@@ -1,0 +1,2 @@
+desktop-1600x900 {"brain":true,"box":true,"gw":true}
+phone-390x844 {"brain":true,"box":true,"gw":true}
