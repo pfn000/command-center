@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090b"><meta name="color-scheme" content="dark">
+<title>Tab Command Center</title>
+<meta name="description" content="Force Respond and live status for Tab and Jena.">
+<style>
+:root{--bg:#07090b;--fg:#eef2f4;--mut:#8d979d;--glass:rgba(255,255,255,.06);--edge:rgba(255,255,255,.14);--ok:#3ee6a0;--bad:#ff5a6e;--warn:#ffc65a;--acc:#8fb8ff}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:radial-gradient(900px 600px at 15% -10%,rgba(120,150,255,.18),transparent 60%),radial-gradient(800px 500px at 110% 20%,rgba(255,80,140,.12),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 40px}
+header{display:flex;align-items:center;gap:12px;margin:4px 0 18px}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(140deg,rgba(255,255,255,.35),rgba(255,255,255,.05));border:1px solid var(--edge);display:grid;place-items:center;font-weight:700}
+h1{font-size:20px;margin:0;letter-spacing:-.01em}.sub{color:var(--mut);font-size:13px}
+.glass{position:relative;background:var(--glass);border:1px solid var(--edge);border-radius:24px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 10px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12)}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:1.25fr 1fr}}
+.card{padding:20px}
+.card h2{margin:0 0 4px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.big{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:76px;margin-top:14px;border-radius:20px;text-decoration:none;color:#fff;font-weight:800;font-size:20px;letter-spacing:.04em;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .08s}
+.big:active{transform:scale(.98)}
+.wa{background:linear-gradient(160deg,#25d366cc,#0d7a43cc)}
+.im{background:linear-gradient(160deg,#3d8bffcc,#1748b8cc)}
+.big small{display:block;font-size:12px;font-weight:600;letter-spacing:0;opacity:.85}
+.note{color:var(--mut);font-size:13px;margin-top:12px}
+.rows{display:grid;gap:10px;margin-top:12px}
+.row{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;background:var(--mut);box-shadow:0 0 0 4px rgba(255,255,255,.05)}
+.dot.ok{background:var(--ok);box-shadow:0 0 14px var(--ok)}.dot.bad{background:var(--bad);box-shadow:0 0 14px var(--bad)}.dot.warn{background:var(--warn)}
+.row b{display:block;font-size:15px}.row span{color:var(--mut);font-size:13px}
+.state{margin-left:auto;font-weight:700;font-size:13px}
+.meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--mut);font-size:12px}
+button.ref{background:rgba(255,255,255,.08);color:var(--fg);border:1px solid var(--edge);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px}
+.later{margin-top:16px;padding:18px}.later li{color:var(--mut);margin:4px 0}
+footer{margin-top:22px;display:flex;justify-content:center}
+.badge{width:200px;max-width:60%;border-radius:14px;filter:drop-shadow(0 6px 20px rgba(140,180,255,.25));background:linear-gradient(120deg,rgba(255,120,200,.15),rgba(120,200,255,.15),rgba(180,255,160,.15));padding:6px}
+</style></head><body><div class="wrap">
+<header><div class="logo">T</div><div><h1>Command Center</h1><div class="sub">Tab + Jena · live</div></div></header>
+<div class="grid">
+ <section class="glass card" id="force">
+  <h2>Force Respond</h2>
+  <div class="sub">Tab froze or went quiet? Tap one. It opens your messages with a wake-up text already typed. Hit send and your text wakes Tab right up.</div>
+  <a class="big wa" href="https://wa.me/12512765320?text=FORCE%20RESPOND%20-%20Tab%20you%20froze">⚡ FORCE RESPOND <small>via WhatsApp</small></a>
+  <a class="big im" href="sms:+16462497856&body=FORCE%20RESPOND">⚡ FORCE RESPOND <small>via iMessage</small></a>
+  <div class="note">Honest note: this page can't think for Tab. It sends Tab a real message from your phone, and a new message from you always gets Tab moving again.</div>
+ </section>
+ <section class="glass card" id="status">
+  <h2>Live status</h2>
+  <div class="rows">
+   <div class="row"><div class="dot" id="d-brain"></div><div><b>Jena's brain</b><span id="t-brain">checking…</span></div><div class="state" id="s-brain"></div></div>
+   <div class="row"><div class="dot" id="d-box"></div><div><b>Jena's box (tunnel)</b><span id="t-box">checking…</span></div><div class="state" id="s-box"></div></div>
+   <div class="row"><div class="dot" id="d-gw"></div><div><b>Gateway</b><span id="t-gw">checking…</span></div><div class="state" id="s-gw"></div></div>
+  </div>
+  <div class="meta"><span id="checked">Last checked: —</span><button class="ref" id="ref">Refresh</button></div>
+ </section>
+</div>
+<section class="glass later"><h2 style="margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Coming next</h2>
+<ul><li>Live tasks + thought view</li><li>Desktops / VMs</li><li>WhatsApp Web + Manus panels</li><li>Workflow canvas, skills, uploads</li></ul></section>
+<footer><img class="badge" src="/legal-badge.png" alt="Saidie legal tag"></footer>
+</div>
+<script>
+function set(k,ok,state,txt,warn){const d=document.getElementById('d-'+k);d.className='dot '+(ok?'ok':(warn?'warn':'bad'));document.getElementById('s-'+k).textContent=state;document.getElementById('s-'+k).style.color=ok?'var(--ok)':(warn?'var(--warn)':'var(--bad)');document.getElementById('t-'+k).textContent=txt}
+async function load(){document.getElementById('checked').textContent='Checking…';
+ try{const r=await fetch('/api/status',{cache:'no-store'});const s=await r.json();
+  set('brain',s.brain.online,s.brain.online?'ONLINE':'OFFLINE',s.brain.online?(s.brain.name+' answering'):s.brain.detail);
+  set('box',s.box.reachable,s.box.reachable?'UP':'DOWN',s.box.detail);
+  set('gw',s.gateway.ok,s.gateway.ok?'OK':'DOWN',s.gateway.detail);
+  document.getElementById('checked').textContent='Last checked: '+new Date(s.checkedAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+ }catch(e){['brain','box','gw'].forEach(k=>set(k,false,'?','status page did not answer',true));document.getElementById('checked').textContent='Last checked: failed '+new Date().toLocaleTimeString()}}
+document.getElementById('ref').onclick=load;load();setInterval(load,30000);
+</script></body></html>

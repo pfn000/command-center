@@ -1,0 +1,43 @@
+name: proof
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: screenshots of the live site
+        run: |
+          mkdir shots && cd shots
+          npm init -y >/dev/null && npm i playwright@1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+          cat > shot.mjs <<'EOF'
+          import { chromium } from 'playwright';
+          const url = process.env.URL;
+          const b = await chromium.launch();
+          for (const [name, w, h, dsf, mobile] of [['desktop-1600x900', 1600, 900, 1, false], ['phone-390x844', 390, 844, 2, true]]) {
+            const p = await b.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: dsf, isMobile: mobile, hasTouch: mobile });
+            await p.goto(url + '?proof=' + Date.now(), { waitUntil: 'networkidle' });
+            await p.waitForFunction(() => document.getElementById('checked').textContent.startsWith('Last checked: ') && !document.getElementById('checked').textContent.endsWith('—'), null, { timeout: 30000 }).catch(() => {});
+            await p.waitForTimeout(800);
+            await p.screenshot({ path: name + '.png' });
+            await p.screenshot({ path: name + '-full.png', fullPage: true });
+            const s = await (await fetch(url + 'api/status')).json();
+            console.log(name, JSON.stringify({ brain: s.brain.online, box: s.box.reachable, gw: s.gateway.ok }));
+          }
+          await b.close();
+          EOF
+          node shot.mjs | tee status.txt
+        env:
+          URL: https://saidie-command-center.sites.tab.bot/
+      - name: commit proofs
+        run: |
+          cd shots
+          git init -q -b proofs && git config user.name proof-bot && git config user.email proof-bot@users.noreply.github.com
+          git add *.png status.txt && git commit -qm "proof ${GITHUB_SHA::7} run ${GITHUB_RUN_ID}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" proofs
