@@ -17,7 +17,7 @@ h1{font-size:20px;margin:0;letter-spacing:-.01em}.sub{color:var(--mut);font-size
 @media(min-width:900px){.grid{grid-template-columns:1.25fr 1fr}}
 .card{padding:20px}
 .card h2{margin:0 0 4px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}
-.big{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:76px;margin-top:14px;border-radius:20px;text-decoration:none;color:#fff;font-weight:800;font-size:20px;letter-spacing:.04em;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .08s}
+.big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;white-space:nowrap;width:100%;min-height:76px;margin-top:14px;border-radius:20px;text-decoration:none;color:#fff;font-weight:800;font-size:clamp(18px,5.4vw,22px);letter-spacing:.04em;border:1px solid rgba(255,255,255,.22);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .08s}
 .big:active{transform:scale(.98)}
 .wa{background:linear-gradient(160deg,#25d366cc,#0d7a43cc)}
 .im{background:linear-gradient(160deg,#3d8bffcc,#1748b8cc)}
@@ -33,7 +33,7 @@ h1{font-size:20px;margin:0;letter-spacing:-.01em}.sub{color:var(--mut);font-size
 button.ref{background:rgba(255,255,255,.08);color:var(--fg);border:1px solid var(--edge);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px}
 .later{margin-top:16px;padding:18px}.later li{color:var(--mut);margin:4px 0}
 footer{margin-top:22px;display:flex;justify-content:center}
-.badge{width:200px;max-width:60%;border-radius:14px;filter:drop-shadow(0 6px 20px rgba(140,180,255,.25));background:linear-gradient(120deg,rgba(255,120,200,.15),rgba(120,200,255,.15),rgba(180,255,160,.15));padding:6px}
+.badge{width:340px;max-width:88%;border-radius:14px;filter:drop-shadow(0 6px 20px rgba(140,180,255,.25));background:linear-gradient(120deg,rgba(255,120,200,.15),rgba(120,200,255,.15),rgba(180,255,160,.15));padding:6px}
 </style></head><body><div class="wrap">
 <header><div class="logo">T</div><div><h1>Command Center</h1><div class="sub">Tab + Jena Â· live</div></div></header>
 <div class="grid">
@@ -65,7 +65,7 @@ async function load(){document.getElementById('checked').textContent='Checkingâ€
   set('brain',s.brain.online,s.brain.online?'ONLINE':'OFFLINE',s.brain.online?(s.brain.name+' answering'):s.brain.detail);
   set('box',s.box.reachable,s.box.reachable?'UP':'DOWN',s.box.detail);
   set('gw',s.gateway.ok,s.gateway.ok?'OK':'DOWN',s.gateway.detail);
-  document.getElementById('checked').textContent='Last checked: '+new Date(s.checkedAt).toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'});
+  document.getElementById('checked').textContent='Last checked: '+new Date(s.checkedAt).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',second:'2-digit',timeZone:'America/New_York'})+' ET';
  }catch(e){['brain','box','gw'].forEach(k=>set(k,false,'?','status page did not answer',true));document.getElementById('checked').textContent='Last checked: failed '+new Date().toLocaleTimeString()}}
 document.getElementById('ref').onclick=load;load();setInterval(load,30000);
 </script></body></html>
