@@ -179,7 +179,7 @@ async function video() {
     p = await center(page, '[data-app=projects] .ctl-pill')
     await page.mouse.move(p.x, p.y, { steps: 10 }); await drag(page, p, { x: p.x, y: p.y + 90 }, { steps: 10 })
     await page.waitForTimeout(1200)
-    // drag the About window's corner arc down = close
+    // drag the About window's top-right arc down = close
     const a = await center(page, '[data-app=about] .ctl-arc')
     await page.mouse.move(a.x, a.y, { steps: 15 }); await drag(page, a, { x: a.x + 20, y: a.y + 220 }, { steps: 30 })
     await page.waitForTimeout(1200)
@@ -192,8 +192,11 @@ async function video() {
   await ctx.close()
   try {
     const src = await v.path()
+    fs.copyFileSync(src, `${out}/gestures.webm`)
+    try { execSync('command -v ffmpeg') } catch { try { execSync('sudo apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg', { timeout: 240000, stdio: 'ignore' }) } catch (e2) { errors.push('apt ffmpeg: ' + String(e2).slice(0, 120)) } }
     execSync(`ffmpeg -y -loglevel error -i "${src}" -vf "fps=30,scale=1280:-2" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart ${out}/gestures.mp4`)
     console.log('video ok', fs.statSync(`${out}/gestures.mp4`).size)
+    fs.rmSync(`${out}/gestures.webm`, { force: true })
   } catch (e) { errors.push('ffmpeg: ' + String(e).slice(0, 200)) }
 }
 
