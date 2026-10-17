@@ -124,6 +124,28 @@ eL,eR=ctr(eyeL),ctr(eyeR); log('eyeL',eL,'eyeR',eR)
 if eyeuv: rep['eye_uv_bb']=[min(u[0] for u in eyeuv),min(u[1] for u in eyeuv),max(u[0] for u in eyeuv),max(u[1] for u in eyeuv)]
 log('eye uv bb',rep.get('eye_uv_bb'))
 rep['eyes']={'L':[list(eL[0]),list(eL[1])] if eL else None,'R':[list(eR[0]),list(eR[1])] if eR else None}
+
+# ---------- her Meshy eyeball -> iris texture (the .glb is a 368k-tri disc: too heavy for VRChat, so it is rendered once and mapped onto the head's eye UVs)
+EYE_TEX=None
+try:
+    before=set(bpy.data.objects); bpy.ops.import_scene.gltf(filepath=IN+'/refs/Meshy_Jena_Eyeball.glb')
+    eo=[o for o in bpy.data.objects if o not in before]
+    off=Vector((100,0,0))
+    for o in eo:
+        if o.parent is None: o.location+=off
+    em=[o for o in eo if o.type=='MESH']
+    sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=32; sc.cycles.use_denoising=True
+    sc.render.film_transparent=False; sc.render.resolution_x=sc.render.resolution_y=1024; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
+    sc.view_settings.view_transform='Standard'
+    w0=bpy.data.worlds.new('weye'); sc.world=w0; w0.use_nodes=True; w0.node_tree.nodes['Background'].inputs[0].default_value=(1,1,1,1); w0.node_tree.nodes['Background'].inputs[1].default_value=0.9
+    ec=bpy.data.objects.new('ecam',bpy.data.cameras.new('ecam')); sc.collection.objects.link(ec); sc.camera=ec; ec.data.type='ORTHO'; ec.data.ortho_scale=1.92
+    ec.location=off+Vector((0,-5,0)); ec.rotation_euler=(math.radians(90),0,0); ec.data.clip_start=3; ec.data.clip_end=7
+    sc.render.filepath=OUT+'/eye_iris.png'; bpy.ops.render.render(write_still=True)
+    for o in eo: bpy.data.objects.remove(o)
+    bpy.data.objects.remove(ec)
+    sc.view_settings.view_transform='AgX'
+    EYE_TEX=bpy.data.images.load(OUT+'/eye_iris.png'); EYE_TEX.pack(); log('meshy iris rendered')
+except Exception as e: log('MESHYERR',e)
 # ---------- materials
 def img(name):
     p=A+'/'+name; return bpy.data.images.load(p,check_existing=True)
@@ -166,6 +188,13 @@ for i,s in enumerate(FH.material_slots):
         for pos,col in ((0.16,(0.01,0.01,0.012,1)),(0.2,(0.20,0.27,0.36,1)),(0.42,(0.36,0.45,0.55,1)),(0.5,(0.10,0.13,0.17,1)),(0.54,(0.85,0.85,0.88,1))):
             x=e.new(pos); x.color=col
         nt.links.new(dv.outputs[0],cr.inputs[0]); nt.links.new(cr.outputs[0],b.inputs['Base Color']); b.inputs['Roughness'].default_value=0.08
+        if EYE_TEX is not None:
+            # Meshy eyeball image: island half-size -> IRIS_ZOOM of the disc radius
+            hs=max(u1-u0,v1-v0)/2
+            sc1=nt.nodes.new('ShaderNodeVectorMath'); sc1.operation='SCALE'; sc1.inputs['Scale'].default_value=0.5*P.get('IRIS_ZOOM',0.8)/hs; nt.links.new(sub.outputs[0],sc1.inputs[0])
+            ad=nt.nodes.new('ShaderNodeVectorMath'); ad.operation='ADD'; ad.inputs[1].default_value=(0.5,0.5,0); nt.links.new(sc1.outputs[0],ad.inputs[0])
+            ti=nt.nodes.new('ShaderNodeTexImage'); ti.image=EYE_TEX; ti.extension='EXTEND'; nt.links.new(ad.outputs[0],ti.inputs[0])
+            nt.links.new(ti.outputs[0],b.inputs['Base Color'])
         s.material=m
 # hair: black roots -> grey -> white tips (generated Z of the hair mesh)
 def hairmat():
@@ -303,7 +332,7 @@ if P['RENDER']:
     mn=Vector([min(p[i] for p in pts) for i in range(3)]); mx=Vector([max(p[i] for p in pts) for i in range(3)]); ce=(mn+mx)/2; H=mx.z-mn.z
     rep['posed_bb']=[list(mn),list(mx)]
     cam.data.type='PERSP'; cam.data.lens=85; dist=H*1.06/(36/85)*1.0
-    def shot(name,view,rx,ry,res,lens=85,target=None,h=None):
+    def shot(name,view,rx,ry,lens=85,target=None,h=None):
         sc.render.resolution_x,sc.render.resolution_y=rx,ry; cam.data.lens=lens; cam.data.sensor_fit='VERTICAL'; cam.data.sensor_height=24
         tgt=target or ce; hh=h or H*1.06
         d=hh/(24/lens)
