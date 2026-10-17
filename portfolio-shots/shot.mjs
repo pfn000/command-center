@@ -1,7 +1,7 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 const [base, out] = process.argv.slice(2)
-const pages = [['home', '/'], ['about', '/about'], ['projects', '/projects'], ['plex', '/plex']]
+const pages = [['about', '/about']]
 const views = [['1600', { width: 1600, height: 900 }, 1, false], ['402', { width: 402, height: 874 }, 2, true]]
 const report = []
 console.log('start', new Date().toISOString())
