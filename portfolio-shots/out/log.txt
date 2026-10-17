@@ -18,5 +18,4 @@ shot phone-402-dark {"name":"phone-402-dark","overflowX":0,"broken":[],"peter":f
 shot phone-home-402-dark {"name":"phone-home-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-projects-402-dark {"name":"phone-projects-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-contact-402-dark {"name":"phone-contact-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
-/bin/sh: 1: ffmpeg: not found
-ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","dark: Failed to load resource: the server responded with a status of 404 (Not Found)","ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/d930e736216f47d9d40a356c06fc45f1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"]
+ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","dark: Failed to load resource: the server responded with a status of 404 (Not Found)","ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/20d856b677fba646a7b6a39f88acd3e1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"]

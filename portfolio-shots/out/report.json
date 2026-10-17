@@ -167,9 +167,9 @@
    429
   ],
   "resume": {
-   "status": 200,
-   "type": "application/pdf",
-   "bytes": 2987842
+   "status": 404,
+   "type": "text/html; charset=utf-8",
+   "bytes": 12377
   },
   "page/about": 200,
   "page/projects": 200,
@@ -179,6 +179,6 @@
  "errors": [
   "light: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/d930e736216f47d9d40a356c06fc45f1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"
+  "ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/20d856b677fba646a7b6a39f88acd3e1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"
  ]
 }
