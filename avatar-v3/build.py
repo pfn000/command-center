@@ -2,7 +2,8 @@
 import bpy, sys, os, math, json, mathutils, bmesh
 from mathutils import Vector, Matrix
 argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; A=IN+'/assets'; os.makedirs(OUT+'/proof',exist_ok=True)
-def log(*a): print('[v3]',*a,flush=True)
+import time as _t; _T0=_t.time()
+def log(*a): print('[v3]',f'{_t.time()-_T0:.0f}s',*a,flush=True)
 P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.14, SHORTS_DROP=0.035, SKIN_COAT=0.5, SKIN_ROUGH=0.3, BODY_MAT='5867', BRA_OFF=0.005, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
