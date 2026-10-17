@@ -23,18 +23,33 @@ def imp_fbx(f):
     before=set(bpy.data.objects); bpy.ops.import_scene.fbx(filepath=A+'/'+f)
     return [o for o in bpy.data.objects if o not in before]
 # ---------- body (APPEND from .blend, not FBX)
-with bpy.data.libraries.load(A+'/body_PandaFitBase_HighFlatFoot.blend',link=False) as (df,dt): dt.objects=list(df.objects)
+BF=IN+"/Panda's Fit Base (High - Flat Foot)/"
+with bpy.data.libraries.load(BF+"Panda's Fit Base (High - Flat Foot).blend",link=False) as (df,dt): dt.objects=list(df.objects)
 for o in dt.objects: sc.collection.objects.link(o)
 B=bpy.data.objects['Armature']; BODY=bpy.data.objects['Body']; B.name='Armature'
 log('body bones',len(B.data.bones),'tris',tris(BODY))
+for im_ in bpy.data.images:
+    base=im_.name.split('.png')[0]+'.png'
+    if os.path.exists(BF+base): im_.filepath=BF+base; im_.reload(); log('relinked',im_.name,'->',base,list(im_.size))
 # ---------- head (Female head + hair FBX; only the head mesh, its hair is pigtails)
 new=imp_fbx('hair_female_head_hair.fbx')
 FA=[o for o in new if o.type=='ARMATURE'][0]; FH=bpy.data.objects['Female Head']
 for o in new:
     if o.type=='MESH' and o is not FH: bpy.data.objects.remove(o)
 # ---------- hair (Umeko, shaggy shoulder-length = closest to her sheet)
-new=imp_fbx('hair_umeko_gift.fbx')
-UA=[o for o in new if o.type=='ARMATURE'][0]; UM=[o for o in new if o.type=='MESH'][0]; UM.name='Hair'
+HAIR=P.get('HAIR','blowout')
+hf={'blowout':IN+'/Blowout Solid textures.fbx','blowout_cards':IN+"/Blowout Nikkie's haircards.fbx",'umeko':A+'/hair_umeko_gift.fbx'}[HAIR]
+before=set(bpy.data.objects); bpy.ops.import_scene.fbx(filepath=hf); new=[o for o in bpy.data.objects if o not in before]
+UA=[o for o in new if o.type=='ARMATURE'][0]; hm=[o for o in new if o.type=='MESH']
+for o in new: log('hair import',HAIR,o.name,o.type,tris(o),[s.material.name for s in o.material_slots if s.material] if o.type=='MESH' else len(o.data.bones))
+for o in hm:
+    for s in o.material_slots:
+        if s.material and s.material.use_nodes:
+            log('hair mat',s.material.name,[(n.image.name,n.image.filepath) for n in s.material.node_tree.nodes if n.type=='TEX_IMAGE' and n.image])
+if len(hm)>1: sel(hm,hm[0]); bpy.ops.object.join()
+UM=hm[0]; UM.name='Hair'
+if UM.parent is not UA: mw=UM.matrix_world.copy(); UM.parent=UA; UM.matrix_world=mw
+log('hair bones',[b_.name for b_ in UA.data.bones][:60])
 hmn,hmx=wbb([FH]); umn,umx=wbb([UM])
 head_w=hmx.x-hmn.x; s=head_w*P['HAIR_W_RATIO']/(umx.x-umn.x)
 yc=(hmn.y+hmx.y)/2
@@ -55,17 +70,22 @@ new=imp_fbx('shorts_BootyShorts_Beanie.fbx'); SH=bpy.data.objects['Booty Shorts'
 for o in new:
     if o is not SH: bpy.data.objects.remove(o)
 # ---------- merge armatures into the body armature
-for arm,ren in ((FA,{'Neck':'DUP_Neck','Head':'DUP_Head'}),(UA,{'Head':'DUP_Head2'})):
-    for b in arm.data.bones:
-        if b.name in ren: b.name=ren[b.name]
+bodyn=set(b_.name for b_ in B.data.bones); DUP={}
+for k,arm in enumerate((FA,UA)):
+    for b_ in arm.data.bones:
+        if b_.name in bodyn:
+            o_=b_.name; b_.name=f'DUP{k}_'+o_; DUP[b_.name]=o_
+log('dup bones',DUP)
+roots=[b_.name for arm in (FA,UA) for b_ in arm.data.bones if b_.parent is None and b_.name not in DUP]
 # FH/UM vertex groups named Head/Neck now point to the body's Head/Neck (same names)
 sel([B,FA,UA],B); bpy.ops.object.join()
 bpy.ops.object.mode_set(mode='EDIT'); eb=B.data.edit_bones
-mapto={'DUP_Neck':'Neck','DUP_Head':'Head','DUP_Head2':'Head'}
-for d,t in mapto.items():
+for d,t in DUP.items():
     if d in eb:
         for c in list(eb[d].children): c.parent=eb[t]
         eb.remove(eb[d])
+for r_ in roots:
+    if r_ in eb and eb[r_].parent is None: eb[r_].parent=eb['Head']; log('rooted under Head',r_)
 # drop the pigtail/bang bones of the deleted Female hair
 def kill(name):
     if name in eb:
@@ -78,6 +98,7 @@ REN={'Belly':'Spine','AssRoot':'Hips','Pussy_Root':'Hips','Pussy.R':'Hips','Puss
      'Left thigh':'Left leg','Right thigh':'Right leg','Root_Butt':'Hips'}
 bn=set(b.name for b in B.data.bones)
 def fixname(n):
+    if n in DUP: return DUP[n]
     if n in bn: return n
     if n in REN: return REN[n]
     for a,b2 in (('.1_L','.L'),('.1_R','.R'),('_L','.L'),('_R','.R')):
@@ -128,6 +149,7 @@ rep['eyes']={'L':[list(eL[0]),list(eL[1])] if eL else None,'R':[list(eR[0]),list
 # ---------- her Meshy eyeball -> iris texture (the .glb is a 368k-tri disc: too heavy for VRChat, so it is rendered once and mapped onto the head's eye UVs)
 EYE_TEX=None
 try:
+    if not P.get('USE_MESHY',False): raise RuntimeError('meshy off: using her ZinPia eye texture')
     before=set(bpy.data.objects); bpy.ops.import_scene.gltf(filepath=IN+'/refs/Meshy_Jena_Eyeball.glb')
     eo=[o for o in bpy.data.objects if o not in before]
     off=Vector((100,0,0))
@@ -156,7 +178,8 @@ mb,nt,bs=newmat('Skin'); t=nt.nodes.new('ShaderNodeTexImage'); t.image=img('5867
 bs.inputs['Roughness'].default_value=0.42; bs.inputs['Subsurface Weight'].default_value=0.08; bs.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
 try: bs.inputs['Coat Weight'].default_value=0.12
 except: pass
-BODY.data.materials.clear(); BODY.data.materials.append(mb)
+if P.get('BODY_MAT','original')=='original' and all(im_.size[0]>0 for im_ in bpy.data.images if im_.name.startswith(('BODY','Skin 1'))): log('body: her authored material (BODY.png + Skin 1.png)')
+else: BODY.data.materials.clear(); BODY.data.materials.append(mb); log('body: fallback 5867')
 # skin tone for the head from the body texture's median skin pixel
 import numpy as np
 im=t.image; px=np.array(im.pixels[:]).reshape(-1,4)[::97,:3]; lum=px.mean(1); sk=px[(lum>0.35)&(lum<0.95)]
@@ -165,8 +188,11 @@ for i,s in enumerate(FH.material_slots):
     n=s.material.name.lower() if s.material else ''
     if n.startswith('face'):
         m,nt,b=newmat('Face'); b.inputs['Base Color'].default_value=(*skin,1); b.inputs['Roughness'].default_value=0.45
-        if os.path.exists(A+'/face_skin_2_from_saidie_1708.jpg'):
-            ft=nt.nodes.new('ShaderNodeTexImage'); ft.image=img('face_skin_2_from_saidie_1708.jpg'); nt.links.new(ft.outputs[0],b.inputs['Base Color']); log('face texture: her 2.png (5:08 PM)'); b.inputs['Subsurface Weight'].default_value=0.08; b.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
+        HT=IN+'/1691108855vrmodels_store_female-head-by-bunisu/Female head/female head textures/'+P.get('FACE_TEX','1.png')
+        if os.path.exists(HT):
+            ft=nt.nodes.new('ShaderNodeTexImage'); ft.image=bpy.data.images.load(HT); nt.links.new(ft.outputs[0],b.inputs['Base Color']); nt.links.new(ft.outputs[1],b.inputs['Alpha']); log('face texture: her head pack',HT.split('/')[-1])
+        elif os.path.exists(A+'/face_skin_2_from_saidie_1708.jpg'):
+            ft=nt.nodes.new('ShaderNodeTexImage'); ft.image=img('face_skin_2_from_saidie_1708.jpg'); nt.links.new(ft.outputs[0],b.inputs['Base Color']); log('face texture: jpg she sent 5:08 PM'); b.inputs['Subsurface Weight'].default_value=0.08; b.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
         s.material=m
     elif n.startswith('effects'):
         m,nt,b=newmat('Effects'); b.inputs['Alpha'].default_value=0.0; m.blend_method='HASHED' if hasattr(m,'blend_method') else None; s.material=m
@@ -190,7 +216,15 @@ for i,s in enumerate(FH.material_slots):
         for pos,col in ((0.16,(0.01,0.01,0.012,1)),(0.2,(0.20,0.27,0.36,1)),(0.42,(0.36,0.45,0.55,1)),(0.5,(0.10,0.13,0.17,1)),(0.54,(0.85,0.85,0.88,1))):
             x=e.new(pos); x.color=col
         nt.links.new(dv.outputs[0],cr.inputs[0]); nt.links.new(cr.outputs[0],b.inputs['Base Color']); b.inputs['Roughness'].default_value=0.08
-        if EYE_TEX is not None:
+        ET=IN+'/ZinPia_Doe Eyes (Sunny Head)/'+P.get('EYE_TEX','doe 5.png')
+        if os.path.exists(ET):
+            ti=nt.nodes.new('ShaderNodeTexImage'); ti.image=bpy.data.images.load(ET); nt.links.new(ti.outputs[0],b.inputs['Base Color']); nt.links.new(ti.outputs[1],b.inputs['Alpha'])
+            ez=P.get('EYE_ZOOM',1.0); eo_=P.get('EYE_OFF',(0.0,0.0))
+            if ez!=1.0 or eo_!=(0.0,0.0):
+                mp2=nt.nodes.new('ShaderNodeMapping'); mp2.vector_type='POINT'; mp2.inputs['Scale'].default_value=(ez,ez,1); mp2.inputs['Location'].default_value=(0.5-0.5*ez+eo_[0],0.5-0.5*ez+eo_[1],0)
+                nt.links.new(uv.outputs['UV'],mp2.inputs['Vector']); nt.links.new(mp2.outputs[0],ti.inputs[0]); ti.extension='EXTEND'
+            b.inputs['Emission Strength'].default_value=0.15; nt.links.new(ti.outputs[0],b.inputs['Emission Color']); log('eyes: her ZinPia',ET.split('/')[-1])
+        elif EYE_TEX is not None:
             # Meshy eyeball image: island half-size -> IRIS_ZOOM of the disc radius
             hs=max(u1-u0,v1-v0)/2
             sc1=nt.nodes.new('ShaderNodeVectorMath'); sc1.operation='SCALE'; sc1.inputs['Scale'].default_value=0.5*P.get('IRIS_ZOOM',0.8)/hs; nt.links.new(sub.outputs[0],sc1.inputs[0])
@@ -235,9 +269,13 @@ bp=nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=0.25; nt.
 BRA.data.materials.clear(); BRA.data.materials.append(m)
 # shorts: her black base color (52f8), AO (41d6), roughness (f14f)
 m,nt,b=newmat('ShortsBlack')
-tb=nt.nodes.new('ShaderNodeTexImage'); tb.image=img('52f8d9c0-f8e3-439b-88d0-8ac7c27be214.jpg')
-ta=nt.nodes.new('ShaderNodeTexImage'); ta.image=img('41d6d1bf-d8bb-4dba-b796-1b80ac9f38a9.jpg'); ta.image.colorspace_settings.name='Non-Color'
-tr=nt.nodes.new('ShaderNodeTexImage'); tr.image=img('f14f4077-56a8-49b7-b71b-577eb6d05c04.jpg'); tr.image.colorspace_settings.name='Non-Color'
+def ld(p,alt):
+    q=IN+'/Textures/'+p
+    return bpy.data.images.load(q) if os.path.exists(q) else img(alt)
+tb=nt.nodes.new('ShaderNodeTexImage'); tb.image=ld(P.get('SHORTS_TEX','Colors/Black.png'),'52f8d9c0-f8e3-439b-88d0-8ac7c27be214.jpg')
+ta=nt.nodes.new('ShaderNodeTexImage'); ta.image=ld('Main/Material.001_Mixed_AO.png','41d6d1bf-d8bb-4dba-b796-1b80ac9f38a9.jpg'); ta.image.colorspace_settings.name='Non-Color'
+tr=nt.nodes.new('ShaderNodeTexImage'); tr.image=ld('Main/Material.001_Roughness.png','f14f4077-56a8-49b7-b71b-577eb6d05c04.jpg'); tr.image.colorspace_settings.name='Non-Color'
+log('shorts textures',tb.image.filepath.split('/')[-1],ta.image.filepath.split('/')[-1])
 mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=0.6
 nt.links.new(tb.outputs[0],mx.inputs['A']); nt.links.new(ta.outputs[0],mx.inputs['B']); nt.links.new(mx.outputs['Result'],b.inputs['Base Color']); nt.links.new(tr.outputs[0],b.inputs['Roughness'])
 SH.data.materials.clear(); SH.data.materials.append(m)
@@ -248,7 +286,7 @@ def dec(o,r):
         o.shape_key_clear()
     md=o.modifiers.new('Dec','DECIMATE'); md.ratio=r; md.use_collapse_triangulate=False
     sel([o]); bpy.ops.object.modifier_move_to_index(modifier='Dec',index=0); bpy.ops.object.modifier_apply(modifier='Dec')
-dec(BODY,P['BODY_DEC']); dec(UM,P['HAIR_DEC']); dec(BRA,P['BRA_DEC']); dec(SH,P['SHORTS_DEC'])
+dec(BODY,P['BODY_DEC']); dec(UM,P['HAIR_DEC'] if tris(UM)>9000 else 1.0); dec(BRA,P['BRA_DEC']); dec(SH,P['SHORTS_DEC'])
 # ---------- curvier (her sheet: wide hips, thick thighs, full bust, small waist) — pose-scale perpendicular to the bones, bake into the meshes, keep the rig
 CUR=P.get('CURVY',{'Hips':(1.10,1.0,1.06),'Left leg':(1.14,1.0,1.12),'Right leg':(1.14,1.0,1.12),'Twist_Leg.L':(1.10,1.0,1.08),'Twist_Leg.R':(1.10,1.0,1.08),
      'Twist_Butt.L':(1.12,1.0,1.12),'Twist_Butt.R':(1.12,1.0,1.12),'Ass_Wiggle.L':(1.12,1.12,1.12),'Ass_Wiggle.R':(1.12,1.12,1.12),
