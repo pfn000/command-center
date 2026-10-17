@@ -8,6 +8,20 @@
    "cream": "rgb(238, 241, 251)"
   },
   {
+   "name": "tour2-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "tour3-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
    "name": "desk-1600-light",
    "overflowX": 0,
    "broken": [],
@@ -171,7 +185,9 @@
  ],
  "checks": {
   "status_light": 200,
+  "coach_gone_light": true,
   "status_dark": 200,
+  "coach_gone_dark": true,
   "contact_honeypot": {
    "status": 200,
    "body": "{\"ok\":true}"
@@ -197,7 +213,7 @@
   "resume": {
    "status": 404,
    "type": "text/html; charset=utf-8",
-   "bytes": 12377
+   "bytes": 12161
   },
   "page/about": 200,
   "page/projects": 200,
@@ -205,8 +221,7 @@
   "page/contact": 200
  },
  "errors": [
-  "light: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "tour: Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Next' }) resolved to 2 elements:\n    1) <button type=\"button\" class=\"hero-img bleed tall about-hero sketch-hero\" aria-l",
-  "dark: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  "video: Error: mouse.move: Target page, context or browser has been closed",
+  "video outer: Error: browserContext.close: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/runner/.cache/ms-playwright/chromium-1140/chrome-linux/chrome --disable-field-trial-config"
  ]
 }

@@ -1,4 +1,6 @@
 shot tour-1600-light {"name":"tour-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot tour2-1600-light {"name":"tour2-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot tour3-1600-light {"name":"tour3-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot desk-1600-light {"name":"desk-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot projects-open-1600-light {"name":"projects-open-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot window-moving-1600-light {"name":"window-moving-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
@@ -22,5 +24,4 @@ shot phone-projects-402-dark {"name":"phone-projects-402-dark","overflowX":0,"br
 shot phone-back-402-dark {"name":"phone-back-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-about-402-dark {"name":"phone-about-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-contact-402-dark {"name":"phone-contact-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
-video ok 8926265
-ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","tour: Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Next' }) resolved to 2 elements:\n    1) <button type=\"button\" class=\"hero-img bleed tall about-hero sketch-hero\" aria-l","dark: Failed to load resource: the server responded with a status of 404 (Not Found)"]
+ERRORS ["video: Error: mouse.move: Target page, context or browser has been closed","video outer: Error: browserContext.close: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/runner/.cache/ms-playwright/chromium-1140/chrome-linux/chrome --disable-field-trial-config"]
