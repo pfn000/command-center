@@ -1,1 +1,1 @@
-build run 7: haircards B&W, scalp cap, clothes outside skin, bra band+clasp, straps, waist, head +9%
+build run 8: authored body material (bug fix), smaller streaked scalp cap, + 1080x1920 turntable (4 shards)

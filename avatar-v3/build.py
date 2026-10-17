@@ -7,6 +7,8 @@ P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
 except Exception as e: log('no params',e)
+TT=os.environ.get('TT_SHARD')
+if TT is not None: P['EXPORT']=False; P['RENDER']=False; P['TT']=True
 log('params',P)
 rep={'params':P}
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -190,8 +192,6 @@ if P.get('BODY_MAT','original')=='original' and all(im_.size[0]>0 for im_ in bpy
             if n_.type=='BSDF_PRINCIPLED':
                 n_.inputs['Roughness'].default_value=P.get('SKIN_ROUGH',0.36); n_.inputs['Coat Weight'].default_value=P.get('SKIN_COAT',0.18); n_.inputs['Coat Roughness'].default_value=0.25
                 n_.inputs['Subsurface Weight'].default_value=0.12; n_.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25); n_.inputs['Subsurface Scale'].default_value=0.01
-for s_ in FH.material_slots:
-    pass
 else: BODY.data.materials.clear(); BODY.data.materials.append(mb); log('body: fallback 5867')
 # skin tone for the head from the body texture's median skin pixel
 import numpy as np
@@ -462,11 +462,13 @@ for o,off in ((SH,0.0016),(BRA,0.0016)):
 # ---------- scalp cap: the Female head is a face shell; close the back of the head under the hair
 if P.get('SCALP',True):
     hmn,hmx=wbb([FH]); hw=(hmx.x-hmn.x)/2
-    sc_c=Vector((0,hmx.y+P.get('SCALP_DY',0.035),hmx.z-0.05))
+    sc_c=Vector((0,hmx.y+P.get('SCALP_DY',0.018),hmx.z-0.052))
     bm=bmesh.new(); r=bmesh.ops.create_uvsphere(bm,u_segments=20,v_segments=14,radius=1.0)
-    for v in r['verts']: v.co=Vector((v.co.x*hw*0.92,v.co.y*P.get('SCALP_RY',0.07),v.co.z*0.07))+sc_c
+    for v in r['verts']: v.co=Vector((v.co.x*hw*0.9,v.co.y*P.get('SCALP_RY',0.058),v.co.z*0.062))+sc_c
     uvl=bm.loops.layers.uv.new('UVMap')
-    scm=bpy.data.materials.new('ScalpBlack'); scm.use_nodes=True; q=scm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.015,0.015,0.016,1); q.inputs['Roughness'].default_value=0.5
+    scm=bpy.data.materials.new('ScalpBlack'); scm.use_nodes=True; q=scm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.015,0.015,0.016,1); q.inputs['Roughness'].default_value=0.4
+    snt=scm.node_tree; wv=snt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value=90; wv.bands_direction='X'; wv.inputs['Distortion'].default_value=4
+    bp=snt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=0.35; snt.links.new(wv.outputs['Fac'],bp.inputs['Height']); snt.links.new(bp.outputs[0],q.inputs['Normal'])
     SCALP=add_mesh('Scalp',bm,scm,'Head'); log('scalp cap',sc_c,hw)
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
@@ -521,5 +523,29 @@ if P['RENDER']:
     fc=Vector((0,(hmn.y+hmx.y)/2,hmx.z-0.055))
     shot('face','front',1024,1024,lens=100,target=fc,h=0.30)
     shot('face34','q34',1024,1024,lens=100,target=fc,h=0.30)
+
+if P.get('TT'):
+    sh_i=int(os.environ['TT_SHARD']); sh_n=int(os.environ.get('TT_SHARDS','4')); NF=P.get('TT_FRAMES',96)
+    sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P.get('TT_SAMPLES',10); sc.cycles.use_denoising=True
+    sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
+    sc.view_settings.view_transform='AgX'; sc.view_settings.look='AgX - Medium High Contrast'; sc.view_settings.exposure=P.get('EXPOSURE',-0.45)
+    w=bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; bg=w.node_tree.nodes['Background']; bg.inputs[0].default_value=(0.05,0.05,0.052,1); bg.inputs[1].default_value=1.0
+    dg=bpy.context.evaluated_depsgraph_get(); pts=[]
+    for o in meshes:
+        e=o.evaluated_get(dg); vv=e.data.vertices; pts+=[e.matrix_world@vv[i].co for i in range(0,len(vv),7)]
+    mn=Vector([min(p[i] for p in pts) for i in range(3)]); mx=Vector([max(p[i] for p in pts) for i in range(3)]); ce=(mn+mx)/2; Hh=(mx.z-mn.z)*1.08
+    rig=bpy.data.objects.new('ttrig',None); sc.collection.objects.link(rig); rig.location=(ce.x,ce.y,0)
+    def area(name,loc,energy,size,col=(1,1,1)):
+        L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
+        o.rotation_euler=(Vector((0,0,0.75))-Vector(loc)).to_track_quat('-Z','Y').to_euler(); o.parent=rig; return o
+    area('key',(-1.6,-2.2,2.0),260,1.6,(1,0.97,0.94)); area('fill',(1.8,-1.8,1.2),110,2.0,(0.92,0.95,1)); area('rim',(0.4,2.4,2.0),220,1.4); area('rim2',(-1.2,2.0,1.4),120,1.2)
+    cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam
+    cam.data.lens=85; cam.data.sensor_fit='VERTICAL'; cam.data.sensor_height=24; d=Hh/(24/85)
+    cam.location=Vector((0,-d,ce.z)); cam.rotation_euler=(Vector((0,0,ce.z))-cam.location).to_track_quat('-Z','Y').to_euler(); cam.parent=rig; cam.data.clip_end=d*3
+    sc.render.resolution_x,sc.render.resolution_y=P.get('TT_W',1080),P.get('TT_H',1920)
+    per=(NF+sh_n-1)//sh_n; os.makedirs(OUT+'/frames',exist_ok=True)
+    for f in range(sh_i*per,min(NF,(sh_i+1)*per)):
+        rig.rotation_euler=(0,0,2*math.pi*f/NF); bpy.context.view_layer.update()
+        sc.render.filepath=OUT+f'/frames/f{f:03d}.png'; bpy.ops.render.render(write_still=True); log('frame',f)
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
 log('DONE')
