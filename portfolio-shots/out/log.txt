@@ -188,7 +188,7 @@ Get:97 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 i965-
 Get:98 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 va-driver-all amd64 2.20.0-2ubuntu0.2 [5014 B]
 Get:99 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 vdpau-driver-all amd64 1.5-2build1 [4414 B]
 Get:100 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 pocketsphinx-en-us all 0.8.0+real5prealpha+1-15ubuntu5 [27.4 MB]
-Fetched 94.1 MB in 9s (11.1 MB/s)
+Fetched 94.1 MB in 10s (9023 kB/s)
 Selecting previously unselected package libva2:amd64.
 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 203807 files and directories currently installed.)
 Preparing to unpack .../00-libva2_2.20.0-2ubuntu0.2_amd64.deb ...
@@ -602,10 +602,10 @@ No containers need to be restarted.
 No user sessions are running outdated binaries.
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-video portfolio-shots/out/video-d-dark-home-scroll.mp4 4885136 14.520000
-video portfolio-shots/out/video-p-dark-home-scroll.mp4 1862907 14.200000
-video portfolio-shots/out/video-d-light-home-scroll.mp4 4875044 14.520000
-video portfolio-shots/out/video-p-light-home-scroll.mp4 1876188 14.200000
+video portfolio-shots/out/video-d-dark-home-scroll.mp4 5017292 14.560000
+video portfolio-shots/out/video-p-dark-home-scroll.mp4 4665565 14.200000
+video portfolio-shots/out/video-d-light-home-scroll.mp4 4957363 14.480000
+video portfolio-shots/out/video-p-light-home-scroll.mp4 4656254 14.160000
 Reading package lists...
 Building dependency tree...
 Reading state information...
@@ -623,7 +623,7 @@ Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
 Get:2 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 poppler-data all 0.4.12-1 [2060 kB]
 Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler134 amd64 24.02.0-1ubuntu9.10 [1115 kB]
 Get:4 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 poppler-utils amd64 24.02.0-1ubuntu9.10 [212 kB]
-Fetched 3386 kB in 1s (4295 kB/s)
+Fetched 3386 kB in 0s (9392 kB/s)
 Selecting previously unselected package poppler-data.
 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 204521 files and directories currently installed.)
 Preparing to unpack .../poppler-data_0.4.12-1_all.deb ...
