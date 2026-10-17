@@ -3,7 +3,7 @@ import bpy, sys, os, math, json, mathutils, bmesh
 from mathutils import Vector, Matrix
 argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; A=IN+'/assets'; os.makedirs(OUT+'/proof',exist_ok=True)
 def log(*a): print('[v3]',*a,flush=True)
-P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.09, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
+P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.09, SHORTS_DROP=0.035, SKIN_COAT=0.3, SKIN_ROUGH=0.32, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
 except Exception as e: log('no params',e)
@@ -37,7 +37,7 @@ FA=[o for o in new if o.type=='ARMATURE'][0]; FH=bpy.data.objects['Female Head']
 for o in new:
     if o.type=='MESH' and o is not FH: bpy.data.objects.remove(o)
 # ---------- hair (Umeko, shaggy shoulder-length = closest to her sheet)
-HAIR=P.get('HAIR','blowout')
+HAIR=P.get('HAIR','blowout_cards')
 hf={'blowout':IN+'/Blowout Solid textures.fbx','blowout_cards':IN+"/Blowout Nikkie's haircards.fbx",'umeko':A+'/hair_umeko_gift.fbx'}[HAIR]
 before=set(bpy.data.objects); bpy.ops.import_scene.fbx(filepath=hf); new=[o for o in bpy.data.objects if o not in before]
 UA=[o for o in new if o.type=='ARMATURE'][0]; hm=[o for o in new if o.type=='MESH']
@@ -272,6 +272,13 @@ if os.path.exists(A+'/hair_texture_black_to_white_1713.jpg'):
         HA,nt,b=newmat('HairAtlas'); ta=nt.nodes.new('ShaderNodeTexImage'); ta.image=ai; nt.links.new(ta.outputs[0],b.inputs['Base Color']); b.inputs['Roughness'].default_value=0.38
         HM=HA; log('hair: using her atlas')
     else: log('hair: atlas does not fit Umeko UVs -> gradient by height')
+HCT=IN+'/Textures/'+P.get('HAIR_TEX','B&W.png')
+if HAIR=='blowout_cards' and os.path.exists(HCT):
+    HM,nt,b=newmat('HairCards'); tt=nt.nodes.new('ShaderNodeTexImage'); tt.image=bpy.data.images.load(HCT)
+    nt.links.new(tt.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha']); b.inputs['Roughness'].default_value=0.4
+    try: HM.blend_method='HASHED'
+    except: pass
+    log('hair: Blowout haircards with her',HCT.split('/')[-1])
 UM.data.materials.clear(); UM.data.materials.append(HM)
 def solidmat(name,col,rough=0.4,metal=0.0):
     m,nt,b=newmat(name); b.inputs['Base Color'].default_value=(*col,1); b.inputs['Roughness'].default_value=rough; b.inputs['Metallic'].default_value=metal; return m,nt,b
@@ -336,7 +343,8 @@ for v in bm.verts:
 r2=bmesh.ops.create_uvsphere(bm,u_segments=12,v_segments=8,radius=hr*0.3)
 for v in r2['verts']: v.co.z*=0.9; v.co+=bunc+Vector((0.012,0.01,0.012))
 uvl=bm.loops.layers.uv.new('UVMap')
-BUN=add_mesh('Bun',bm,bpy.data.materials['HairGradient'],'Head')
+bunm=bpy.data.materials.new('BunDark'); bunm.use_nodes=True; q=bunm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.02,0.02,0.022,1); q.inputs['Roughness'].default_value=0.42
+BUN=add_mesh('Bun',bm,bunm,'Head')
 clip=bpy.data.materials.new('ClawClipBlack'); clip.use_nodes=True; cb=clip.node_tree.nodes['Principled BSDF']; cb.inputs['Base Color'].default_value=(0.008,0.008,0.009,1); cb.inputs['Roughness'].default_value=0.18
 bm=bmesh.new()
 cc=bunc+Vector((0,0.0,-hr*0.25))
@@ -416,6 +424,19 @@ if gv:
     for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
+# bra back band (grey knit) + black clasp, closing the bra around the back
+bm=bmesh.new(); zb=bmn.z+P.get('BAND_DZ',0.022); pts=[]
+for k in range(41):
+    a=math.pi*(k/40.0)   # from left side (x+) around the back to right side (x-)
+    x=0.16*math.cos(a); y=0.12*math.sin(a)+0.0
+    pts.append(snap(Vector((x,y,zb)),0.0022))
+pts=[p for p in pts if p.y>bmx.y-0.03]
+ribbon(bm,pts,P.get('BAND_W',0.016),0.0022)
+cl=snap(Vector((0,0.2,zb)),0.0035)
+r=bmesh.ops.create_cube(bm,size=1.0)
+for v in r['verts']: v.co=Vector((v.co.x*0.014,v.co.y*0.003,v.co.z*0.012))+cl
+uvl=bm.loops.layers.uv.new('UVMap')
+BAND=add_mesh('BraBand',bm,bpy.data.materials['BraKnit'],'Chest'); log('bra band pts',len(pts))
 # ---------- shorts: lower the waistband onto the hips (compress the top band down, keep it on the skin)
 if P.get('SHORTS_DROP',0.035)>0:
     smn,smx=wbb([SH]); top=smx.z; z0=top-P.get('SHORTS_BAND',0.11); f=1-P['SHORTS_DROP']/(top-z0); moved=0
@@ -429,6 +450,24 @@ if P.get('SHORTS_DROP',0.035)>0:
                 if (p-h[0]).dot(n_)<0.0015: p=h[0]+n_*0.0015
             v.co=mwi@p; moved+=1
     SH.data.update(); log('shorts waistband lowered',P['SHORTS_DROP'],'verts',moved)
+# ---------- keep clothes outside the (curvier) skin
+for o,off in ((SH,0.0016),(BRA,0.0016)):
+    mw=o.matrix_world; mwi=mw.inverted(); pushed=0
+    for v in o.data.vertices:
+        p=mw@v.co; h=bvh.find_nearest(p)
+        if h and h[0] is not None:
+            n_=h[1].normalized()
+            if (p-h[0]).dot(n_)<off: v.co=mwi@(h[0]+n_*off); pushed+=1
+    o.data.update(); log('pushed outside skin',o.name,pushed)
+# ---------- scalp cap: the Female head is a face shell; close the back of the head under the hair
+if P.get('SCALP',True):
+    hmn,hmx=wbb([FH]); hw=(hmx.x-hmn.x)/2
+    sc_c=Vector((0,hmx.y+P.get('SCALP_DY',0.035),hmx.z-0.05))
+    bm=bmesh.new(); r=bmesh.ops.create_uvsphere(bm,u_segments=20,v_segments=14,radius=1.0)
+    for v in r['verts']: v.co=Vector((v.co.x*hw*0.92,v.co.y*P.get('SCALP_RY',0.07),v.co.z*0.07))+sc_c
+    uvl=bm.loops.layers.uv.new('UVMap')
+    scm=bpy.data.materials.new('ScalpBlack'); scm.use_nodes=True; q=scm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.015,0.015,0.016,1); q.inputs['Roughness'].default_value=0.5
+    SCALP=add_mesh('Scalp',bm,scm,'Head'); log('scalp cap',sc_c,hw)
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
 rep['materials']=sorted(set(s.material.name for o in meshes for s in o.material_slots if s.material))
