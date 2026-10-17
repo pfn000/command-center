@@ -1,3 +1,4 @@
+shot tour-1600-light {"name":"tour-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot desk-1600-light {"name":"desk-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot projects-open-1600-light {"name":"projects-open-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot window-moving-1600-light {"name":"window-moving-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
@@ -6,16 +7,20 @@ shot pill-info-1600-light {"name":"pill-info-1600-light","overflowX":0,"broken":
 shot dots-menu-1600-light {"name":"dots-menu-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot lightbox-1600-light {"name":"lightbox-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot contact-1600-light {"name":"contact-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot tour-1600-dark {"name":"tour-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot desk-1600-dark {"name":"desk-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot contact-1600-dark {"name":"contact-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot now-1600-dark {"name":"now-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot jena-1600-dark {"name":"jena-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot plex-1600-dark {"name":"plex-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
-shot phone-402-light {"name":"phone-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot phone-home-402-light {"name":"phone-home-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot phone-projects-402-light {"name":"phone-projects-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
-shot phone-402-dark {"name":"phone-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-back-402-light {"name":"phone-back-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot phone-about-402-light {"name":"phone-about-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
 shot phone-home-402-dark {"name":"phone-home-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-projects-402-dark {"name":"phone-projects-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-back-402-dark {"name":"phone-back-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-about-402-dark {"name":"phone-about-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
 shot phone-contact-402-dark {"name":"phone-contact-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
-ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","dark: Failed to load resource: the server responded with a status of 404 (Not Found)","ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/20d856b677fba646a7b6a39f88acd3e1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"]
+video ok 8926265
+ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","tour: Error: locator.click: Error: strict mode violation: getByRole('button', { name: 'Next' }) resolved to 2 elements:\n    1) <button type=\"button\" class=\"hero-img bleed tall about-hero sketch-hero\" aria-l","dark: Failed to load resource: the server responded with a status of 404 (Not Found)"]
