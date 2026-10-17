@@ -390,6 +390,44 @@
    "windows": 0
   }
  },
+ "videos": [
+  {
+   "file": "video-d-dark-home-scroll.mp4",
+   "bytes": 3277715,
+   "duration": 10.12,
+   "size": {
+    "width": 1600,
+    "height": 900
+   }
+  },
+  {
+   "file": "video-p-dark-home-scroll.mp4",
+   "bytes": 1294851,
+   "duration": 9.6,
+   "size": {
+    "width": 804,
+    "height": 1748
+   }
+  },
+  {
+   "file": "video-d-light-home-scroll.mp4",
+   "bytes": 3172664,
+   "duration": 9.96,
+   "size": {
+    "width": 1600,
+    "height": 900
+   }
+  },
+  {
+   "file": "video-p-light-home-scroll.mp4",
+   "bytes": 1298766,
+   "duration": 9.6,
+   "size": {
+    "width": 804,
+    "height": 1748
+   }
+  }
+ ],
  "resume": {
   "status": 200,
   "type": "application/pdf",
