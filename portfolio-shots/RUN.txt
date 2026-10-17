@@ -1,1 +1,1 @@
-v4.3 polish proof run for skills-cli-command portfolio-v2 at 2026-10-17T16:33:22Z
+v5 proof run (Saidie review fix pass) at 2026-10-17T19:20:21Z
