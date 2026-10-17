@@ -1,1 +1,1 @@
-build v3.1 run A: face reshape (eyes 80/72%, nose, lower face), face/body paint, doe 1 + sclera, bangs lifted, darker matte hair + layer 2, claw clip on bun back, pink skin, continuous bra band, thong cut + rings, curvier
+build v3.1 run B: run A + shapekey clear before curvy apply, paint fixes (crease, lips position, warmer bridge)

@@ -397,13 +397,13 @@ if P.get('FACE_PAINT',True) and FACE_M and eL and eR:
             q=FH.matrix_world@v.co
             if abs(q.x-x)<0.06*ipd and abs(q.z-z)<0.06*ipd and (best is None or q.y<best.y): best=q
         return best
-    BL=(1.0,0.66,0.68); SH_=(0.78,0.62,0.62); LIP=(0.86,0.52,0.56); ops=[]
+    BL=(1.0,0.66,0.68); SH_=tuple(P.get('SHADE_COL',(0.88,0.68,0.66))); LIP=(0.86,0.52,0.56); ops=[]
     for c,sg in ((cL,1),(cR,-1)):
         q=surf(c.x+sg*0.18*ipd,c.z-0.42*ipd)
         if q: ops.append((q,0.20*ipd,BL,P.get('BLUSH',0.45)))
         for k in range(9):  # lid crease arc
             t=(k-4)/4.0; q=surf(c.x+t*exs*0.62,c.z+ezs*0.5*(1.0-0.35*t*t)+P.get('CREASE_UP',0.055)*ipd)
-            if q: ops.append((q,0.028*ipd,SH_,P.get('CREASE',0.5)))
+            if q: ops.append((q,P.get('CREASE_R',0.045)*ipd,SH_,P.get('CREASE',0.6)))
         for k in range(5):  # soft under-eye/socket shading at the inner corner + upper lid
             t=(k-2)/2.0; q=surf(c.x-sg*0.42*exs,c.z+t*0.2*ezs)
             if q: ops.append((q,0.05*ipd,SH_,0.22))
@@ -415,14 +415,14 @@ if P.get('FACE_PAINT',True) and FACE_M and eL and eR:
             z=ez0-0.05*ipd-(ez0-tip.z)*k/6.0
             for sg in (1,-1):
                 q=surf(sg*0.11*ipd,z)
-                if q: ops.append((q,0.05*ipd,SH_,0.28))
+                if q: ops.append((q,0.05*ipd,SH_,P.get('BRIDGE',0.14)))
         for sg in (1,-1):
             q=surf(sg*0.10*ipd,tip.z-0.02*ipd)
             if q: ops.append((q,0.035*ipd,SH_,0.35))
-        mz=tip.z-P.get('MOUTH_DZ',0.36)*ipd   # lips (deepen whatever lip colour the pack has)
+        mz=tip.z-P.get('MOUTH_DZ',0.64)*ipd   # lips (deepen whatever lip colour the pack has)
         for k in range(7):
             t=(k-3)/3.0; q=surf(t*0.22*ipd,mz+0.02*ipd*(1-t*t))
-            if q: ops.append((q,0.05*ipd,LIP,P.get('LIPS',0.35)))
+            if q: ops.append((q,0.05*ipd,LIP,P.get('LIPS',0.2)))
     paint(FH,fimg,ops,matnames={FACE_M.name},tag='face')
     rep['face_paint_ops']=len(ops)
 if P.get('BODY_PAINT',True) and SKIN_M:
@@ -535,6 +535,7 @@ if CUR:
         B.pose.bones[bn_].scale=sc_
     bpy.context.view_layer.update()
     for o in (BODY,BRA,SH):
+        if o.data.shape_keys: o.shape_key_clear()
         sel([o]); am=[m for m in o.modifiers if m.type=='ARMATURE'][0]; bpy.ops.object.modifier_apply(modifier=am.name)
     sel([B]); bpy.ops.object.mode_set(mode='POSE'); bpy.ops.pose.armature_apply(selected=False); bpy.ops.object.mode_set(mode='OBJECT')
     for n_,v_ in saved.items(): B.data.bones[n_].inherit_scale=v_
