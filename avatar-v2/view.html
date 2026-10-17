@@ -45,7 +45,7 @@ void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(c
     float ramp = smoothstep(0.0,1.0,NdotL)*0.7 + pow(NdotL,2.0)*0.3;
     vec3 sss = vec3(0.85,0.42,0.32)*0.4*(1.0-NdotL)*step(0.001,NdotL)*0.30;
     float spec = 0.5*D_GGX(NdotH,max(rough,0.35)) + 0.5*D_GGX(NdotH,0.15);
-    c += uWt[i] * (alb*(ramp+sss) + vec3(0.04)*spec*NdotL); }
+    c += uWt[i] * (alb*(ramp+sss) + vec3(0.075)*spec*NdotL) + uWt[i]*alb*fres*0.25*NdotL; }
   gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
 fabric: COMMON + `uniform float uSheen; uniform float uGloss; 
 void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(cameraPosition - vW); vec3 c = vec3(0.0);

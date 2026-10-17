@@ -116,14 +116,14 @@ for p0 in sample_roots(480):
     if front:
         # bangs: swept from her left to her right (-X), ending at brow/eye level, some across her right eye
         sweep = np.array([-0.75, -0.45, -0.55]) + rng.normal(0, 0.12, 3)
-        tz = eyez + rng.uniform(-0.022, 0.018) - (0.015 if p0[0] < 0 else 0.0)
+        tz = eyez + rng.uniform(-0.015, 0.018) - (0.035 if p0[0] < 0.01 else 0.0)   # long over her right eye
         pts = grow(p0, sweep, tz, 0.004, 0.010, np.array([0.0, -0.15, 0.05]), nseg=9, grav=0.18)
         add_card(pts, rng.uniform(0.016, 0.024), 'bang')
     else:
         back = rad[1] > 0.35
-        if back: tz = neckz + rng.uniform(-0.005, 0.04)
-        elif side: tz = chinz + rng.uniform(-0.03, 0.02)
-        else: tz = chinz + rng.uniform(0.0, 0.05)
+        if back: tz = neckz + rng.uniform(-0.08, -0.02)
+        elif side: tz = neckz + rng.uniform(-0.08, -0.03)
+        else: tz = chinz + rng.uniform(-0.04, 0.02)
         d0 = radh*0.45 + np.array([0,0,0.15])*max(rad[2], 0) + np.array([0,0,-0.35]) + rng.normal(0, 0.06, 3)
         curl = radh*rng.uniform(0.0, 0.18) + rng.normal(0, 0.05, 3)          # messy flicks outward at the ends
         layer = rng.random()
@@ -135,14 +135,14 @@ for s in (1,-1):
     for k in range(5):
         p0 = Hc + np.array([s*Hr[0]*rng.uniform(0.70, 0.85), -Hr[1]*rng.uniform(0.15, 0.40), Hr[2]*rng.uniform(0.25, 0.55)])
         p0 = np.array(push_out(p0, 0.004))
-        pts = grow(p0, [s*0.25, -0.35, -1.0], chinz - rng.uniform(0.00, 0.03), 0.005, 0.012, np.array([s*0.05, -0.08, 0]), nseg=10, grav=0.3)
+        pts = grow(p0, [s*0.25, -0.35, -1.0], neckz - rng.uniform(0.03, 0.08), 0.005, 0.012, np.array([s*0.05, -0.08, 0]), nseg=12, grav=0.3)
         add_card(pts, rng.uniform(0.012, 0.017), 'lock')
 note('hair cards', len(CARDS), {k: sum(1 for c in CARDS if c[3]==k) for k in ('bang','main','lock')})
 # --- bun at the back top (messy loops) ---
 top_z = float(hb[:,2].max())
 ring = hb[(hb[:,2] > top_z - 0.10) & (hb[:,2] < top_z - 0.06)]
 back_y = float(ring[:,1].max()) if len(ring) else Hc[1] + Hr[1]
-bun_c = Vector((0.0, back_y + 0.012, top_z - 0.055)); head_c = Vector(Hc.tolist())
+bun_c = Vector((0.0, Hc[1] + 0.55*Hr[1], top_z + 0.004)); head_c = Vector(Hc.tolist())
 dirv = (bun_c - head_c).normalized(); REP['bun_center'] = [round(x,3) for x in bun_c]
 BUNC = []
 for k in range(16):
@@ -160,9 +160,9 @@ for k in range(14):
 TW_, TH_ = 512, 1024
 uu = (np.arange(TW_)[None,:] + 0.5)/TW_; vv = 1.0 - (np.arange(TH_)[:,None] + 0.5)/TH_   # make_img flips rows: array row 0 = top = v 1 (tip)
 col_ = np.floor(uu*8).astype(int); lu = uu*8 - col_
-starts = np.array([0.72, 0.80, 0.66, 1.10, 0.76, 1.10, 0.84, 0.70])
+starts = np.array([0.42, 0.50, 0.38, 0.62, 0.46, 0.80, 0.55, 0.40])
 st_ = starts[col_]
-wmix = ss(st_, st_ + 0.22, vv)
+wmix = ss(st_, st_ + 0.40, vv)
 fine = 0.88 + 0.12*np.sin(lu*2*math.pi*9 + 3*np.sin(vv*13 + col_))
 blk, wht = 0.028, 0.86
 lum_ = (blk*(1-wmix) + wht*wmix) * fine
@@ -239,8 +239,21 @@ weight_cards(hair, h_t, h_own, list(csec))
 HAIR_ZMAP = (-10.0, 1.0)
 note('hair chains', len(CHN))
 REP['hair'] = {'kind': 'procedural cards (no VRoid strands)', 'cards': len(CARDS), 'bun_loops': len(BUNC), 'chains': len(CHN)}
-bpy.ops.mesh.primitive_torus_add(major_radius=0.020, minor_radius=0.005, major_segments=32, minor_segments=10, generate_uvs=True)
-tie = bpy.context.active_object; tie.name = 'HairTie'
-tie.rotation_euler = Vector((0,0,1)).rotation_difference(dirv).to_euler(); tie.location = bun_c - dirv*0.006
-with ctx(tie): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-tie.data.materials.append(make_mat('HairTie_Black', (0.03,0.03,0.035,1), rough=0.35))
+# black claw clip holding the top bun (her sheet): curved spine + interlocking teeth
+_cp = []
+_ax = Vector((1,0,0)); _up = dirv
+for k in range(9):
+    a = (k/8 - 0.5)*1.9; ang = a
+    for side_ in (-1, 1):
+        bpy.ops.mesh.primitive_cube_add(size=1); t_ = bpy.context.active_object
+        t_.scale = (0.0045, 0.0030, 0.030)
+        q = Vector((0, side_*0.020, 0)); q.rotate(Matrix.Rotation(ang*0.0 + side_*0.35, 4, 'X'))
+        t_.location = bun_c + Vector((a*0.022, 0, 0)) + Vector((0, side_*0.016, 0.004)) + dirv*0.004
+        t_.rotation_euler = (side_*0.55, 0, 0); _cp.append(t_)
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.006, depth=0.050); sp_ = bpy.context.active_object
+sp_.rotation_euler = (0, math.pi/2, 0); sp_.location = bun_c + dirv*0.018; _cp.append(sp_)
+for t_ in _cp:
+    with ctx(t_): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+tie = join(_cp[0], _cp[1:]); tie.name = 'HairTie'
+tie.data.materials.clear(); tie.data.materials.append(make_mat('HairClip_Black', (0.02,0.02,0.022,1), rough=0.25))
+note('claw clip parts', len(_cp))

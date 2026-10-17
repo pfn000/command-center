@@ -107,7 +107,7 @@ def add_armature(o):
 
 # ---------- 0. whole-figure reshape to Jena (19, adult, her refs): head x0.86, legs x1.08, smaller less-anime eyes ----------
 for _o in [o for o in bpy.data.objects if o.type=='MESH' and o.name.startswith('Icosphere')]: bpy.data.objects.remove(_o)
-HS, LS = 0.86, 1.08
+HS, LS = 0.80, 1.08
 _piv = np.array([0.0, L['neck'].y, L['neck'].z]); _lz = float(L['leg'].z)
 _eyec = {}
 _fv = coords(face); _fmat = [''] * len(face.data.vertices)
@@ -130,7 +130,8 @@ def _reshape(P, eyes=False):
         for _s, c in _eyec.items():   # smaller, narrower almond eyes (sockets, lids, lashes, iris move together)
             d = np.hypot((B[:,0]-c[0])/1.0, (B[:,2]-c[2])/1.15)
             w = ss(0.036, 0.017, d) * (B[:,1] < c[1] + 0.03) * (B[:,0]*_s > -0.002)
-            P[:,0] = c[0] + (B[:,0]-c[0])*(1-0.24*w); P[:,2] = c[2] + (B[:,2]-c[2])*(1-0.36*w) - 0.0015*w
+            P[:,0] = c[0] + (B[:,0]-c[0])*(1-0.24*w); P[:,2] = c[2] + (B[:,2]-c[2])*(1-0.42*w) - 0.0015*w
+            im_ = _ir & (B[:,0]*_s > 0); P[im_,0] = c[0] + (P[im_,0]-c[0])*0.80; P[im_,2] = c[2] + (P[im_,2]-c[2])*0.80
         # lash line: thinner, no anime wing (squash toward its upper edge, pull the wing in)
         for _s in (1,-1):
             em_ = _eyel & (B[:,0]*_s > 0)
@@ -171,7 +172,7 @@ for _e in arm.data.edit_bones:
 bpy.ops.object.mode_set(mode='OBJECT')
 L = _landmarks()
 note('reshaped: head x%.2f legs x%.2f eyes pinched 15%%; new landmarks' % (HS, LS), {k:[round(c,3) for c in v] for k,v in L.items()})
-REP['reshape'] = {'head_scale': HS, 'leg_scale': LS, 'eye_pinch_xz': [0.24, 0.36], 'brows': 'x1.7 thicker', 'nose': 'bridge+tip'}
+REP['reshape'] = {'head_scale': HS, 'leg_scale': LS, 'eye_pinch_xz': [0.24, 0.42], 'iris': 0.80, 'brows': 'x1.7 thicker', 'nose': 'bridge+tip'}
 # ---------- 1. base Body -> skin only; HairBack (scalp) goes to hair; sample clothes/shoes dropped ----------
 hairback = split_faces(body, lambda o,f,bm: 'HAIR' in matname(o, f.material_index), 'HairBack')
 # VRoid culls the skin hidden under clothes: the sample has NO chest skin (z 1.1-1.25 empty).
@@ -199,19 +200,19 @@ C = coords(body)
 for names, s in ((['J_Sec_L_Bust1','J_Sec_L_Bust2'], 1), (['J_Sec_R_Bust1','J_Sec_R_Bust2'], -1)):
     wb = np.clip(np.maximum(weights(body, names), bust_w(C, s)), 0, 1)[:,None]
     c0 = np.array([L['bust'].x*s, L['bust'].y, L['bust'].z])
-    C += (C - c0) * wb * np.array([0.48, 0.70, 0.42]) + wb*np.array([0, FWD*0.006, -0.004])
+    C += (C - c0) * wb * np.array([0.70, 0.95, 0.60]) + wb*np.array([0, FWD*0.006, -0.004])
 legz, kneez = L['leg'].z, L['knee'].z
 arms = (np.abs(C[:,0]) > L['sh'].x - 0.02) & (C[:,2] > L['uchest'].z - 0.02)
 f_ = np.exp(-((C[:,2] - (legz - 0.04))/0.13)**2) * (C[:,2] > kneez) * (~arms)
-C[:,0] *= 1 + 0.18*f_
+C[:,0] *= 1 + 0.30*f_
 back = np.clip((C[:,1] - L['hips'].y)/0.08, 0, 1)
-C[:,1] += 0.028*np.exp(-((C[:,2] - (legz - 0.02))/0.09)**2) * back * (~arms)
+C[:,1] += 0.050*np.exp(-((C[:,2] - (legz - 0.02))/0.09)**2) * back * (~arms)
 for s in (1,-1):
     sel = (C[:,0]*s > 0.015) & (C[:,2] < legz) & (C[:,2] > kneez) & (~arms)
     ax0, ay0 = L['leg'].x*s, L['leg'].y
-    g = 1 + 0.15*ss(kneez, legz-0.05, C[:,2])
+    g = 1 + 0.28*ss(kneez, legz-0.05, C[:,2])
     C[sel,0] = ax0 + (C[sel,0]-ax0)*g[sel]; C[sel,1] = ay0 + (C[sel,1]-ay0)*g[sel]
-C[:,0] *= 1 - 0.08*np.exp(-((C[:,2] - (L['spine'].z+0.06))/0.06)**2) * (~arms)
+C[:,0] *= 1 - 0.14*np.exp(-((C[:,2] - (L['spine'].z+0.06))/0.06)**2) * (~arms)
 set_coords(body, C); BODY_C = C.copy()
 REP['proportions'] = 'bust +48-70%, hips +18% width, seat +2.8cm, thighs +15%, waist -8%, head x0.86, legs x1.08'
 # ---------- 3. clothes, each its own mesh, built from the body surface ----------
@@ -250,7 +251,7 @@ def bra_pred(c, f):
     if is_arm(c): return False
     if under - 0.03 < c[2] < under + 0.004: return True
     w = float(np.mean([wbs[v.index] for v in f.verts]))
-    return w > 0.12 and c[2] < cup_top and c[1]*FWD > 0
+    return w > 0.12 and c[2] < under + 0.74*(cup_top - under) and c[1]*FWD > 0
 bra = from_body('Bra', bra_pred, lambda v: 0.0042, solid=0.0015)
 note('clothes verts', {o.name: len(o.data.vertices) for o in (tee, shorts, thigh, bra)})
 dg = bpy.context.evaluated_depsgraph_get(); BV = BVHTree.FromObject(body, dg)
@@ -297,6 +298,49 @@ sc = coords(shorts)
 for p in shorts.data.polygons:
     vv = sc[list(p.vertices)]
     if all(v_[2] < hem_at(v_) + 0.010 for v_ in vv) and abs(vv[:,0]).min() > 0.02: p.material_index = 1
-bra.data.materials.append(make_mat('Bra_Black', (0.015,0.015,0.017,1), rough=0.5))
-for st in straps: st.data.materials.append(bra.data.materials[0])
+_rib = 0.30 + 0.06*np.sin(np.arange(256)[None,:]*math.pi/3.0) + 0.0*np.arange(256)[:,None]
+bra.data.materials.append(make_mat('Bra_GreyRib', img=make_img('Bra_GreyRib', np.stack([_rib, _rib, _rib*1.03], 2)), rough=0.75))
+bra.data.materials.append(make_mat('Bra_Lace', (0.72,0.72,0.74,1), rough=0.7))
+_bc = coords(bra); _lace_z = under + 0.74*(cup_top - under) - 0.010
+for p in bra.data.polygons:
+    if _bc[list(p.vertices)][:,2].mean() > _lace_z: p.material_index = 1
+for st in straps: st.data.materials.append(make_mat('Bra_Strap', (0.10,0.10,0.11,1), rough=0.5))
 join(bra, straps); bra.name = 'Bra'
+# ---------- her sheet: black thong (low-rise front, thin side straps over the hips, silver rings), bow on the bra ----------
+crz = legz - 0.065; tfront = legz + 0.035; zb0, zb1 = legz + 0.050, legz + 0.061; tback = legz + 0.058
+def thong_pred(c, f):
+    if is_arm(c) or c[2] < crz - 0.01 or c[2] > zb1: return False
+    if zb0 < c[2] < zb1: return True
+    if c[1]*FWD > 0:  # front
+        return c[2] < tfront and abs(c[0]) < 0.012 + 0.78*(c[2] - crz)
+    return abs(c[0]) < 0.007 + 1.1*max(0.0, c[2] - (tback - 0.055))
+thong = from_body('Thong', thong_pred, lambda v: 0.0035, solid=0.0012)
+thong.data.materials.append(make_mat('Thong_Black', (0.012,0.012,0.014,1), rough=0.35))
+_silver = make_mat('Ring_Silver', (0.85,0.86,0.88,1), rough=0.2, metal=1.0)
+_extra = []
+for s in (1,-1):
+    zr = (zb0+zb1)/2; hx = 0.012 + 0.78*(min(tfront, zr) - crz)
+    hit = BV.ray_cast(Vector((s*hx, -1.0, zr)), Vector((0,1,0)))
+    if hit[0] is None: continue
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.0075, minor_radius=0.0017, major_segments=24, minor_segments=8)
+    rg = bpy.context.active_object; rg.rotation_euler = Vector((0,0,1)).rotation_difference(hit[1]).to_euler(); rg.location = hit[0] + hit[1]*0.006
+    with ctx(rg): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    rg.data.materials.append(_silver); _extra.append(rg)
+hit = BV.ray_cast(Vector((0.0, -1.0, under + 0.012)), Vector((0,1,0)))
+if hit[0] is not None:
+    for sx in (1,-1):
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=1)
+        lb = bpy.context.active_object; lb.scale = (0.0065, 0.0022, 0.0042); lb.rotation_euler = (0, sx*0.35, 0)
+        lb.location = hit[0] + hit[1]*0.007 + Vector((sx*0.006, 0, 0))
+        with ctx(lb): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        lb.data.materials.append(bra.data.materials[1]); _extra.append(lb)
+for o_ in _extra: copy_weights_nearest(o_, body)
+_rings = [o_ for o_ in _extra if o_.data.materials[0] is _silver]; _bows = [o_ for o_ in _extra if o_ not in _rings]
+if _rings: join(thong, _rings)
+if _bows: join(bra, _bows)
+thong.name = 'Thong'; bra.name = 'Bra'
+# skin: one clean pale-pink tone on body (VRoid body texture + Tops-UV chest fill made patches)
+for n_ in body.data.materials[0].node_tree.nodes:
+    if n_.type == 'TEX_IMAGE' and n_.image and 'nml' not in n_.image.name: n_.image = make_img('Jena_Skin', np.tile(np.array([0.95,0.83,0.80,1.0],np.float32), (32,32,1)))
+note('outfit per sheet: grey ribbed bra + lace trim + bow, black thong + silver rings; flat skin tone')
+

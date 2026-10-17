@@ -109,6 +109,10 @@ REP['landmarks_blender'] = {k: [round(c,4) for c in v] for k,v in L.items()}
 REP['extra_points'] = {'bun_c': [round(x,4) for x in bun_c], 'mouth_c': [round(float(x),4) for x in mc], 'pend': [round(x,4) for x in pend],
                       'band_mid_z': round(mid,4), 'band_lo': round(band_lo,4), 'th_top': round(th_top,4), 'under': round(under,4)}
 note('final meshes', REP['meshes'])
+for _o in (tee, shorts, thigh):
+    try: bpy.data.objects.remove(_o)
+    except Exception as e: note('remove failed', repr(e))
+REP['outfit'] = 'sheet 2026-10-17: grey ribbed bra (lace trim, bow), black thong (silver rings), cross necklace; old tee/shorts/thigh-highs removed'
 bpy.ops.wm.save_as_mainfile(filepath=OUT+'/jena-v2.blend', compress=True)
 bpy.ops.export_scene.gltf(filepath=OUT+'/jena-v2.glb', export_format='GLB', use_selection=False, export_skins=True, export_morph=True,
                           export_morph_normal=False, export_animations=False, export_apply=False, export_yup=True, export_def_bones=False)
