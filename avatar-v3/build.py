@@ -3,7 +3,7 @@ import bpy, sys, os, math, json, mathutils, bmesh
 from mathutils import Vector, Matrix
 argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; A=IN+'/assets'; os.makedirs(OUT+'/proof',exist_ok=True)
 def log(*a): print('[v3]',*a,flush=True)
-P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.09, SHORTS_DROP=0.035, SKIN_COAT=0.3, SKIN_ROUGH=0.32, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
+P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.14, SHORTS_DROP=0.035, SKIN_COAT=0.5, SKIN_ROUGH=0.3, BODY_MAT='5867', BRA_OFF=0.005, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
 except Exception as e: log('no params',e)
@@ -182,9 +182,8 @@ def newmat(name):
     m=bpy.data.materials.new(name); m.use_nodes=True; nt=m.node_tree; return m,nt,nt.nodes['Principled BSDF']
 # body skin: her albedo 5867 (she re-sent it 5:07 PM as THE skin) (pale pink skin, nipples/navel)
 mb,nt,bs=newmat('Skin'); t=nt.nodes.new('ShaderNodeTexImage'); t.image=img('5867c342-78a0-443f-aecc-a24f5d7dc6d3.jpg'); nt.links.new(t.outputs[0],bs.inputs['Base Color'])
-bs.inputs['Roughness'].default_value=0.42; bs.inputs['Subsurface Weight'].default_value=0.08; bs.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
-try: bs.inputs['Coat Weight'].default_value=0.12
-except: pass
+bs.inputs['Roughness'].default_value=P.get('SKIN_ROUGH',0.3); bs.inputs['Subsurface Weight'].default_value=0.1; bs.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25); bs.inputs['Subsurface Scale'].default_value=0.01
+bs.inputs['Coat Weight'].default_value=P.get('SKIN_COAT',0.5); bs.inputs['Coat Roughness'].default_value=0.12
 if P.get('BODY_MAT','original')=='original' and all(im_.size[0]>0 for im_ in bpy.data.images if im_.name.startswith(('BODY','Skin 1'))):
     log('body: her authored material (BODY.png + Skin 1.png)')
     for s_ in BODY.material_slots:
@@ -200,7 +199,7 @@ skin=tuple(np.median(sk,0)) if len(sk) else (0.85,0.68,0.66); log('skin rgb (lin
 for i,s in enumerate(FH.material_slots):
     n=s.material.name.lower() if s.material else ''
     if n.startswith('face'):
-        m,nt,b=newmat('Face'); b.inputs['Base Color'].default_value=(*skin,1); b.inputs['Roughness'].default_value=0.45
+        m,nt,b=newmat('Face'); b.inputs['Base Color'].default_value=(*skin,1); b.inputs['Roughness'].default_value=P.get('SKIN_ROUGH',0.3)+0.05; b.inputs['Coat Weight'].default_value=P.get('SKIN_COAT',0.5)*0.7; b.inputs['Coat Roughness'].default_value=0.15
         HT=IN+'/1691108855vrmodels_store_female-head-by-bunisu/Female head/female head textures/'+P.get('FACE_TEX','1.png')
         if os.path.exists(HT):
             ft=nt.nodes.new('ShaderNodeTexImage'); ft.image=bpy.data.images.load(HT); nt.links.new(ft.outputs[0],b.inputs['Base Color']); nt.links.new(ft.outputs[1],b.inputs['Alpha']); log('face texture: her head pack',HT.split('/')[-1])
@@ -277,6 +276,7 @@ if HAIR=='blowout_cards' and os.path.exists(HCT):
     HM,nt,b=newmat('HairCards'); tt=nt.nodes.new('ShaderNodeTexImage'); tt.image=bpy.data.images.load(HCT)
     gm=nt.nodes.new('ShaderNodeGamma'); gm.inputs['Gamma'].default_value=P.get('HAIR_GAMMA',1.9); nt.links.new(tt.outputs[0],gm.inputs['Color'])
     nt.links.new(gm.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha']); b.inputs['Roughness'].default_value=0.4
+    b.inputs['Anisotropic'].default_value=0.6; b.inputs['Sheen Weight'].default_value=0.35; b.inputs['Sheen Roughness'].default_value=0.4; b.inputs['Specular IOR Level'].default_value=0.65; b.inputs['Roughness'].default_value=0.36
     try: HM.blend_method='HASHED'
     except: pass
     log('hair: Blowout haircards with her',HCT.split('/')[-1])
@@ -385,8 +385,8 @@ for i in range(N):
     rot=d.to_track_quat('X','Z').to_matrix()
     for v in r['verts']: v.co=rot@Vector((v.co.x*L,v.co.y*0.0019,v.co.z*0.0019))+(p0+p1)/2
 low=pts[0]
-cx=low+Vector((0,-0.003,-0.016))
-for dims,off in (((0.0034,0.0022,0.026),(0,0,0)),((0.015,0.0022,0.0034),(0,0,0.005))):
+cx=low+Vector((0,-0.0035,-0.021))
+for dims,off in (((0.0045,0.0026,0.036),(0,0,0)),((0.021,0.0026,0.0045),(0,0,0.007))):
     r=bmesh.ops.create_cube(bm,size=1.0)
     for v in r['verts']: v.co=Vector((v.co.x*dims[0],v.co.y*dims[1],v.co.z*dims[2]))+cx+Vector(off)
 uvl=bm.loops.layers.uv.new('UVMap')
