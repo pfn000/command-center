@@ -153,6 +153,75 @@ if eyeuv: rep['eye_uv_bb']=[min(u[0] for u in eyeuv),min(u[1] for u in eyeuv),ma
 log('eye uv bb',rep.get('eye_uv_bb'))
 rep['eyes']={'L':[list(eL[0]),list(eL[1])] if eL else None,'R':[list(eR[0]),list(eR[1])] if eR else None}
 
+# ---------- v3.1 FACE RESHAPE (semi-realistic): smaller almond eyes, nose bridge, applied to basis + every shape key
+def _shift_all_keys(o,delta_world):
+    mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices)
+    dl=[mwi3@d for d in delta_world]
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            for i in range(n):
+                if dl[i].length_squared>0: kb.data[i].co+=dl[i]
+    for i in range(n):
+        if dl[i].length_squared>0: o.data.vertices[i].co+=dl[i]
+    o.data.update()
+FR={}
+if P.get('FACE_RESHAPE',True) and eL and eR:
+    mw=FH.matrix_world; V=[mw@v.co for v in FH.data.vertices]; N=len(V)
+    cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez=(sL.z+sR.z)/2; ex=(sL.x+sR.x)/2
+    hmn,hmx=wbb([FH]); ycen=(hmn.y+hmx.y)/2
+    D=[Vector((0,0,0)) for _ in range(N)]
+    # 1) eyes: shrink toward each eye centre (x by EYE_SX, z by EYE_SZ) with a smooth falloff onto the skin
+    rc=0.55*max(ex,ez)*P.get('EYE_RC',1.15); ro=rc*P.get('EYE_RO',1.9)
+    sx_,sz_=P.get('EYE_SX',0.80),P.get('EYE_SZ',0.72)
+    for i,p in enumerate(V):
+        if p.y>ycen: continue
+        for c in (cL,cR):
+            dx=p.x-c.x; dz=p.z-c.z; d=math.hypot(dx,dz*ex/max(ez,1e-6)*0.8)
+            if d<ro:
+                t_=0.0 if d<=rc else (d-rc)/(ro-rc); w=1-t_*t_*(3-2*t_)
+                D[i]+=Vector((dx*(sx_-1)*w,0,dz*(sz_-1)*w))
+    # 2) nose: find the tip (most forward point on the centre line below the eyes), push the bridge + tip forward
+    ez0=(cL.z+cR.z)/2
+    cand=[(p.y,i) for i,p in enumerate(V) if abs(p.x)<0.10*ipd and ez0-0.95*ipd<p.z<ez0-0.15*ipd and p.y<ycen]
+    if cand:
+        tip=V[min(cand)[1]]; FR['nose_tip']=list(tip)
+        amt=P.get('NOSE_PUSH',0.07)*ipd; sg=P.get('NOSE_SIG',0.11)*ipd
+        for i,p in enumerate(V):
+            if p.y>ycen: continue
+            if tip.z-0.12*ipd<p.z<ez0+0.05*ipd:
+                prof=min(1.0,max(0.0,(ez0+0.05*ipd-p.z)/(ez0+0.05*ipd-tip.z)))**0.7
+                low=1.0 if p.z>=tip.z else max(0,1-(tip.z-p.z)/(0.12*ipd))
+                wx=math.exp(-(p.x/sg)**2)
+                D[i]+=Vector((0,-amt*prof*low*wx,0))
+    # 3) longer lower face: stretch below the eyes down a little, fading out before the jaw/neck seam
+    lf=P.get('LOWER_FACE',1.05)
+    if lf!=1.0:
+        zt=ez0-0.25*ipd; zb=ez0-1.55*ipd
+        for i,p in enumerate(V):
+            if p.y>ycen+0.2*ipd: continue
+            if zb<p.z<zt:
+                t=(zt-p.z)/(zt-zb); w=math.sin(math.pi*t)  # 0 at both ends -> no seam
+                D[i]+=Vector((0,0,-(lf-1)*(zt-zb)*0.5*w))
+    _shift_all_keys(FH,D); FR.update(ipd=ipd,eye_size=[ex,ez],rc=rc,ro=ro,moved=sum(1 for d in D if d.length>1e-5))
+    log('face reshape',FR)
+rep['face_reshape']=FR
+# ---------- v3.1 BANGS: lift/part the fringe so both eyes + brows show (compress hair in front of the face upward above the brow line)
+if P.get('BANGS_LIFT',True) and eL and eR:
+    cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
+    browz=ez0+P.get('BROW_UP',0.62)*ipd*0.5+max(sL.z,sR.z)*0.5
+    hmn,hmx=wbb([FH]); yfront=hmn.y; mw=UM.matrix_world; mwi=mw.inverted(); n_=0
+    kz=P.get('BANG_K',0.22)
+    for v in UM.data.vertices:
+        p=mw@v.co
+        if p.y<yfront+0.55*ipd and abs(p.x)<P.get('BANG_W',1.05)*ipd and p.z<browz+0.02*ipd:
+            t=max(0.0,min(1.0,(p.y-yfront)/(0.55*ipd)))   # fade at the sides/back
+            nz=browz+(p.z-browz)*kz
+            nz=p.z+(nz-p.z)*(1-t*t)
+            # sweep to her right side like the sheet
+            p.x+= -P.get('BANG_SWEEP',0.10)*ipd*(1-t)*max(0,(browz-p.z))/(ipd)
+            p.z=nz; v.co=mwi@p; n_+=1
+    UM.data.update(); log('bangs lifted above brow z',round(browz,4),'verts',n_); rep['bangs']={'browz':browz,'verts':n_}
+
 # ---------- her Meshy eyeball -> iris texture (the .glb is a 368k-tri disc: too heavy for VRChat, so it is rendered once and mapped onto the head's eye UVs)
 EYE_TEX=None
 try:
@@ -230,12 +299,17 @@ for i,s in enumerate(FH.material_slots):
         nt.links.new(dv.outputs[0],cr.inputs[0]); nt.links.new(cr.outputs[0],b.inputs['Base Color']); b.inputs['Roughness'].default_value=0.08
         ET=IN+'/ZinPia_Doe Eyes (Sunny Head)/'+P.get('EYE_TEX','doe 5.png')
         if os.path.exists(ET):
-            ti=nt.nodes.new('ShaderNodeTexImage'); ti.image=bpy.data.images.load(ET); nt.links.new(ti.outputs[0],b.inputs['Base Color']); nt.links.new(ti.outputs[1],b.inputs['Alpha'])
+            ti=nt.nodes.new('ShaderNodeTexImage'); ti.image=bpy.data.images.load(ET)
+            if P.get('SCLERA',True):
+                mxs=nt.nodes.new('ShaderNodeMix'); mxs.data_type='RGBA'; mxs.inputs['A'].default_value=(*P.get('SCLERA_COL',(0.80,0.78,0.77)),1)
+                nt.links.new(ti.outputs[1],mxs.inputs['Factor']); nt.links.new(ti.outputs[0],mxs.inputs['B']); nt.links.new(mxs.outputs['Result'],b.inputs['Base Color'])
+            else:
+                nt.links.new(ti.outputs[0],b.inputs['Base Color']); nt.links.new(ti.outputs[1],b.inputs['Alpha'])
             ez=P.get('EYE_ZOOM',1.0); eo_=P.get('EYE_OFF',(0.0,0.0))
             if ez!=1.0 or eo_!=(0.0,0.0):
                 mp2=nt.nodes.new('ShaderNodeMapping'); mp2.vector_type='POINT'; mp2.inputs['Scale'].default_value=(ez,ez,1); mp2.inputs['Location'].default_value=(0.5-0.5*ez+eo_[0],0.5-0.5*ez+eo_[1],0)
                 nt.links.new(uv.outputs['UV'],mp2.inputs['Vector']); nt.links.new(mp2.outputs[0],ti.inputs[0]); ti.extension='EXTEND'
-            b.inputs['Emission Strength'].default_value=0.15; nt.links.new(ti.outputs[0],b.inputs['Emission Color']); log('eyes: her ZinPia',ET.split('/')[-1])
+            b.inputs['Emission Strength'].default_value=P.get('EYE_EMIT',0.04); nt.links.new(ti.outputs[0],b.inputs['Emission Color']); b.inputs['Coat Weight'].default_value=1.0; b.inputs['Coat Roughness'].default_value=0.03; log('eyes: her ZinPia',ET.split('/')[-1])
         elif EYE_TEX is not None:
             # Meshy eyeball image: island half-size -> IRIS_ZOOM of the disc radius
             hs=max(u1-u0,v1-v0)/2
@@ -244,6 +318,131 @@ for i,s in enumerate(FH.material_slots):
             ti=nt.nodes.new('ShaderNodeTexImage'); ti.image=EYE_TEX; ti.extension='EXTEND'; nt.links.new(ad.outputs[0],ti.inputs[0])
             nt.links.new(ti.outputs[0],b.inputs['Base Color'])
         s.material=m
+
+# ---------- v3.1 SKIN: pale PINK (tint + warm subsurface) + glossy wet-look, and makeup-style paint (blush, lid crease, nose, lips, knees/elbows/knuckles)
+def pinkify(mat,tint,sat):
+    nt=mat.node_tree; b=[n for n in nt.nodes if n.type=='BSDF_PRINCIPLED'][0]
+    lk=[l for l in nt.links if l.to_socket==b.inputs['Base Color']]
+    if not lk: b.inputs['Base Color'].default_value=(b.inputs['Base Color'].default_value[0]*tint[0],b.inputs['Base Color'].default_value[1]*tint[1],b.inputs['Base Color'].default_value[2]*tint[2],1); src=None
+    else: src=lk[0].from_socket; nt.links.remove(lk[0])
+    if src is not None:
+        hs=nt.nodes.new('ShaderNodeHueSaturation'); hs.inputs['Saturation'].default_value=sat; nt.links.new(src,hs.inputs['Color'])
+        mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=1.0; mx.inputs['B'].default_value=(*tint,1)
+        nt.links.new(hs.outputs['Color'],mx.inputs['A']); nt.links.new(mx.outputs['Result'],b.inputs['Base Color'])
+    b.inputs['Subsurface Weight'].default_value=P.get('SSS_W',0.22); b.inputs['Subsurface Radius'].default_value=(1.0,0.32,0.22); b.inputs['Subsurface Scale'].default_value=P.get('SSS_SCALE',0.02)
+    b.inputs['Roughness'].default_value=P.get('SKIN_ROUGH2',0.32); b.inputs['Specular IOR Level'].default_value=0.6
+    b.inputs['Coat Weight'].default_value=P.get('SKIN_COAT2',0.55); b.inputs['Coat Roughness'].default_value=0.08
+    log('pinkify',mat.name,tint,sat)
+def uv_lookup(o,matnames=None):
+    me=o.data; uv=me.uv_layers.active.data; mw=o.matrix_world; d={}
+    for p in me.polygons:
+        if matnames is not None:
+            mn_=o.material_slots[p.material_index].material.name if o.material_slots[p.material_index].material else ''
+            if mn_ not in matnames: continue
+        for li in p.loop_indices:
+            vi=me.loops[li].vertex_index
+            if vi not in d: d[vi]=tuple(uv[li].uv)
+    from mathutils.kdtree import KDTree as _KD
+    kd=_KD(len(d)); idx=list(d)
+    for k,vi in enumerate(idx): kd.insert(mw@me.vertices[vi].co,k)
+    kd.balance(); return kd,idx,d
+def paint(o,image,ops,matnames=None,tag=''):
+    if image is None or image.size[0]==0: log('paint: no image',tag); return
+    import numpy as np
+    W_,H_=image.size; px=np.empty(W_*H_*4,dtype=np.float32); image.pixels.foreach_get(px); px=px.reshape(H_,W_,4)
+    kd,idx,d=uv_lookup(o,matnames)
+    # UV units per metre near each point: from the 8 nearest verts
+    def uvat(p):
+        res=kd.find_n(p,8)
+        if not res: return None,None
+        (co0,k0,dist0)=res[0]; u0=Vector(d[idx[k0]])
+        ratios=[]
+        for co,k,dist in res[1:]:
+            du=(Vector(d[idx[k]])-u0).length; dm=(co-co0).length
+            if dm>1e-6 and du<0.2: ratios.append(du/dm)
+        return u0,(sorted(ratios)[len(ratios)//2] if ratios else None)
+    done=0
+    for (p3,rad,col,stg) in ops:
+        u,k=uvat(p3)
+        if u is None or not k: continue
+        cx,cy=u.x*W_,u.y*H_; r=max(1.5,rad*k*W_); R=int(r*2.6)+1
+        x0,x1=int(max(0,cx-R)),int(min(W_,cx+R)); y0,y1=int(max(0,cy-R)),int(min(H_,cy+R))
+        if x1<=x0 or y1<=y0: continue
+        yy,xx=np.mgrid[y0:y1,x0:x1]; g=np.exp(-((xx-cx)**2+(yy-cy)**2)/(2*r*r))*stg
+        reg=px[y0:y1,x0:x1,:3]; c=np.array(col,dtype=np.float32)
+        px[y0:y1,x0:x1,:3]=reg*(1-g[...,None]*(1-c))
+        done+=1
+    image.pixels.foreach_set(px.ravel()); image.update()
+    try:
+        os.makedirs(OUT+'/tex',exist_ok=True); image.filepath_raw=OUT+'/tex/'+tag+'_painted.png'; image.file_format='PNG'; image.save()
+    except Exception as e: log('tex save err',e)
+    try: image.pack()
+    except Exception as e: log('pack err',e)
+    log('painted',tag,done,'of',len(ops))
+FACE_M=next((s_.material for s_ in FH.material_slots if s_.material and s_.material.name.lower().startswith('face')),None); SKIN_M=BODY.material_slots[0].material if BODY.material_slots else None
+PINK=tuple(P.get('PINK',(1.0,0.86,0.86))); SAT=P.get('SKIN_SAT',1.25)
+for m_ in set([FACE_M]+[s_.material for s_ in BODY.material_slots if s_.material]):
+    if m_: pinkify(m_,PINK,SAT)
+if P.get('FACE_PAINT',True) and FACE_M and eL and eR:
+    ft=[n for n in FACE_M.node_tree.nodes if n.type=='TEX_IMAGE']
+    fimg=ft[0].image if ft else None
+    if fimg is not None:
+        fimg=fimg.copy(); fimg.name='face_painted'; ft[0].image=fimg
+    cL=eL[0]; cR=eR[0]; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
+    exs=eL[1].x*P.get('EYE_SX',0.80); ezs=eL[1].z*P.get('EYE_SZ',0.72)
+    fy=wbb([FH])[0].y
+    def surf(x,z):  # nearest face surface point in front at (x,z)
+        best=None
+        for v in FH.data.vertices:
+            q=FH.matrix_world@v.co
+            if abs(q.x-x)<0.06*ipd and abs(q.z-z)<0.06*ipd and (best is None or q.y<best.y): best=q
+        return best
+    BL=(1.0,0.66,0.68); SH_=(0.78,0.62,0.62); LIP=(0.86,0.52,0.56); ops=[]
+    for c,sg in ((cL,1),(cR,-1)):
+        q=surf(c.x+sg*0.18*ipd,c.z-0.42*ipd)
+        if q: ops.append((q,0.20*ipd,BL,P.get('BLUSH',0.45)))
+        for k in range(9):  # lid crease arc
+            t=(k-4)/4.0; q=surf(c.x+t*exs*0.62,c.z+ezs*0.5*(1.0-0.35*t*t)+P.get('CREASE_UP',0.055)*ipd)
+            if q: ops.append((q,0.028*ipd,SH_,P.get('CREASE',0.5)))
+        for k in range(5):  # soft under-eye/socket shading at the inner corner + upper lid
+            t=(k-2)/2.0; q=surf(c.x-sg*0.42*exs,c.z+t*0.2*ezs)
+            if q: ops.append((q,0.05*ipd,SH_,0.22))
+    tip=FR.get('nose_tip')
+    if tip:
+        tip=Vector(tip)
+        ops.append((surf(0,tip.z+0.02*ipd) or tip,0.09*ipd,BL,0.35))
+        for k in range(6):  # bridge side shadows
+            z=ez0-0.05*ipd-(ez0-tip.z)*k/6.0
+            for sg in (1,-1):
+                q=surf(sg*0.11*ipd,z)
+                if q: ops.append((q,0.05*ipd,SH_,0.28))
+        for sg in (1,-1):
+            q=surf(sg*0.10*ipd,tip.z-0.02*ipd)
+            if q: ops.append((q,0.035*ipd,SH_,0.35))
+        mz=tip.z-P.get('MOUTH_DZ',0.36)*ipd   # lips (deepen whatever lip colour the pack has)
+        for k in range(7):
+            t=(k-3)/3.0; q=surf(t*0.22*ipd,mz+0.02*ipd*(1-t*t))
+            if q: ops.append((q,0.05*ipd,LIP,P.get('LIPS',0.35)))
+    paint(FH,fimg,ops,matnames={FACE_M.name},tag='face')
+    rep['face_paint_ops']=len(ops)
+if P.get('BODY_PAINT',True) and SKIN_M:
+    bt=[n for n in SKIN_M.node_tree.nodes if n.type=='TEX_IMAGE']
+    bimg=bt[0].image.copy() if bt and bt[0].image else None
+    if bimg: bimg.name='body_painted'; bt[0].image=bimg
+    bn_=B.data.bones; ops=[]; BLK=(1.0,0.70,0.72)
+    def bhead(n): return B.matrix_world@bn_[n].head_local if n in bn_ else None
+    log('bones sample',[b_.name for b_ in bn_][:90])
+    for nm in P.get('PINK_JOINTS',['Left knee','Right knee','Left elbow','Right elbow','Left wrist','Right wrist']):
+        h=bhead(nm)
+        if h is None: continue
+        fwd=Vector((0,-0.05,0)) if 'knee' in nm else Vector((0,0.04,0)) if 'elbow' in nm else Vector((0,0,0))
+        ops.append((h+fwd,0.035 if 'knee' in nm else 0.025,BLK,0.4))
+    for b_ in bn_:
+        if any(k in b_.name.lower() for k in ('index','middle','ring','little','pinky')) and b_.name[-1:].isdigit()==False:
+            ops.append((B.matrix_world@b_.head_local,0.008,BLK,0.3))
+    ch=bhead('Chest') or bhead('Upper Chest')
+    if ch: ops.append((ch+Vector((0,-0.12,0.06)),0.06,BLK,0.22))
+    paint(BODY,bimg,ops,tag='body')
 # hair: black roots -> grey -> white tips (generated Z of the hair mesh)
 def hairmat():
     m,nt,b=newmat('HairGradient'); tc=nt.nodes.new('ShaderNodeTexCoord'); sp=nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Generated'],sp.inputs[0])
@@ -274,13 +473,28 @@ if os.path.exists(A+'/hair_texture_black_to_white_1713.jpg'):
 HCT=IN+'/Textures/'+P.get('HAIR_TEX','B&W.png')
 if HAIR=='blowout_cards' and os.path.exists(HCT):
     HM,nt,b=newmat('HairCards'); tt=nt.nodes.new('ShaderNodeTexImage'); tt.image=bpy.data.images.load(HCT)
-    gm=nt.nodes.new('ShaderNodeGamma'); gm.inputs['Gamma'].default_value=P.get('HAIR_GAMMA',1.9); nt.links.new(tt.outputs[0],gm.inputs['Color'])
-    nt.links.new(gm.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha']); b.inputs['Roughness'].default_value=0.4
-    b.inputs['Anisotropic'].default_value=0.6; b.inputs['Sheen Weight'].default_value=0.35; b.inputs['Sheen Roughness'].default_value=0.4; b.inputs['Specular IOR Level'].default_value=0.65; b.inputs['Roughness'].default_value=0.36
+    # v3.1: black-dominant (roots + top half), grey -> white only at the ends; matte, low sheen
+    bw=nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(tt.outputs[0],bw.inputs[0])
+    cr=nt.nodes.new('ShaderNodeValToRGB'); e=cr.color_ramp.elements
+    HR=P.get('HAIR_RAMP',[(0.0,0.006),(0.58,0.010),(0.74,0.06),(0.86,0.30),(1.0,0.72)])
+    e[0].position=HR[0][0]; e[0].color=(HR[0][1],)*3+(1,); e[1].position=HR[-1][0]; e[1].color=(HR[-1][1],)*3+(1,)
+    for pos,val in HR[1:-1]: x=e.new(pos); x.color=(val,val,val*1.03,1)
+    nt.links.new(bw.outputs[0],cr.inputs[0]); nt.links.new(cr.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha'])
+    b.inputs['Roughness'].default_value=P.get('HAIR_ROUGH',0.55); b.inputs['Anisotropic'].default_value=0.35; b.inputs['Sheen Weight'].default_value=P.get('HAIR_SHEEN',0.08)
+    b.inputs['Sheen Roughness'].default_value=0.5; b.inputs['Specular IOR Level'].default_value=P.get('HAIR_SPEC',0.35); b.inputs['Coat Weight'].default_value=0.0
     try: HM.blend_method='HASHED'
     except: pass
     log('hair: Blowout haircards with her',HCT.split('/')[-1])
 UM.data.materials.clear(); UM.data.materials.append(HM)
+
+# v3.1: second, slightly smaller + rotated hair layer -> more, layered strands; breaks the flat-ribbon / helmet read
+if P.get('HAIR_LAYER2',True) and HAIR=='blowout_cards':
+    hmn_,hmx_=wbb([UM]); piv=Vector(((hmn_.x+hmx_.x)/2,(hmn_.y+hmx_.y)/2,hmx_.z))
+    U2=UM.copy(); U2.data=UM.data.copy(); U2.name='Hair2'; sc.collection.objects.link(U2)
+    M2=Matrix.Translation(piv)@Matrix.Rotation(math.radians(P.get('L2_ROT',7)),4,'Z')@Matrix.Scale(P.get('L2_SCALE',0.955),4)@Matrix.Translation(-piv)
+    U2.matrix_world=M2@U2.matrix_world; bpy.context.view_layer.update(); sel([U2]); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+    # keep the lifted fringe clear of the eyes in layer 2 too: drop its front-face verts below the brow
+    sel([UM,U2],UM); bpy.ops.object.join(); log('hair layer 2 joined, tris',tris(UM))
 def solidmat(name,col,rough=0.4,metal=0.0):
     m,nt,b=newmat(name); b.inputs['Base Color'].default_value=(*col,1); b.inputs['Roughness'].default_value=rough; b.inputs['Metallic'].default_value=metal; return m,nt,b
 # bra: grey ribbed knit
@@ -336,7 +550,7 @@ def add_mesh(name,bm,mat,group):
     return o
 hmn,hmx=wbb([FH]); umn,umx=wbb([UM])
 hr=(hmx.x-hmn.x)/2
-bunc=Vector((0, (hmn.y+hmx.y)/2+0.045, umx.z-0.012))
+bunc=Vector((0, (hmn.y+hmx.y)/2+P.get('BUN_DY',0.045), umx.z-P.get('BUN_DZ',0.012)))
 bm=bmesh.new(); bmesh.ops.create_uvsphere(bm,u_segments=16,v_segments=10,radius=hr*0.42)
 for v in bm.verts:
     v.co.z*=0.8; v.co+=bunc
@@ -346,19 +560,25 @@ for v in r2['verts']: v.co.z*=0.9; v.co+=bunc+Vector((0.012,0.01,0.012))
 uvl=bm.loops.layers.uv.new('UVMap')
 bunm=bpy.data.materials.new('BunDark'); bunm.use_nodes=True; q=bunm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.02,0.02,0.022,1); q.inputs['Roughness'].default_value=0.42
 BUN=add_mesh('Bun',bm,bunm,'Head')
-clip=bpy.data.materials.new('ClawClipBlack'); clip.use_nodes=True; cb=clip.node_tree.nodes['Principled BSDF']; cb.inputs['Base Color'].default_value=(0.008,0.008,0.009,1); cb.inputs['Roughness'].default_value=0.18
-bm=bmesh.new()
-cc=bunc+Vector((0,0.0,-hr*0.25))
-for k in range(5):  # claw teeth arcs on each side
-    for side in (-1,1):
-        r=bmesh.ops.create_cube(bm,size=1.0)
-        vs=r['verts']; x=(k-2)*0.0085
-        for v in vs:
-            v.co=Vector((v.co.x*0.004, v.co.y*0.006, v.co.z*0.03))
-            a=side*0.55; v.co=Matrix.Rotation(a,3,'X')@v.co
-            v.co+=cc+Vector((x, side*0.016, 0.0))
-r=bmesh.ops.create_cube(bm,size=1.0)
-for v in r['verts']: v.co=Vector((v.co.x*0.05,v.co.y*0.012,v.co.z*0.012))+cc+Vector((0,0,0.017))
+clip=bpy.data.materials.new('ClawClipBlack'); clip.use_nodes=True; cb=clip.node_tree.nodes['Principled BSDF']; cb.inputs['Base Color'].default_value=(0.012,0.012,0.014,1); cb.inputs['Roughness'].default_value=0.12; cb.inputs['Coat Weight'].default_value=1.0; cb.inputs['Coat Roughness'].default_value=0.05
+# v3.1: a real claw clip clamped on the BACK of the bun: horizontal spine + teeth arcing over the top and under the bun (visible from back, side, 3/4)
+bm=bmesh.new(); rb=hr*0.42*P.get('CLIP_R',1.08); ccen=bunc+Vector((0,P.get('CLIP_DY',0.004),0))
+def seg(bm,p0,p1,w,t):
+    d=p1-p0; L=d.length
+    if L<1e-7: return
+    r=bmesh.ops.create_cube(bm,size=1.0); rot=d.to_track_quat('X','Z').to_matrix()
+    for v in r['verts']: v.co=rot@Vector((v.co.x*L*1.15,v.co.y*w,v.co.z*t))+(p0+p1)/2
+spine_y=ccen.y+rb*0.95; L_=P.get('CLIP_L',0.062)
+for k in range(12): seg(bm,Vector((-L_/2+L_*k/12,spine_y,ccen.z)),Vector((-L_/2+L_*(k+1)/12,spine_y,ccen.z)),0.010,0.010)
+NT=P.get('CLIP_TEETH',6)
+for k in range(NT):
+    x=-L_/2+L_*(k+0.5)/NT
+    for a0,a1 in ((0,105),(0,-80)):
+        pts=[]
+        for j in range(9):
+            a=math.radians(a0+(a1-a0)*j/8); rr=rb*0.95+0.002
+            pts.append(Vector((x*(1-0.15*j/8),ccen.y+rr*math.cos(a),ccen.z+rr*math.sin(a))))
+        for j in range(8): seg(bm,pts[j],pts[j+1],0.0045,0.0032)
 uvl=bm.loops.layers.uv.new('UVMap')
 CLIP=add_mesh('ClawClip',bm,clip,'Head')
 # cross necklace: chain ring around the neck base + small cross on the sternum
@@ -425,17 +645,35 @@ if gv:
     for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
-# bra back band (grey knit) + black clasp, closing the bra around the back
-bm=bmesh.new(); zb=bmn.z+P.get('BAND_DZ',0.022); pts=[]
-for k in range(41):
-    a=math.pi*(k/40.0)   # from left side (x+) around the back to right side (x-)
-    x=0.16*math.cos(a); y=0.12*math.sin(a)+0.0
-    pts.append(snap(Vector((x,y,zb)),0.0022))
-pts=[p for p in pts if p.y>bmx.y-0.03]
-ribbon(bm,pts,P.get('BAND_W',0.016),0.0022)
-cl=snap(Vector((0,0.2,zb)),0.0035)
+# v3.1 bra: ONE continuous garment — a conforming knit underband all the way round (overlapping the cup bottoms), side wings up to the cups, back clasp
+def strip(bm,ring,lo,hi,off):
+    # ring: list of (x,y) directions at angle; build quads between z=lo(a) and z=hi(a), each vertex snapped to skin + off
+    rows=[]
+    for (px_,py_,zl,zh) in ring:
+        col=[]
+        for j in range(5):
+            z=zl+(zh-zl)*j/4; dr=Vector((px_,py_,0)).normalized(); o_=Vector((tcx,tcy,z))+dr*0.45
+            h=bvh.ray_cast(o_,-dr,0.6)
+            q=(h[0]+h[1].normalized()*off) if h and h[0] is not None else snap(Vector((tcx+px_*0.5,tcy+py_*0.5,z)),off)
+            col.append(bm.verts.new(q))
+        rows.append(col)
+    for i in range(len(rows)):
+        a=rows[i]; b2=rows[(i+1)%len(rows)]
+        for j in range(4): bm.faces.new((a[j],b2[j],b2[j+1],a[j+1]))
+bm=bmesh.new(); zb=bmn.z+P.get('BAND_DZ2',0.004); NR=72; ring=[]
+_ch=B.matrix_world@B.data.bones['Chest'].head_local if 'Chest' in B.data.bones else Vector((0,0,zb)); tcx,tcy=0.0,_ch.y
+bh=P.get('BAND_H',0.020); wing=P.get('BAND_WING',0.035)
+for k in range(NR):
+    a=2*math.pi*k/NR; x=0.25*math.sin(a); y=-0.25*math.cos(a)   # a=0 front, pi/2 left side, pi back
+    side=math.sin(a)**2
+    front=max(0.0,math.cos(a))
+    zl=zb-0.006; zh=zb+bh+wing*side**3-0.006*front
+    ring.append((x,y,zl,zh))
+strip(bm,ring,None,None,P.get('BAND_OFF',0.0030))
+_h=bvh.ray_cast(Vector((0,tcy+0.45,zb+bh*0.5)),Vector((0,-1,0)),0.6); cl=(_h[0]+Vector((0,0.0042,0))) if _h[0] is not None else snap(Vector((0,0.3,zb+bh*0.5)),0.0042)
 r=bmesh.ops.create_cube(bm,size=1.0)
-for v in r['verts']: v.co=Vector((v.co.x*0.014,v.co.y*0.003,v.co.z*0.012))+cl
+for v in r['verts']: v.co=Vector((v.co.x*0.016,v.co.y*0.003,v.co.z*bh*0.9))+cl
+pts=[0]
 uvl=bm.loops.layers.uv.new('UVMap')
 BAND=add_mesh('BraBand',bm,bpy.data.materials['BraKnit'],'Chest'); log('bra band pts',len(pts))
 # ---------- shorts: lower the waistband onto the hips (compress the top band down, keep it on the skin)
@@ -451,6 +689,40 @@ if P.get('SHORTS_DROP',0.035)>0:
                 if (p-h[0]).dot(n_)<0.0015: p=h[0]+n_*0.0015
             v.co=mwi@p; moved+=1
     SH.data.update(); log('shorts waistband lowered',P['SHORTS_DROP'],'verts',moved)
+
+# ---------- v3.1 bottoms: cut her black shorts down to the sheet's high-cut THONG (front panel tapering to the crotch, thin back, thin side strings) + silver side rings
+if P.get('BOTTOM','thong')=='thong':
+    mw=SH.matrix_world; smn,smx=wbb([SH]); hx=(smx.x-smn.x)/2; top=max((mw@v.co).z for v in SH.data.vertices)
+    cy=(B.matrix_world@B.data.bones['Hips'].head_local).y if 'Hips' in B.data.bones else (smn.y+smx.y)/2
+    cen=[mw@v.co for v in SH.data.vertices if abs((mw@v.co).x)<0.012]
+    crz=min(p.z for p in cen) if cen else smn.z
+    bt=P.get('STRING_H',0.010); zt=top-bt
+    FW=P.get('THONG_FRONT',(0.42,0.10)); BW=P.get('THONG_BACK',(0.20,0.05))
+    bmT=bmesh.new(); bmT.from_mesh(SH.data); kill_=[]
+    for f in bmT.faces:
+        c=mw@f.calc_center_median()
+        if c.z>zt: continue
+        t=max(0.0,min(1.0,(zt-c.z)/max(1e-4,zt-crz)))
+        a,b_=FW if c.y<cy else BW
+        hw_=hx*(a+(b_-a)*t**0.8)
+        if c.z<crz-0.012 or abs(c.x)>hw_: kill_.append(f)
+    bmesh.ops.delete(bmT,geom=kill_,context='FACES'); bmT.to_mesh(SH.data); bmT.free(); SH.data.update()
+    log('thong cut: removed faces',len(kill_),'top',round(top,4),'crotch z',round(crz,4),'hip half-width',round(hx,4))
+    rep['thong']={'removed':len(kill_),'top':top,'crz':crz,'hx':hx}
+    bmR=bmesh.new()
+    for sg in (1,-1):
+        x=sg*hx*FW[0]; z=top-bt*0.5
+        h=bvh.ray_cast(Vector((x,cy-0.45,z)),Vector((0,1,0)),0.6)
+        if h[0] is None: continue
+        c=h[0]+h[1].normalized()*0.004; nrm=h[1].normalized()
+        # small ring in the plane of the skin
+        tng=nrm.cross(Vector((0,0,1))).normalized(); up=tng.cross(nrm).normalized(); RR=P.get('RING_R',0.0075); prev=None
+        pts_=[c+(tng*math.cos(2*math.pi*j/16)+up*math.sin(2*math.pi*j/16))*RR for j in range(17)]
+        for j in range(16):
+            d=pts_[j+1]-pts_[j]; L=d.length; r=bmesh.ops.create_cube(bmR,size=1.0); rot=d.to_track_quat('X','Z').to_matrix()
+            for v in r['verts']: v.co=rot@Vector((v.co.x*L*1.2,v.co.y*0.0022,v.co.z*0.0022))+(pts_[j]+pts_[j+1])/2
+    bmR.loops.layers.uv.new('UVMap')
+    RINGS=add_mesh('ThongRings',bmR,bpy.data.materials['Silver'] if 'Silver' in bpy.data.materials else bpy.data.materials.new('Silver2'),'Hips')
 # ---------- keep clothes outside the (curvier) skin
 for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
     mw=o.matrix_world; mwi=mw.inverted(); pushed=0
@@ -502,7 +774,7 @@ if P['RENDER']:
     def area(name,loc,energy,size,col=(1,1,1)):
         L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
         o.rotation_euler=(Vector((0,0,0.75))-Vector(loc)).to_track_quat('-Z','Y').to_euler(); return o
-    area('key',(-1.6,-2.2,2.0),260,1.6,(1,0.97,0.94)); area('fill',(1.8,-1.8,1.2),110,2.0,(0.92,0.95,1)); area('rim',(0.4,2.4,2.0),220,1.4); area('rim2',(-1.2,2.0,1.4),120,1.2)
+    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),1.6,(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,(0.95,0.93,1)); area('rim',(0.4,2.4,2.0),220,1.4); area('rim2',(-1.2,2.0,1.4),120,1.2); area('spec',(2.2,-1.0,1.6),P.get('SPEC_E',90),0.5,(1,0.96,0.95))
     cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam
     mn,mx=wbb([o for o in meshes if o.visible_get()])
     # deformed bounds: use evaluated mesh extents
@@ -539,7 +811,7 @@ if P.get('TT'):
     def area(name,loc,energy,size,col=(1,1,1)):
         L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
         o.rotation_euler=(Vector((0,0,0.75))-Vector(loc)).to_track_quat('-Z','Y').to_euler(); o.parent=rig; return o
-    area('key',(-1.6,-2.2,2.0),260,1.6,(1,0.97,0.94)); area('fill',(1.8,-1.8,1.2),110,2.0,(0.92,0.95,1)); area('rim',(0.4,2.4,2.0),220,1.4); area('rim2',(-1.2,2.0,1.4),120,1.2)
+    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),1.6,(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,(0.95,0.93,1)); area('rim',(0.4,2.4,2.0),220,1.4); area('rim2',(-1.2,2.0,1.4),120,1.2); area('spec',(2.2,-1.0,1.6),P.get('SPEC_E',90),0.5,(1,0.96,0.95))
     cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam
     cam.data.lens=85; cam.data.sensor_fit='VERTICAL'; cam.data.sensor_height=24; d=Hh/(24/85)
     cam.location=Vector((0,-d,ce.z)); cam.rotation_euler=(Vector((0,0,ce.z))-cam.location).to_track_quat('-Z','Y').to_euler(); cam.parent=rig; cam.data.clip_end=d*3

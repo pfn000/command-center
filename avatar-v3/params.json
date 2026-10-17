@@ -1,0 +1,71 @@
+{
+ "HEAD_SCALE": 1.08,
+ "HAIR_DEC": 1.0,
+ "SHORTS_DEC": 1.0,
+ "SHORTS_DROP": 0.02,
+ "EXPOSURE": -0.8,
+ "EYE_TEX": "doe 1.png",
+ "EYE_ZOOM": 1.3,
+ "CURVY": {
+  "Hips": [
+   1.13,
+   1.0,
+   1.08
+  ],
+  "Left leg": [
+   1.15,
+   1.0,
+   1.13
+  ],
+  "Right leg": [
+   1.15,
+   1.0,
+   1.13
+  ],
+  "Twist_Leg.L": [
+   1.1,
+   1.0,
+   1.08
+  ],
+  "Twist_Leg.R": [
+   1.1,
+   1.0,
+   1.08
+  ],
+  "Twist_Butt.L": [
+   1.16,
+   1.0,
+   1.16
+  ],
+  "Twist_Butt.R": [
+   1.16,
+   1.0,
+   1.16
+  ],
+  "Ass_Wiggle.L": [
+   1.18,
+   1.18,
+   1.18
+  ],
+  "Ass_Wiggle.R": [
+   1.18,
+   1.18,
+   1.18
+  ],
+  "BreastUpper2_L": [
+   1.2,
+   1.2,
+   1.2
+  ],
+  "BreastUpper2_R": [
+   1.2,
+   1.2,
+   1.2
+  ],
+  "Spine": [
+   0.84,
+   1.0,
+   0.9
+  ]
+ }
+}
