@@ -1,1 +1,1 @@
-v5 proof run (Saidie review fix pass) at 2026-10-17T19:20:21Z
+v5.1 critic-fix proof run for skills-cli-command portfolio-v2 at 2026-10-17T19:32Z

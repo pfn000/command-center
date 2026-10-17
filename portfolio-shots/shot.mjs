@@ -86,6 +86,17 @@ for (const theme of ['dark', 'light']) {
   }
   await c.close()
 }
+{
+  // the /resume page: readable in-site, download secondary
+  const { c, p } = await ctxFor('desk', 'light')
+  await p.goto(`${B}/resume?nocoach=1&theme=light`, { waitUntil: 'networkidle', timeout: 45000 }).catch((e) => report.errors.push('goto resume ' + String(e).slice(0, 120)))
+  await p.waitForTimeout(4000)
+  await snap(p, 'd-light-9-resume-page')
+  await snap(p, 'z-menubar-light', { clip: { x: 0, y: 0, width: 800, height: 60 } })
+  const dk = await p.locator('.nos-dock').first().boundingBox()
+  if (dk) await snap(p, 'z-dock-light', { clip: { x: Math.max(0, dk.x - 20), y: dk.y - 20, width: Math.min(1600, dk.width + 40), height: dk.height + 36 } })
+  await c.close()
+}
 try {
   const pdf = await fetch(`${B}/resume/download`)
   report.resume = { status: pdf.status, type: pdf.headers.get('content-type'), bytes: (await pdf.arrayBuffer()).byteLength }
