@@ -1,0 +1,65 @@
+name: avatar-v2 build
+# Jena avatar v2 (Saidie's VTuber). Private inputs come from her private HF dataset with a repo secret;
+# outputs go back to that private dataset. Nothing private is committed to this public repo.
+on:
+  push:
+    branches: [avatar-v2]
+    paths: [avatar-v2/RUN.txt]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender 4.4
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 ffmpeg > /dev/null
+          /opt/blender/blender --version | head -1
+      - name: Inputs (private)
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          mkdir -p /tmp/in /tmp/out
+          D=https://huggingface.co/datasets/Saidie000/tab-render-out/resolve/main/avatar-v2/in
+          curl -sfL -H "Authorization: Bearer $HF" -o /tmp/in/logo.jpg $D/refs/edde8bcf-00b2-4b6a-a8bf-02856aede6dc.jpg
+          curl -sfL -o /tmp/in/base.vrm https://github.com/pixiv/three-vrm/raw/dev/packages/three-vrm/examples/models/VRM1_Constraint_Twist_Sample.vrm
+          if grep -q meshy avatar-v2/RUN.txt; then curl -sfL -H "Authorization: Bearer $HF" -o /tmp/in/meshy.blend $D/meshy-jena.blend; fi
+          ls -la /tmp/in
+      - name: Build (Blender)
+        if: always()
+        run: |
+          cd avatar-v2 && cat build_p1.py build_p2.py build_p3.py build_p4.py > /tmp/build.py
+          timeout -k 10 1200 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python /tmp/build.py -- /tmp/in/base.vrm /tmp/in/logo.jpg /tmp/out > /tmp/out/build-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "\[build\]|Error|Traceback|line [0-9]+" /tmp/out/build-log.txt | cut -c1-400 | head -150 || true
+      - name: VRM
+        if: always()
+        run: pip install -q numpy > /dev/null; python3 avatar-v2/make_vrm.py /tmp/out/jena-v2.glb /tmp/out/jena-v2.vrm /tmp/out/jena-v2.glb /tmp/in/base.vrm /tmp/out/build-report.json 2>&1 | tail -5
+      - name: Meshy model -> glb
+        if: always()
+        run: |
+          if [ -f /tmp/in/meshy.blend ]; then timeout -k 10 600 /opt/blender/blender -b /tmp/in/meshy.blend --python avatar-v2/export_meshy.py -- /tmp/out/meshy.glb 2>&1 | tail -15; fi
+      - name: Render proofs (three.js WebGL2 + .nude shaders)
+        if: always()
+        run: |
+          mkdir -p /tmp/view && cd /tmp/view && cp $GITHUB_WORKSPACE/avatar-v2/view.html $GITHUB_WORKSPACE/avatar-v2/shoot.mjs .
+          npm init -y > /dev/null && npm i --no-audit --no-fund three@0.169.0 @pixiv/three-vrm@3.1.0 playwright@1.48.2 > /dev/null && npx playwright install --with-deps chromium > /dev/null
+          cp /tmp/out/jena-v2.vrm . ; [ -f /tmp/out/meshy.glb ] && cp /tmp/out/meshy.glb . || true
+          (python3 -m http.server 8123 > /dev/null 2>&1 &) ; sleep 2
+          timeout -k 10 900 node shoot.mjs http://localhost:8123 /tmp/out 2>&1 | tail -60
+          cd /tmp/out/proof && [ -d frames ] && ffmpeg -loglevel error -y -framerate 12 -i frames/f%03d.png -c:v libx264 -pix_fmt yuv420p -crf 20 turntable-v2.mp4 && rm -rf frames || true
+      - name: Upload outputs (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          pip install -q huggingface_hub > /dev/null
+          rm -f /tmp/out/meshy.glb.bak; ls -la /tmp/out /tmp/out/proof || true
+          python3 - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out', path_in_repo='avatar-v2/runs/' + os.environ['GITHUB_RUN_ID'],
+              repo_id='Saidie000/tab-render-out', repo_type='dataset', ignore_patterns=['meshy.glb'])
+          print('uploaded')
+          EOF

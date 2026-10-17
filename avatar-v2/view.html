@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#1f1f21}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/","@pixiv/three-vrm":"./node_modules/@pixiv/three-vrm/lib/three-vrm.module.js"}}</script>
+</head><body><script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { VRMLoaderPlugin } from '@pixiv/three-vrm';
+// ---- Anime_StudioPaint.nude, ported to WebGL2 with the 3-panel loop (2 back panels 60%, 1 front panel 20%, invisible one-way diffuse area lights)
+const NUDE = { I: 2.0, clear: [0.12,0.12,0.13],
+  panels: [ { d: [-0.7, 0.8, -1.0], w: 0.60 }, { d: [0.7, 0.8, -1.0], w: 0.60 }, { d: [0.0, 0.3, 1.0], w: 0.20 } ] };   // subject faces +Z (camera); back = -Z
+const VS = `
+#include <common>
+#include <morphtarget_pars_vertex>
+#include <skinning_pars_vertex>
+out vec2 vUv; out vec3 vN; out vec3 vW;
+void main(){
+  vUv = uv;
+  #include <morphinstance_vertex>
+  #include <beginnormal_vertex>
+  #include <morphnormal_vertex>
+  #include <skinbase_vertex>
+  #include <skinnormal_vertex>
+  #include <begin_vertex>
+  #include <morphtarget_vertex>
+  #include <skinning_vertex>
+  vec4 wp = modelMatrix * vec4(transformed, 1.0);
+  vW = wp.xyz; vN = normalize(mat3(modelMatrix) * objectNormal);
+  gl_Position = projectionMatrix * viewMatrix * wp;
+}`;
+const COMMON = `
+in vec2 vUv; in vec3 vN; in vec3 vW;
+uniform sampler2D uAlb; uniform vec4 uCol; uniform bool uHasTex; uniform float uCut; uniform float uI;
+uniform vec3 uL[3]; uniform float uWt[3];
+float D_GGX(float NdotH,float r){float a=r*r;float a2=a*a;float d=NdotH*NdotH*(a2-1.0)+1.0;return a2/(3.14159*d*d);}
+vec3 aces(vec3 x){return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0);}
+vec3 toSRGB(vec3 c){return pow(c,vec3(1.0/2.2));}
+float panel(vec3 N, vec3 L){ return max((dot(N,L)+0.25)/1.25, 0.0); }   // diffuse AREA panel: soft wrap, one-way (back side gets nothing)
+vec4 albedo(){ vec4 a = uHasTex ? texture(uAlb, vUv) * uCol : uCol; if(a.a < uCut) discard; return a; }
+vec3 Nf(){ vec3 N = normalize(vN); vec3 V = normalize(cameraPosition - vW); return dot(N,V) < 0.0 ? -N : N; }
+`;
+const FS = {
+skin: COMMON + `
+void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(cameraPosition - vW); vec3 c = vec3(0.0);
+  float fres = pow(1.0-max(dot(N,V),0.0),4.0); float rough = mix(0.35, 0.18, fres*0.6);
+  for(int i=0;i<3;i++){ vec3 L = normalize(uL[i]); vec3 H = normalize(L+V); float NdotL = panel(N,L); float NdotH = max(dot(N,H),0.0);
+    float ramp = smoothstep(0.0,1.0,NdotL)*0.7 + pow(NdotL,2.0)*0.3;
+    vec3 sss = vec3(0.8,0.2,0.2)*0.4*(1.0-NdotL)*step(0.001,NdotL)*0.35;
+    float spec = 0.5*D_GGX(NdotH,max(rough,0.35)) + 0.5*D_GGX(NdotH,0.15);
+    c += uWt[i] * (alb*(ramp+sss) + vec3(0.04)*spec*NdotL); }
+  gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
+fabric: COMMON + `uniform float uSheen; 
+void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(cameraPosition - vW); vec3 c = vec3(0.0);
+  float NdotV = max(dot(N,V),0.0); vec3 sheenC = mix(vec3(1.0),alb,0.5)*pow(1.0-NdotV,2.0)*uSheen;
+  for(int i=0;i<3;i++){ float NdotL = panel(N, normalize(uL[i])); c += uWt[i] * (alb*0.8*(0.3+0.7*NdotL) + sheenC*NdotL); }
+  gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
+hair: COMMON + `
+float kk(vec3 T,vec3 H,float r){float th=dot(T,H);float s=sqrt(max(1.0-th*th,0.0));return smoothstep(-1.0,0.0,th)*pow(s,1.0/r);}
+void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(cameraPosition - vW);
+  vec3 T = normalize(vec3(0.0,1.0,0.0) - N*N.y + vec3(1e-4)); vec3 c = vec3(0.0);
+  for(int i=0;i<3;i++){ vec3 L = normalize(uL[i]); vec3 H = normalize(L+V); float NdotL = panel(N,L);
+    float s = kk(normalize(T-0.2*N),H,0.25)*0.6 + kk(normalize(T+0.3*N),H,0.35)*0.4;
+    c += uWt[i] * (alb*(0.35+0.65*NdotL) + vec3(s)*0.3*NdotL); }
+  gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
+flat: COMMON + `
+void main(){ vec4 a = albedo(); gl_FragColor = vec4(toSRGB(aces(a.rgb*1.15)), a.a); }`
+};
+function kindOf(name, isMeshy){
+  if (isMeshy) return 'skin';
+  if (/Hair|Bun/.test(name)) return 'hair';
+  if (/Eye(Iris|White|Highlight)|FaceEyeline|FaceBrow|FaceMouth/.test(name)) return 'flat';
+  if (/SKIN|Skin|Face_00|Body_00/.test(name)) return 'skin';
+  return 'fabric';
+}
+function nudeMat(old, isMeshy){
+  const name = old.name || ''; const kind = kindOf(name, isMeshy);
+  const tex = old.map || null; const blend = old.transparent || /Sheer/.test(name);
+  const m = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, vertexShader: VS, fragmentShader: FS[kind],
+    uniforms: { uAlb: { value: tex }, uHasTex: { value: !!tex }, uCol: { value: new THREE.Vector4(old.color?.r ?? 1, old.color?.g ?? 1, old.color?.b ?? 1, old.opacity ?? 1) },
+      uCut: { value: blend ? 0.02 : (old.alphaTest || (/Hair|Eyeline|Brow|Highlight|Iris/.test(name) ? 0.5 : 0.0)) }, uI: { value: NUDE.I },
+      uL: { value: NUDE.panels.map(p => new THREE.Vector3(...p.d)) }, uWt: { value: NUDE.panels.map(p => p.w) }, uSheen: { value: /Sheer/.test(name) ? 0.5 : 0.8 } },
+    side: THREE.DoubleSide, transparent: blend, depthWrite: !blend });
+  m.name = name; m.userData.kind = kind; return m;
+}
+const R = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+R.setPixelRatio(1); document.body.appendChild(R.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color().setRGB(...NUDE.clear, THREE.SRGBColorSpace);
+const cam = new THREE.PerspectiveCamera(22, 1, 0.01, 50);
+const loader = new GLTFLoader(); loader.register(p => new VRMLoaderPlugin(p));
+window.models = {};
+async function load(key, url, isMeshy){
+  const g = await loader.loadAsync(url); const vrm = g.userData.vrm || null; const root = vrm ? vrm.scene : g.scene;
+  const mats = new Set();
+  root.traverse(o => { if (o.isMesh) { o.frustumCulled = false; const arr = Array.isArray(o.material) ? o.material : [o.material];
+    const nm = arr.map(m => { mats.add(m.name); return nudeMat(m, isMeshy); }); o.material = Array.isArray(o.material) ? nm : nm[0]; } });
+  // normalize: height 1.60 m, feet on floor, centred
+  root.updateMatrixWorld(true); const box = new THREE.Box3().setFromObject(root); const h = box.max.y - box.min.y;
+  const s = 1.60 / h; const wrap = new THREE.Group(); wrap.add(root); root.scale.multiplyScalar(s);
+  root.updateMatrixWorld(true); const b2 = new THREE.Box3().setFromObject(root); const c = b2.getCenter(new THREE.Vector3());
+  root.position.sub(new THREE.Vector3(c.x, b2.min.y, c.z));
+  if (vrm) { const hb = n => vrm.humanoid.getNormalizedBoneNode(n);
+    hb('leftUpperArm').rotation.z = -1.18; hb('rightUpperArm').rotation.z = 1.18; hb('leftLowerArm').rotation.z = -0.12; hb('rightLowerArm').rotation.z = 0.12;
+    hb('leftHand').rotation.z = -0.1; hb('rightHand').rotation.z = 0.1; for (let i = 0; i < 90; i++) vrm.update(1/60); }
+  window.models[key] = { wrap, vrm, root, scale: s, mats: [...mats], info: { height_raw: h, meshes: (() => { const a = []; root.traverse(o => { if (o.isMesh) a.push(o.name); }); return a; })() } };
+  return window.models[key].info;
+}
+function show(key){ for (const k in window.models) { const w = window.models[k].wrap; if (k === key) scene.add(w); else scene.remove(w); } }
+function setExpr(key, vals){
+  const M = window.models[key];
+  M.root.traverse(o => { if (o.isMesh && o.morphTargetInfluences) o.morphTargetInfluences.fill(0); });
+  if (M.vrm && M.vrm.expressionManager) { const em = M.vrm.expressionManager; for (const e of em.expressions) em.setValue(e.expressionName, 0);
+    for (const [k, v] of Object.entries(vals)) em.setValue(k, v); M.vrm.update(1/60); }
+  else M.root.traverse(o => { if (o.isMesh && o.morphTargetDictionary) for (const [k, v] of Object.entries(vals)) { const i = o.morphTargetDictionary[k]; if (i !== undefined) o.morphTargetInfluences[i] = v; } });
+}
+function shot(key, { yaw = 0, w = 900, h = 1400, target = [0, 0.82, 0], dist = 4.3, fov = 22, up = 0 } = {}){
+  show(key); const M = window.models[key]; M.wrap.rotation.y = yaw * Math.PI / 180;
+  R.setSize(w, h, false); cam.aspect = w / h; cam.fov = fov; cam.updateProjectionMatrix();
+  cam.position.set(target[0], target[1] + up, target[2] + dist); cam.lookAt(...target);
+  R.render(scene, cam); return R.domElement.toDataURL('image/png');
+}
+window.api = { load, shot, setExpr, ready: true };
+window.dispatchEvent(new Event('apiready'));
+</script></body></html>
