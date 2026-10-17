@@ -1,7 +1,22 @@
-start 2026-10-17T03:09:30.963Z
-page about 1600 2026-10-17T03:09:31.111Z
-about 1600 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
-NOW-FEED 1600 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n22h ago\n\npushed updates to main\n\njena-heavy\n1d ago\n\nnew branch: main\n\njena-magic-screen\n1d ago\n\npushed updates to phone-fix\n\njena-magic-screen\n1d ago\n\nnew branch: phone-fix\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
-page about 402 2026-10-17T03:09:46.742Z
-about 402 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
-NOW-FEED 402 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n22h ago\n\npushed updates to main\n\njena-heavy\n1d ago\n\nnew branch: main\n\njena-magic-screen\n1d ago\n\npushed updates to phone-fix\n\njena-magic-screen\n1d ago\n\nnew branch: phone-fix\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
+shot desk-1600-light {"name":"desk-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot projects-open-1600-light {"name":"projects-open-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot window-moving-1600-light {"name":"window-moving-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot window-resizing-1600-light {"name":"window-resizing-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot pill-info-1600-light {"name":"pill-info-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot dots-menu-1600-light {"name":"dots-menu-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot lightbox-1600-light {"name":"lightbox-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot contact-1600-light {"name":"contact-1600-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot desk-1600-dark {"name":"desk-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot contact-1600-dark {"name":"contact-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot now-1600-dark {"name":"now-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot jena-1600-dark {"name":"jena-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot plex-1600-dark {"name":"plex-1600-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-402-light {"name":"phone-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot phone-home-402-light {"name":"phone-home-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot phone-projects-402-light {"name":"phone-projects-402-light","overflowX":0,"broken":[],"peter":false,"cream":"rgb(238, 241, 251)"}
+shot phone-402-dark {"name":"phone-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-home-402-dark {"name":"phone-home-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-projects-402-dark {"name":"phone-projects-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+shot phone-contact-402-dark {"name":"phone-contact-402-dark","overflowX":0,"broken":[],"peter":false,"cream":"rgb(7, 7, 26)"}
+/bin/sh: 1: ffmpeg: not found
+ERRORS ["light: Failed to load resource: the server responded with a status of 404 (Not Found)","dark: Failed to load resource: the server responded with a status of 404 (Not Found)","ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/d930e736216f47d9d40a356c06fc45f1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"]

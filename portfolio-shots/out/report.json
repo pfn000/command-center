@@ -1,26 +1,184 @@
-[
- {
-  "page": "about",
-  "view": "1600",
-  "url": "http://localhost:3000/about",
-  "status": 200,
-  "title": "Résumé — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
+{
+ "shots": [
+  {
+   "name": "desk-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "projects-open-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "window-moving-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "window-resizing-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "pill-info-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "dots-menu-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "lightbox-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "contact-1600-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "desk-1600-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "contact-1600-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "now-1600-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "jena-1600-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "plex-1600-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "phone-402-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "phone-home-402-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "phone-projects-402-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(238, 241, 251)"
+  },
+  {
+   "name": "phone-402-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "phone-home-402-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "phone-projects-402-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  },
+  {
+   "name": "phone-contact-402-dark",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "cream": "rgb(7, 7, 26)"
+  }
+ ],
+ "checks": {
+  "status_light": 200,
+  "status_dark": 200,
+  "contact_honeypot": {
+   "status": 200,
+   "body": "{\"ok\":true}"
+  },
+  "contact_too_fast": {
+   "status": 200,
+   "body": "{\"ok\":true}"
+  },
+  "contact_invalid": {
+   "status": 400,
+   "body": "{\"ok\":false,\"error\":\"Please add your name, a valid email and a message (10+ characters).\"}"
+  },
+  "contact_real_no_key": {
+   "status": 503,
+   "body": "{\"ok\":false,\"mailto\":\"mailto:official_emmi@outlook.com?subject=%5BPortfolio%5D%20Other%20%E2%80%94%20Proof%20Run&body=Automated%20proof%20message%20from%20CI\"}"
+  },
+  "contact_rate_limit_statuses": [
+   503,
+   503,
+   429,
+   429
+  ],
+  "resume": {
+   "status": 200,
+   "type": "application/pdf",
+   "bytes": 2987842
+  },
+  "page/about": 200,
+  "page/projects": 200,
+  "page/plex": 200,
+  "page/contact": 200
  },
- {
-  "page": "about",
-  "view": "402",
-  "url": "http://localhost:3000/about",
-  "status": 200,
-  "title": "Résumé — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- }
-]
+ "errors": [
+  "light: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "ffmpeg: Error: Command failed: ffmpeg -y -loglevel error -i \"/tmp/vid/d930e736216f47d9d40a356c06fc45f1.webm\" -vf \"fps=30,scale=1280:-2\" -c:v libx264 -pix_fmt yuv420p -crf 26 -movflags +faststart portfolio-sho"
+ ]
+}
