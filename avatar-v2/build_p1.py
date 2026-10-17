@@ -100,13 +100,27 @@ def add_armature(o):
     o.parent = arm
 # ---------- 1. base Body -> skin only; HairBack (scalp) goes to hair; sample clothes/shoes dropped ----------
 hairback = split_faces(body, lambda o,f,bm: 'HAIR' in matname(o, f.material_index), 'HairBack')
+# VRoid culls the skin hidden under clothes: the sample has NO chest skin (z 1.1-1.25 empty).
+# Fill it from the sample's Tops shell (torso band only), pulled 4 mm inward, re-materialed as skin.
+_skin_i = [i for i,m in enumerate(body.data.materials) if m and 'SKIN' in m.name][0]
+bm = bmesh.new(); bm.from_mesh(body.data); bm.faces.ensure_lookup_table(); bm.normal_update()
+_fill = [f for f in bm.faces if 'Tops' in matname(body, f.material_index) and L['spine'].z + 0.06 < f.calc_center_median().z < L['sh'].z + 0.03 and abs(f.calc_center_median().x) < L['sh'].x + 0.01]
+_fv = {v for f in _fill for v in f.verts}
+for v in _fv: v.co -= v.normal * 0.004
+for f in _fill: f.material_index = _skin_i
+bm.to_mesh(body.data); bm.free(); note('chest fill from Tops faces', len(_fill), 'verts', len(_fv))
 bm = bmesh.new(); bm.from_mesh(body.data); bm.faces.ensure_lookup_table()
 bmesh.ops.delete(bm, geom=[f for f in bm.faces if 'SKIN' not in matname(body, f.material_index)], context='FACES'); bm.to_mesh(body.data); bm.free(); clean_slots(body)
 note('body skin verts', len(body.data.vertices))
+def bust_w(Cc, s):
+    """geometric bust weight (VRoid sample's bust bones weight only ~49 culled-area verts)"""
+    c0 = np.array([L['bust'].x*s, L['bust'].y + FWD*0.035, L['bust'].z - 0.01])
+    d = np.linalg.norm((Cc - c0) / np.array([1.0, 1.25, 1.1]), axis=1)
+    return ss(0.085, 0.035, d) * ((Cc[:,1] - L['bust'].y)*FWD > -0.01) * (np.abs(Cc[:,0]) < L['sh'].x - 0.01)
 # ---------- 2. Jena proportions (refs: fuller bust, wide hips, thick thighs) ----------
 C = coords(body)
 for names, s in ((['J_Sec_L_Bust1','J_Sec_L_Bust2'], 1), (['J_Sec_R_Bust1','J_Sec_R_Bust2'], -1)):
-    wb = np.clip(weights(body, names), 0, 1)[:,None]
+    wb = np.clip(np.maximum(weights(body, names), bust_w(C, s)), 0, 1)[:,None]
     c0 = np.array([L['bust'].x*s, L['bust'].y, L['bust'].z])
     C += (C - c0) * wb * np.array([0.30, 0.42, 0.26]) + wb*np.array([0, FWD*0.006, -0.004])
 legz, kneez = L['leg'].z, L['knee'].z
@@ -152,7 +166,8 @@ def hem_at(c):
 shorts = from_body('Shorts', lambda c,f: (not is_arm(c)) and hem_at(c) < c[2] < legz + 0.135, lambda v: 0.0055, solid=0.0018)
 th_top = legz - 0.42*(legz-kneez)
 thigh = from_body('ThighHighs', lambda c,f: c[2] < th_top and abs(c[0]) > 0.004, lambda v: 0.0024)
-wbs = weights(body, ['J_Sec_L_Bust1','J_Sec_L_Bust2','J_Sec_R_Bust1','J_Sec_R_Bust2'])
+wbs = np.maximum(bust_w(BODY_C, 1), bust_w(BODY_C, -1))
+note('bust verts', int((wbs>0.3).sum()))
 bz = BODY_C[wbs>0.3][:,2]; under = float(bz.min()) - 0.008; cup_top = float(bz.max()) + 0.004
 def bra_pred(c, f):
     if is_arm(c): return False
