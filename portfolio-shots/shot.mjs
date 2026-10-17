@@ -37,6 +37,7 @@ for (const [vn, vp, dpr, mobile] of views) {
     const page = await ctx.newPage()
     await page.goto(base.replace(/\/$/, '') + '/', { waitUntil: 'load', timeout: 45000 })
     await page.waitForTimeout(3000)
+    await page.addStyleTag({ content: 'header, .sticky, [class*="sticky"] { position: static !important }' }).catch(() => {})
     for (const id of ['sketches', 'now', 'plex']) {
       const el = page.locator('#' + id).first()
       await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(1500)
