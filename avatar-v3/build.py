@@ -395,7 +395,8 @@ def paint(o,image,ops,matnames=None,tag=''):
         return u0,(sorted(ratios)[len(ratios)//2] if ratios else None)
     done=0
     for (p3,rad,col,stg) in ops:
-        u,k=uvat(p3)
+        if isinstance(p3,tuple) and p3 and p3[0]=='UV': u,k=p3[1],p3[2]
+        else: u,k=uvat(p3)
         if u is None or not k: continue
         cx,cy=u.x*W_,u.y*H_; r=max(1.5,rad*k*W_); R=int(r*2.6)+1
         x0,x1=int(max(0,cx-R)),int(min(W_,cx+R)); y0,y1=int(max(0,cy-R)),int(min(H_,cy+R))
@@ -423,12 +424,21 @@ if P.get('FACE_PAINT',True) and FACE_M and eL and eR:
     cL=eL[0]; cR=eR[0]; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
     exs=eL[1].x*P.get('EYE_SX',0.80); ezs=eL[1].z*P.get('EYE_SZ',0.72)
     fy=wbb([FH])[0].y
-    def surf(x,z):  # nearest face surface point in front at (x,z)
-        best=None
-        for v in FH.data.vertices:
-            q=FH.matrix_world@v.co
-            if abs(q.x-x)<0.06*ipd and abs(q.z-z)<0.06*ipd and (best is None or q.y<best.y): best=q
-        return best
+    from mathutils.bvhtree import BVHTree as _BVH
+    from mathutils.interpolate import poly_3d_calc as _p3c
+    _bvF=_BVH.FromObject(FH,bpy.context.evaluated_depsgraph_get()); _mwi=FH.matrix_world.inverted(); _mwi3=_mwi.to_3x3(); _me=FH.data; _uvd=_me.uv_layers.active.data
+    _fmi=[i for i,s_ in enumerate(FH.material_slots) if s_.material is FACE_M]
+    def surf(x,z):  # exact face-surface UV at (x,z) seen from the front (barycentric, no vertex snapping)
+        h=_bvF.ray_cast(_mwi@Vector((x,fy-0.08,z)),_mwi3@Vector((0,1,0)),0.3)
+        if h[0] is None: return None
+        poly=_me.polygons[h[2]]
+        if poly.material_index not in _fmi: return None
+        li=list(poly.loop_indices); vco=[_me.vertices[_me.loops[l].vertex_index].co for l in li]; uvs=[Vector(_uvd[l].uv) for l in li]
+        w=_p3c(vco,h[0]); uv=Vector((0,0))
+        for wi,u in zip(w,uvs): uv+=u*wi
+        lw=sum((vco[i]-vco[i-1]).length for i in range(len(vco))); lu=sum((uvs[i]-uvs[i-1]).length for i in range(len(uvs)))
+        k=lu/lw/FH.matrix_world.to_scale()[0] if lw>1e-9 else None
+        return ('UV',uv,k)
     BL=(1.0,0.66,0.68); SH_=tuple(P.get('SHADE_COL',(0.88,0.68,0.66))); LIP=(0.86,0.52,0.56); ops=[]
     for c,sg in ((cL,1),(cR,-1)):
         q=surf(c.x+sg*0.18*ipd,c.z-0.42*ipd)

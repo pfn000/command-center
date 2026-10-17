@@ -1,1 +1,1 @@
-build v3.1 run G: semi-real face from her head's own shape keys baked into the basis (smaller sharper eyes, no anime highlight, smaller forehead, fuller lips, thinner lashes/brows), wider fringe cut, no bra bow, + turntable
+build v3.1 run H (final candidate): eyes smaller (Eyes -), thinner eyeliner/lashes, flatter mouth, smaller forehead, exact-UV painted brows/crease/blush, bun + claw clip lower at the back, + turntable
