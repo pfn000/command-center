@@ -1,19 +1,19 @@
-start 2026-10-17T02:45:05.875Z
-page home 1600 2026-10-17T02:45:06.021Z
+start 2026-10-17T02:51:11.407Z
+page home 1600 2026-10-17T02:51:11.526Z
 home 1600 200 Saidie Newara · XR UI/UX concept designer overflowX=0 broken=0 errors=1
-page about 1600 2026-10-17T02:45:13.097Z
+page about 1600 2026-10-17T02:51:18.101Z
 about 1600 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
-page projects 1600 2026-10-17T02:45:19.419Z
+page projects 1600 2026-10-17T02:51:23.896Z
 projects 1600 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
-page plex 1600 2026-10-17T02:45:26.404Z
+page plex 1600 2026-10-17T02:51:30.100Z
 plex 1600 200 PleX Code — Built For Direct Intent overflowX=0 broken=0 errors=1
-NOW-FEED 1600 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n1d ago\n\npushed new commits\n\njena-magic-screen\n1d ago\n\nnew branch\n\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n1d ago\n\npushed new commits\n\njena-heavy\n1d ago\n\nnew branch\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
-page home 402 2026-10-17T02:45:40.664Z
+NOW-FEED 1600 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n22h ago\n\npushed updates to main\n\njena-heavy\n1d ago\n\nnew branch: main\n\njena-magic-screen\n1d ago\n\npushed updates to phone-fix\n\njena-magic-screen\n1d ago\n\nnew branch: phone-fix\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
+page home 402 2026-10-17T02:51:43.410Z
 home 402 200 Saidie Newara · XR UI/UX concept designer overflowX=0 broken=0 errors=1
-page about 402 2026-10-17T02:45:50.124Z
+page about 402 2026-10-17T02:51:51.890Z
 about 402 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
-page projects 402 2026-10-17T02:45:58.501Z
+page projects 402 2026-10-17T02:51:59.127Z
 projects 402 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
-page plex 402 2026-10-17T02:46:07.833Z
+page plex 402 2026-10-17T02:52:07.336Z
 plex 402 200 PleX Code — Built For Direct Intent overflowX=0 broken=0 errors=1
-NOW-FEED 402 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n1d ago\n\npushed new commits\n\njena-magic-screen\n1d ago\n\nnew branch\n\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n1d ago\n\npushed new commits\n\njena-heavy\n1d ago\n\nnew branch\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
+NOW-FEED 402 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n22h ago\n\npushed updates to main\n\njena-heavy\n1d ago\n\nnew branch: main\n\njena-magic-screen\n1d ago\n\npushed updates to phone-fix\n\njena-magic-screen\n1d ago\n\nnew branch: phone-fix\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
