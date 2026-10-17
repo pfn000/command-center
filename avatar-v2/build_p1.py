@@ -31,12 +31,16 @@ def matname(o, i):
     m = o.data.materials[i] if i < len(o.data.materials) else None
     return m.name if m else ''
 def clean_slots(obj):
-    me = obj.data; used = set(p.material_index for p in me.polygons)
-    for i in reversed(range(len(me.materials))):
-        if i not in used:
-            for p in me.polygons:
-                if p.material_index > i: p.material_index -= 1
-            me.materials.pop(index=i)
+    """drop unused material slots. (Blender's materials.pop already remaps polygon indices; the old manual
+    decrement double-shifted them and put the face skin on FaceMouth.) Rebuild by name instead."""
+    me = obj.data
+    if not len(me.materials): return
+    mats = list(me.materials); idx = np.zeros(len(me.polygons), np.int32); me.polygons.foreach_get('material_index', idx)
+    used = sorted(set(idx.tolist())); keep = [mats[i] for i in used if i < len(mats)]
+    remap = {u: k for k, u in enumerate(used)}
+    me.materials.clear()
+    for m in keep: me.materials.append(m)
+    me.polygons.foreach_set('material_index', np.array([remap[i] for i in idx], np.int32))
 def split_faces(o, pred, newname):
     """move faces where pred(obj, face) into a new object (shape keys, weights, modifiers kept)"""
     n = o.copy(); n.data = o.data.copy(); n.name = newname; n.data.name = newname

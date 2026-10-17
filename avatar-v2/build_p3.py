@@ -107,16 +107,22 @@ ALL = dict(SK); ALL.update(VIS); ALL['blink_Eye_L'] = SK['eyeBlinkLeft']; ALL['b
 for n, dlt in ALL.items():
     kk = face.shape_key_add(name=n, from_mix=False); kk.data.foreach_set('co', (B0 + dlt).astype(np.float32).ravel())
 note('face shape keys total', len(fm.shape_keys.key_blocks))
-# iris -> Jena blue-grey (from her character sheet), VRoid iris detail kept
-for i in range(len(fm.materials)):
-    if 'EyeIris' in matname(face, i):
-        for n in fm.materials[i].node_tree.nodes:
-            if n.type=='TEX_IMAGE' and n.image:
-                im = n.image; w_, h_ = im.size; px = np.array(im.pixels[:], np.float32).reshape(-1,4)
-                l_ = px[:,:3].mean(1, keepdims=True); px[:,:3] = np.clip(l_*np.array([0.42,0.52,0.66])*1.6, 0, 1)
-                ni = bpy.data.images.new('EyeIris_Jena', w_, h_, alpha=True); ni.pixels.foreach_set(px.ravel())
-                pth = f'{OUT}/tex/EyeIris_Jena.png'; ni.filepath_raw = pth; ni.file_format='PNG'; ni.save(); n.image = bpy.data.images.load(pth)
-EYE = ('EyeIris','EyeHighlight','EyeWhite')
+# Jena's own painted face + iris (repainted from scratch: no VRoid blush dots / anime iris / sparkle), dark natural brows + lash line
+_AV = os.path.join(os.environ.get('GITHUB_WORKSPACE', os.getcwd().rsplit('/avatar-v2',1)[0]), 'avatar-v2')
+def _swap_img(match, img):
+    for i in range(len(fm.materials)):
+        if match in matname(face, i):
+            for n in fm.materials[i].node_tree.nodes:
+                if n.type=='TEX_IMAGE' and n.image and 'nml' not in n.image.name and 'outline' not in n.image.name: n.image = img
+_swap_img('Face_00_SKIN', bpy.data.images.load(_AV + '/jena_face.png'))
+_swap_img('EyeIris', bpy.data.images.load(_AV + '/jena_iris.png'))
+_swap_img('FaceBrow', make_img('Jena_Brow', np.tile(np.array([0.09,0.075,0.075,1.0],np.float32), (64,256,1))))
+_swap_img('FaceEyeline', make_img('Jena_Lashline', np.tile(np.array([0.05,0.04,0.045,1.0],np.float32), (64,256,1))))
+shutil.copy(_AV + '/jena_face.png', OUT + '/tex/jena_face.png'); shutil.copy(_AV + '/jena_iris.png', OUT + '/tex/jena_iris.png')
+note('face + iris repainted, brows/lash line darkened')
+_hl = split_faces(face, lambda o,f,bm: 'EyeHighlight' in matname(o,f.material_index), 'HL_drop'); bpy.data.objects.remove(_hl)
+note('anime eye highlights removed')
+EYE = ('EyeIris','EyeWhite')
 eye_l = split_faces(face, lambda o,f,bm: any(s in matname(o,f.material_index) for s in EYE) and f.calc_center_median().x > 0, 'Eye_L')
 eye_r = split_faces(face, lambda o,f,bm: any(s in matname(o,f.material_index) for s in EYE), 'Eye_R')
 bm = bmesh.new(); bm.from_mesh(fm); bm.faces.ensure_lookup_table()

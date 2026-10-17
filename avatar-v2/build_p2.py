@@ -108,7 +108,7 @@ def sample_roots(n):
         t = tris[k]; out.append(np.array(t[0] + (t[1]-t[0])*a + (t[2]-t[0])*b))
     return out
 front_y = Hc[1] - 0.55*Hr[1]
-for p0 in sample_roots(420):
+for p0 in sample_roots(560):
     rad = nrmz(p0 - Hc); radh = nrmz([rad[0], rad[1], 0.0])
     if p0[2] < eyez - 0.005 and rad[1] < 0.2: continue          # no roots on the cheeks/temples below the eye line
     front = p0[1] < front_y and p0[2] > eyez + 0.02
@@ -118,18 +118,18 @@ for p0 in sample_roots(420):
         sweep = np.array([-0.75, -0.45, -0.55]) + rng.normal(0, 0.12, 3)
         tz = eyez + rng.uniform(-0.022, 0.018) - (0.015 if p0[0] < 0 else 0.0)
         pts = grow(p0, sweep, tz, 0.004, 0.010, np.array([0.0, -0.15, 0.05]), nseg=9, grav=0.18)
-        add_card(pts, rng.uniform(0.010, 0.016), 'bang')
+        add_card(pts, rng.uniform(0.016, 0.024), 'bang')
     else:
         back = rad[1] > 0.35
         if back: tz = neckz + rng.uniform(-0.005, 0.04)
         elif side: tz = chinz + rng.uniform(-0.03, 0.02)
         else: tz = chinz + rng.uniform(0.0, 0.05)
         d0 = radh*0.75 + np.array([0,0,0.35])*max(rad[2], 0) + rng.normal(0, 0.08, 3)
-        curl = radh*rng.uniform(0.0, 0.35) + rng.normal(0, 0.10, 3)          # messy flicks outward at the ends
+        curl = radh*rng.uniform(0.0, 0.18) + rng.normal(0, 0.05, 3)          # messy flicks outward at the ends
         layer = rng.random()
         off0, off1 = (0.003, 0.007) if layer < 0.5 else (0.008, 0.017)
         pts = grow(p0, d0, tz, off0, off1, curl, nseg=10)
-        add_card(pts, rng.uniform(0.012, 0.020) if layer < 0.5 else rng.uniform(0.009, 0.015), 'main')
+        add_card(pts, rng.uniform(0.022, 0.032) if layer < 0.5 else rng.uniform(0.016, 0.026), 'main')
 # side locks in front of the ears, a little longer (refs)
 for s in (1,-1):
     for k in range(5):
@@ -158,11 +158,11 @@ for k in range(14):
     BUNC.append((pts, rng.uniform(0.012, 0.018), int(rng.integers(0, 8)), 'gather'))
 # --- texture: 8 strand columns, black roots -> white ends at a different height per column, combed alpha tips ---
 TW_, TH_ = 512, 1024
-uu = (np.arange(TW_)[None,:] + 0.5)/TW_; vv = (np.arange(TH_)[:,None] + 0.5)/TH_   # v=0 root (image row 0 = bottom in Blender)
+uu = (np.arange(TW_)[None,:] + 0.5)/TW_; vv = 1.0 - (np.arange(TH_)[:,None] + 0.5)/TH_   # make_img flips rows: array row 0 = top = v 1 (tip)
 col_ = np.floor(uu*8).astype(int); lu = uu*8 - col_
-starts = np.array([0.40, 0.50, 0.35, 0.62, 0.45, 0.80, 0.55, 0.30])
+starts = np.array([0.55, 0.62, 0.48, 0.70, 0.58, 0.90, 0.66, 0.52])
 st_ = starts[col_]
-wmix = ss(st_, st_ + 0.30, vv)
+wmix = ss(st_, st_ + 0.22, vv)
 fine = 0.80 + 0.20*np.sin(lu*2*math.pi*9 + 3*np.sin(vv*13 + col_))
 blk, wht = 0.028, 0.86
 lum_ = (blk*(1-wmix) + wht*wmix) * fine
@@ -173,14 +173,14 @@ def build_cards(name, cards):
     verts, faces, uvs, vt, owner = [], [], [], [], []
     for ci, (pts, w, colk, kind) in enumerate(cards):
         n = len(pts); base = len(verts)
-        tw = rng.uniform(-0.5, 0.5)
+        tw = rng.uniform(-0.25, 0.25)
         for j, p in enumerate(pts):
             t = j/(n-1)
             tg = nrmz(np.array(pts[min(j+1,n-1)]) - np.array(pts[max(j-1,0)]))
             rad = nrmz(np.array(p) - Hc)
             sd = nrmz(np.cross(tg, rad)); nn = np.cross(sd, tg)
             sd = nrmz(sd*math.cos(tw*t) + nn*math.sin(tw*t))
-            ww = w*(1.0 - 0.55*t)*(0.75 + 0.25*math.sin(math.pi*min(1, t*3)))
+            ww = w*(1.0 - 0.45*t*t)
             for side_ in (-0.5, 0.5):
                 verts.append(np.array(p) + sd*ww*side_ + rad*0.0015*(1-t)); uvs.append(((colk + 0.5 + side_*0.94)/8.0, t)); vt.append(t); owner.append(ci)
         for j in range(n-1):
