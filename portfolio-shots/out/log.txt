@@ -12,6 +12,8 @@ shot d-dark-7-resume-sec {"overflowX":0,"broken":[],"peter":false,"dock":false,"
 shot d-dark-8-contact {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-dark-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-dark-10-arch-demo {"overflowX":0,"broken":[],"peter":false,"dock":true,"windows":1,"navResume":0}
+shot d-dark-11-arch-menu-resume {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot d-dark-11b-arch-menu-resume-bottom {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-2-work {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
@@ -36,4 +38,49 @@ shot p-light-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"window
 shot p-light-4-projects {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-8-contact {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
-ERRORS []
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libpoppler134 poppler-data
+Suggested packages:
+  ghostscript fonts-japanese-mincho | fonts-ipafont-mincho fonts-arphic-ukai
+  fonts-arphic-uming fonts-nanum
+The following NEW packages will be installed:
+  libpoppler134 poppler-data poppler-utils
+0 upgraded, 3 newly installed, 0 to remove and 44 not upgraded.
+Need to get 3386 kB of archives.
+After this operation, 17.8 MB of additional disk space will be used.
+Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+Get:2 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 poppler-data all 0.4.12-1 [2060 kB]
+Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler134 amd64 24.02.0-1ubuntu9.10 [1115 kB]
+Get:4 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 poppler-utils amd64 24.02.0-1ubuntu9.10 [212 kB]
+Fetched 3386 kB in 1s (4167 kB/s)
+Selecting previously unselected package poppler-data.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 203807 files and directories currently installed.)
+Preparing to unpack .../poppler-data_0.4.12-1_all.deb ...
+Unpacking poppler-data (0.4.12-1) ...
+Selecting previously unselected package libpoppler134:amd64.
+Preparing to unpack .../libpoppler134_24.02.0-1ubuntu9.10_amd64.deb ...
+Unpacking libpoppler134:amd64 (24.02.0-1ubuntu9.10) ...
+Selecting previously unselected package poppler-utils.
+Preparing to unpack .../poppler-utils_24.02.0-1ubuntu9.10_amd64.deb ...
+Unpacking poppler-utils (24.02.0-1ubuntu9.10) ...
+Setting up libpoppler134:amd64 (24.02.0-1ubuntu9.10) ...
+Setting up poppler-data (0.4.12-1) ...
+Setting up poppler-utils (24.02.0-1ubuntu9.10) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Not building database; man-db/auto-update is not 'true'.
+Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+
+Running kernel seems to be up-to-date.
+
+No services need to be restarted.
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+ERRORS ["phone arch résumé click: TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('button:has-text(\"Résumé\"):visible').first()\n  -   locator resolved to <button type=\"button\" class=\"btn ghost\">R"]
