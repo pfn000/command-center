@@ -1,17 +1,19 @@
-start 2026-10-17T02:15:53.386Z
-page home 1600 2026-10-17T02:15:53.506Z
-home 1600 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
-page jena 1600 2026-10-17T02:15:59.037Z
-jena 1600 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
-page nos 1600 2026-10-17T02:16:05.032Z
-nos 1600 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
-page projects 1600 2026-10-17T02:16:10.986Z
+start 2026-10-17T02:45:05.875Z
+page home 1600 2026-10-17T02:45:06.021Z
+home 1600 200 Saidie Newara · XR UI/UX concept designer overflowX=0 broken=0 errors=1
+page about 1600 2026-10-17T02:45:13.097Z
+about 1600 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
+page projects 1600 2026-10-17T02:45:19.419Z
 projects 1600 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
-page home 402 2026-10-17T02:16:23.689Z
-home 402 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
-page jena 402 2026-10-17T02:16:30.694Z
-jena 402 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
-page nos 402 2026-10-17T02:16:37.860Z
-nos 402 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
-page projects 402 2026-10-17T02:16:44.389Z
+page plex 1600 2026-10-17T02:45:26.404Z
+plex 1600 200 PleX Code — Built For Direct Intent overflowX=0 broken=0 errors=1
+NOW-FEED 1600 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n1d ago\n\npushed new commits\n\njena-magic-screen\n1d ago\n\nnew branch\n\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n1d ago\n\npushed new commits\n\njena-heavy\n1d ago\n\nnew branch\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"
+page home 402 2026-10-17T02:45:40.664Z
+home 402 200 Saidie Newara · XR UI/UX concept designer overflowX=0 broken=0 errors=1
+page about 402 2026-10-17T02:45:50.124Z
+about 402 200 Résumé — Saidie Newara overflowX=0 broken=0 errors=1
+page projects 402 2026-10-17T02:45:58.501Z
 projects 402 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
+page plex 402 2026-10-17T02:46:07.833Z
+plex 402 200 PleX Code — Built For Direct Intent overflowX=0 broken=0 errors=1
+NOW-FEED 402 "NOW BUILDING\n\nWhat I'm working on and learning, live\n\nThis part updates itself from my public GitHub, and Jena runs live right here.\n\nLatest activity\nLIVE FROM GITHUB\njena-magic-screen\n1d ago\n\npushed new commits\n\njena-magic-screen\n1d ago\n\nnew branch\n\njena-magic-screen\n5h ago\n\nmerged a pull request\n\njena-magic-screen\n5h ago\n\nopened a pull request\n\njena-heavy\n1d ago\n\npushed new commits\n\njena-heavy\n1d ago\n\nnew branch\n\nall my public repos\nCurrently learning\nPleX: building my own language, and how to port it to more systems\nThree.js / WebGL: Jena’s 3D room and real-time worlds in the browser\nGLSL shaders: the .nude shader packages for NUDE.SDK\nLocal AI: running Jena’s brain on her own machine\nJENA · LIVE SITE\nopen\nWatch Jena live"

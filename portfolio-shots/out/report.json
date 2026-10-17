@@ -4,7 +4,7 @@
   "view": "1600",
   "url": "http://localhost:3000/",
   "status": 200,
-  "title": "Saidie Newara Portfolio",
+  "title": "Saidie Newara · XR UI/UX concept designer",
   "overflowX": 0,
   "broken": [],
   "errors": [
@@ -12,23 +12,11 @@
   ]
  },
  {
-  "page": "jena",
+  "page": "about",
   "view": "1600",
-  "url": "http://localhost:3000/jena",
+  "url": "http://localhost:3000/about",
   "status": 200,
-  "title": "Jena · AI VTuber — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "nos",
-  "view": "1600",
-  "url": "http://localhost:3000/nos",
-  "status": 200,
-  "title": "N•OS & NCOM-Arch — Saidie Newara",
+  "title": "Résumé — Saidie Newara",
   "overflowX": 0,
   "broken": [],
   "errors": [
@@ -41,6 +29,18 @@
   "url": "http://localhost:3000/projects",
   "status": 200,
   "title": "Projects — Saidie Newara",
+  "overflowX": 0,
+  "broken": [],
+  "errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ },
+ {
+  "page": "plex",
+  "view": "1600",
+  "url": "http://localhost:3000/plex",
+  "status": 200,
+  "title": "PleX Code — Built For Direct Intent",
   "overflowX": 0,
   "broken": [],
   "errors": [
@@ -52,7 +52,7 @@
   "view": "402",
   "url": "http://localhost:3000/",
   "status": 200,
-  "title": "Saidie Newara Portfolio",
+  "title": "Saidie Newara · XR UI/UX concept designer",
   "overflowX": 0,
   "broken": [],
   "errors": [
@@ -60,23 +60,11 @@
   ]
  },
  {
-  "page": "jena",
+  "page": "about",
   "view": "402",
-  "url": "http://localhost:3000/jena",
+  "url": "http://localhost:3000/about",
   "status": 200,
-  "title": "Jena · AI VTuber — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "nos",
-  "view": "402",
-  "url": "http://localhost:3000/nos",
-  "status": 200,
-  "title": "N•OS & NCOM-Arch — Saidie Newara",
+  "title": "Résumé — Saidie Newara",
   "overflowX": 0,
   "broken": [],
   "errors": [
@@ -89,6 +77,18 @@
   "url": "http://localhost:3000/projects",
   "status": 200,
   "title": "Projects — Saidie Newara",
+  "overflowX": 0,
+  "broken": [],
+  "errors": [
+   "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+ },
+ {
+  "page": "plex",
+  "view": "402",
+  "url": "http://localhost:3000/plex",
+  "status": 200,
+  "title": "PleX Code — Built For Direct Intent",
   "overflowX": 0,
   "broken": [],
   "errors": [
