@@ -1,1 +1,1 @@
-build v3.1 run F: painted brows + fringe cut above them, eyes 95/82%, hair to shoulders with brighter ends, slimmer higher bra band, smaller bow, os._exit fix for the exit hang, + turntable
+build v3.1 run G: semi-real face from her head's own shape keys baked into the basis (smaller sharper eyes, no anime highlight, smaller forehead, fuller lips, thinner lashes/brows), wider fringe cut, no bra bow, + turntable

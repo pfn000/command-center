@@ -75,8 +75,8 @@
   0.91
  ],
  "SKIN_SAT": 1.1,
- "EYE_SX": 0.95,
- "EYE_SZ": 0.82,
+ "EYE_SX": 1.0,
+ "EYE_SZ": 1.0,
  "BUN_DY": 0.065,
  "BUN_DZ": 0.03,
  "BAND_H": 0.011,
@@ -110,5 +110,21 @@
  "SSS_W": 0.18,
  "HAIR_LEN": 1.22,
  "BAND_DZ2": 0.012,
- "TT_SAMPLES": 10
+ "TT_SAMPLES": 10,
+ "LOWER_FACE": 1.0,
+ "NOSE_PUSH": 0.05,
+ "BANG_W": 1.6,
+ "BANG_DEPTH": 0.05,
+ "BOW": false,
+ "BAKE_KEYS": {
+  "Eyes -": 0.55,
+  "Sharp": 0.35,
+  "highlight -": 1.0,
+  "forehead -": 0.6,
+  "Lips +": 0.4,
+  "Lashes thin": 0.5,
+  "iris -": 0.25,
+  "brow thin": 0.3,
+  ":|": 0.3
+ }
 }

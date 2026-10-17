@@ -135,6 +135,31 @@ for o in (BODY,FH,UM,BRA,SH):
     am[0].object=B
 for o in list(bpy.data.objects):
     if o.type=='ARMATURE' and o is not B: bpy.data.objects.remove(o)
+def _shift_all_keys(o,delta_world):
+    mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices)
+    dl=[mwi3@d for d in delta_world]
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            for i in range(n):
+                if dl[i].length_squared>0: kb.data[i].co+=dl[i]
+    for i in range(n):
+        if dl[i].length_squared>0: o.data.vertices[i].co+=dl[i]
+    o.data.update()
+# ---------- v3.1 SEMI-REAL FACE from her head's own authored shape keys (Eyes -, Sharp, highlight -, forehead -, Lips +, ...): baked into the basis, every other key shifted the same, so visemes/blinks still work
+BK=P.get('BAKE_KEYS',{})
+if BK and FH.data.shape_keys:
+    kbs=FH.data.shape_keys.key_blocks; basis=kbs[0]; n=len(FH.data.vertices); mw3=FH.matrix_world.to_3x3()
+    D_=[Vector((0,0,0)) for _ in range(n)]; used={}
+    for k_,v_ in BK.items():
+        if k_ not in kbs: log('bake: no key',k_); continue
+        kb=kbs[k_]; used[k_]=v_
+        for i in range(n):
+            d=kb.data[i].co-basis.data[i].co
+            if d.length_squared>1e-14: D_[i]+=d*v_
+    Dw=[mw3@d for d in D_]
+    _shift_all_keys(FH,Dw)
+    for k_ in used: kbs[k_].value=0.0
+    log('baked face keys',used); rep['baked_face_keys']=used
 # ---------- face/eye geometry facts
 me=FH.data; mi={i:s.material.name if s.material else '' for i,s in enumerate(FH.material_slots)}
 eyeL=[];eyeR=[]
@@ -653,7 +678,7 @@ for sgn in (1,-1):
     for a_,b_ in zip(vs_,vs_[1:]): bm.faces.new((a_[0],b_[0],b_[1],a_[1]))
 # bow at the center gore
 gv=[BRA.matrix_world@v.co for v in BRA.data.vertices if abs((BRA.matrix_world@v.co).x)<0.01]
-if gv:
+if gv and P.get('BOW',True):
     g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
     for sx in (-1,1):
         r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
