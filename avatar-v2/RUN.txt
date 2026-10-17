@@ -1,1 +1,1 @@
-run 6 meshy: face de-VRoid (eyes/brows/nose), hair volume, darker tee/stockings
+run 7 meshy: cleaner face paint, thin lash line, blacker wider hair

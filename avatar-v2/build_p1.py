@@ -118,7 +118,7 @@ _ir = np.array(['EyeIris' in m for m in _fmat])
 for _s in (1,-1):
     _sel = _ir & (_fv[:,0]*_s > 0)
     if _sel.any(): _eyec[_s] = _fv[_sel].mean(0)
-_brow = np.array(['FaceBrow' in m for m in _fmat]); _skinm = np.array(['Face_00' in m for m in _fmat])
+_brow = np.array(['FaceBrow' in m for m in _fmat]); _eyel = np.array(['FaceEyeline' in m for m in _fmat]); _skinm = np.array(['Face_00' in m for m in _fmat])
 _ncand = _fv[_skinm & (np.abs(_fv[:,0]) < 0.006) & (_fv[:,2] < list(_eyec.values())[0][2] - 0.012) & (_fv[:,2] > list(_eyec.values())[0][2] - 0.05)]
 _nose = _ncand[np.argmin(_ncand[:,1])] if len(_ncand) else np.array([0, -0.08, list(_eyec.values())[0][2]-0.03])
 note('nose tip', [round(float(x),3) for x in _nose])
@@ -131,6 +131,12 @@ def _reshape(P, eyes=False):
             d = np.hypot((B[:,0]-c[0])/1.0, (B[:,2]-c[2])/1.15)
             w = ss(0.036, 0.017, d) * (B[:,1] < c[1] + 0.03) * (B[:,0]*_s > -0.002)
             P[:,0] = c[0] + (B[:,0]-c[0])*(1-0.24*w); P[:,2] = c[2] + (B[:,2]-c[2])*(1-0.36*w) - 0.0015*w
+        # lash line: thinner, no anime wing (squash toward its upper edge, pull the wing in)
+        for _s in (1,-1):
+            em_ = _eyel & (B[:,0]*_s > 0)
+            if em_.any():
+                top = np.percentile(B[em_,2], 85); cx_ = _eyec[_s][0]
+                P[em_,2] = top + (P[em_,2]-top)*0.45; P[em_,0] = cx_ + (P[em_,0]-cx_)*0.90
         # brows: thicker, a touch lower and straighter (less anime arch)
         for _s in (1,-1):
             bm_ = _brow & (B[:,0]*_s > 0)
@@ -140,7 +146,7 @@ def _reshape(P, eyes=False):
         r = np.hypot(B[:,0]/0.011, (B[:,2]-_nose[2])/0.016)
         br = np.exp(-(B[:,0]/0.006)**2) * ss(_nose[2]-0.005, _nose[2]+0.012, B[:,2]) * ss(_eyec[1][2]+0.004, _eyec[1][2]-0.01, B[:,2])
         front = (B[:,1] < _nose[1] + 0.02)
-        P[:,1] -= (0.0035*np.exp(-r**2) + 0.0022*br) * front
+        P[:,1] -= (0.0018*np.exp(-r**2) + 0.0022*br) * front
     w = ss(L['neck'].z - 0.01, L['neck'].z + 0.04, P[:,2])[:,None]
     P = P + ((_piv + (P - _piv)*HS) - P) * w
     b = P[:,2] < _lz
@@ -283,7 +289,7 @@ neck.data.materials.clear(); neck.data.materials.append(make_mat('Necklace_Silve
 copy_weights_nearest(neck, body); add_armature(neck)
 for st in straps: st.data.materials.clear(); copy_weights_nearest(st, body)
 H = 512; n1 = np.random.rand(H,H).astype(np.float32)
-knit = 0.36 + 0.05*(n1-0.5) + 0.03*np.sin(np.arange(H)[None,:]*math.pi/2.0)
+knit = 0.36 + 0.035*(n1-0.5) + 0.008*np.sin(np.arange(H)[None,:]*math.pi/2.0)
 tee.data.materials.append(make_mat('Tee_Knit', img=make_img('Tee_Heather', np.stack([knit*0.98, knit*0.98, knit*1.01], 2)), rough=0.9))
 shorts.data.materials.append(make_mat('Shorts_Black', (0.02,0.02,0.022,1), rough=0.6))
 shorts.data.materials.append(make_mat('Shorts_Trim_White', (0.92,0.92,0.92,1), rough=0.6))

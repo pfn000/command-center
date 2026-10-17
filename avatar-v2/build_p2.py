@@ -108,7 +108,7 @@ def sample_roots(n):
         t = tris[k]; out.append(np.array(t[0] + (t[1]-t[0])*a + (t[2]-t[0])*b))
     return out
 front_y = Hc[1] - 0.55*Hr[1]
-for p0 in sample_roots(560):
+for p0 in sample_roots(480):
     rad = nrmz(p0 - Hc); radh = nrmz([rad[0], rad[1], 0.0])
     if p0[2] < eyez - 0.005 and rad[1] < 0.2: continue          # no roots on the cheeks/temples below the eye line
     front = p0[1] < front_y and p0[2] > eyez + 0.02
@@ -129,7 +129,7 @@ for p0 in sample_roots(560):
         layer = rng.random()
         off0, off1 = (0.003, 0.006) if layer < 0.5 else (0.006, 0.012)
         pts = grow(p0, d0, tz, off0, off1, curl, nseg=10, grav=0.30)
-        add_card(pts, rng.uniform(0.022, 0.032) if layer < 0.5 else rng.uniform(0.016, 0.026), 'main')
+        add_card(pts, rng.uniform(0.028, 0.040) if layer < 0.5 else rng.uniform(0.020, 0.030), 'main')
 # side locks in front of the ears, a little longer (refs)
 for s in (1,-1):
     for k in range(5):
@@ -160,10 +160,10 @@ for k in range(14):
 TW_, TH_ = 512, 1024
 uu = (np.arange(TW_)[None,:] + 0.5)/TW_; vv = 1.0 - (np.arange(TH_)[:,None] + 0.5)/TH_   # make_img flips rows: array row 0 = top = v 1 (tip)
 col_ = np.floor(uu*8).astype(int); lu = uu*8 - col_
-starts = np.array([0.55, 0.62, 0.48, 0.70, 0.58, 0.90, 0.66, 0.52])
+starts = np.array([0.72, 0.80, 0.66, 1.10, 0.76, 1.10, 0.84, 0.70])
 st_ = starts[col_]
 wmix = ss(st_, st_ + 0.22, vv)
-fine = 0.80 + 0.20*np.sin(lu*2*math.pi*9 + 3*np.sin(vv*13 + col_))
+fine = 0.88 + 0.12*np.sin(lu*2*math.pi*9 + 3*np.sin(vv*13 + col_))
 blk, wht = 0.028, 0.86
 lum_ = (blk*(1-wmix) + wht*wmix) * fine
 teeth = 0.80 + 0.18*np.abs(np.sin(lu*math.pi*5 + col_))
