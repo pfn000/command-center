@@ -1,0 +1,55 @@
+
+> my-project@0.1.0 build /tmp/site
+> next build
+
+⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.2.6 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.1s
+  Skipping validation of types
+  Finished TypeScript config validation in 6ms ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/20) ...
+  Generating static pages using 3 workers (5/20) 
+  Generating static pages using 3 workers (10/20) 
+  Generating static pages using 3 workers (15/20) 
+✓ Generating static pages using 3 workers (20/20) in 782ms
+  Finalizing page optimization ...
+
+Route (app)            Revalidate  Expire
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ƒ /admin
+├ ƒ /admin/edit/[id]
+├ ƒ /admin/login
+├ ƒ /admin/new
+├ ƒ /api/admin/upload
+├ ƒ /api/vault/file
+├ ○ /contact
+├ ○ /emmi
+├ ○ /icon.png
+├ ○ /jena
+├ ○ /ncom
+├ ƒ /news
+├ ƒ /news-sitemap.xml
+├ ƒ /news/[slug]
+├ ○ /nos
+├ ○ /plex
+├ ○ /projects
+├ ○ /resume/download
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+├ ○ /vault                     1h      1y
+└ ƒ /vault/[repo]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

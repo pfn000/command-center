@@ -1,0 +1,8 @@
+home 1600 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
+jena 1600 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
+nos 1600 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
+projects 1600 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
+home 402 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
+jena 402 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
+nos 402 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
+projects 402 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
