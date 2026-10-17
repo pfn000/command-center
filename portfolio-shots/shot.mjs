@@ -1,7 +1,7 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 const [base, out] = process.argv.slice(2)
-const pages = [['home', '/'], ['jena', '/jena'], ['nos', '/nos'], ['projects', '/projects']]
+const pages = [['home', '/'], ['about', '/about'], ['projects', '/projects'], ['plex', '/plex']]
 const views = [['1600', { width: 1600, height: 900 }, 1, false], ['402', { width: 402, height: 874 }, 2, true]]
 const report = []
 console.log('start', new Date().toISOString())
@@ -32,15 +32,20 @@ for (const [vn, vp, dpr, mobile] of views) {
     console.log(pn, vn, status, title, 'overflowX=' + overflowX, 'broken=' + broken.length, 'errors=' + errors.length)
     await page.close()
   }
-  // the N•OS live demo, loaded (click the poster) on the /nos page
+  // section close-ups on home: hero, sketch→built, now building, plex call-out
   try {
     const page = await ctx.newPage()
-    await page.goto(base.replace(/\/$/, '') + '/nos', { waitUntil: 'load', timeout: 45000 })
-    const btn = page.getByRole('button', { name: /Run the live demo/ }).first()
-    await btn.scrollIntoViewIfNeeded(); await btn.click(); await page.waitForTimeout(6000)
-    await page.screenshot({ path: `${out}/nos-demo-running-${vn}.jpg`, type: 'jpeg', quality: 82, timeout: 60000 })
+    await page.goto(base.replace(/\/$/, '') + '/', { waitUntil: 'load', timeout: 45000 })
+    await page.waitForTimeout(3000)
+    for (const id of ['sketches', 'now', 'plex']) {
+      const el = page.locator('#' + id).first()
+      await el.scrollIntoViewIfNeeded(); await page.waitForTimeout(1500)
+      await el.screenshot({ path: `${out}/sec-${id}-${vn}.jpg`, type: 'jpeg', quality: 78, timeout: 60000 })
+    }
+    const feed = await page.evaluate(() => { const s = document.querySelector('#now'); return s ? s.innerText.slice(0, 900) : '' })
+    console.log('NOW-FEED', vn, JSON.stringify(feed))
     await page.close()
-  } catch (e) { console.log('demo shot failed', String(e).slice(0, 200)) }
+  } catch (e) { console.log('section shot failed', String(e).slice(0, 200)) }
   await ctx.close()
 }
 await browser.close()
