@@ -44,22 +44,24 @@ async function desktop(theme) {
   const page = await ctx.newPage()
   page.on('console', (m) => m.type() === 'error' && errors.push(`${theme}: ${m.text().slice(0, 200)}`))
   page.on('pageerror', (e) => errors.push(`${theme} pageerror: ${String(e).slice(0, 300)}`))
+  page.on('response', (x) => x.status() >= 400 && errors.push(`${theme} HTTP ${x.status()} ${x.url().slice(0, 200)}`))
   const r = await page.goto(`${B}/?theme=${theme}`, { waitUntil: 'networkidle', timeout: 60000 })
   report.checks[`status_${theme}`] = r && r.status()
   await page.waitForTimeout(2200)
   await snap(page, `tour-1600-${theme}`)
   try {
     if (theme === 'light') {
-      await page.getByRole('button', { name: 'Next' }).click(); await page.waitForTimeout(500)
+      await page.locator('.coach').getByRole('button', { name: 'Next', exact: true }).click(); await page.waitForTimeout(500)
       await snap(page, 'tour2-1600-light')
-      await page.getByRole('button', { name: 'Next' }).click(); await page.waitForTimeout(500)
+      await page.locator('.coach').getByRole('button', { name: 'Next', exact: true }).click(); await page.waitForTimeout(500)
       await snap(page, 'tour3-1600-light')
-      await page.getByRole('button', { name: 'Got it' }).click()
+      await page.locator('.coach').getByRole('button', { name: 'Got it', exact: true }).click()
     } else {
-      await page.getByRole('button', { name: 'Skip' }).click()
+      await page.locator('.coach').getByRole('button', { name: 'Skip', exact: true }).click()
     }
     await page.waitForTimeout(500)
   } catch (e) { errors.push('tour: ' + String(e).slice(0, 200)) }
+  report.checks[`coach_gone_${theme}`] = (await page.locator('.coach').count()) === 0
   await snap(page, `desk-1600-${theme}`)
   try {
     await page.locator('[data-app=about]').screenshot({ path: `${out}/hero-app-${theme}.jpg`, type: 'jpeg', quality: 86 })
@@ -127,6 +129,8 @@ async function phone(theme) {
   const ctx = await browser.newContext({ viewport: { width: 402, height: 874 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: IPHONE, colorScheme: theme })
   const page = await ctx.newPage()
   page.on('pageerror', (e) => errors.push(`phone ${theme} pageerror: ${String(e).slice(0, 300)}`))
+  page.on('console', (m) => m.type() === 'error' && errors.push(`phone ${theme}: ${m.text().slice(0, 200)}`))
+  page.on('response', (x) => x.status() >= 400 && errors.push(`phone ${theme} HTTP ${x.status()} ${x.url().slice(0, 200)}`))
   await page.goto(`${B}/?theme=${theme}`, { waitUntil: 'networkidle', timeout: 60000 })
   await page.waitForTimeout(2200)
   await snap(page, `phone-home-402-${theme}`)
