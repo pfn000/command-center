@@ -1,1 +1,1 @@
-build v3.1 run E: = run D (D hung on the runner like B), Blender step capped at 1100 s so a hang still uploads the timestamped log
+build v3.1 run F: painted brows + fringe cut above them, eyes 95/82%, hair to shoulders with brighter ends, slimmer higher bra band, smaller bow, os._exit fix for the exit hang, + turntable

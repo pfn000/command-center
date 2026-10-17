@@ -206,10 +206,17 @@ if P.get('FACE_RESHAPE',True) and eL and eR:
     _shift_all_keys(FH,D); FR.update(ipd=ipd,eye_size=[ex,ez],rc=rc,ro=ro,moved=sum(1 for d in D if d.length>1e-5))
     log('face reshape',FR)
 rep['face_reshape']=FR
+# ---------- v3.1 hair length to the shoulders (her sheet): stretch the hair below eye level downward
+if P.get('HAIR_LEN',1.0)!=1.0 and eL:
+    zr=eL[0].z; mw=UM.matrix_world; mwi=mw.inverted(); n_=0
+    for v in UM.data.vertices:
+        p=mw@v.co
+        if p.z<zr: p.z=zr-(zr-p.z)*P['HAIR_LEN']; v.co=mwi@p; n_+=1
+    UM.data.update(); log('hair lengthened',P['HAIR_LEN'],n_)
 # ---------- v3.1 BANGS: cut the fringe at the brow line — delete hair-card faces that sit in front of the face below the brows
 if P.get('BANGS_LIFT',True) and eL and eR:
     cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
-    browz=ez0+max(sL.z,sR.z)*P.get('EYE_SZ',0.72)*0.5+P.get('BROW_GAP',0.16)*ipd
+    browz=ez0+max(sL.z,sR.z)*P.get('EYE_SZ',0.72)*0.5+P.get('BROW_GAP',0.30)*ipd
     from mathutils.bvhtree import BVHTree as _BVH
     dgh=bpy.context.evaluated_depsgraph_get(); hb=_BVH.FromObject(FH,dgh)
     mw=UM.matrix_world; bmH=bmesh.new(); bmH.from_mesh(UM.data); kill_=[]
@@ -423,6 +430,12 @@ if P.get('FACE_PAINT',True) and FACE_M and eL and eR:
         for k in range(7):
             t=(k-3)/3.0; q=surf(t*0.22*ipd,mz+0.02*ipd*(1-t*t))
             if q: ops.append((q,0.05*ipd,LIP,P.get('LIPS',0.2)))
+    BROW=tuple(P.get('BROW_COL',(0.22,0.19,0.19)))
+    for c,sg in ((cL,1),(cR,-1)):
+        for k in range(13):   # inner (thicker) -> outer tail, gentle arch
+            t=k/12.0; x=c.x+sg*(-0.55*exs+1.25*exs*t); z=c.z+ezs*0.5+P.get('BROW_UP2',0.16)*ipd+0.05*ipd*math.sin(math.pi*min(1,t*1.3))-0.02*ipd*t
+            q=surf(x,z)
+            if q: ops.append((q,(0.030-0.014*t)*ipd,BROW,P.get('BROW_S',0.75)*(1-0.35*t)))
     paint(FH,fimg,ops,matnames={FACE_M.name},tag='face')
     rep['face_paint_ops']=len(ops)
 if P.get('BODY_PAINT',True) and SKIN_M:
@@ -644,8 +657,8 @@ if gv:
     g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
     for sx in (-1,1):
         r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
-        for v in r['verts']: v.co=Vector((v.co.x*0.0055,v.co.y*0.0016,v.co.z*0.0034))+gc+Vector((sx*0.0055,0,0))
-    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0022)
+        for v in r['verts']: v.co=Vector((v.co.x*0.0038,v.co.y*0.0014,v.co.z*0.0024))+gc+Vector((sx*0.0038,0,0))
+    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0016)
     for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
@@ -861,3 +874,4 @@ if P.get('TT'):
         sc.render.filepath=OUT+f'/frames/f{f:03d}.png'; bpy.ops.render.render(write_still=True); log('frame',f)
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
 log('DONE')
+import sys as _s; _s.stdout.flush(); _s.stderr.flush(); os._exit(0)
