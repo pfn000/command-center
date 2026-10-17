@@ -1,3 +1,4 @@
+clip desk-dark {"count":0,"items":[]}
 shot d-dark-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-dark-2-work {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-dark-2b-work-pairs {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
@@ -14,6 +15,7 @@ shot d-dark-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,
 shot d-dark-10-arch-demo {"overflowX":0,"broken":[],"peter":false,"dock":true,"windows":1,"navResume":0}
 shot d-dark-11-arch-menu-resume {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-dark-11b-arch-menu-resume-bottom {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+clip desk-light {"count":0,"items":[]}
 shot d-light-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-2-work {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
@@ -21,12 +23,16 @@ shot d-light-4-projects {"overflowX":0,"broken":[],"peter":false,"dock":false,"w
 shot d-light-5-plex {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-8-contact {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot d-light-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+clip phone-dark {"count":0,"items":[]}
 shot p-dark-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-2-work {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-2b-work-pairs {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-4-projects {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-4b-projects-more {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-dark-4c-projects-3 {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-dark-4d-projects-4 {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-dark-4e-projects-5 {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-5-plex {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-5b-plex-code {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-6-emmi {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
@@ -35,9 +41,12 @@ shot p-dark-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,
 shot p-dark-10-arch-demo {"overflowX":0,"broken":[],"peter":false,"dock":true,"windows":1,"navResume":0}
 shot p-dark-11-arch-menu-resume {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-11b-arch-menu-resume-bottom {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+clip phone-light {"count":0,"items":[]}
 shot p-light-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-4-projects {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-light-4b-projects-more {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-light-4c-projects-3 {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-8-contact {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-light-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 Reading package lists...
@@ -188,7 +197,7 @@ Get:97 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 i965-
 Get:98 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 va-driver-all amd64 2.20.0-2ubuntu0.2 [5014 B]
 Get:99 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 vdpau-driver-all amd64 1.5-2build1 [4414 B]
 Get:100 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 pocketsphinx-en-us all 0.8.0+real5prealpha+1-15ubuntu5 [27.4 MB]
-Fetched 94.1 MB in 10s (9023 kB/s)
+Fetched 94.1 MB in 13s (7143 kB/s)
 Selecting previously unselected package libva2:amd64.
 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 203807 files and directories currently installed.)
 Preparing to unpack .../00-libva2_2.20.0-2ubuntu0.2_amd64.deb ...
@@ -602,10 +611,10 @@ No containers need to be restarted.
 No user sessions are running outdated binaries.
 
 No VM guests are running outdated hypervisor (qemu) binaries on this host.
-video portfolio-shots/out/video-d-dark-home-scroll.mp4 5017292 14.560000
-video portfolio-shots/out/video-p-dark-home-scroll.mp4 4665565 14.200000
-video portfolio-shots/out/video-d-light-home-scroll.mp4 4957363 14.480000
-video portfolio-shots/out/video-p-light-home-scroll.mp4 4656254 14.160000
+video portfolio-shots/out/video-d-dark-home-scroll.mp4 5629966 14.600000
+video portfolio-shots/out/video-p-dark-home-scroll.mp4 5773069 14.120000
+video portfolio-shots/out/video-d-light-home-scroll.mp4 5515214 14.560000
+video portfolio-shots/out/video-p-light-home-scroll.mp4 5741528 14.080000
 Reading package lists...
 Building dependency tree...
 Reading state information...
@@ -623,7 +632,7 @@ Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
 Get:2 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 poppler-data all 0.4.12-1 [2060 kB]
 Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libpoppler134 amd64 24.02.0-1ubuntu9.10 [1115 kB]
 Get:4 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 poppler-utils amd64 24.02.0-1ubuntu9.10 [212 kB]
-Fetched 3386 kB in 0s (9392 kB/s)
+Fetched 3386 kB in 0s (8097 kB/s)
 Selecting previously unselected package poppler-data.
 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 204521 files and directories currently installed.)
 Preparing to unpack .../poppler-data_0.4.12-1_all.deb ...

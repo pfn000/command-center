@@ -262,6 +262,33 @@
    "navResume": 1
   },
   {
+   "name": "p-dark-4c-projects-3",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-4d-projects-4",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-4e-projects-5",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
    "name": "p-dark-5-plex",
    "overflowX": 0,
    "broken": [],
@@ -361,6 +388,24 @@
    "navResume": 1
   },
   {
+   "name": "p-light-4b-projects-more",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-light-4c-projects-3",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
    "name": "p-light-8-contact",
    "overflowX": 0,
    "broken": [],
@@ -380,6 +425,24 @@
   }
  ],
  "errors": [],
+ "clip": {
+  "desk-dark": {
+   "count": 0,
+   "items": []
+  },
+  "desk-light": {
+   "count": 0,
+   "items": []
+  },
+  "phone-dark": {
+   "count": 0,
+   "items": []
+  },
+  "phone-light": {
+   "count": 0,
+   "items": []
+  }
+ },
  "archResume": {
   "desk": {
    "url": "http://localhost:3000/resume",
@@ -393,8 +456,8 @@
  "videos": [
   {
    "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 5017292,
-   "duration": 14.56,
+   "bytes": 5629966,
+   "duration": 14.6,
    "size": {
     "width": 1600,
     "height": 900
@@ -402,8 +465,8 @@
   },
   {
    "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 4665565,
-   "duration": 14.2,
+   "bytes": 5773069,
+   "duration": 14.12,
    "size": {
     "width": 402,
     "height": 874
@@ -411,8 +474,8 @@
   },
   {
    "file": "video-d-light-home-scroll.mp4",
-   "bytes": 4957363,
-   "duration": 14.48,
+   "bytes": 5515214,
+   "duration": 14.56,
    "size": {
     "width": 1600,
     "height": 900
@@ -420,8 +483,8 @@
   },
   {
    "file": "video-p-light-home-scroll.mp4",
-   "bytes": 4656254,
-   "duration": 14.16,
+   "bytes": 5741528,
+   "duration": 14.08,
    "size": {
     "width": 402,
     "height": 874
