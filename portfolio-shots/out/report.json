@@ -316,6 +316,24 @@
    "navResume": 0
   },
   {
+   "name": "p-dark-11-arch-menu-resume",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-11b-arch-menu-resume-bottom",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
    "name": "p-light-1-home",
    "overflowX": 0,
    "broken": [],
@@ -361,11 +379,13 @@
    "navResume": 1
   }
  ],
- "errors": [
-  "phone arch résumé click: TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('.nos-grid button[aria-label=\"Open Résumé\"]').first()\n  -   locator resolved to <button type=\"button\" class=\"gri"
- ],
+ "errors": [],
  "archResume": {
   "desk": {
+   "url": "http://localhost:3000/resume",
+   "windows": 0
+  },
+  "phone": {
    "url": "http://localhost:3000/resume",
    "windows": 0
   }
