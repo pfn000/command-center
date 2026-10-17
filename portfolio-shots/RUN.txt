@@ -1,1 +1,1 @@
-v5.3 proof run 1 (nav own row, sketch letterhead cropped, room shot instead of old avatar, phone sketch->built lead, /arch back link in menubar, MP4 scroll-throughs) at 2026-10-17T21:48:14Z
+v5.3 proof run 2 (phone: sketch + glass both on first screen; Now portrait image framed; 15 s videos) at 2026-10-17T21:54:59Z

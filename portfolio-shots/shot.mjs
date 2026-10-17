@@ -99,7 +99,7 @@ async function scrollVideo(kind, theme) {
     const tStart = (Date.now() - t0) / 1000
     await p.waitForTimeout(1500)
     const H = await p.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
-    const steps = 110
+    const steps = 185
     for (let k = 1; k <= steps; k++) {
       const e = k / steps, ease = e < 0.5 ? 2 * e * e : 1 - Math.pow(-2 * e + 2, 2) / 2
       await p.evaluate((v) => window.scrollTo(0, v), Math.round(H * ease))
