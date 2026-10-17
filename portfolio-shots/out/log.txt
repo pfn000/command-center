@@ -1,8 +1,6 @@
+start 2026-10-17T02:07:29.226Z
+page home 1600 2026-10-17T02:07:29.426Z
 home 1600 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
+page jena 1600 2026-10-17T02:07:35.642Z
 jena 1600 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
-nos 1600 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
-projects 1600 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
-home 402 200 Saidie Newara Portfolio overflowX=0 broken=0 errors=1
-jena 402 200 Jena · AI VTuber — Saidie Newara overflowX=0 broken=0 errors=1
-nos 402 200 N•OS & NCOM-Arch — Saidie Newara overflowX=0 broken=0 errors=1
-projects 402 200 Projects — Saidie Newara overflowX=0 broken=0 errors=1
+page nos 1600 2026-10-17T02:07:41.966Z
