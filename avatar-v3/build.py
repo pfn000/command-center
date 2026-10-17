@@ -275,7 +275,8 @@ if os.path.exists(A+'/hair_texture_black_to_white_1713.jpg'):
 HCT=IN+'/Textures/'+P.get('HAIR_TEX','B&W.png')
 if HAIR=='blowout_cards' and os.path.exists(HCT):
     HM,nt,b=newmat('HairCards'); tt=nt.nodes.new('ShaderNodeTexImage'); tt.image=bpy.data.images.load(HCT)
-    nt.links.new(tt.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha']); b.inputs['Roughness'].default_value=0.4
+    gm=nt.nodes.new('ShaderNodeGamma'); gm.inputs['Gamma'].default_value=P.get('HAIR_GAMMA',1.9); nt.links.new(tt.outputs[0],gm.inputs['Color'])
+    nt.links.new(gm.outputs[0],b.inputs['Base Color']); nt.links.new(tt.outputs[1],b.inputs['Alpha']); b.inputs['Roughness'].default_value=0.4
     try: HM.blend_method='HASHED'
     except: pass
     log('hair: Blowout haircards with her',HCT.split('/')[-1])
@@ -462,9 +463,9 @@ for o,off in ((SH,0.0016),(BRA,0.0016)):
 # ---------- scalp cap: the Female head is a face shell; close the back of the head under the hair
 if P.get('SCALP',True):
     hmn,hmx=wbb([FH]); hw=(hmx.x-hmn.x)/2
-    sc_c=Vector((0,hmx.y+P.get('SCALP_DY',0.018),hmx.z-0.052))
+    sc_c=Vector((0,hmx.y+P.get('SCALP_DY',0.012),hmx.z-0.054))
     bm=bmesh.new(); r=bmesh.ops.create_uvsphere(bm,u_segments=20,v_segments=14,radius=1.0)
-    for v in r['verts']: v.co=Vector((v.co.x*hw*0.9,v.co.y*P.get('SCALP_RY',0.058),v.co.z*0.062))+sc_c
+    for v in r['verts']: v.co=Vector((v.co.x*hw*0.84,v.co.y*P.get('SCALP_RY',0.05),v.co.z*0.056))+sc_c
     uvl=bm.loops.layers.uv.new('UVMap')
     scm=bpy.data.materials.new('ScalpBlack'); scm.use_nodes=True; q=scm.node_tree.nodes['Principled BSDF']; q.inputs['Base Color'].default_value=(0.015,0.015,0.016,1); q.inputs['Roughness'].default_value=0.4
     snt=scm.node_tree; wv=snt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value=90; wv.bands_direction='X'; wv.inputs['Distortion'].default_value=4
