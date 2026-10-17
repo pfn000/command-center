@@ -1,227 +1,384 @@
 {
  "shots": [
   {
-   "name": "tour-1600-light",
+   "name": "d-dark-1-about",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "tour2-1600-light",
+   "name": "z-hat",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "tour3-1600-light",
+   "name": "z-menubar",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "desk-1600-light",
+   "name": "z-dock",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "projects-open-1600-light",
+   "name": "d-dark-1b-about-scrolled",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "window-moving-1600-light",
+   "name": "d-dark-2-projects",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "projects"
+   ]
   },
   {
-   "name": "window-resizing-1600-light",
+   "name": "d-dark-2b-projects-scrolled",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "projects"
+   ]
   },
   {
-   "name": "pill-info-1600-light",
+   "name": "d-dark-2c-projects-auravt",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png",
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [
+    "https://www.electronjs.org/",
+    "https://www.electronjs.org/",
+    "https://threejs.org/",
+    "https://github.com/pixiv/three-vrm",
+    "https://mediapipe.dev/",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
+    "http://opensoundcontrol.org/",
+    "https://github.com/pixiv",
+    "https://mediapipe.dev/",
+    "https://discord.gg/7sFeAEq2"
+   ],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "projects"
+   ]
   },
   {
-   "name": "dots-menu-1600-light",
+   "name": "d-dark-3-plex",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "plex"
+   ]
   },
   {
-   "name": "lightbox-1600-light",
+   "name": "d-dark-3b-plex-scrolled",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "plex"
+   ]
   },
   {
-   "name": "contact-1600-light",
+   "name": "d-dark-3c-plex-docs",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "plex"
+   ]
   },
   {
-   "name": "tour-1600-dark",
+   "name": "d-dark-4-now",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "now"
+   ]
   },
   {
-   "name": "desk-1600-dark",
+   "name": "d-dark-5-emmi",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [
+    "https://www.electronjs.org/",
+    "https://www.electronjs.org/",
+    "https://threejs.org/",
+    "https://github.com/pixiv/three-vrm",
+    "https://mediapipe.dev/",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
+    "http://opensoundcontrol.org/",
+    "https://github.com/pixiv",
+    "https://mediapipe.dev/",
+    "https://discord.gg/7sFeAEq2",
+    "https://nodejs.org/",
+    "https://threejs.org/"
+   ],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "emmi"
+   ]
   },
   {
-   "name": "contact-1600-dark",
+   "name": "d-dark-6-resume",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "resume"
+   ]
   },
   {
-   "name": "now-1600-dark",
+   "name": "d-dark-7-contact",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "contact"
+   ]
   },
   {
-   "name": "jena-1600-dark",
+   "name": "d-dark-8-jena",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [
+    "https://jena-magic-screen.vercel.app"
+   ],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "jena"
+   ]
   },
   {
-   "name": "plex-1600-dark",
+   "name": "d-light-1-about",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "phone-home-402-light",
+   "name": "d-light-2-projects",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "projects"
+   ]
   },
   {
-   "name": "phone-projects-402-light",
+   "name": "d-light-3-plex",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "plex"
+   ]
   },
   {
-   "name": "phone-back-402-light",
+   "name": "d-light-4-now",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "now"
+   ]
   },
   {
-   "name": "phone-about-402-light",
+   "name": "p-dark-1-about",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(238, 241, 251)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   },
   {
-   "name": "phone-home-402-dark",
+   "name": "p-dark-2-projects",
    "overflowX": 0,
-   "broken": [],
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "projects"
+   ]
   },
   {
-   "name": "phone-projects-402-dark",
+   "name": "p-dark-3-plex",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "plex"
+   ]
   },
   {
-   "name": "phone-back-402-dark",
+   "name": "p-dark-4-now",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "now"
+   ]
   },
   {
-   "name": "phone-about-402-dark",
+   "name": "p-dark-5-resume",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "resume"
+   ]
   },
   {
-   "name": "phone-contact-402-dark",
+   "name": "p-dark-6-emmi",
+   "overflowX": 0,
+   "broken": [
+    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
+   ],
+   "peter": false,
+   "offsite": [
+    "https://www.electronjs.org/",
+    "https://www.electronjs.org/",
+    "https://threejs.org/",
+    "https://github.com/pixiv/three-vrm",
+    "https://mediapipe.dev/",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
+    "http://opensoundcontrol.org/",
+    "https://github.com/pixiv",
+    "https://mediapipe.dev/",
+    "https://discord.gg/7sFeAEq2",
+    "https://nodejs.org/",
+    "https://threejs.org/"
+   ],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "emmi"
+   ]
+  },
+  {
+   "name": "p-light-1-about",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "cream": "rgb(7, 7, 26)"
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about"
+   ]
   }
  ],
- "checks": {
-  "status_light": 200,
-  "coach_gone_light": true,
-  "status_dark": 200,
-  "coach_gone_dark": true,
-  "contact_honeypot": {
-   "status": 200,
-   "body": "{\"ok\":true}"
-  },
-  "contact_too_fast": {
-   "status": 200,
-   "body": "{\"ok\":true}"
-  },
-  "contact_invalid": {
-   "status": 400,
-   "body": "{\"ok\":false,\"error\":\"Please add your name, a valid email and a message (10+ characters).\"}"
-  },
-  "contact_real_no_key": {
-   "status": 503,
-   "body": "{\"ok\":false,\"mailto\":\"mailto:official_emmi@outlook.com?subject=%5BPortfolio%5D%20Other%20%E2%80%94%20Proof%20Run&body=Automated%20proof%20message%20from%20CI\"}"
-  },
-  "contact_rate_limit_statuses": [
-   503,
-   503,
-   429,
-   429
-  ],
-  "resume": {
-   "status": 404,
-   "type": "text/html; charset=utf-8",
-   "bytes": 12161
-  },
-  "page/about": 200,
-  "page/projects": 200,
-  "page/plex": 200,
-  "page/contact": 200
+ "errors": [],
+ "resume": {
+  "status": 200,
+  "type": "application/pdf",
+  "bytes": 1930
  },
- "errors": [
-  "video: Error: mouse.move: Target page, context or browser has been closed",
-  "video outer: Error: browserContext.close: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /home/runner/.cache/ms-playwright/chromium-1140/chrome-linux/chrome --disable-field-trial-config"
- ]
+ "gh": {
+  "status": 200,
+  "bytes": 325941
+ }
 }
