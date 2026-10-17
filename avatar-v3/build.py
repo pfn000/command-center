@@ -3,7 +3,7 @@ import bpy, sys, os, math, json, mathutils, bmesh
 from mathutils import Vector, Matrix
 argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; A=IN+'/assets'; os.makedirs(OUT+'/proof',exist_ok=True)
 def log(*a): print('[v3]',*a,flush=True)
-P=dict(HAIR_W_RATIO=1.55, HAIR_TOP_GAP=0.010, HAIR_DY=0.012, HAIR_DZ=0.0, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
+P=dict(HAIR_W_RATIO=1.45, HAIR_TOP_GAP=0.010, HAIR_DY=0.012, HAIR_DZ=0.0, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
 except Exception as e: log('no params',e)
@@ -164,7 +164,9 @@ skin=tuple(np.median(sk,0)) if len(sk) else (0.85,0.68,0.66); log('skin rgb (lin
 for i,s in enumerate(FH.material_slots):
     n=s.material.name.lower() if s.material else ''
     if n.startswith('face'):
-        m,nt,b=newmat('Face'); b.inputs['Base Color'].default_value=(*skin,1); b.inputs['Roughness'].default_value=0.45; b.inputs['Subsurface Weight'].default_value=0.08; b.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
+        m,nt,b=newmat('Face'); b.inputs['Base Color'].default_value=(*skin,1); b.inputs['Roughness'].default_value=0.45
+        if os.path.exists(A+'/face_skin_2_from_saidie_1708.jpg'):
+            ft=nt.nodes.new('ShaderNodeTexImage'); ft.image=img('face_skin_2_from_saidie_1708.jpg'); nt.links.new(ft.outputs[0],b.inputs['Base Color']); log('face texture: her 2.png (5:08 PM)'); b.inputs['Subsurface Weight'].default_value=0.08; b.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
         s.material=m
     elif n.startswith('effects'):
         m,nt,b=newmat('Effects'); b.inputs['Alpha'].default_value=0.0; m.blend_method='HASHED' if hasattr(m,'blend_method') else None; s.material=m
@@ -202,14 +204,28 @@ def hairmat():
     nz=nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value=60; nt.links.new(tc.outputs['Object'],nz.inputs['Vector'])
     ad=nt.nodes.new('ShaderNodeMath'); ad.operation='MULTIPLY_ADD'; nt.links.new(nz.outputs['Fac'],ad.inputs[0]); ad.inputs[1].default_value=0.12; nt.links.new(sp.outputs['Z'],ad.inputs[2])
     cr=nt.nodes.new('ShaderNodeValToRGB'); e=cr.color_ramp.elements
-    e[0].position=0.12; e[0].color=(0.80,0.80,0.80,1); e[1].position=0.82; e[1].color=(0.012,0.012,0.014,1)
-    for pos,col in ((0.32,(0.45,0.45,0.46,1)),(0.5,(0.10,0.10,0.105,1))): x=e.new(pos); x.color=col
+    e[0].position=0.10; e[0].color=(0.82,0.82,0.82,1); e[1].position=0.62; e[1].color=(0.010,0.010,0.012,1)
+    for pos,col in ((0.27,(0.45,0.45,0.46,1)),(0.45,(0.07,0.07,0.075,1))): x=e.new(pos); x.color=col
     nt.links.new(ad.outputs[0],cr.inputs[0]); nt.links.new(cr.outputs[0],b.inputs['Base Color'])
     b.inputs['Roughness'].default_value=0.38; b.inputs['Specular IOR Level'].default_value=0.6
     try: b.inputs['Sheen Weight'].default_value=0.3
     except: pass
     return m
-HM=hairmat(); UM.data.materials.clear(); UM.data.materials.append(HM)
+HM=hairmat()
+# her black->white strip atlas (5:13 PM): use it only if the Umeko UVs land on strands, not on the white background
+HA=None
+if os.path.exists(A+'/hair_texture_black_to_white_1713.jpg'):
+    ai=img('hair_texture_black_to_white_1713.jpg'); W_,H_=ai.size; apx=np.array(ai.pixels[:]).reshape(H_,W_,4)
+    uvd=UM.data.uv_layers.active.data; n=len(uvd); idx=range(0,n,max(1,n//4000)); white=0
+    for i in idx:
+        u,v=uvd[i].uv; x=min(W_-1,max(0,int((u%1)*W_))); y=min(H_-1,max(0,int((v%1)*H_)))
+        if apx[y,x,:3].mean()>0.85: white+=1
+    wf=white/len(idx); rep['hair_atlas_white_fraction']=wf; log('hair atlas: fraction of Umeko UVs on white background',round(wf,3))
+    if wf<P.get('ATLAS_MAX_WHITE',0.3):
+        HA,nt,b=newmat('HairAtlas'); ta=nt.nodes.new('ShaderNodeTexImage'); ta.image=ai; nt.links.new(ta.outputs[0],b.inputs['Base Color']); b.inputs['Roughness'].default_value=0.38
+        HM=HA; log('hair: using her atlas')
+    else: log('hair: atlas does not fit Umeko UVs -> gradient by height')
+UM.data.materials.clear(); UM.data.materials.append(HM)
 def solidmat(name,col,rough=0.4,metal=0.0):
     m,nt,b=newmat(name); b.inputs['Base Color'].default_value=(*col,1); b.inputs['Roughness'].default_value=rough; b.inputs['Metallic'].default_value=metal; return m,nt,b
 # bra: grey ribbed knit
@@ -225,6 +241,33 @@ tr=nt.nodes.new('ShaderNodeTexImage'); tr.image=img('f14f4077-56a8-49b7-b71b-577
 mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=0.6
 nt.links.new(tb.outputs[0],mx.inputs['A']); nt.links.new(ta.outputs[0],mx.inputs['B']); nt.links.new(mx.outputs['Result'],b.inputs['Base Color']); nt.links.new(tr.outputs[0],b.inputs['Roughness'])
 SH.data.materials.clear(); SH.data.materials.append(m)
+# ---------- decimate to the VRChat budget (<70k tris)
+def dec(o,r):
+    if r>=0.999: return
+    if o.data.shape_keys:
+        o.shape_key_clear()
+    md=o.modifiers.new('Dec','DECIMATE'); md.ratio=r; md.use_collapse_triangulate=False
+    sel([o]); bpy.ops.object.modifier_move_to_index(modifier='Dec',index=0); bpy.ops.object.modifier_apply(modifier='Dec')
+dec(BODY,P['BODY_DEC']); dec(UM,P['HAIR_DEC']); dec(BRA,P['BRA_DEC']); dec(SH,P['SHORTS_DEC'])
+# ---------- curvier (her sheet: wide hips, thick thighs, full bust, small waist) — pose-scale perpendicular to the bones, bake into the meshes, keep the rig
+CUR=P.get('CURVY',{'Hips':(1.10,1.0,1.06),'Left leg':(1.14,1.0,1.12),'Right leg':(1.14,1.0,1.12),'Twist_Leg.L':(1.10,1.0,1.08),'Twist_Leg.R':(1.10,1.0,1.08),
+     'Twist_Butt.L':(1.12,1.0,1.12),'Twist_Butt.R':(1.12,1.0,1.12),'Ass_Wiggle.L':(1.12,1.12,1.12),'Ass_Wiggle.R':(1.12,1.12,1.12),
+     'BreastUpper2_L':(1.14,1.14,1.14),'BreastUpper2_R':(1.14,1.14,1.14),'Spine':(0.94,1.0,0.96)})
+if CUR:
+    saved={}
+    for bn_,sc_ in CUR.items():
+        if bn_ not in B.data.bones: log('curvy: no bone',bn_); continue
+        for c in list(B.data.bones[bn_].children)+[B.data.bones[bn_]]:
+            if c.name not in saved: saved[c.name]=c.inherit_scale; c.inherit_scale='NONE'
+        B.pose.bones[bn_].scale=sc_
+    bpy.context.view_layer.update()
+    for o in (BODY,BRA,SH):
+        sel([o]); am=[m for m in o.modifiers if m.type=='ARMATURE'][0]; bpy.ops.object.modifier_apply(modifier=am.name)
+    sel([B]); bpy.ops.object.mode_set(mode='POSE'); bpy.ops.pose.armature_apply(selected=False); bpy.ops.object.mode_set(mode='OBJECT')
+    for n_,v_ in saved.items(): B.data.bones[n_].inherit_scale=v_
+    for o in (BODY,BRA,SH):
+        md=o.modifiers.new('Armature','ARMATURE'); md.object=B
+    log('curvy applied',list(CUR))
 # ---------- bun + black claw clip + cross necklace (rigid to Head / Chest)
 def add_mesh(name,bm,mat,group):
     me=bpy.data.meshes.new(name); bm.to_mesh(me); bm.free(); o=bpy.data.objects.new(name,me); sc.collection.objects.link(o)
@@ -242,7 +285,7 @@ for v in bm.verts:
 r2=bmesh.ops.create_uvsphere(bm,u_segments=12,v_segments=8,radius=hr*0.3)
 for v in r2['verts']: v.co.z*=0.9; v.co+=bunc+Vector((0.012,0.01,0.012))
 uvl=bm.loops.layers.uv.new('UVMap')
-BUN=add_mesh('Bun',bm,HM,'Head')
+BUN=add_mesh('Bun',bm,bpy.data.materials['HairGradient'],'Head')
 clip=bpy.data.materials.new('ClawClipBlack'); clip.use_nodes=True; cb=clip.node_tree.nodes['Principled BSDF']; cb.inputs['Base Color'].default_value=(0.008,0.008,0.009,1); cb.inputs['Roughness'].default_value=0.18
 bm=bmesh.new()
 cc=bunc+Vector((0,0.0,-hr*0.25))
@@ -267,30 +310,27 @@ rx=P.get('NECK_RX',0.05); ry0=nh.y-P.get('NECK_RY',0.047); ry1=nh.y+P.get('NECK_
 log('neck ring',len(ring),rx,ry0,ry1)
 bm=bmesh.new(); prev=None; pts=[]
 N=40
+from mathutils.bvhtree import BVHTree
+dg0=bpy.context.evaluated_depsgraph_get(); bvh=BVHTree.FromObject(BODY,dg0)
 for i in range(N):
     a=2*math.pi*i/N
-    x=(rx+0.006)*math.sin(a); y=((ry0+ry1)/2)+((ry1-ry0)/2+0.006)*(-math.cos(a)); z=nz-P.get('NECK_DROP',0.06)*max(0,math.cos(a))**2
-    pts.append(Vector((x,y,z)))
+    x=(rx+0.006)*math.sin(a); y=((ry0+ry1)/2)+((ry1-ry0)/2+0.006)*(-math.cos(a)); z=nz-P.get('NECK_DROP',0.07)*max(0,math.cos(a))**2
+    p=Vector((x,y,z)); hit=bvh.find_nearest(p)
+    if hit and hit[0] is not None: p=hit[0]+hit[1].normalized()*0.0028
+    pts.append(p)
+log('necklace front point',pts[0])
 for i in range(N):
     p0,p1=pts[i],pts[(i+1)%N]
     r=bmesh.ops.create_cube(bm,size=1.0); d=p1-p0; L=d.length
     rot=d.to_track_quat('X','Z').to_matrix()
     for v in r['verts']: v.co=rot@Vector((v.co.x*L,v.co.y*0.0012,v.co.z*0.0012))+(p0+p1)/2
 low=pts[0]
-cx=low+Vector((0,-0.003,-0.012))
+cx=low+Vector((0,-0.002,-0.013))
 for dims,off in (((0.0025,0.0016,0.018),(0,0,0)),((0.011,0.0016,0.0025),(0,0,0.003))):
     r=bmesh.ops.create_cube(bm,size=1.0)
     for v in r['verts']: v.co=Vector((v.co.x*dims[0],v.co.y*dims[1],v.co.z*dims[2]))+cx+Vector(off)
 uvl=bm.loops.layers.uv.new('UVMap')
 NECK=add_mesh('CrossNecklace',bm,silver,'Chest')
-# ---------- decimate to the VRChat budget (<70k tris)
-def dec(o,r):
-    if r>=0.999: return
-    if o.data.shape_keys:
-        o.shape_key_clear()
-    md=o.modifiers.new('Dec','DECIMATE'); md.ratio=r; md.use_collapse_triangulate=False
-    sel([o]); bpy.ops.object.modifier_move_to_index(modifier='Dec',index=0); bpy.ops.object.modifier_apply(modifier='Dec')
-dec(BODY,P['BODY_DEC']); dec(UM,P['HAIR_DEC']); dec(BRA,P['BRA_DEC']); dec(SH,P['SHORTS_DEC'])
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
 rep['materials']=sorted(set(s.material.name for o in meshes for s in o.material_slots if s.material))
@@ -317,7 +357,7 @@ bpy.ops.object.mode_set(mode='OBJECT')
 if P['RENDER']:
     sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['SAMPLES']; sc.cycles.use_denoising=True
     sc.render.film_transparent=True; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGBA'
-    sc.view_settings.view_transform='AgX'; sc.view_settings.look='AgX - Medium High Contrast'
+    sc.view_settings.view_transform='AgX'; sc.view_settings.look='AgX - Medium High Contrast'; sc.view_settings.exposure=P.get('EXPOSURE',-0.45)
     w=bpy.data.worlds.new('w'); sc.world=w; w.use_nodes=True; bg=w.node_tree.nodes['Background']; bg.inputs[0].default_value=(0.06,0.06,0.065,1); bg.inputs[1].default_value=1.0
     def area(name,loc,energy,size,col=(1,1,1)):
         L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
@@ -336,12 +376,13 @@ if P['RENDER']:
         sc.render.resolution_x,sc.render.resolution_y=rx,ry; cam.data.lens=lens; cam.data.sensor_fit='VERTICAL'; cam.data.sensor_height=24
         tgt=target or ce; hh=h or H*1.06
         d=hh/(24/lens)
-        dirs={'front':Vector((0,-1,0)),'back':Vector((0,1,0)),'side':Vector((-1,0,0))}
+        dirs={'front':Vector((0,-1,0)),'back':Vector((0,1,0)),'side':Vector((-1,0,0)),'q34':Vector((-0.72,-0.69,0)).normalized()}
         cam.location=tgt+dirs[view]*d; cam.rotation_euler=(tgt-cam.location).to_track_quat('-Z','Y').to_euler(); cam.data.clip_end=d*3
         sc.render.filepath=OUT+'/proof/'+name+'.png'; bpy.ops.render.render(write_still=True); log('render',name)
     shot('front','front',768,1376); shot('side','side',768,1376); shot('back','back',864,1536)
     hmn,hmx=wbb([FH]); fc=(hmn+hmx)/2; fc.z+=0.01
-    shot('face','front',1024,1024,lens=100,target=fc,h=(hmx.z-hmn.z)*1.9)
-    shot('face34','side',1024,1024,lens=100,target=fc,h=(hmx.z-hmn.z)*1.9)
+    fc=Vector((0,(hmn.y+hmx.y)/2,hmx.z-0.055))
+    shot('face','front',1024,1024,lens=100,target=fc,h=0.30)
+    shot('face34','q34',1024,1024,lens=100,target=fc,h=0.30)
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
 log('DONE')
