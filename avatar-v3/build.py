@@ -3,7 +3,7 @@ import bpy, sys, os, math, json, mathutils, bmesh
 from mathutils import Vector, Matrix
 argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; A=IN+'/assets'; os.makedirs(OUT+'/proof',exist_ok=True)
 def log(*a): print('[v3]',*a,flush=True)
-P=dict(HAIR_W_RATIO=1.45, HAIR_TOP_GAP=0.010, HAIR_DY=0.012, HAIR_DZ=0.0, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
+P=dict(HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DY=0.030, HAIR_DZ=0.006, HEAD_SCALE=1.09, ARM_DOWN=68, SAMPLES=48, RENDER=True, EXPORT=True,
        BODY_DEC=0.55, HAIR_DEC=0.55, BRA_DEC=0.5, SHORTS_DEC=0.45)
 try: P.update(json.load(open(os.path.dirname(os.path.abspath(__file__))+'/params.json')))
 except Exception as e: log('no params',e)
@@ -50,6 +50,11 @@ if len(hm)>1: sel(hm,hm[0]); bpy.ops.object.join()
 UM=hm[0]; UM.name='Hair'
 if UM.parent is not UA: mw=UM.matrix_world.copy(); UM.parent=UA; UM.matrix_world=mw
 log('hair bones',[b_.name for b_ in UA.data.bones][:60])
+if P.get('HEAD_SCALE',1.0)!=1.0:
+    hmn,hmx=wbb([FH]); piv=Vector((0,(hmn.y+hmx.y)/2,hmn.z))
+    S_=Matrix.Translation(piv)@Matrix.Scale(P['HEAD_SCALE'],4)@Matrix.Translation(-piv)
+    FA.matrix_world=S_@FA.matrix_world; bpy.context.view_layer.update()
+    sel([FA,FH],FA); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True); log('head scaled',P['HEAD_SCALE'])
 hmn,hmx=wbb([FH]); umn,umx=wbb([UM])
 head_w=hmx.x-hmn.x; s=head_w*P['HAIR_W_RATIO']/(umx.x-umn.x)
 yc=(hmn.y+hmx.y)/2
@@ -178,7 +183,15 @@ mb,nt,bs=newmat('Skin'); t=nt.nodes.new('ShaderNodeTexImage'); t.image=img('5867
 bs.inputs['Roughness'].default_value=0.42; bs.inputs['Subsurface Weight'].default_value=0.08; bs.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
 try: bs.inputs['Coat Weight'].default_value=0.12
 except: pass
-if P.get('BODY_MAT','original')=='original' and all(im_.size[0]>0 for im_ in bpy.data.images if im_.name.startswith(('BODY','Skin 1'))): log('body: her authored material (BODY.png + Skin 1.png)')
+if P.get('BODY_MAT','original')=='original' and all(im_.size[0]>0 for im_ in bpy.data.images if im_.name.startswith(('BODY','Skin 1'))):
+    log('body: her authored material (BODY.png + Skin 1.png)')
+    for s_ in BODY.material_slots:
+        for n_ in s_.material.node_tree.nodes:
+            if n_.type=='BSDF_PRINCIPLED':
+                n_.inputs['Roughness'].default_value=P.get('SKIN_ROUGH',0.36); n_.inputs['Coat Weight'].default_value=P.get('SKIN_COAT',0.18); n_.inputs['Coat Roughness'].default_value=0.25
+                n_.inputs['Subsurface Weight'].default_value=0.12; n_.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25); n_.inputs['Subsurface Scale'].default_value=0.01
+for s_ in FH.material_slots:
+    pass
 else: BODY.data.materials.clear(); BODY.data.materials.append(mb); log('body: fallback 5867')
 # skin tone for the head from the body texture's median skin pixel
 import numpy as np
@@ -290,7 +303,7 @@ dec(BODY,P['BODY_DEC']); dec(UM,P['HAIR_DEC'] if tris(UM)>9000 else 1.0); dec(BR
 # ---------- curvier (her sheet: wide hips, thick thighs, full bust, small waist) — pose-scale perpendicular to the bones, bake into the meshes, keep the rig
 CUR=P.get('CURVY',{'Hips':(1.10,1.0,1.06),'Left leg':(1.14,1.0,1.12),'Right leg':(1.14,1.0,1.12),'Twist_Leg.L':(1.10,1.0,1.08),'Twist_Leg.R':(1.10,1.0,1.08),
      'Twist_Butt.L':(1.12,1.0,1.12),'Twist_Butt.R':(1.12,1.0,1.12),'Ass_Wiggle.L':(1.12,1.12,1.12),'Ass_Wiggle.R':(1.12,1.12,1.12),
-     'BreastUpper2_L':(1.14,1.14,1.14),'BreastUpper2_R':(1.14,1.14,1.14),'Spine':(0.94,1.0,0.96)})
+     'BreastUpper2_L':(1.14,1.14,1.14),'BreastUpper2_R':(1.14,1.14,1.14),'Spine':(0.88,1.0,0.93)})
 if CUR:
     saved={}
     for bn_,sc_ in CUR.items():
@@ -361,14 +374,61 @@ for i in range(N):
     p0,p1=pts[i],pts[(i+1)%N]
     r=bmesh.ops.create_cube(bm,size=1.0); d=p1-p0; L=d.length
     rot=d.to_track_quat('X','Z').to_matrix()
-    for v in r['verts']: v.co=rot@Vector((v.co.x*L,v.co.y*0.0012,v.co.z*0.0012))+(p0+p1)/2
+    for v in r['verts']: v.co=rot@Vector((v.co.x*L,v.co.y*0.0019,v.co.z*0.0019))+(p0+p1)/2
 low=pts[0]
-cx=low+Vector((0,-0.002,-0.013))
-for dims,off in (((0.0025,0.0016,0.018),(0,0,0)),((0.011,0.0016,0.0025),(0,0,0.003))):
+cx=low+Vector((0,-0.003,-0.016))
+for dims,off in (((0.0034,0.0022,0.026),(0,0,0)),((0.015,0.0022,0.0034),(0,0,0.005))):
     r=bmesh.ops.create_cube(bm,size=1.0)
     for v in r['verts']: v.co=Vector((v.co.x*dims[0],v.co.y*dims[1],v.co.z*dims[2]))+cx+Vector(off)
 uvl=bm.loops.layers.uv.new('UVMap')
 NECK=add_mesh('CrossNecklace',bm,silver,'Chest')
+# ---------- bra straps (thin black, over the shoulders) + small center bow, as on her sheet
+blk=bpy.data.materials.new('StrapBlack'); blk.use_nodes=True; kb=blk.node_tree.nodes['Principled BSDF']; kb.inputs['Base Color'].default_value=(0.012,0.012,0.013,1); kb.inputs['Roughness'].default_value=0.5
+dg0=bpy.context.evaluated_depsgraph_get(); bvh=BVHTree.FromObject(BODY,dg0)
+bmn,bmx=wbb([BRA])
+def snap(p,off):
+    h=bvh.find_nearest(p)
+    return h[0]+h[1].normalized()*off if h and h[0] is not None else p
+def ribbon(bm,pts,w,t):
+    for i in range(len(pts)-1):
+        p0,p1=pts[i],pts[i+1]; d=p1-p0; L=d.length
+        if L<1e-6: continue
+        r=bmesh.ops.create_cube(bm,size=1.0); rot=d.to_track_quat('X','Z').to_matrix()
+        for v in r['verts']: v.co=rot@Vector((v.co.x*L*1.08,v.co.y*w,v.co.z*t))+(p0+p1)/2
+bm=bmesh.new()
+sh_l=B.data.bones['Left shoulder']; shz=(B.matrix_world@sh_l.tail_local).z
+for sgn in (1,-1):
+    x=sgn*P.get('STRAP_X',0.055); pts=[]
+    zt=bmx.z-0.004; zs=shz+0.03
+    for k in range(25):
+        t=k/24.0; a=math.pi*t
+        y=-0.10*math.cos(a)+0.03; z=zt+(zs-zt)*math.sin(a)
+        pts.append(snap(Vector((x+sgn*0.012*math.sin(a),y,z)),0.0022))
+    ribbon(bm,pts,0.0035,0.0016)
+# bow at the center gore
+gv=[BRA.matrix_world@v.co for v in BRA.data.vertices if abs((BRA.matrix_world@v.co).x)<0.01]
+if gv:
+    g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
+    for sx in (-1,1):
+        r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
+        for v in r['verts']: v.co=Vector((v.co.x*0.008,v.co.y*0.002,v.co.z*0.005))+gc+Vector((sx*0.008,0,0))
+    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0035)
+    for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
+uvl=bm.loops.layers.uv.new('UVMap')
+STR=add_mesh('BraStraps',bm,blk,'Chest')
+# ---------- shorts: lower the waistband onto the hips (compress the top band down, keep it on the skin)
+if P.get('SHORTS_DROP',0.035)>0:
+    smn,smx=wbb([SH]); top=smx.z; z0=top-P.get('SHORTS_BAND',0.11); f=1-P['SHORTS_DROP']/(top-z0); moved=0
+    mw=SH.matrix_world; mwi=mw.inverted()
+    for v in SH.data.vertices:
+        p=mw@v.co
+        if p.z>z0:
+            p.z=z0+(p.z-z0)*f; h=bvh.find_nearest(p)
+            if h and h[0] is not None:
+                n_=h[1].normalized()
+                if (p-h[0]).dot(n_)<0.0015: p=h[0]+n_*0.0015
+            v.co=mwi@p; moved+=1
+    SH.data.update(); log('shorts waistband lowered',P['SHORTS_DROP'],'verts',moved)
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
 rep['materials']=sorted(set(s.material.name for o in meshes for s in o.material_slots if s.material))
