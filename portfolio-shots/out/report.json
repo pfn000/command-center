@@ -362,7 +362,7 @@
   }
  ],
  "errors": [
-  "phone arch résumé click: TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('button:has-text(\"Résumé\"):visible').first()\n  -   locator resolved to <button type=\"button\" class=\"btn ghost\">R"
+  "phone arch résumé click: TimeoutError: locator.click: Timeout 8000ms exceeded.\nCall log:\n  - waiting for locator('.nos-grid button[aria-label=\"Open Résumé\"]').first()\n  -   locator resolved to <button type=\"button\" class=\"gri"
  ],
  "archResume": {
   "desk": {
