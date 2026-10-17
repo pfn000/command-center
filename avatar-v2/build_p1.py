@@ -118,14 +118,29 @@ _ir = np.array(['EyeIris' in m for m in _fmat])
 for _s in (1,-1):
     _sel = _ir & (_fv[:,0]*_s > 0)
     if _sel.any(): _eyec[_s] = _fv[_sel].mean(0)
+_brow = np.array(['FaceBrow' in m for m in _fmat]); _skinm = np.array(['Face_00' in m for m in _fmat])
+_ncand = _fv[_skinm & (np.abs(_fv[:,0]) < 0.006) & (_fv[:,2] < list(_eyec.values())[0][2] - 0.012) & (_fv[:,2] > list(_eyec.values())[0][2] - 0.05)]
+_nose = _ncand[np.argmin(_ncand[:,1])] if len(_ncand) else np.array([0, -0.08, list(_eyec.values())[0][2]-0.03])
+note('nose tip', [round(float(x),3) for x in _nose])
 note('eye centres', {k:[round(float(x),3) for x in v] for k,v in _eyec.items()})
 def _reshape(P, eyes=False):
     P = np.array(P, np.float64)
     if eyes:
-        for _s, c in _eyec.items():
-            d = np.hypot((P[:,0]-c[0])/1.0, (P[:,2]-c[2])/1.15)
-            w = ss(0.034, 0.016, d) * (P[:,1] < c[1] + 0.03) * (P[:,0]*_s > -0.002)
-            P[:,0] = c[0] + (P[:,0]-c[0])*(1-0.15*w); P[:,2] = c[2] + (P[:,2]-c[2])*(1-0.15*w)
+        B = P.copy()
+        for _s, c in _eyec.items():   # smaller, narrower almond eyes (sockets, lids, lashes, iris move together)
+            d = np.hypot((B[:,0]-c[0])/1.0, (B[:,2]-c[2])/1.15)
+            w = ss(0.036, 0.017, d) * (B[:,1] < c[1] + 0.03) * (B[:,0]*_s > -0.002)
+            P[:,0] = c[0] + (B[:,0]-c[0])*(1-0.24*w); P[:,2] = c[2] + (B[:,2]-c[2])*(1-0.36*w) - 0.0015*w
+        # brows: thicker, a touch lower and straighter (less anime arch)
+        for _s in (1,-1):
+            bm_ = _brow & (B[:,0]*_s > 0)
+            if bm_.any():
+                bc = B[bm_].mean(0); P[bm_,2] = bc[2] + (B[bm_,2]-bc[2])*1.7 - 0.002; P[bm_,0] = bc[0] + (B[bm_,0]-bc[0])*0.95
+        # nose: more defined bridge + tip (VRoid's is a dot)
+        r = np.hypot(B[:,0]/0.011, (B[:,2]-_nose[2])/0.016)
+        br = np.exp(-(B[:,0]/0.006)**2) * ss(_nose[2]-0.005, _nose[2]+0.012, B[:,2]) * ss(_eyec[1][2]+0.004, _eyec[1][2]-0.01, B[:,2])
+        front = (B[:,1] < _nose[1] + 0.02)
+        P[:,1] -= (0.0035*np.exp(-r**2) + 0.0022*br) * front
     w = ss(L['neck'].z - 0.01, L['neck'].z + 0.04, P[:,2])[:,None]
     P = P + ((_piv + (P - _piv)*HS) - P) * w
     b = P[:,2] < _lz
@@ -150,7 +165,7 @@ for _e in arm.data.edit_bones:
 bpy.ops.object.mode_set(mode='OBJECT')
 L = _landmarks()
 note('reshaped: head x%.2f legs x%.2f eyes pinched 15%%; new landmarks' % (HS, LS), {k:[round(c,3) for c in v] for k,v in L.items()})
-REP['reshape'] = {'head_scale': HS, 'leg_scale': LS, 'eye_pinch': 0.15}
+REP['reshape'] = {'head_scale': HS, 'leg_scale': LS, 'eye_pinch_xz': [0.24, 0.36], 'brows': 'x1.7 thicker', 'nose': 'bridge+tip'}
 # ---------- 1. base Body -> skin only; HairBack (scalp) goes to hair; sample clothes/shoes dropped ----------
 hairback = split_faces(body, lambda o,f,bm: 'HAIR' in matname(o, f.material_index), 'HairBack')
 # VRoid culls the skin hidden under clothes: the sample has NO chest skin (z 1.1-1.25 empty).
@@ -268,7 +283,7 @@ neck.data.materials.clear(); neck.data.materials.append(make_mat('Necklace_Silve
 copy_weights_nearest(neck, body); add_armature(neck)
 for st in straps: st.data.materials.clear(); copy_weights_nearest(st, body)
 H = 512; n1 = np.random.rand(H,H).astype(np.float32)
-knit = 0.62 + 0.05*(n1-0.5) + 0.03*np.sin(np.arange(H)[None,:]*math.pi/2.0)
+knit = 0.36 + 0.05*(n1-0.5) + 0.03*np.sin(np.arange(H)[None,:]*math.pi/2.0)
 tee.data.materials.append(make_mat('Tee_Knit', img=make_img('Tee_Heather', np.stack([knit*0.98, knit*0.98, knit*1.01], 2)), rough=0.9))
 shorts.data.materials.append(make_mat('Shorts_Black', (0.02,0.02,0.022,1), rough=0.6))
 shorts.data.materials.append(make_mat('Shorts_Trim_White', (0.92,0.92,0.92,1), rough=0.6))

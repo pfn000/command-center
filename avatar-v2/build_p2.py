@@ -30,7 +30,7 @@ C_band = 2*math.pi*r_; H_band = th_top - band_lo
 REP['band'] = {'circumference_m': round(C_band,4), 'height_m': round(H_band,4)}
 S = 256; yy, xx = np.mgrid[0:S,0:S]/S
 d_ = np.abs(((xx*18 + yy*18) % 1) - 0.5) + np.abs(((xx*18 - yy*18) % 1) - 0.5)
-alpha = 0.55 + 0.25*ss(0.86, 0.98, d_)
+alpha = 0.80 + 0.15*ss(0.86, 0.98, d_)
 sheer_img = make_img('ThighHigh_Sheer', np.stack([np.full((S,S),0.045), np.full((S,S),0.035), np.full((S,S),0.03), alpha], 2))
 TW, TH = 2048, 256
 band = np.zeros((TH, TW, 4), np.float32); band[...,:3] = 0.02; band[...,3] = 1
@@ -124,11 +124,11 @@ for p0 in sample_roots(560):
         if back: tz = neckz + rng.uniform(-0.005, 0.04)
         elif side: tz = chinz + rng.uniform(-0.03, 0.02)
         else: tz = chinz + rng.uniform(0.0, 0.05)
-        d0 = radh*0.75 + np.array([0,0,0.35])*max(rad[2], 0) + rng.normal(0, 0.08, 3)
+        d0 = radh*0.45 + np.array([0,0,0.15])*max(rad[2], 0) + np.array([0,0,-0.35]) + rng.normal(0, 0.06, 3)
         curl = radh*rng.uniform(0.0, 0.18) + rng.normal(0, 0.05, 3)          # messy flicks outward at the ends
         layer = rng.random()
-        off0, off1 = (0.003, 0.007) if layer < 0.5 else (0.008, 0.017)
-        pts = grow(p0, d0, tz, off0, off1, curl, nseg=10)
+        off0, off1 = (0.003, 0.006) if layer < 0.5 else (0.006, 0.012)
+        pts = grow(p0, d0, tz, off0, off1, curl, nseg=10, grav=0.30)
         add_card(pts, rng.uniform(0.022, 0.032) if layer < 0.5 else rng.uniform(0.016, 0.026), 'main')
 # side locks in front of the ears, a little longer (refs)
 for s in (1,-1):
@@ -180,11 +180,12 @@ def build_cards(name, cards):
             rad = nrmz(np.array(p) - Hc)
             sd = nrmz(np.cross(tg, rad)); nn = np.cross(sd, tg)
             sd = nrmz(sd*math.cos(tw*t) + nn*math.sin(tw*t))
-            ww = w*(1.0 - 0.45*t*t)
-            for side_ in (-0.5, 0.5):
-                verts.append(np.array(p) + sd*ww*side_ + rad*0.0015*(1-t)); uvs.append(((colk + 0.5 + side_*0.94)/8.0, t)); vt.append(t); owner.append(ci)
+            ww = w*max(0.08, 1.0 - t**1.6)
+            for side_ in (-0.5, 0.0, 0.5):
+                ridge = (0.5 - abs(side_))*2*ww*0.35
+                verts.append(np.array(p) + sd*ww*side_ + rad*(0.0015*(1-t) + ridge)); uvs.append(((colk + 0.5 + side_*0.94)/8.0, t)); vt.append(t); owner.append(ci)
         for j in range(n-1):
-            a = base + 2*j; faces.append((a, a+1, a+3, a+2))
+            a = base + 3*j; faces.append((a, a+1, a+4, a+3)); faces.append((a+1, a+2, a+5, a+4))
     me = bpy.data.meshes.new(name); me.from_pydata([tuple(v) for v in verts], [], faces); me.update()
     uvl = me.uv_layers.new(name='UVMap')
     for poly in me.polygons:
