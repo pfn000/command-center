@@ -206,22 +206,20 @@ if P.get('FACE_RESHAPE',True) and eL and eR:
     _shift_all_keys(FH,D); FR.update(ipd=ipd,eye_size=[ex,ez],rc=rc,ro=ro,moved=sum(1 for d in D if d.length>1e-5))
     log('face reshape',FR)
 rep['face_reshape']=FR
-# ---------- v3.1 BANGS: lift/part the fringe so both eyes + brows show (compress hair in front of the face upward above the brow line)
+# ---------- v3.1 BANGS: cut the fringe at the brow line — delete hair-card faces that sit in front of the face below the brows
 if P.get('BANGS_LIFT',True) and eL and eR:
     cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
-    browz=ez0+P.get('BROW_UP',0.62)*ipd*0.5+max(sL.z,sR.z)*0.5
-    hmn,hmx=wbb([FH]); yfront=hmn.y; mw=UM.matrix_world; mwi=mw.inverted(); n_=0
-    kz=P.get('BANG_K',0.22)
-    for v in UM.data.vertices:
-        p=mw@v.co
-        if p.y<yfront+0.55*ipd and abs(p.x)<P.get('BANG_W',1.05)*ipd and p.z<browz+0.02*ipd:
-            t=max(0.0,min(1.0,(p.y-yfront)/(0.55*ipd)))   # fade at the sides/back
-            nz=browz+(p.z-browz)*kz
-            nz=p.z+(nz-p.z)*(1-t*t)
-            # sweep to her right side like the sheet
-            p.x+= -P.get('BANG_SWEEP',0.10)*ipd*(1-t)*max(0,(browz-p.z))/(ipd)
-            p.z=nz; v.co=mwi@p; n_+=1
-    UM.data.update(); log('bangs lifted above brow z',round(browz,4),'verts',n_); rep['bangs']={'browz':browz,'verts':n_}
+    browz=ez0+max(sL.z,sR.z)*P.get('EYE_SZ',0.72)*0.5+P.get('BROW_GAP',0.16)*ipd
+    from mathutils.bvhtree import BVHTree as _BVH
+    dgh=bpy.context.evaluated_depsgraph_get(); hb=_BVH.FromObject(FH,dgh)
+    mw=UM.matrix_world; bmH=bmesh.new(); bmH.from_mesh(UM.data); kill_=[]
+    for f in bmH.faces:
+        c=mw@f.calc_center_median()
+        if c.z>browz or abs(c.x)>P.get('BANG_W',1.15)*ipd: continue
+        h=hb.ray_cast(c,Vector((0,1,0)),P.get('BANG_DEPTH',0.035))
+        if h[0] is not None: kill_.append(f)
+    bmesh.ops.delete(bmH,geom=kill_,context='FACES'); bmH.to_mesh(UM.data); bmH.free(); UM.data.update()
+    log('bangs cut at brow z',round(browz,4),'faces removed',len(kill_)); rep['bangs']={'browz':browz,'removed':len(kill_)}
 
 # ---------- her Meshy eyeball -> iris texture (the .glb is a 368k-tri disc: too heavy for VRChat, so it is rendered once and mapped onto the head's eye UVs)
 EYE_TEX=None
@@ -331,8 +329,9 @@ def pinkify(mat,tint,sat):
         mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=1.0; mx.inputs['B'].default_value=(*tint,1)
         nt.links.new(hs.outputs['Color'],mx.inputs['A']); nt.links.new(mx.outputs['Result'],b.inputs['Base Color'])
     b.inputs['Subsurface Weight'].default_value=P.get('SSS_W',0.22); b.inputs['Subsurface Radius'].default_value=(1.0,0.32,0.22); b.inputs['Subsurface Scale'].default_value=P.get('SSS_SCALE',0.02)
-    b.inputs['Roughness'].default_value=P.get('SKIN_ROUGH2',0.32); b.inputs['Specular IOR Level'].default_value=0.6
-    b.inputs['Coat Weight'].default_value=P.get('SKIN_COAT2',0.55); b.inputs['Coat Roughness'].default_value=0.08
+    isface=mat.name.lower().startswith('face')
+    b.inputs['Roughness'].default_value=P.get('FACE_ROUGH',0.42) if isface else P.get('SKIN_ROUGH2',0.32); b.inputs['Specular IOR Level'].default_value=0.5 if isface else 0.6
+    b.inputs['Coat Weight'].default_value=P.get('FACE_COAT',0.18) if isface else P.get('SKIN_COAT2',0.45); b.inputs['Coat Roughness'].default_value=0.2 if isface else 0.08
     log('pinkify',mat.name,tint,sat)
 def uv_lookup(o,matnames=None):
     me=o.data; uv=me.uv_layers.active.data; mw=o.matrix_world; d={}
@@ -433,16 +432,15 @@ if P.get('BODY_PAINT',True) and SKIN_M:
     bn_=B.data.bones; ops=[]; BLK=(1.0,0.70,0.72)
     def bhead(n): return B.matrix_world@bn_[n].head_local if n in bn_ else None
     log('bones sample',[b_.name for b_ in bn_][:90])
-    for nm in P.get('PINK_JOINTS',['Left knee','Right knee','Left elbow','Right elbow','Left wrist','Right wrist']):
+    from mathutils.bvhtree import BVHTree as _BVH
+    _bb=_BVH.FromObject(BODY,bpy.context.evaluated_depsgraph_get())
+    for nm in ('Left knee','Right knee'):
         h=bhead(nm)
         if h is None: continue
-        fwd=Vector((0,-0.05,0)) if 'knee' in nm else Vector((0,0.04,0)) if 'elbow' in nm else Vector((0,0,0))
-        ops.append((h+fwd,0.035 if 'knee' in nm else 0.025,BLK,0.4))
-    for b_ in bn_:
-        if any(k in b_.name.lower() for k in ('index','middle','ring','little','pinky')) and b_.name[-1:].isdigit()==False:
-            ops.append((B.matrix_world@b_.head_local,0.008,BLK,0.3))
+        hh=_bb.ray_cast(Vector((h.x,h.y-0.5,h.z)),Vector((0,1,0)),0.7)
+        if hh[0] is not None: ops.append((hh[0],P.get('KNEE_R',0.028),BLK,P.get('KNEE_S',0.22)))
     ch=bhead('Chest') or bhead('Upper Chest')
-    if ch: ops.append((ch+Vector((0,-0.12,0.06)),0.06,BLK,0.22))
+    if ch: ops.append((ch+Vector((0,-0.12,0.06)),0.06,BLK,P.get('CHEST_S',0.12)))
     paint(BODY,bimg,ops,tag='body')
 # hair: black roots -> grey -> white tips (generated Z of the hair mesh)
 def hairmat():
@@ -575,7 +573,7 @@ for k in range(12): seg(bm,Vector((-L_/2+L_*k/12,spine_y,ccen.z)),Vector((-L_/2+
 NT=P.get('CLIP_TEETH',6)
 for k in range(NT):
     x=-L_/2+L_*(k+0.5)/NT
-    for a0,a1 in ((0,105),(0,-80)):
+    for a0,a1 in ((0,P.get('CLIP_UP',55)),(0,-P.get('CLIP_DN',55))):
         pts=[]
         for j in range(9):
             a=math.radians(a0+(a1-a0)*j/8); rr=rb*0.95+0.002
@@ -635,7 +633,11 @@ for sgn in (1,-1):
         t=k/24.0; a=math.pi*t
         y=-0.10*math.cos(a)+0.03; z=zt+(zs-zt)*math.sin(a)
         pts.append(snap(Vector((x+sgn*0.012*math.sin(a),y,z)),0.0022))
-    ribbon(bm,pts,0.0035,0.0016)
+    vs_=[]
+    for j,p_ in enumerate(pts):
+        tg=(pts[min(j+1,len(pts)-1)]-pts[max(j-1,0)]).normalized(); h_=bvh.find_nearest(p_); n_=h_[1].normalized() if h_[0] is not None else Vector((0,-1,0))
+        sd=tg.cross(n_).normalized()*P.get('STRAP_W',0.0045)/2; vs_.append((bm.verts.new(p_-sd),bm.verts.new(p_+sd)))
+    for a_,b_ in zip(vs_,vs_[1:]): bm.faces.new((a_[0],b_[0],b_[1],a_[1]))
 # bow at the center gore
 gv=[BRA.matrix_world@v.co for v in BRA.data.vertices if abs((BRA.matrix_world@v.co).x)<0.01]
 if gv:
@@ -692,39 +694,71 @@ if P.get('SHORTS_DROP',0.035)>0:
             v.co=mwi@p; moved+=1
     SH.data.update(); log('shorts waistband lowered',P['SHORTS_DROP'],'verts',moved)
 
-# ---------- v3.1 bottoms: cut her black shorts down to the sheet's high-cut THONG (front panel tapering to the crotch, thin back, thin side strings) + silver side rings
+# ---------- v3.1 bottoms: a high-cut black THONG generated ON her body (conforming panel front->crotch->back, thin hip strings, silver rings), in her shorts' black fabric; weights transferred from the body
+def weights_from_body(o):
+    dt=o.modifiers.new('DT','DATA_TRANSFER'); dt.object=BODY; dt.use_vert_data=True; dt.data_types_verts={'VGROUP_WEIGHTS'}; dt.vert_mapping='POLYINTERP_NEAREST'
+    dt.layers_vgroup_select_src='ALL'; dt.layers_vgroup_select_dst='NAME'
+    sel([o]); bpy.ops.object.datalayout_transfer(modifier='DT'); bpy.ops.object.modifier_move_to_index(modifier='DT',index=0); bpy.ops.object.modifier_apply(modifier='DT')
 if P.get('BOTTOM','thong')=='thong':
-    mw=SH.matrix_world; smn,smx=wbb([SH]); hx=(smx.x-smn.x)/2; top=max((mw@v.co).z for v in SH.data.vertices)
+    smn,smx=wbb([SH]); hx=(smx.x-smn.x)/2
     cy=(B.matrix_world@B.data.bones['Hips'].head_local).y if 'Hips' in B.data.bones else (smn.y+smx.y)/2
-    cen=[mw@v.co for v in SH.data.vertices if abs((mw@v.co).x)<0.012]
-    crz=min(p.z for p in cen) if cen else smn.z
-    bt=P.get('STRING_H',0.010); zt=top-bt
-    FW=P.get('THONG_FRONT',(0.42,0.10)); BW=P.get('THONG_BACK',(0.20,0.05))
-    bmT=bmesh.new(); bmT.from_mesh(SH.data); kill_=[]
-    for f in bmT.faces:
-        c=mw@f.calc_center_median()
-        if c.z>zt: continue
-        t=max(0.0,min(1.0,(zt-c.z)/max(1e-4,zt-crz)))
-        a,b_=FW if c.y<cy else BW
-        hw_=hx*(a+(b_-a)*t**0.8)
-        if c.z<crz-0.012 or abs(c.x)>hw_: kill_.append(f)
-    bmesh.ops.delete(bmT,geom=kill_,context='FACES'); bmT.to_mesh(SH.data); bmT.free(); SH.data.update()
-    log('thong cut: removed faces',len(kill_),'top',round(top,4),'crotch z',round(crz,4),'hip half-width',round(hx,4))
-    rep['thong']={'removed':len(kill_),'top':top,'crz':crz,'hx':hx}
+    hc=bvh.ray_cast(Vector((0,cy,smn.z-0.5)),Vector((0,0,1)),1.0); crz=hc[0].z if hc[0] is not None else smn.z+0.05
+    zO=crz+0.11; zpt=crz+P.get('PANEL_H',0.085); zbt=zpt+P.get('BACK_UP',0.045)
+    FW0,FW1,BW0,BW1=[hx*v for v in P.get('THONG_W',(0.40,0.09,0.07,0.11))]
+    off=0.0022; rows=[]
+    def cast(x,th):
+        d=Vector((0,-math.cos(th),-math.sin(th))); o_=Vector((x,cy,zO))+d*0.5; h=bvh.ray_cast(o_,-d,0.7)
+        return (h[0]+h[1].normalized()*off) if h[0] is not None else None
+    NTH=90
+    for k in range(NTH+1):
+        th=math.radians(-10+200*k/NTH); c=cast(0,th)
+        if c is None: continue
+        front=th<math.radians(90)
+        if front and c.z>zpt: continue
+        if (not front) and c.z>zbt: continue
+        if front: t=max(0,min(1,(zpt-c.z)/max(1e-4,zpt-crz))); hw=FW0+(FW1-FW0)*t**0.75
+        else: t=max(0,min(1,(c.z-crz)/max(1e-4,zbt-crz))); hw=BW0+(BW1-BW0)*t
+        row=[cast(hw*(j/3.0-1),th) for j in range(7)]
+        if all(r_ is not None for r_ in row): rows.append(row)
+    bmT=bmesh.new(); vr=[[bmT.verts.new(p) for p in r_] for r_ in rows]
+    for a,b2 in zip(vr,vr[1:]):
+        for j in range(6): bmT.faces.new((a[j],a[j+1],b2[j+1],b2[j]))
+    # hip strings: from the panel's top corners up over the hip bones and round to the back top
+    fc=rows[0] if rows else None
+    def ring_pt(a,z,o2):
+        dr=Vector((math.sin(a),-math.cos(a),0)); h=bvh.ray_cast(Vector((0,cy,z))+dr*0.5,-dr,0.7)
+        return (h[0]+h[1].normalized()*o2) if h[0] is not None else None
+    ac=math.asin(min(0.9,FW0/max(hx,1e-3)))*0.9; SHt=P.get('STRING_H',0.006); NS=40
+    for sg in (1,-1):
+        prev=None
+        for k in range(NS+1):
+            a=ac+(math.pi-ac)*k/NS; t=k/NS
+            z=zpt+P.get('STRING_RISE',0.035)*math.sin(min(1,t*2)*math.pi/2) - (P.get('STRING_RISE',0.035)-(zbt-zpt))*max(0,t*2-1)
+            p0=ring_pt(sg*a,z-SHt/2,off); p1=ring_pt(sg*a,z+SHt/2,off)
+            if p0 is None or p1 is None: continue
+            cur=(bmT.verts.new(p0),bmT.verts.new(p1))
+            if prev: bmT.faces.new((prev[0],cur[0],cur[1],prev[1]))
+            prev=cur
+    bmT.loops.layers.uv.new('UVMap')
+    me=bpy.data.meshes.new('Thong'); bmT.to_mesh(me); bmT.free(); TH=bpy.data.objects.new('Thong',me); sc.collection.objects.link(TH)
+    tm,tnt,tb_=newmat('ThongBlack'); tb_.inputs['Base Color'].default_value=(0.012,0.012,0.013,1); tb_.inputs['Roughness'].default_value=0.42; tb_.inputs['Sheen Weight'].default_value=0.3
+    me.materials.append(tm); TH.parent=B
+    for p_ in me.polygons: p_.use_smooth=True
+    weights_from_body(TH); md=TH.modifiers.new('Armature','ARMATURE'); md.object=B
+    log('thong generated rows',len(rows),'tris',tris(TH),'crotch z',round(crz,4),'panel top',round(zpt,4))
+    rep['thong']={'rows':len(rows),'crz':crz,'zpt':zpt,'hx':hx}
     bmR=bmesh.new()
     for sg in (1,-1):
-        x=sg*hx*FW[0]; z=top-bt*0.5
-        h=bvh.ray_cast(Vector((x,cy-0.45,z)),Vector((0,1,0)),0.6)
-        if h[0] is None: continue
-        c=h[0]+h[1].normalized()*0.004; nrm=h[1].normalized()
-        # small ring in the plane of the skin
-        tng=nrm.cross(Vector((0,0,1))).normalized(); up=tng.cross(nrm).normalized(); RR=P.get('RING_R',0.0075); prev=None
+        c=ring_pt(sg*ac,zpt,0.0045)
+        if c is None: continue
+        nrm=(c-Vector((0,cy,c.z))).normalized(); tng=nrm.cross(Vector((0,0,1))).normalized(); up=tng.cross(nrm).normalized(); RR=P.get('RING_R',0.0075)
         pts_=[c+(tng*math.cos(2*math.pi*j/16)+up*math.sin(2*math.pi*j/16))*RR for j in range(17)]
         for j in range(16):
             d=pts_[j+1]-pts_[j]; L=d.length; r=bmesh.ops.create_cube(bmR,size=1.0); rot=d.to_track_quat('X','Z').to_matrix()
             for v in r['verts']: v.co=rot@Vector((v.co.x*L*1.2,v.co.y*0.0022,v.co.z*0.0022))+(pts_[j]+pts_[j+1])/2
     bmR.loops.layers.uv.new('UVMap')
-    RINGS=add_mesh('ThongRings',bmR,bpy.data.materials['Silver'] if 'Silver' in bpy.data.materials else bpy.data.materials.new('Silver2'),'Hips')
+    RINGS=add_mesh('ThongRings',bmR,bpy.data.materials['Silver'],'Hips')
+    bpy.data.objects.remove(SH); SH=TH
 # ---------- keep clothes outside the (curvier) skin
 for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
     mw=o.matrix_world; mwi=mw.inverted(); pushed=0
