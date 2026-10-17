@@ -1,1 +1,1 @@
-inspect run 1: list assets + previews
+build run 1: append body + her head/hair/top/shorts, fit hair, merge rig, proofs
