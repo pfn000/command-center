@@ -110,11 +110,13 @@ for o in list(bpy.data.objects):
 me=FH.data; mi={i:s.material.name if s.material else '' for i,s in enumerate(FH.material_slots)}
 eyeL=[];eyeR=[]
 uvl=me.uv_layers.active.data
-eyeuv=[]
+eyeuv=[];euvL=[];euvR=[]
 for p in me.polygons:
     if 'eye' in mi[p.material_index].lower():
         c=FH.matrix_world@p.center; (eyeL if c.x>0 else eyeR).append(c)
-        for li in p.loop_indices: eyeuv.append(tuple(uvl[li].uv))
+        for li in p.loop_indices: eyeuv.append(tuple(uvl[li].uv)); (euvL if c.x>0 else euvR).append(tuple(uvl[li].uv))
+def uvbb(L): return [min(u[0] for u in L),min(u[1] for u in L),max(u[0] for u in L),max(u[1] for u in L)] if L else [0,0,1,1]
+rep['eye_uv_L']=uvbb(euvL); rep['eye_uv_R']=uvbb(euvR); log('eye uv L',rep['eye_uv_L'],'R',rep['eye_uv_R'])
 def ctr(ps): 
     if not ps: return None
     mn=Vector([min(p[i] for p in ps) for i in range(3)]); mx=Vector([max(p[i] for p in ps) for i in range(3)]); return (mn+mx)/2,(mx-mn)
@@ -127,8 +129,8 @@ def img(name):
     p=A+'/'+name; return bpy.data.images.load(p,check_existing=True)
 def newmat(name):
     m=bpy.data.materials.new(name); m.use_nodes=True; nt=m.node_tree; return m,nt,nt.nodes['Principled BSDF']
-# body skin: her albedo 8d51 (pale pink skin, nipples/navel)
-mb,nt,bs=newmat('Skin'); t=nt.nodes.new('ShaderNodeTexImage'); t.image=img('8d51befa-86f9-4d6c-be9d-ad3cf8c28f68.jpg'); nt.links.new(t.outputs[0],bs.inputs['Base Color'])
+# body skin: her albedo 5867 (she re-sent it 5:07 PM as THE skin) (pale pink skin, nipples/navel)
+mb,nt,bs=newmat('Skin'); t=nt.nodes.new('ShaderNodeTexImage'); t.image=img('5867c342-78a0-443f-aecc-a24f5d7dc6d3.jpg'); nt.links.new(t.outputs[0],bs.inputs['Base Color'])
 bs.inputs['Roughness'].default_value=0.42; bs.inputs['Subsurface Weight'].default_value=0.08; bs.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25)
 try: bs.inputs['Coat Weight'].default_value=0.12
 except: pass
@@ -149,9 +151,14 @@ for i,s in enumerate(FH.material_slots):
     elif n.startswith('eyes'):
         # procedural blue-grey iris on the head's eye UVs until the Meshy iris is mapped
         m,nt,b=newmat('Eyes'); uv=nt.nodes.new('ShaderNodeTexCoord'); 
-        u0,v0,u1,v1=rep.get('eye_uv_bb',[0,0,1,1])
-        mp=nt.nodes.new('ShaderNodeMapping'); mp.inputs['Location'].default_value=(-(u0+u1)/2,-(v0+v1)/2,0)
-        nt.links.new(uv.outputs['UV'],mp.inputs['Vector'])
+        L_=rep['eye_uv_L']; R_=rep['eye_uv_R']
+        cL=((L_[0]+L_[2])/2,(L_[1]+L_[3])/2,0); cR=((R_[0]+R_[2])/2,(R_[1]+R_[3])/2,0)
+        u0,v0,u1,v1=L_
+        sp=nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(uv.outputs['Object'],sp.inputs[0])
+        lt=nt.nodes.new('ShaderNodeMath'); lt.operation='LESS_THAN'; lt.inputs[1].default_value=0.0; nt.links.new(sp.outputs['X'],lt.inputs[0])
+        mxv=nt.nodes.new('ShaderNodeMix'); mxv.data_type='VECTOR'; nt.links.new(lt.outputs[0],mxv.inputs['Factor']); mxv.inputs[4].default_value=cL; mxv.inputs[5].default_value=cR
+        sub=nt.nodes.new('ShaderNodeVectorMath'); sub.operation='SUBTRACT'; nt.links.new(uv.outputs['UV'],sub.inputs[0]); nt.links.new(mxv.outputs[1],sub.inputs[1])
+        mp=sub
         ln=nt.nodes.new('ShaderNodeVectorMath'); ln.operation='LENGTH'; nt.links.new(mp.outputs[0],ln.inputs[0])
         dv=nt.nodes.new('ShaderNodeMath'); dv.operation='DIVIDE'; dv.inputs[1].default_value=max(u1-u0,v1-v0)/2; nt.links.new(ln.outputs['Value'],dv.inputs[0])
         cr=nt.nodes.new('ShaderNodeValToRGB'); e=cr.color_ramp.elements
@@ -226,16 +233,14 @@ CLIP=add_mesh('ClawClip',bm,clip,'Head')
 silver=bpy.data.materials.new('Silver'); silver.use_nodes=True; sb=silver.node_tree.nodes['Principled BSDF']; sb.inputs['Base Color'].default_value=(0.85,0.85,0.88,1); sb.inputs['Metallic'].default_value=1; sb.inputs['Roughness'].default_value=0.2
 neck=B.data.bones['Neck']; nh=B.matrix_world@neck.head_local
 # find body cross-section at neck base to size the chain
-nz=nh.z-0.02; ring=[BODY.matrix_world@v.co for v in BODY.data.vertices if abs((BODY.matrix_world@v.co).z-nz)<0.006 and abs((BODY.matrix_world@v.co).x)<0.09]
-if ring:
-    rx=max(abs(p.x) for p in ring); ry0=min(p.y for p in ring); ry1=max(p.y for p in ring)
-else: rx,ry0,ry1=0.05,-0.05,0.05
+nz=nh.z+P.get('NECK_DZ',0.0)
+rx=P.get('NECK_RX',0.05); ry0=nh.y-P.get('NECK_RY',0.047); ry1=nh.y+P.get('NECK_RY',0.047); ring=[]
 log('neck ring',len(ring),rx,ry0,ry1)
 bm=bmesh.new(); prev=None; pts=[]
 N=40
 for i in range(N):
     a=2*math.pi*i/N
-    x=(rx+0.006)*math.sin(a); y=((ry0+ry1)/2)+((ry1-ry0)/2+0.006)*(-math.cos(a)); z=nz-0.035*max(0,math.cos(a))**2
+    x=(rx+0.006)*math.sin(a); y=((ry0+ry1)/2)+((ry1-ry0)/2+0.006)*(-math.cos(a)); z=nz-P.get('NECK_DROP',0.06)*max(0,math.cos(a))**2
     pts.append(Vector((x,y,z)))
 for i in range(N):
     p0,p1=pts[i],pts[(i+1)%N]
@@ -294,7 +299,7 @@ if P['RENDER']:
     # deformed bounds: use evaluated mesh extents
     dg=bpy.context.evaluated_depsgraph_get(); pts=[]
     for o in meshes:
-        e=o.evaluated_get(dg); pts+= [e.matrix_world@v.co for v in e.data.vertices[::7]]
+        e=o.evaluated_get(dg); vv=e.data.vertices; pts+= [e.matrix_world@vv[i].co for i in range(0,len(vv),7)]
     mn=Vector([min(p[i] for p in pts) for i in range(3)]); mx=Vector([max(p[i] for p in pts) for i in range(3)]); ce=(mn+mx)/2; H=mx.z-mn.z
     rep['posed_bb']=[list(mn),list(mx)]
     cam.data.type='PERSP'; cam.data.lens=85; dist=H*1.06/(36/85)*1.0
