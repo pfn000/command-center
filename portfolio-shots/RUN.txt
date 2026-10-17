@@ -1,1 +1,1 @@
-v5.1c proof run (phone hero: image then copy, no overlay) at 2026-10-17T21:04:06Z
+v5.1d proof run (hero Jena crop) at 2026-10-17T21:07:40Z
