@@ -1,10 +1,11 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
-// v5.2 proof (white light theme, phone line-first hero, clean desktop hero band, wrapped multi-page résumé PDF rendered to PNG, /arch Résumé -> /resume): open-layout portfolio (no windows/dock in normal view), 1600x900 desktop + 402x874 phone, light + dark
+// v5.3 proof (nav in its own row, sketch letterhead cropped, no old avatar as a first image, /arch back link in the menubar, MP4 scroll-throughs; white light theme, phone line-first hero, clean desktop hero band, wrapped multi-page résumé PDF rendered to PNG, /arch Résumé -> /resume): open-layout portfolio (no windows/dock in normal view), 1600x900 desktop + 402x874 phone, light + dark
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [] }
+const T0 = Date.now()
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
 const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
 async function audit(page) {
@@ -76,6 +77,52 @@ for (const key of Object.keys(PLAN)) {
     } catch (e) { report.errors.push(`${kind} arch résumé click: ${String(e).slice(0, 200)}`) }
   }
   await c.close()
+}
+
+// MP4 scroll-throughs of the home page (Saidie asked for videos of the final): record, trim the warm-up, H.264
+async function scrollVideo(kind, theme) {
+  const dir = `/tmp/vid-${kind}-${theme}`
+  fs.mkdirSync(dir, { recursive: true })
+  const size = kind === 'phone' ? { width: 804, height: 1748 } : { width: 1600, height: 900 }
+  const opts = kind === 'phone'
+    ? { viewport: { width: 402, height: 874 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: IPHONE, colorScheme: theme }
+    : { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, colorScheme: theme }
+  const t0 = Date.now()
+  const c = await browser.newContext({ ...opts, recordVideo: { dir, size } })
+  const p = await c.newPage()
+  try {
+    await go(p, '/', theme, 3000)
+    // warm-up pass so every lazy image is loaded before the take
+    const H0 = await p.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+    for (let y = 0; y <= H0; y += 700) { await p.evaluate((v) => window.scrollTo(0, v), y); await p.waitForTimeout(120) }
+    await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(2500)
+    const tStart = (Date.now() - t0) / 1000
+    await p.waitForTimeout(1500)
+    const H = await p.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+    const steps = 110
+    for (let k = 1; k <= steps; k++) {
+      const e = k / steps, ease = e < 0.5 ? 2 * e * e : 1 - Math.pow(-2 * e + 2, 2) / 2
+      await p.evaluate((v) => window.scrollTo(0, v), Math.round(H * ease))
+      await p.waitForTimeout(60)
+    }
+    await p.waitForTimeout(1200)
+    const tEnd = (Date.now() - t0) / 1000
+    await c.close()
+    const raw = await p.video().path()
+    const tag = kind === 'phone' ? 'p' : 'd'
+    const mp4 = `${out}/video-${tag}-${theme}-home-scroll.mp4`
+    execSync(`ffmpeg -y -loglevel error -ss ${Math.max(0, tStart).toFixed(2)} -to ${tEnd.toFixed(2)} -i ${raw} -c:v libx264 -preset medium -crf ${kind === 'phone' ? 26 : 24} -pix_fmt yuv420p -movflags +faststart -an ${mp4}`, { timeout: 240000 })
+    const bytes = fs.statSync(mp4).size
+    const dur = execSync(`ffprobe -v error -show_entries format=duration -of csv=p=0 ${mp4}`).toString().trim()
+    report.videos = report.videos || []
+    report.videos.push({ file: mp4.split('/').pop(), bytes, duration: Number(dur), size })
+    console.log('video', mp4, bytes, dur)
+  } catch (e) { report.errors.push(`video ${kind}-${theme}: ${String(e).slice(0, 300)}`); try { await c.close() } catch {} }
+}
+try { execSync('command -v ffmpeg') } catch { try { execSync('sudo apt-get install -y -q ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)', { stdio: 'inherit', timeout: 240000, shell: '/bin/bash' }) } catch (e) { report.errors.push('ffmpeg install ' + String(e).slice(0, 200)) } }
+for (const [k, t] of [['desk', 'dark'], ['phone', 'dark'], ['desk', 'light'], ['phone', 'light']]) {
+  if (Date.now() - T0 > 430000) { report.errors.push(`video ${k}-${t} skipped: time`); continue }
+  await scrollVideo(k, t)
 }
 try {
   const pdf = await fetch(`${B}/resume/download`)

@@ -1,1 +1,1 @@
-v5.2 proof run 3 (nav scrim, demo back link legible) at 2026-10-17T21:34:43Z
+v5.3 proof run 1 (nav own row, sketch letterhead cropped, room shot instead of old avatar, phone sketch->built lead, /arch back link in menubar, MP4 scroll-throughs) at 2026-10-17T21:48:14Z
