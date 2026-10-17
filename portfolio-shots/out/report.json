@@ -58,9 +58,7 @@
   {
    "name": "d-dark-2-projects",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
    "offsite": [],
    "dockRadius": "9999px",
@@ -72,9 +70,7 @@
   {
    "name": "d-dark-2b-projects-scrolled",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
    "offsite": [],
    "dockRadius": "9999px",
@@ -86,23 +82,9 @@
   {
    "name": "d-dark-2c-projects-auravt",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png",
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
-   "offsite": [
-    "https://www.electronjs.org/",
-    "https://www.electronjs.org/",
-    "https://threejs.org/",
-    "https://github.com/pixiv/three-vrm",
-    "https://mediapipe.dev/",
-    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
-    "http://opensoundcontrol.org/",
-    "https://github.com/pixiv",
-    "https://mediapipe.dev/",
-    "https://discord.gg/7sFeAEq2"
-   ],
+   "offsite": [],
    "dockRadius": "9999px",
    "wins": [
     "about",
@@ -160,24 +142,9 @@
   {
    "name": "d-dark-5-emmi",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
-   "offsite": [
-    "https://www.electronjs.org/",
-    "https://www.electronjs.org/",
-    "https://threejs.org/",
-    "https://github.com/pixiv/three-vrm",
-    "https://mediapipe.dev/",
-    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
-    "http://opensoundcontrol.org/",
-    "https://github.com/pixiv",
-    "https://mediapipe.dev/",
-    "https://discord.gg/7sFeAEq2",
-    "https://nodejs.org/",
-    "https://threejs.org/"
-   ],
+   "offsite": [],
    "dockRadius": "9999px",
    "wins": [
     "about",
@@ -236,9 +203,7 @@
   {
    "name": "d-light-2-projects",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
    "offsite": [],
    "dockRadius": "9999px",
@@ -285,9 +250,7 @@
   {
    "name": "p-dark-2-projects",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
    "offsite": [],
    "dockRadius": "9999px",
@@ -335,24 +298,9 @@
   {
    "name": "p-dark-6-emmi",
    "overflowX": 0,
-   "broken": [
-    "https://raw.githubusercontent.com/pfn000/AuraVT/main/.github/Images/Image.png"
-   ],
+   "broken": [],
    "peter": false,
-   "offsite": [
-    "https://www.electronjs.org/",
-    "https://www.electronjs.org/",
-    "https://threejs.org/",
-    "https://github.com/pixiv/three-vrm",
-    "https://mediapipe.dev/",
-    "https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API",
-    "http://opensoundcontrol.org/",
-    "https://github.com/pixiv",
-    "https://mediapipe.dev/",
-    "https://discord.gg/7sFeAEq2",
-    "https://nodejs.org/",
-    "https://threejs.org/"
-   ],
+   "offsite": [],
    "dockRadius": "9999px",
    "wins": [
     "about",
@@ -369,6 +317,42 @@
    "wins": [
     "about"
    ]
+  },
+  {
+   "name": "d-light-9-resume-page",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "resume"
+   ]
+  },
+  {
+   "name": "z-menubar-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "resume"
+   ]
+  },
+  {
+   "name": "z-dock-light",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "offsite": [],
+   "dockRadius": "9999px",
+   "wins": [
+    "about",
+    "resume"
+   ]
   }
  ],
  "errors": [],
@@ -379,6 +363,6 @@
  },
  "gh": {
   "status": 200,
-  "bytes": 325941
+  "bytes": 320375
  }
 }
