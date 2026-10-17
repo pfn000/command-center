@@ -64,7 +64,7 @@ for (const key of Object.keys(PLAN)) {
     await snap(p, `${tag}-dark-10-arch-demo`)
     // the résumé opened from the demo's menu must be its own page, never stacked over About
     try {
-      const btn = p.locator(kind === 'phone' ? '.nos-grid button[aria-label="Open Résumé"]' : 'header.nos-menubar button:has-text("Résumé")').first()
+      const btn = p.locator(kind === 'phone' ? 'button:has-text("Read my résumé")' : 'header.nos-menubar button:has-text("Résumé")').first()
       await btn.click({ timeout: 8000 })
       await p.waitForURL('**/resume**', { timeout: 15000 })
       await p.waitForTimeout(2500)

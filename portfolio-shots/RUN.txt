@@ -1,1 +1,1 @@
-v5.2 proof run 2 (Jena hero crop: no chip, no UI panel) at 2026-10-17T21:27:57Z
+v5.2 proof run 3 (nav scrim, demo back link legible) at 2026-10-17T21:34:43Z
