@@ -420,8 +420,8 @@ if gv:
     g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
     for sx in (-1,1):
         r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
-        for v in r['verts']: v.co=Vector((v.co.x*0.008,v.co.y*0.002,v.co.z*0.005))+gc+Vector((sx*0.008,0,0))
-    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0035)
+        for v in r['verts']: v.co=Vector((v.co.x*0.0055,v.co.y*0.0016,v.co.z*0.0034))+gc+Vector((sx*0.0055,0,0))
+    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0022)
     for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
@@ -452,7 +452,7 @@ if P.get('SHORTS_DROP',0.035)>0:
             v.co=mwi@p; moved+=1
     SH.data.update(); log('shorts waistband lowered',P['SHORTS_DROP'],'verts',moved)
 # ---------- keep clothes outside the (curvier) skin
-for o,off in ((SH,0.0016),(BRA,0.0016)):
+for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
     mw=o.matrix_world; mwi=mw.inverted(); pushed=0
     for v in o.data.vertices:
         p=mw@v.co; h=bvh.find_nearest(p)
