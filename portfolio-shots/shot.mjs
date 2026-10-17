@@ -1,7 +1,7 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
-// v5.3 proof (nav in its own row, sketch letterhead cropped, no old avatar as a first image, /arch back link in the menubar, MP4 scroll-throughs; white light theme, phone line-first hero, clean desktop hero band, wrapped multi-page résumé PDF rendered to PNG, /arch Résumé -> /resume): open-layout portfolio (no windows/dock in normal view), 1600x900 desktop + 402x874 phone, light + dark
+// v5.4 proof (phone Projects text wraps inside 402px, checked by element boxes; no mostly-empty project art) + v5.3 proof (nav in its own row, sketch letterhead cropped, no old avatar as a first image, /arch back link in the menubar, MP4 scroll-throughs; white light theme, phone line-first hero, clean desktop hero band, wrapped multi-page résumé PDF rendered to PNG, /arch Résumé -> /resume): open-layout portfolio (no windows/dock in normal view), 1600x900 desktop + 402x874 phone, light + dark
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [] }
@@ -17,6 +17,27 @@ async function audit(page) {
     windows: document.querySelectorAll('.nwin').length,
     navResume: [...document.querySelectorAll('.pf-nav a')].filter((a) => /résumé/i.test(a.textContent || '')).length,
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
+}
+
+// v5.4: element-box clipping audit over the WHOLE page (not just document scrollWidth): any visible element whose box runs past the viewport's left/right edge,
+// unless an ancestor clips/scrolls it inside the viewport (a code block that scrolls sideways is fine)
+async function clipAudit(page) {
+  return page.evaluate(() => {
+    const W = window.innerWidth, out = []
+    const clipsX = (el) => { const o = getComputedStyle(el).overflowX; return o !== 'visible' }
+    for (const el of document.body.querySelectorAll('*')) {
+      const r = el.getBoundingClientRect()
+      if (r.width < 2 || r.height < 2) continue
+      const cs = getComputedStyle(el)
+      if (cs.visibility === 'hidden' || cs.display === 'none' || cs.position === 'fixed') continue
+      if (r.right <= W + 1 && r.left >= -1) continue
+      let a = el.parentElement, ok = false
+      while (a && a !== document.body) { if (clipsX(a)) { const ar = a.getBoundingClientRect(); const o = getComputedStyle(a).overflowX; const scroller = o === 'auto' || o === 'scroll'; if (ar.right <= W + 1 && ar.left >= -1 && (scroller || ar.width < W - 1)) { ok = true; break } } a = a.parentElement }
+      if (ok) continue
+      out.push(`${el.tagName.toLowerCase()}.${String(el.className || '').slice(0, 40)} L${Math.round(r.left)} R${Math.round(r.right)} "${(el.textContent || '').trim().slice(0, 40)}"`)
+    }
+    return { count: out.length, items: out.slice(0, 15) }
+  }).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
 async function snap(page, name, opts = {}) {
   await page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 82, ...opts })
@@ -45,14 +66,20 @@ async function at(p, sel, dy = 0) {
 const PLAN = {
   'desk-dark': [['1-home', null], ['2-work', '#work'], ['2b-work-pairs', '#work', 900], ['3-now', '#now'], ['3b-now-more', '#now', 1200], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 1400], ['5-plex', '#plex'], ['5b-plex-code', '#plex', 600], ['6-emmi', '#emmi'], ['7-resume-sec', '#resume'], ['8-contact', '#contact']],
   'desk-light': [['1-home', null], ['2-work', '#work'], ['3-now', '#now'], ['4-projects', '#projects'], ['5-plex', '#plex'], ['8-contact', '#contact']],
-  'phone-dark': [['1-home', null], ['2-work', '#work'], ['2b-work-pairs', '#work', 700], ['3-now', '#now'], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 900], ['5-plex', '#plex'], ['5b-plex-code', '#plex', 700], ['6-emmi', '#emmi'], ['8-contact', '#contact']],
-  'phone-light': [['1-home', null], ['3-now', '#now'], ['4-projects', '#projects'], ['8-contact', '#contact']],
+  'phone-dark': [['1-home', null], ['2-work', '#work'], ['2b-work-pairs', '#work', 700], ['3-now', '#now'], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 900], ['4c-projects-3', '#projects', 1800], ['4d-projects-4', '#projects', 2700], ['4e-projects-5', '#projects', 3600], ['5-plex', '#plex'], ['5b-plex-code', '#plex', 700], ['6-emmi', '#emmi'], ['8-contact', '#contact']],
+  'phone-light': [['1-home', null], ['3-now', '#now'], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 900], ['4c-projects-3', '#projects', 1800], ['8-contact', '#contact']],
 }
 for (const key of Object.keys(PLAN)) {
   const [kind, theme] = key.split('-')
   const { c, p } = await ctxFor(kind, theme)
   await go(p, '/', theme)
   const tag = kind === 'phone' ? 'p' : 'd'
+  // load every lazy image first, then audit element boxes across the whole page
+  for (let y = 0; y < 30000; y += 700) { const done = await p.evaluate((yy) => { window.scrollTo(0, yy); return yy > document.documentElement.scrollHeight }, y); await p.waitForTimeout(120); if (done) break }
+  await p.waitForTimeout(1500)
+  report.clip = report.clip || {}
+  report.clip[key] = await clipAudit(p)
+  console.log('clip', key, JSON.stringify(report.clip[key]))
   for (const [name, sel, dy] of PLAN[key]) {
     if (sel) await at(p, sel, dy || 0)
     else { await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(600) }

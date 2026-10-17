@@ -1,1 +1,1 @@
-v5.3 proof run 3 FINAL (Jena screen project no longer first; phone video at true size) at 2026-10-17T22:01:10Z
+v5.4 proof run 1 (phone projects wrap; no empty pen art; element-box clip audit) at 2026-10-17T22:14:45Z
