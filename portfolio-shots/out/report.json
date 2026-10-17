@@ -1,358 +1,337 @@
 {
  "shots": [
   {
-   "name": "d-dark-1-about",
+   "name": "d-dark-1-home",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "z-hat",
+   "name": "d-dark-2-work",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "z-menubar",
+   "name": "d-dark-2b-work-pairs",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "z-dock",
+   "name": "d-dark-3-now",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-1b-about-scrolled",
+   "name": "d-dark-3b-now-more",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-2-projects",
+   "name": "d-dark-4-projects",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "projects"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-2b-projects-scrolled",
+   "name": "d-dark-4b-projects-more",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "projects"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-2c-projects-auravt",
+   "name": "d-dark-5-plex",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "projects"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-3-plex",
+   "name": "d-dark-5b-plex-code",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "plex"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-3b-plex-scrolled",
+   "name": "d-dark-6-emmi",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "plex"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-3c-plex-docs",
+   "name": "d-dark-7-resume-sec",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "plex"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-4-now",
+   "name": "d-dark-8-contact",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "now"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-5-emmi",
+   "name": "d-dark-9-resume-page",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "emmi"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-6-resume",
+   "name": "d-dark-10-arch-demo",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "resume"
-   ]
+   "dock": true,
+   "windows": 1,
+   "navResume": 0
   },
   {
-   "name": "d-dark-7-contact",
+   "name": "d-light-1-home",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "contact"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-dark-8-jena",
+   "name": "d-light-2-work",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [
-    "https://jena-magic-screen.vercel.app"
-   ],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "jena"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-light-1-about",
+   "name": "d-light-3-now",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-light-2-projects",
+   "name": "d-light-4-projects",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "projects"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-light-3-plex",
+   "name": "d-light-5-plex",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "plex"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "d-light-4-now",
+   "name": "d-light-8-contact",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "now"
-   ]
-  },
-  {
-   "name": "p-dark-1-about",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
-  },
-  {
-   "name": "p-dark-2-projects",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "projects"
-   ]
-  },
-  {
-   "name": "p-dark-3-plex",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "plex"
-   ]
-  },
-  {
-   "name": "p-dark-4-now",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "now"
-   ]
-  },
-  {
-   "name": "p-dark-5-resume",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "resume"
-   ]
-  },
-  {
-   "name": "p-dark-6-emmi",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "emmi"
-   ]
-  },
-  {
-   "name": "p-light-1-about",
-   "overflowX": 0,
-   "broken": [],
-   "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
    "name": "d-light-9-resume-page",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "resume"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "z-menubar-light",
+   "name": "p-dark-1-home",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "resume"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   },
   {
-   "name": "z-dock-light",
+   "name": "p-dark-2-work",
    "overflowX": 0,
    "broken": [],
    "peter": false,
-   "offsite": [],
-   "dockRadius": "9999px",
-   "wins": [
-    "about",
-    "resume"
-   ]
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-3-now",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-4-projects",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-4b-projects-more",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-5-plex",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-5b-plex-code",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-6-emmi",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-8-contact",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-9-resume-page",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-dark-10-arch-demo",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": true,
+   "windows": 1,
+   "navResume": 0
+  },
+  {
+   "name": "p-light-1-home",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-light-3-now",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-light-4-projects",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-light-8-contact",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
+  },
+  {
+   "name": "p-light-9-resume-page",
+   "overflowX": 0,
+   "broken": [],
+   "peter": false,
+   "dock": false,
+   "windows": 0,
+   "navResume": 1
   }
  ],
  "errors": [],
@@ -360,9 +339,5 @@
   "status": 200,
   "type": "application/pdf",
   "bytes": 1930
- },
- "gh": {
-  "status": 200,
-  "bytes": 320375
  }
 }
