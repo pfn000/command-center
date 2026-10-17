@@ -21,6 +21,7 @@ shot d-light-8-contact {"overflowX":0,"broken":[],"peter":false,"dock":false,"wi
 shot d-light-9-resume-page {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-1-home {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-2-work {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
+shot p-dark-2b-work-pairs {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-3-now {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-4-projects {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
 shot p-dark-4b-projects-more {"overflowX":0,"broken":[],"peter":false,"dock":false,"windows":0,"navResume":1}
