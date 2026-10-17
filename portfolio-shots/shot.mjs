@@ -83,7 +83,7 @@ for (const key of Object.keys(PLAN)) {
 async function scrollVideo(kind, theme) {
   const dir = `/tmp/vid-${kind}-${theme}`
   fs.mkdirSync(dir, { recursive: true })
-  const size = kind === 'phone' ? { width: 804, height: 1748 } : { width: 1600, height: 900 }
+  const size = kind === 'phone' ? { width: 402, height: 874 } : { width: 1600, height: 900 }
   const opts = kind === 'phone'
     ? { viewport: { width: 402, height: 874 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: IPHONE, colorScheme: theme }
     : { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, colorScheme: theme }
@@ -111,7 +111,7 @@ async function scrollVideo(kind, theme) {
     const raw = await p.video().path()
     const tag = kind === 'phone' ? 'p' : 'd'
     const mp4 = `${out}/video-${tag}-${theme}-home-scroll.mp4`
-    execSync(`ffmpeg -y -loglevel error -ss ${Math.max(0, tStart).toFixed(2)} -to ${tEnd.toFixed(2)} -i ${raw} -c:v libx264 -preset medium -crf ${kind === 'phone' ? 26 : 24} -pix_fmt yuv420p -movflags +faststart -an ${mp4}`, { timeout: 240000 })
+    execSync(`ffmpeg -y -loglevel error -ss ${Math.max(0, tStart).toFixed(2)} -to ${tEnd.toFixed(2)} -i ${raw} ${kind === 'phone' ? '-vf scale=804:1748:flags=lanczos ' : ''}-c:v libx264 -preset medium -crf ${kind === 'phone' ? 26 : 24} -pix_fmt yuv420p -movflags +faststart -an ${mp4}`, { timeout: 240000 })
     const bytes = fs.statSync(mp4).size
     const dur = execSync(`ffprobe -v error -show_entries format=duration -of csv=p=0 ${mp4}`).toString().trim()
     report.videos = report.videos || []

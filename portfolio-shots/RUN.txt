@@ -1,1 +1,1 @@
-v5.3 proof run 2 (phone: sketch + glass both on first screen; Now portrait image framed; 15 s videos) at 2026-10-17T21:54:59Z
+v5.3 proof run 3 FINAL (Jena screen project no longer first; phone video at true size) at 2026-10-17T22:01:10Z
