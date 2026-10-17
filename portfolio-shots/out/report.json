@@ -1,17 +1,5 @@
 [
  {
-  "page": "home",
-  "view": "1600",
-  "url": "http://localhost:3000/",
-  "status": 200,
-  "title": "Saidie Newara · XR UI/UX concept designer",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
   "page": "about",
   "view": "1600",
   "url": "http://localhost:3000/about",
@@ -24,71 +12,11 @@
   ]
  },
  {
-  "page": "projects",
-  "view": "1600",
-  "url": "http://localhost:3000/projects",
-  "status": 200,
-  "title": "Projects — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "plex",
-  "view": "1600",
-  "url": "http://localhost:3000/plex",
-  "status": 200,
-  "title": "PleX Code — Built For Direct Intent",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "home",
-  "view": "402",
-  "url": "http://localhost:3000/",
-  "status": 200,
-  "title": "Saidie Newara · XR UI/UX concept designer",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
   "page": "about",
   "view": "402",
   "url": "http://localhost:3000/about",
   "status": 200,
   "title": "Résumé — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "projects",
-  "view": "402",
-  "url": "http://localhost:3000/projects",
-  "status": 200,
-  "title": "Projects — Saidie Newara",
-  "overflowX": 0,
-  "broken": [],
-  "errors": [
-   "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  ]
- },
- {
-  "page": "plex",
-  "view": "402",
-  "url": "http://localhost:3000/plex",
-  "status": 200,
-  "title": "PleX Code — Built For Direct Intent",
   "overflowX": 0,
   "broken": [],
   "errors": [
