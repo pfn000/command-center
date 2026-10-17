@@ -1,1 +1,1 @@
-build v3.1 run D: fringe cut at brow, generated thong + strings + rings, strap strips, softer pink, matte face, smaller eyes, whiter hair ends, less balloon hips
+build v3.1 run E: = run D (D hung on the runner like B), Blender step capped at 1100 s so a hang still uploads the timestamped log

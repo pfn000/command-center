@@ -782,7 +782,10 @@ if P.get('SCALP',True):
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
 rep['materials']=sorted(set(s.material.name for o in meshes for s in o.material_slots if s.material))
-rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks][:20] if FH.data.shape_keys else []
+rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
+log('head keys',rep['shapekeys_head'])
+for k_,v_ in P.get('FACE_KEYS',{}).items():
+    if FH.data.shape_keys and k_ in FH.data.shape_keys.key_blocks: FH.data.shape_keys.key_blocks[k_].value=v_; log('face key',k_,v_)
 log('TRIS',rep['tris_total'],tri); log('materials',rep['materials'])
 # no piercings by default
 if FH.data.shape_keys and 'No peircings ' in FH.data.shape_keys.key_blocks: FH.data.shape_keys.key_blocks['No peircings '].value=1.0

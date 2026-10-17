@@ -32,7 +32,7 @@ jobs:
         if: always()
         run: |
           MODE=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f1)
-          timeout -k 10 2400 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          timeout -k 10 1100 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\]|Error|Traceback|line [0-9]+" /tmp/out/blender-log.txt | cut -c1-400 | head -250 || true
       - name: Compose proofs
         if: always()
