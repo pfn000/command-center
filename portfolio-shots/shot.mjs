@@ -47,6 +47,19 @@ async function desktop(theme) {
   const r = await page.goto(`${B}/?theme=${theme}`, { waitUntil: 'networkidle', timeout: 60000 })
   report.checks[`status_${theme}`] = r && r.status()
   await page.waitForTimeout(2200)
+  await snap(page, `tour-1600-${theme}`)
+  try {
+    if (theme === 'light') {
+      await page.getByRole('button', { name: 'Next' }).click(); await page.waitForTimeout(500)
+      await snap(page, 'tour2-1600-light')
+      await page.getByRole('button', { name: 'Next' }).click(); await page.waitForTimeout(500)
+      await snap(page, 'tour3-1600-light')
+      await page.getByRole('button', { name: 'Got it' }).click()
+    } else {
+      await page.getByRole('button', { name: 'Skip' }).click()
+    }
+    await page.waitForTimeout(500)
+  } catch (e) { errors.push('tour: ' + String(e).slice(0, 200)) }
   await snap(page, `desk-1600-${theme}`)
   try {
     await page.locator('[data-app=about]').screenshot({ path: `${out}/hero-app-${theme}.jpg`, type: 'jpeg', quality: 86 })
@@ -54,7 +67,7 @@ async function desktop(theme) {
   if (theme === 'light') {
     try {
       // open Projects from the dock, then hold ••• and move it (shot mid-move), then resize from the hidden corner (shot mid-resize)
-      await page.getByRole('button', { name: 'Open Projects' }).click()
+      await page.getByRole('button', { name: 'Explore my work' }).click()
       await page.waitForTimeout(900)
       await snap(page, 'projects-open-1600-light')
       const d = await center(page, '[data-app=projects] .ctl-dots')
@@ -116,17 +129,23 @@ async function phone(theme) {
   page.on('pageerror', (e) => errors.push(`phone ${theme} pageerror: ${String(e).slice(0, 300)}`))
   await page.goto(`${B}/?theme=${theme}`, { waitUntil: 'networkidle', timeout: 60000 })
   await page.waitForTimeout(2200)
-  await snap(page, `phone-402-${theme}`)
+  await snap(page, `phone-home-402-${theme}`)
   try {
-    // swipe the pill down = minimize -> home screen
-    const p = await center(page, '[data-app=about] .ctl-pill')
-    await drag(page, p, { x: p.x, y: p.y + 120 })
-    await page.waitForTimeout(900)
-    await snap(page, `phone-home-402-${theme}`)
-    await page.getByRole('button', { name: 'Open Projects' }).click()
+    await page.getByRole('button', { name: 'Explore my work' }).click()
     await page.waitForTimeout(1200)
     await snap(page, `phone-projects-402-${theme}`)
+    // swipe the pill down = minimize -> back to the app home
+    const p = await center(page, '[data-app=projects] .ctl-pill')
+    await drag(page, p, { x: p.x, y: p.y + 120 })
+    await page.waitForTimeout(900)
+    await snap(page, `phone-back-402-${theme}`)
+    await page.getByRole('button', { name: 'Open About Saidie' }).click()
+    await page.waitForTimeout(1200)
+    await snap(page, `phone-about-402-${theme}`)
     if (theme === 'dark') {
+      const a = await center(page, '[data-app=about] .ctl-arc')
+      await drag(page, a, { x: a.x, y: a.y + 220 })
+      await page.waitForTimeout(900)
       await page.getByRole('button', { name: 'Open Contact' }).click()
       await page.waitForTimeout(1200)
       await snap(page, 'phone-contact-402-dark')
@@ -143,9 +162,13 @@ async function video() {
   try {
     await page.goto(`${B}/?theme=light`, { waitUntil: 'networkidle', timeout: 60000 })
     await page.waitForTimeout(1800)
+    // the first-run window tour: Next, Next, Got it
+    for (const n of ['Next', 'Next', 'Got it']) {
+      try { const b = await center(page, `.coach button:has-text("${n}")`); await page.mouse.move(b.x, b.y, { steps: 14 }); await page.waitForTimeout(700); await page.mouse.click(b.x, b.y); await page.waitForTimeout(900) } catch (e) { errors.push('video tour ' + n) }
+    }
     await page.mouse.move(640, 380, { steps: 10 })
-    // open Projects
-    const dock = await center(page, 'button[aria-label="Open Projects"]')
+    // open Projects from the labelled dock
+    const dock = await center(page, '.nos-dock button[aria-label="Open Projects"]')
     await page.mouse.move(dock.x, dock.y, { steps: 20 }); await page.waitForTimeout(300); await page.mouse.click(dock.x, dock.y)
     await page.waitForTimeout(1200)
     // hold ••• and move

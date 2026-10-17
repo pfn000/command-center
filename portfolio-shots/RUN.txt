@@ -1,1 +1,1 @@
-v4.1 proof run for skills-cli-command portfolio-v2 e9fd00ebd90bbf57918b476cdf15d1fc17012dc0 at 2026-10-17T14:37:29Z
+v4.2 proof run for skills-cli-command portfolio-v2 (first-screen redesign) at 2026-10-17T15:53:57Z
