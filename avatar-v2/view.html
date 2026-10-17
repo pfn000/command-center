@@ -43,14 +43,14 @@ void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(c
   float fres = pow(1.0-max(dot(N,V),0.0),4.0); float rough = mix(0.35, 0.18, fres*0.6);
   for(int i=0;i<3;i++){ vec3 L = normalize(uL[i]); vec3 H = normalize(L+V); float NdotL = panel(N,L); float NdotH = max(dot(N,H),0.0);
     float ramp = smoothstep(0.0,1.0,NdotL)*0.7 + pow(NdotL,2.0)*0.3;
-    vec3 sss = vec3(0.8,0.2,0.2)*0.4*(1.0-NdotL)*step(0.001,NdotL)*0.35;
+    vec3 sss = vec3(0.85,0.42,0.32)*0.4*(1.0-NdotL)*step(0.001,NdotL)*0.30;
     float spec = 0.5*D_GGX(NdotH,max(rough,0.35)) + 0.5*D_GGX(NdotH,0.15);
     c += uWt[i] * (alb*(ramp+sss) + vec3(0.04)*spec*NdotL); }
   gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
-fabric: COMMON + `uniform float uSheen; 
+fabric: COMMON + `uniform float uSheen; uniform float uGloss; 
 void main(){ vec4 a = albedo(); vec3 alb = a.rgb; vec3 N = Nf(), V = normalize(cameraPosition - vW); vec3 c = vec3(0.0);
   float NdotV = max(dot(N,V),0.0); vec3 sheenC = mix(vec3(1.0),alb,0.5)*pow(1.0-NdotV,2.0)*uSheen;
-  for(int i=0;i<3;i++){ float NdotL = panel(N, normalize(uL[i])); c += uWt[i] * (alb*0.8*(0.3+0.7*NdotL) + sheenC*NdotL); }
+  for(int i=0;i<3;i++){ vec3 L = normalize(uL[i]); float NdotL = panel(N, L); float NdotH = max(dot(N, normalize(L+V)),0.0); c += uWt[i] * (alb*0.8*(0.3+0.7*NdotL) + sheenC*NdotL + vec3(0.05)*uGloss*D_GGX(NdotH,0.22)*NdotL); }
   gl_FragColor = vec4(toSRGB(aces(c*uI)), a.a); }`,
 hair: COMMON + `
 float kk(vec3 T,vec3 H,float r){float th=dot(T,H);float s=sqrt(max(1.0-th*th,0.0));return smoothstep(-1.0,0.0,th)*pow(s,1.0/r);}
@@ -76,7 +76,7 @@ function nudeMat(old, isMeshy){
   const m = new THREE.ShaderMaterial({ vertexShader: VS, fragmentShader: FS[kind],
     uniforms: { uAlb: { value: tex }, uHasTex: { value: !!tex }, uCol: { value: new THREE.Vector4(old.color?.r ?? 1, old.color?.g ?? 1, old.color?.b ?? 1, old.opacity ?? 1) },
       uCut: { value: blend ? 0.02 : (old.alphaTest || (/Hair|Eyeline|Brow|Highlight|Iris/.test(name) ? 0.5 : 0.0)) }, uI: { value: NUDE.I },
-      uL: { value: NUDE.panels.map(p => new THREE.Vector3(...p.d)) }, uWt: { value: NUDE.panels.map(p => p.w) }, uSheen: { value: /Sheer/.test(name) ? 0.5 : 0.8 } },
+      uL: { value: NUDE.panels.map(p => new THREE.Vector3(...p.d)) }, uWt: { value: NUDE.panels.map(p => p.w) }, uSheen: { value: /Sheer/.test(name) ? 0.5 : 0.8 }, uGloss: { value: /ThighHigh|Shorts_Black/.test(name) ? 1.0 : 0.0 } },
     side: THREE.DoubleSide, transparent: blend, depthWrite: !blend });
   m.name = name; m.userData.kind = kind; return m;
 }

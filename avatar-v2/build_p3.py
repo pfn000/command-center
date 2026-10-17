@@ -119,13 +119,15 @@ for i in range(len(fm.materials)):
 EYE = ('EyeIris','EyeHighlight','EyeWhite')
 eye_l = split_faces(face, lambda o,f,bm: any(s in matname(o,f.material_index) for s in EYE) and f.calc_center_median().x > 0, 'Eye_L')
 eye_r = split_faces(face, lambda o,f,bm: any(s in matname(o,f.material_index) for s in EYE), 'Eye_R')
+bm = bmesh.new(); bm.from_mesh(fm); bm.faces.ensure_lookup_table()
+_il, _kd, _ = mouth_islands(face, bm); _lay = bm.faces.layers.int.new('mkind')
+for f in bm.faces:
+    if f.index in _il: f[_lay] = {'teeth': 1, 'tongue': 2}.get(_kd[_il[f.index]], 0)
+bm.to_mesh(fm); bm.free()
 def kind_pred(kind):
-    cache = {}
+    code = {'teeth': 1, 'tongue': 2}[kind]
     def pr(o, f, bm):
-        key = (o.name, id(bm))
-        if key not in cache: cache.clear(); cache[key] = mouth_islands(o, bm)
-        il, kd, _ = cache[key]
-        return f.index in il and kd[il[f.index]] == kind
+        lay = bm.faces.layers.int.get('mkind'); return lay is not None and f[lay] == code
     return pr
 teeth = split_faces(face, kind_pred('teeth'), 'Teeth')
 tongue = split_faces(face, kind_pred('tongue'), 'Tongue')

@@ -19,9 +19,11 @@ note('objects', list(MESH), 'bones', len(arm.data.bones))
 body, face, hair = MESH['Body'], MESH['Face'], MESH['Hair']
 def bpos(n, tail=False):
     b = arm.data.bones[n]; return arm.matrix_world @ (b.tail_local if tail else b.head_local)
-L = {k: bpos(v) for k,v in dict(hips='J_Bip_C_Hips', spine='J_Bip_C_Spine', chest='J_Bip_C_Chest', uchest='J_Bip_C_UpperChest',
+def _landmarks():
+    return {k: bpos(v) for k,v in dict(hips='J_Bip_C_Hips', spine='J_Bip_C_Spine', chest='J_Bip_C_Chest', uchest='J_Bip_C_UpperChest',
      neck='J_Bip_C_Neck', head='J_Bip_C_Head', sh='J_Bip_L_UpperArm', el='J_Bip_L_LowerArm', wr='J_Bip_L_Hand',
      leg='J_Bip_L_UpperLeg', knee='J_Bip_L_LowerLeg', ankle='J_Bip_L_Foot', toe='J_Bip_L_ToeBase', bust='J_Sec_L_Bust1', eye='J_Adj_L_FaceEye').items()}
+L = _landmarks()
 note('landmarks', {k:[round(c,3) for c in v] for k,v in L.items()})
 assert L['sh'].x > 0, 'expected character left at +X'
 FWD = -1.0  # character faces -Y in Blender
@@ -98,6 +100,53 @@ def add_armature(o):
     if not any(m.type=='ARMATURE' for m in o.modifiers):
         md = o.modifiers.new('Armature','ARMATURE'); md.object = arm
     o.parent = arm
+
+# ---------- 0. whole-figure reshape to Jena (19, adult, her refs): head x0.86, legs x1.08, smaller less-anime eyes ----------
+for _o in [o for o in bpy.data.objects if o.type=='MESH' and o.name.startswith('Icosphere')]: bpy.data.objects.remove(_o)
+HS, LS = 0.86, 1.08
+_piv = np.array([0.0, L['neck'].y, L['neck'].z]); _lz = float(L['leg'].z)
+_eyec = {}
+_fv = coords(face); _fmat = [''] * len(face.data.vertices)
+for _p in face.data.polygons:
+    for _v in _p.vertices: _fmat[_v] = matname(face, _p.material_index)
+note('face materials at import', sorted(set(_fmat)))
+_ir = np.array(['EyeIris' in m for m in _fmat])
+for _s in (1,-1):
+    _sel = _ir & (_fv[:,0]*_s > 0)
+    if _sel.any(): _eyec[_s] = _fv[_sel].mean(0)
+note('eye centres', {k:[round(float(x),3) for x in v] for k,v in _eyec.items()})
+def _reshape(P, eyes=False):
+    P = np.array(P, np.float64)
+    if eyes:
+        for _s, c in _eyec.items():
+            d = np.hypot((P[:,0]-c[0])/1.0, (P[:,2]-c[2])/1.15)
+            w = ss(0.034, 0.016, d) * (P[:,1] < c[1] + 0.03) * (P[:,0]*_s > -0.002)
+            P[:,0] = c[0] + (P[:,0]-c[0])*(1-0.15*w); P[:,2] = c[2] + (P[:,2]-c[2])*(1-0.15*w)
+    w = ss(L['neck'].z - 0.01, L['neck'].z + 0.04, P[:,2])[:,None]
+    P = P + ((_piv + (P - _piv)*HS) - P) * w
+    b = P[:,2] < _lz
+    P[b,2] = P[b,2]*LS; P[~b,2] = P[~b,2] + (LS-1)*_lz
+    return P
+for _o in [o for o in bpy.data.objects if o.type=='MESH']:
+    _mw = np.array(_o.matrix_world); _mi = np.linalg.inv(_mw); _eyes = (_o == face)
+    def _xf(Pl):
+        Pw = Pl @ _mw[:3,:3].T + _mw[:3,3]; Pw = _reshape(Pw, _eyes); return (Pw - _mw[:3,3]) @ _mi[:3,:3].T
+    _n = len(_o.data.vertices)
+    if _o.data.shape_keys:
+        for _kb in _o.data.shape_keys.key_blocks:
+            a = np.zeros(_n*3, np.float32); _kb.data.foreach_get('co', a); _kb.data.foreach_set('co', _xf(a.reshape(-1,3)).astype(np.float32).ravel())
+    a = np.zeros(_n*3, np.float32); _o.data.vertices.foreach_get('co', a); _o.data.vertices.foreach_set('co', _xf(a.reshape(-1,3)).astype(np.float32).ravel()); _o.data.update()
+bpy.context.view_layer.objects.active = arm
+for _ob in bpy.context.view_layer.objects: _ob.select_set(_ob == arm)
+bpy.ops.object.mode_set(mode='EDIT')
+_amw = arm.matrix_world; _ami = _amw.inverted()
+for _e in arm.data.edit_bones:
+    hw = _amw @ _e.head; tw = _amw @ _e.tail; nh, nt = _reshape(np.array([hw[:], tw[:]]))
+    _e.head = _ami @ Vector(nh); _e.tail = _ami @ Vector(nt)
+bpy.ops.object.mode_set(mode='OBJECT')
+L = _landmarks()
+note('reshaped: head x%.2f legs x%.2f eyes pinched 15%%; new landmarks' % (HS, LS), {k:[round(c,3) for c in v] for k,v in L.items()})
+REP['reshape'] = {'head_scale': HS, 'leg_scale': LS, 'eye_pinch': 0.15}
 # ---------- 1. base Body -> skin only; HairBack (scalp) goes to hair; sample clothes/shoes dropped ----------
 hairback = split_faces(body, lambda o,f,bm: 'HAIR' in matname(o, f.material_index), 'HairBack')
 # VRoid culls the skin hidden under clothes: the sample has NO chest skin (z 1.1-1.25 empty).
@@ -112,6 +161,9 @@ bm.to_mesh(body.data); bm.free(); note('chest fill from Tops faces', len(_fill),
 bm = bmesh.new(); bm.from_mesh(body.data); bm.faces.ensure_lookup_table()
 bmesh.ops.delete(bm, geom=[f for f in bm.faces if 'SKIN' not in matname(body, f.material_index)], context='FACES'); bm.to_mesh(body.data); bm.free(); clean_slots(body)
 note('body skin verts', len(body.data.vertices))
+_sd = body.modifiers.new('Dense', 'SUBSURF'); _sd.subdivision_type = 'SIMPLE'; _sd.levels = 1; _sd.render_levels = 1
+body.modifiers.move(len(body.modifiers)-1, 0); apply_mod(body, _sd)
+note('body subdivided (simple) for smooth curves, verts', len(body.data.vertices))
 def bust_w(Cc, s):
     """geometric bust weight (VRoid sample's bust bones weight only ~49 culled-area verts)"""
     c0 = np.array([L['bust'].x*s, L['bust'].y + FWD*0.035, L['bust'].z - 0.01])
@@ -122,21 +174,21 @@ C = coords(body)
 for names, s in ((['J_Sec_L_Bust1','J_Sec_L_Bust2'], 1), (['J_Sec_R_Bust1','J_Sec_R_Bust2'], -1)):
     wb = np.clip(np.maximum(weights(body, names), bust_w(C, s)), 0, 1)[:,None]
     c0 = np.array([L['bust'].x*s, L['bust'].y, L['bust'].z])
-    C += (C - c0) * wb * np.array([0.30, 0.42, 0.26]) + wb*np.array([0, FWD*0.006, -0.004])
+    C += (C - c0) * wb * np.array([0.48, 0.70, 0.42]) + wb*np.array([0, FWD*0.006, -0.004])
 legz, kneez = L['leg'].z, L['knee'].z
 arms = (np.abs(C[:,0]) > L['sh'].x - 0.02) & (C[:,2] > L['uchest'].z - 0.02)
 f_ = np.exp(-((C[:,2] - (legz - 0.04))/0.13)**2) * (C[:,2] > kneez) * (~arms)
-C[:,0] *= 1 + 0.13*f_
+C[:,0] *= 1 + 0.18*f_
 back = np.clip((C[:,1] - L['hips'].y)/0.08, 0, 1)
 C[:,1] += 0.028*np.exp(-((C[:,2] - (legz - 0.02))/0.09)**2) * back * (~arms)
 for s in (1,-1):
     sel = (C[:,0]*s > 0.015) & (C[:,2] < legz) & (C[:,2] > kneez) & (~arms)
     ax0, ay0 = L['leg'].x*s, L['leg'].y
-    g = 1 + 0.10*ss(kneez, legz-0.05, C[:,2])
+    g = 1 + 0.15*ss(kneez, legz-0.05, C[:,2])
     C[sel,0] = ax0 + (C[sel,0]-ax0)*g[sel]; C[sel,1] = ay0 + (C[sel,1]-ay0)*g[sel]
-C[:,0] *= 1 - 0.05*np.exp(-((C[:,2] - (L['spine'].z+0.06))/0.06)**2) * (~arms)
+C[:,0] *= 1 - 0.08*np.exp(-((C[:,2] - (L['spine'].z+0.06))/0.06)**2) * (~arms)
 set_coords(body, C); BODY_C = C.copy()
-REP['proportions'] = 'bust +30-42%, hips +13% width, seat +2.8cm, thighs +10%, waist -5%'
+REP['proportions'] = 'bust +48-70%, hips +18% width, seat +2.8cm, thighs +15%, waist -8%, head x0.86, legs x1.08'
 # ---------- 3. clothes, each its own mesh, built from the body surface ----------
 SH, WR = L['sh'], L['wr']
 def is_arm(c): return abs(c[0]) > SH.x - 0.015 and c[2] > L['uchest'].z - 0.04
@@ -153,12 +205,12 @@ def from_body(name, face_pred, offset_fn, solid=0.0):
         md = o.modifiers.new('Solid','SOLIDIFY'); md.thickness = solid; md.offset = 1.0; md.use_rim = True
         o.modifiers.move(len(o.modifiers)-1, 0); apply_mod(o, md)
     me.materials.clear(); return o
-neck_line = SH.z - 0.045; tee_hem = legz + 0.105
+neck_line = SH.z - 0.045; tee_hem = legz + 0.035
 def tee_pred(c, f):
     if abs(c[0]) > WR.x + 0.035: return False
     if is_arm(c): return abs(c[0]) > SH.x + 0.045 or c[2] < SH.z - 0.032
     return tee_hem < c[2] < neck_line
-tee = from_body('Tee', tee_pred, lambda v: 0.009 + 0.012*float(ss(tee_hem+0.06, tee_hem, v[2])), solid=0.002)
+tee = from_body('Tee', tee_pred, lambda v: 0.010 + 0.030*float(ss(tee_hem+0.12, tee_hem, v[2])), solid=0.002)
 sh_hem = legz - 0.055
 def hem_at(c):
     out = max(0.0, (abs(c[0]) - abs(L['leg'].x))/0.07) if c[2] < legz + 0.02 else 0.0
@@ -218,8 +270,8 @@ shorts.data.materials.append(make_mat('Shorts_Black', (0.02,0.02,0.022,1), rough
 shorts.data.materials.append(make_mat('Shorts_Trim_White', (0.92,0.92,0.92,1), rough=0.6))
 sc = coords(shorts)
 for p in shorts.data.polygons:
-    c = sc[list(p.vertices)].mean(0)
-    if c[2] < hem_at(c) + 0.012 or c[2] > legz + 0.125: p.material_index = 1
+    vv = sc[list(p.vertices)]
+    if all(v_[2] < hem_at(v_) + 0.010 for v_ in vv) and abs(vv[:,0]).min() > 0.02: p.material_index = 1
 bra.data.materials.append(make_mat('Bra_Black', (0.015,0.015,0.017,1), rough=0.5))
 for st in straps: st.data.materials.append(bra.data.materials[0])
 join(bra, straps); bra.name = 'Bra'

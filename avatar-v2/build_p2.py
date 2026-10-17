@@ -59,110 +59,187 @@ thigh.data.materials.append(make_mat('ThighHigh_Sheer', img=sheer_img, alpha=Tru
 thigh.data.materials.append(make_mat('ThighHigh_Band', img=plain_img, rough=0.75))
 thigh.data.materials.append(make_mat('ThighHigh_Band_L_NCOM', img=logo_img, rough=0.75))
 for o in (tee, shorts, thigh, bra): add_armature(o)
-# ---------- 4. hair: drop long back strands (the bun replaces them), shorten locks to a bob, black -> white ends ----------
-hc = coords(hair)
-bm = bmesh.new(); bm.from_mesh(hair.data); bm.verts.ensure_lookup_table()
-isl = np.full(len(bm.verts), -1); NI = 0
-for v in bm.verts:
-    if isl[v.index] >= 0: continue
-    stack = [v]; isl[v.index] = NI
-    while stack:
-        x = stack.pop()
-        for e in x.link_edges:
-            o_ = e.other_vert(x)
-            if isl[o_.index] < 0: isl[o_.index] = NI; stack.append(o_)
-    NI += 1
-bm.free()
+# ---------- 4. hair: Jena's OWN procedural hair (VRoid strands deleted): short messy layered cut, side-swept bangs over her right eye,
+#                black roots -> white ends (refs), small messy bun at the back. Strand cards weighted to new spring chains.
 neckz, eyez, headz = L['neck'].z, L['eye'].z, L['head'].z
-chin = headz + 0.005
-drop, comp = set(), set()
-for i in range(NI):
-    sel = hc[isl==i]
-    if sel[:,2].min() < neckz - 0.02 and sel[:,1].mean() > L['head'].y + 0.015: drop.add(i)
-    elif sel[:,2].min() < chin: comp.add(i)
-note('hair islands', NI, 'dropped(back long)', len(drop), 'shortened', len(comp))
-REP['hair'] = {'islands': NI, 'dropped_back': len(drop), 'shortened': len(comp)}
-def zmap(zv): return np.where(zv < chin, chin - (chin - zv)*0.30, zv)
-cm = np.isin(isl, list(comp)); hc[cm,2] = zmap(hc[cm,2]); set_coords(hair, hc)
-dv = np.isin(isl, list(drop))
-bm = bmesh.new(); bm.from_mesh(hair.data); bm.verts.ensure_lookup_table()
-bmesh.ops.delete(bm, geom=[bm.verts[i] for i in np.where(dv)[0]], context='VERTS'); bm.to_mesh(hair.data); bm.free()
-HAIR_ZMAP = (chin, 0.30)
-hc2 = coords(hair); isl2 = isl[~dv]
-streak = [i for i in range(NI) if random.random() < 0.18]
-wf = ss(eyez - 0.005, eyez - 0.075, hc2[:,2])
-stm = np.isin(isl2, streak); wf[stm] = ss(eyez + 0.03, eyez - 0.03, hc2[stm,2])
-def bake_recolor(o, wfac, matname_out):
-    me = o.data
-    ca = me.color_attributes.new('jena_w', 'FLOAT_COLOR', 'POINT')
-    ca.data.foreach_set('color', np.repeat(np.asarray(wfac, np.float32)[:,None], 4, 1).ravel())
-    srcimg = None
-    for n in me.materials[0].node_tree.nodes:
-        if n.type == 'TEX_IMAGE' and n.image: srcimg = n.image; break
-    W_, H_ = srcimg.size
-    tgt = bpy.data.images.new(o.name+'_jena', W_, H_, alpha=True)
-    m = bpy.data.materials.new(o.name+'_bake'); m.use_nodes = True; nt = m.node_tree
-    for n in list(nt.nodes): nt.nodes.remove(n)
-    outn = nt.nodes.new('ShaderNodeOutputMaterial'); em = nt.nodes.new('ShaderNodeEmission')
-    tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = srcimg
-    va = nt.nodes.new('ShaderNodeVertexColor'); va.layer_name = 'jena_w'
-    bw = nt.nodes.new('ShaderNodeRGBToBW')
-    pw = nt.nodes.new('ShaderNodeMath'); pw.operation = 'POWER'; pw.inputs[1].default_value = 1.6
-    dk = nt.nodes.new('ShaderNodeMath'); dk.operation = 'MULTIPLY'; dk.inputs[1].default_value = 0.16
-    lt = nt.nodes.new('ShaderNodeMath'); lt.operation = 'MULTIPLY_ADD'; lt.inputs[1].default_value = 0.35; lt.inputs[2].default_value = 0.62
-    sep = nt.nodes.new('ShaderNodeSeparateColor'); mx = nt.nodes.new('ShaderNodeMath'); mx.operation = 'ADD'
-    mix = nt.nodes.new('ShaderNodeMix'); mix.data_type = 'FLOAT'
-    nt.links.new(tx.outputs['Color'], bw.inputs['Color']); nt.links.new(bw.outputs[0], pw.inputs[0])
-    nt.links.new(pw.outputs[0], dk.inputs[0]); nt.links.new(pw.outputs[0], lt.inputs[0])
-    nt.links.new(va.outputs['Color'], sep.inputs['Color'])
-    nt.links.new(sep.outputs[0], mix.inputs['Factor']); nt.links.new(dk.outputs[0], mix.inputs['A']); nt.links.new(lt.outputs[0], mix.inputs['B'])
-    comb = nt.nodes.new('ShaderNodeCombineColor')
-    for ch in ('Red','Green','Blue'): nt.links.new(mix.outputs['Result'], comb.inputs[ch])
-    nt.links.new(comb.outputs[0], em.inputs['Color']); nt.links.new(em.outputs[0], outn.inputs[0])
-    tn = nt.nodes.new('ShaderNodeTexImage'); tn.image = tgt; nt.nodes.active = tn
-    me.materials.clear(); me.materials.append(m)
-    sc_ = bpy.context.scene; sc_.render.engine = 'CYCLES'; sc_.cycles.device = 'CPU'; sc_.cycles.samples = 1
-    for ob in bpy.context.view_layer.objects: ob.select_set(False)
-    bpy.context.view_layer.objects.active = o; o.select_set(True)
-    bpy.ops.object.bake(type='EMIT', margin=6, use_clear=True)
-    px = np.array(tgt.pixels[:], np.float32).reshape(-1,4)
-    sp = np.array(srcimg.pixels[:], np.float32).reshape(-1,4)
-    if len(sp) == len(px): px[:,3] = sp[:,3]
-    tgt.pixels.foreach_set(px.ravel())
-    path = f'{OUT}/tex/{o.name}_Jena.png'; tgt.filepath_raw = path; tgt.file_format = 'PNG'; tgt.save()
-    me.materials.clear(); me.materials.append(make_mat(matname_out, img=bpy.data.images.load(path), alpha=True, rough=0.5))
-    me.color_attributes.remove(me.color_attributes['jena_w'])
-try:
-    bake_recolor(hair, wf, 'Hair_Jena')
-    bake_recolor(hairback, np.zeros(len(hairback.data.vertices)), 'HairBack_Jena')
-    note('hair baked: black roots -> white ends')
-except Exception as e:
-    import traceback; traceback.print_exc()
-    note('HAIR BAKE FAILED', repr(e)); REP['stubbed'].append('hair recolor bake failed: '+repr(e))
-hb = coords(hairback); hz = coords(hair)
-top_z = float(max(hb[:,2].max(), hz[:,2].max()))
+dg = bpy.context.evaluated_depsgraph_get()
+FBV = BVHTree.FromObject(face, dg); SBV = BVHTree.FromObject(hairback, dg)
+hb = coords(hairback); fv_ = coords(face)
+crown = np.vstack([hb, fv_[fv_[:,2] > eyez - 0.01]])
+Hc = (crown.min(0) + crown.max(0)) / 2; Hc[0] = 0.0; Hr = (crown.max(0) - crown.min(0)) / 2
+chinz = float(fv_[:,2].min()) + 0.012
+note('head centre', [round(float(x),3) for x in Hc], 'radii', [round(float(x),3) for x in Hr], 'chin', round(chinz,3))
+def push_out(p, off):
+    p = Vector(p)
+    for bv in (FBV, SBV):
+        loc, nrm, _i, dist = bv.find_nearest(p)
+        if loc is None: continue
+        if (p - loc).dot(nrm) < off: p = loc + nrm*off
+    q = (np.array(p) - Hc) / (Hr*np.array([0.97, 0.97, 0.97]))
+    r = float(np.linalg.norm(q))
+    if r < 1.0 and p.z > eyez - 0.02: p = Vector(Hc + (np.array(p) - Hc)/max(r,1e-6))
+    return p
+def nrmz(v): v = np.asarray(v, float); return v/ (np.linalg.norm(v)+1e-9)
+def grow(p0, d0, target_z, off0, off1, curl, nseg=10, grav=0.22):
+    L_est = max(0.03, (p0[2] - target_z)*1.2 + 0.025); step = L_est/nseg
+    pts = [Vector(p0)]; d = nrmz(d0); p = Vector(p0)
+    for i in range(nseg):
+        t = (i+1)/nseg
+        rad = nrmz(np.array(p) - Hc); radh = nrmz([rad[0], rad[1], 0.0])
+        d = nrmz(d*(1-grav) + np.array([0,0,-1.0])*grav + radh*0.05 + curl*t*t)
+        p = push_out(p + Vector(d*step), off0 + (off1-off0)*t)
+        pts.append(p)
+        if p.z < target_z: break
+    return pts
+CARDS = []   # (pts, width, column, kind)
+rng = np.random.default_rng(11)
+def add_card(pts, w, kind):
+    if len(pts) >= 3: CARDS.append((pts, w, int(rng.integers(0, 8)), kind))
+# roots: area-weighted samples on the scalp cap
+bm = bmesh.new(); bm.from_mesh(hairback.data); bmesh.ops.triangulate(bm, faces=bm.faces[:]); bm.faces.ensure_lookup_table()
+mw_ = hairback.matrix_world
+tris = [[mw_ @ v.co for v in f.verts] for f in bm.faces]; bm.free()
+areas = np.array([((t[1]-t[0]).cross(t[2]-t[0])).length/2 for t in tris]); areas /= areas.sum()
+def sample_roots(n):
+    out = []
+    for k in rng.choice(len(tris), n, p=areas):
+        a, b = rng.random(2)
+        if a + b > 1: a, b = 1-a, 1-b
+        t = tris[k]; out.append(np.array(t[0] + (t[1]-t[0])*a + (t[2]-t[0])*b))
+    return out
+front_y = Hc[1] - 0.55*Hr[1]
+for p0 in sample_roots(420):
+    rad = nrmz(p0 - Hc); radh = nrmz([rad[0], rad[1], 0.0])
+    if p0[2] < eyez - 0.005 and rad[1] < 0.2: continue          # no roots on the cheeks/temples below the eye line
+    front = p0[1] < front_y and p0[2] > eyez + 0.02
+    side = abs(rad[0]) > 0.55
+    if front:
+        # bangs: swept from her left to her right (-X), ending at brow/eye level, some across her right eye
+        sweep = np.array([-0.75, -0.45, -0.55]) + rng.normal(0, 0.12, 3)
+        tz = eyez + rng.uniform(-0.022, 0.018) - (0.015 if p0[0] < 0 else 0.0)
+        pts = grow(p0, sweep, tz, 0.004, 0.010, np.array([0.0, -0.15, 0.05]), nseg=9, grav=0.18)
+        add_card(pts, rng.uniform(0.010, 0.016), 'bang')
+    else:
+        back = rad[1] > 0.35
+        if back: tz = neckz + rng.uniform(-0.005, 0.04)
+        elif side: tz = chinz + rng.uniform(-0.03, 0.02)
+        else: tz = chinz + rng.uniform(0.0, 0.05)
+        d0 = radh*0.75 + np.array([0,0,0.35])*max(rad[2], 0) + rng.normal(0, 0.08, 3)
+        curl = radh*rng.uniform(0.0, 0.35) + rng.normal(0, 0.10, 3)          # messy flicks outward at the ends
+        layer = rng.random()
+        off0, off1 = (0.003, 0.007) if layer < 0.5 else (0.008, 0.017)
+        pts = grow(p0, d0, tz, off0, off1, curl, nseg=10)
+        add_card(pts, rng.uniform(0.012, 0.020) if layer < 0.5 else rng.uniform(0.009, 0.015), 'main')
+# side locks in front of the ears, a little longer (refs)
+for s in (1,-1):
+    for k in range(5):
+        p0 = Hc + np.array([s*Hr[0]*rng.uniform(0.70, 0.85), -Hr[1]*rng.uniform(0.15, 0.40), Hr[2]*rng.uniform(0.25, 0.55)])
+        p0 = np.array(push_out(p0, 0.004))
+        pts = grow(p0, [s*0.25, -0.35, -1.0], chinz - rng.uniform(0.00, 0.03), 0.005, 0.012, np.array([s*0.05, -0.08, 0]), nseg=10, grav=0.3)
+        add_card(pts, rng.uniform(0.012, 0.017), 'lock')
+note('hair cards', len(CARDS), {k: sum(1 for c in CARDS if c[3]==k) for k in ('bang','main','lock')})
+# --- bun at the back top (messy loops) ---
+top_z = float(hb[:,2].max())
 ring = hb[(hb[:,2] > top_z - 0.10) & (hb[:,2] < top_z - 0.06)]
-back_y = float(ring[:,1].max()) if len(ring) else L['head'].y + 0.09
-bun_c = Vector((0.0, back_y - 0.005, top_z - 0.065)); head_c = Vector((0.0, L['head'].y + 0.01, eyez + 0.02))
+back_y = float(ring[:,1].max()) if len(ring) else Hc[1] + Hr[1]
+bun_c = Vector((0.0, back_y + 0.012, top_z - 0.055)); head_c = Vector(Hc.tolist())
 dirv = (bun_c - head_c).normalized(); REP['bun_center'] = [round(x,3) for x in bun_c]
-parts = []
-for k_ in range(7):
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.026 + 0.008*random.random(), minor_radius=0.014 + 0.005*random.random(),
-                                     major_segments=28, minor_segments=10, generate_uvs=True)
-    t = bpy.context.active_object
-    t.rotation_euler = (random.uniform(0, math.pi), random.uniform(0, math.pi), random.uniform(0, math.pi))
-    t.location = bun_c + dirv*0.012 + Vector((random.uniform(-.012,.012), random.uniform(-.008,.008), random.uniform(-.01,.01)))
-    parts.append(t)
-for t in parts:
-    with ctx(t): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-bun = join(parts[0], parts[1:]); bun.name = 'Bun'
-S2 = 512; uq = np.linspace(0,1,S2)[None,:]; vq = np.linspace(0,1,S2)[:,None]
-strand = 0.5 + 0.5*np.sin((vq*90 + 3*np.sin(uq*20))*math.pi)
-wst = (np.sin(vq*7*math.pi + 1.3) > 0.82).astype(np.float32)
-col = (0.05 + 0.06*strand)*(1-wst) + (0.62+0.3*strand)*wst
-bun.data.materials.append(make_mat('Hair_Bun', img=make_img('Hair_Bun', np.stack([col,col,col*1.02], 2)), rough=0.5))
-bpy.ops.mesh.primitive_torus_add(major_radius=0.024, minor_radius=0.0055, major_segments=32, minor_segments=10, generate_uvs=True)
+BUNC = []
+for k in range(16):
+    ax = nrmz(rng.normal(0, 1, 3)); u_ = nrmz(np.cross(ax, [0.3, 0.5, 0.8])); v_ = np.cross(ax, u_)
+    r_ = rng.uniform(0.016, 0.030); a0 = rng.uniform(0, 2*math.pi); span = rng.uniform(4.0, 6.6)
+    pts = [Vector(np.array(bun_c) + np.array(dirv)*0.012 + r_*(math.cos(a)*u_ + math.sin(a)*v_)) for a in np.linspace(a0, a0+span, 12)]
+    BUNC.append((pts, rng.uniform(0.010, 0.016), int(rng.integers(0, 8)), 'bun'))
+# gather strands into the bun from the nape/back crown
+for k in range(14):
+    ang = rng.uniform(-1.2, 1.2); p0 = Hc + np.array([Hr[0]*0.9*math.sin(ang), Hr[1]*0.9*math.cos(ang), Hr[2]*rng.uniform(-0.1, 0.35)])
+    p0 = np.array(push_out(p0, 0.004)); tgt = np.array(bun_c)
+    pts = [push_out(p0 + (tgt - p0)*t + nrmz(p0 - Hc)*0.01*math.sin(math.pi*t), 0.005) for t in np.linspace(0, 1, 8)]
+    BUNC.append((pts, rng.uniform(0.012, 0.018), int(rng.integers(0, 8)), 'gather'))
+# --- texture: 8 strand columns, black roots -> white ends at a different height per column, combed alpha tips ---
+TW_, TH_ = 512, 1024
+uu = (np.arange(TW_)[None,:] + 0.5)/TW_; vv = (np.arange(TH_)[:,None] + 0.5)/TH_   # v=0 root (image row 0 = bottom in Blender)
+col_ = np.floor(uu*8).astype(int); lu = uu*8 - col_
+starts = np.array([0.40, 0.50, 0.35, 0.62, 0.45, 0.80, 0.55, 0.30])
+st_ = starts[col_]
+wmix = ss(st_, st_ + 0.30, vv)
+fine = 0.80 + 0.20*np.sin(lu*2*math.pi*9 + 3*np.sin(vv*13 + col_))
+blk, wht = 0.028, 0.86
+lum_ = (blk*(1-wmix) + wht*wmix) * fine
+teeth = 0.80 + 0.18*np.abs(np.sin(lu*math.pi*5 + col_))
+alpha_ = (vv < teeth).astype(np.float32) * (np.abs(lu - 0.5) < 0.47)
+hair_img = make_img('Hair_Jena', np.stack([lum_, lum_*0.99, lum_*1.03, alpha_], 2).astype(np.float32))
+def build_cards(name, cards):
+    verts, faces, uvs, vt, owner = [], [], [], [], []
+    for ci, (pts, w, colk, kind) in enumerate(cards):
+        n = len(pts); base = len(verts)
+        tw = rng.uniform(-0.5, 0.5)
+        for j, p in enumerate(pts):
+            t = j/(n-1)
+            tg = nrmz(np.array(pts[min(j+1,n-1)]) - np.array(pts[max(j-1,0)]))
+            rad = nrmz(np.array(p) - Hc)
+            sd = nrmz(np.cross(tg, rad)); nn = np.cross(sd, tg)
+            sd = nrmz(sd*math.cos(tw*t) + nn*math.sin(tw*t))
+            ww = w*(1.0 - 0.55*t)*(0.75 + 0.25*math.sin(math.pi*min(1, t*3)))
+            for side_ in (-0.5, 0.5):
+                verts.append(np.array(p) + sd*ww*side_ + rad*0.0015*(1-t)); uvs.append(((colk + 0.5 + side_*0.94)/8.0, t)); vt.append(t); owner.append(ci)
+        for j in range(n-1):
+            a = base + 2*j; faces.append((a, a+1, a+3, a+2))
+    me = bpy.data.meshes.new(name); me.from_pydata([tuple(v) for v in verts], [], faces); me.update()
+    uvl = me.uv_layers.new(name='UVMap')
+    for poly in me.polygons:
+        for li in poly.loop_indices: uvl.data[li].uv = uvs[me.loops[li].vertex_index]
+    ob = bpy.data.objects.new(name, me); bpy.context.scene.collection.objects.link(ob)
+    return ob, np.array(vt), np.array(owner)
+for o_ in [hair]: bpy.data.objects.remove(o_)
+hair, h_t, h_own = build_cards('Hair', CARDS)
+bun, b_t, b_own = build_cards('Bun', BUNC)
+for o_ in (hair, bun): o_.data.materials.append(make_mat('Hair_Jena', img=hair_img, alpha=True, rough=0.45))
+hairback.data.materials.clear(); hairback.data.materials.append(make_mat('HairBack_Jena', (0.022,0.021,0.024,1), rough=0.6))
+path_ = f'{OUT}/tex/Hair_Jena.png'; hair_img.filepath_raw = path_; hair_img.file_format = 'PNG'; hair_img.save()
+note('hair verts', len(hair.data.vertices), 'bun verts', len(bun.data.vertices))
+# --- spring chains: 12 sectors around the head + 2 bang chains; old VRoid hair bones removed ---
+def sector(pts, kind):
+    p0 = np.array(pts[0]) - Hc
+    if kind == 'bang': return 12 + (0 if p0[0] > 0 else 1)
+    a = math.atan2(p0[0], p0[1]); return int(((a + math.pi) / (2*math.pi)) * 12) % 12
+csec = np.array([sector(c[0], c[3]) for c in CARDS])
+CH = {}
+for s_ in sorted(set(csec.tolist())):
+    mem = [CARDS[i][0] for i in np.where(csec == s_)[0]]
+    path = np.array([np.mean([np.array(m[min(len(m)-1, int(round(f*(len(m)-1))))]) for m in mem], 0) for f in (0.12, 0.40, 0.70, 1.0)])
+    CH[s_] = path
+bpy.context.view_layer.objects.active = arm
+for ob_ in bpy.context.view_layer.objects: ob_.select_set(ob_ == arm)
+bpy.ops.object.mode_set(mode='EDIT'); eb_ = arm.data.edit_bones
+_ami = arm.matrix_world.inverted()
+for e_ in [e for e in eb_ if e.name.startswith('J_Sec_Hair')]: eb_.remove(e_)
+CHN = {}
+for k_, (s_, path) in enumerate(sorted(CH.items())):
+    ch = k_ + 1; par = eb_['J_Bip_C_Head']; names = []
+    for j in range(3):
+        e = eb_.new(f'J_Sec_Hair{j+1}_{ch:02d}'); e.head = _ami @ Vector(path[j]); e.tail = _ami @ Vector(path[j+1]); e.parent = par; e.use_connect = False
+        par = e; names.append(e.name)
+    tail_dir = Vector(path[3] - path[2]).normalized()*0.02
+    e = eb_.new(f'J_Sec_Hair3_{ch:02d}_end'); e.head = _ami @ Vector(path[3]); e.tail = _ami @ (Vector(path[3]) + tail_dir); e.parent = par
+    CHN[s_] = names
+bpy.ops.object.mode_set(mode='OBJECT')
+def weight_cards(ob, tvals, owners, secs):
+    hg = ob.vertex_groups.new(name='J_Bip_C_Head'); groups = {}
+    for i in range(len(tvals)):
+        t = float(tvals[i]); s_ = secs[owners[i]]
+        wh = 1.0 - float(ss(0.06, 0.30, t))
+        hg.add([i], wh, 'REPLACE')
+        if s_ is None or wh >= 0.999: continue
+        j = min(2, int(t*3)); nm = CHN[s_][j]
+        if nm not in groups: groups[nm] = ob.vertex_groups.new(name=nm)
+        groups[nm].add([i], 1.0 - wh, 'REPLACE')
+weight_cards(hair, h_t, h_own, list(csec))
+HAIR_ZMAP = (-10.0, 1.0)
+note('hair chains', len(CHN))
+REP['hair'] = {'kind': 'procedural cards (no VRoid strands)', 'cards': len(CARDS), 'bun_loops': len(BUNC), 'chains': len(CHN)}
+bpy.ops.mesh.primitive_torus_add(major_radius=0.020, minor_radius=0.005, major_segments=32, minor_segments=10, generate_uvs=True)
 tie = bpy.context.active_object; tie.name = 'HairTie'
-tie.rotation_euler = Vector((0,0,1)).rotation_difference(dirv).to_euler(); tie.location = bun_c - dirv*0.012
+tie.rotation_euler = Vector((0,0,1)).rotation_difference(dirv).to_euler(); tie.location = bun_c - dirv*0.006
 with ctx(tie): bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 tie.data.materials.append(make_mat('HairTie_Black', (0.03,0.03,0.035,1), rough=0.35))
