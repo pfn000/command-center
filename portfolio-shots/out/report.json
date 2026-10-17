@@ -456,8 +456,8 @@
  "videos": [
   {
    "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 5762572,
-   "duration": 14.4,
+   "bytes": 5275341,
+   "duration": 14.6,
    "size": {
     "width": 1600,
     "height": 900
@@ -465,8 +465,8 @@
   },
   {
    "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 5856856,
-   "duration": 14.2,
+   "bytes": 5815510,
+   "duration": 14.12,
    "size": {
     "width": 402,
     "height": 874
@@ -474,8 +474,8 @@
   },
   {
    "file": "video-d-light-home-scroll.mp4",
-   "bytes": 5711878,
-   "duration": 14.72,
+   "bytes": 5282906,
+   "duration": 14.48,
    "size": {
     "width": 1600,
     "height": 900
@@ -483,8 +483,8 @@
   },
   {
    "file": "video-p-light-home-scroll.mp4",
-   "bytes": 5704015,
-   "duration": 14.2,
+   "bytes": 5848857,
+   "duration": 14.12,
    "size": {
     "width": 402,
     "height": 874
