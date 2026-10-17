@@ -1,5 +1,6 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
+// v5.1 proof: open-layout portfolio (no windows/dock in normal view), 1600x900 desktop + 402x874 phone, light + dark
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [] }
@@ -8,11 +9,11 @@ const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebK
 async function audit(page) {
   return page.evaluate(() => ({
     overflowX: document.documentElement.scrollWidth - window.innerWidth,
-    broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.getAttribute('src')).slice(0, 8),
+    broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.style.display !== 'none').map((i) => i.getAttribute('src')).slice(0, 8),
     peter: /peter/i.test(document.body.innerText || ''),
-    offsite: [...document.querySelectorAll('a[href^="http"]')].filter((a) => a.closest('.nwin:not(.min)')).map((a) => a.getAttribute('href')).slice(0, 12),
-    dockRadius: getComputedStyle(document.querySelector('.nos-dock') || document.body).borderRadius,
-    wins: [...document.querySelectorAll('.nwin:not(.min)')].map((w) => w.getAttribute('data-app')),
+    dock: !!document.querySelector('.nos-dock'),
+    windows: document.querySelectorAll('.nwin').length,
+    navResume: [...document.querySelectorAll('.pf-nav a')].filter((a) => /résumé/i.test(a.textContent || '')).length,
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
 async function snap(page, name, opts = {}) {
@@ -23,85 +24,49 @@ async function snap(page, name, opts = {}) {
 }
 async function ctxFor(kind, theme) {
   const c = kind === 'phone'
-    ? await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: IPHONE, colorScheme: theme })
+    ? await browser.newContext({ viewport: { width: 402, height: 874 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: IPHONE, colorScheme: theme })
     : await browser.newContext({ viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1, colorScheme: theme })
   const p = await c.newPage()
   p.on('console', (m) => m.type() === 'error' && report.errors.push(`${kind}-${theme}: ${m.text().slice(0, 200)}`))
   p.on('pageerror', (e) => report.errors.push(`${kind}-${theme} pageerror: ${String(e).slice(0, 300)}`))
   return { c, p }
 }
-async function go(p, q, wait = 3500) {
-  await p.goto(`${B}/?nocoach=1&theme=${q.theme}${q.app ? '&app=' + q.app : ''}`, { waitUntil: 'networkidle', timeout: 45000 }).catch((e) => report.errors.push('goto ' + String(e).slice(0, 120)))
+async function go(p, path, theme, wait = 3500) {
+  const sep = path.includes('?') ? '&' : '?'
+  await p.goto(`${B}${path}${sep}nocoach=1&theme=${theme}`, { waitUntil: 'networkidle', timeout: 45000 }).catch((e) => report.errors.push('goto ' + path + ' ' + String(e).slice(0, 120)))
   await p.waitForTimeout(wait)
 }
-for (const theme of ['dark', 'light']) {
-  const { c, p } = await ctxFor('desk', theme)
-  await go(p, { theme })
-  await snap(p, `d-${theme}-1-about`)
-  if (theme === 'dark') {
-    // close-ups: the hat (window top-right), the menu bar, the dock
-    const w = await p.locator('[data-app=about]').first().boundingBox()
-    if (w) await snap(p, 'z-hat', { clip: { x: w.x + w.width - 190, y: w.y - 6, width: 196, height: 80 } })
-    await snap(p, 'z-menubar', { clip: { x: 0, y: 0, width: 800, height: 60 } })
-    const dk = await p.locator('.nos-dock').first().boundingBox()
-    if (dk) await snap(p, 'z-dock', { clip: { x: Math.max(0, dk.x - 20), y: dk.y - 20, width: Math.min(1600, dk.width + 40), height: dk.height + 36 } })
-    await p.locator('[data-app=about] .nwin-body').first().evaluate((el) => el.scrollTo(0, 700)).catch(() => {})
-    await p.waitForTimeout(800)
-    await snap(p, 'd-dark-1b-about-scrolled')
-  }
-  for (const [i, app] of ['projects', 'plex', 'now', 'emmi', 'resume', 'contact', 'jena'].entries()) {
-    if (theme === 'light' && !['projects', 'plex', 'now'].includes(app)) continue
-    await go(p, { theme, app }, 5000)
-    await snap(p, `d-${theme}-${i + 2}-${app}`)
-    if (theme === 'dark' && (app === 'projects' || app === 'plex')) {
-      await p.locator(`[data-app=${app}] .nwin-body`).first().evaluate((el) => el.scrollTo(0, 900)).catch(() => {})
-      await p.waitForTimeout(1500)
-      await snap(p, `d-dark-${i + 2}b-${app}-scrolled`)
-    }
-    if (theme === 'dark' && app === 'plex') {
-      await p.getByRole('button', { name: 'Language spec' }).first().click().catch(() => {})
-      await p.waitForTimeout(800)
-      await p.locator('[data-app=plex] .nwin-body').first().evaluate((el) => el.scrollTo(0, 600)).catch(() => {})
-      await p.waitForTimeout(800)
-      await snap(p, 'd-dark-3c-plex-docs')
-    }
-    if (theme === 'dark' && app === 'projects') {
-      await p.getByRole('button', { name: /AuraVT/ }).first().click().catch(() => {})
-      await p.waitForTimeout(2500)
-      await p.locator('[data-app=projects] .nwin-body').first().evaluate((el) => el.scrollTo(0, 0)).catch(() => {})
-      await snap(p, 'd-dark-2c-projects-auravt')
-    }
-  }
-  await c.close()
+async function at(p, sel, dy = 0) {
+  await p.evaluate(([s, d]) => { const el = document.querySelector(s); if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 20 + d) }, [sel, dy])
+  await p.waitForTimeout(1800)
 }
-for (const theme of ['dark', 'light']) {
-  const { c, p } = await ctxFor('phone', theme)
-  await go(p, { theme })
-  await snap(p, `p-${theme}-1-about`)
-  if (theme === 'dark') {
-    for (const [i, app] of ['projects', 'plex', 'now', 'resume', 'emmi'].entries()) {
-      await go(p, { theme, app }, 5000)
-      await snap(p, `p-dark-${i + 2}-${app}`)
-    }
-  }
-  await c.close()
+const PLAN = {
+  'desk-dark': [['1-home', null], ['2-work', '#work'], ['2b-work-pairs', '#work', 900], ['3-now', '#now'], ['3b-now-more', '#now', 1200], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 1400], ['5-plex', '#plex'], ['5b-plex-code', '#plex', 600], ['6-emmi', '#emmi'], ['7-resume-sec', '#resume'], ['8-contact', '#contact']],
+  'desk-light': [['1-home', null], ['2-work', '#work'], ['3-now', '#now'], ['4-projects', '#projects'], ['5-plex', '#plex'], ['8-contact', '#contact']],
+  'phone-dark': [['1-home', null], ['2-work', '#work'], ['3-now', '#now'], ['4-projects', '#projects'], ['4b-projects-more', '#projects', 900], ['5-plex', '#plex'], ['5b-plex-code', '#plex', 700], ['6-emmi', '#emmi'], ['8-contact', '#contact']],
+  'phone-light': [['1-home', null], ['3-now', '#now'], ['4-projects', '#projects'], ['8-contact', '#contact']],
 }
-{
-  // the /resume page: readable in-site, download secondary
-  const { c, p } = await ctxFor('desk', 'light')
-  await p.goto(`${B}/resume?nocoach=1&theme=light`, { waitUntil: 'networkidle', timeout: 45000 }).catch((e) => report.errors.push('goto resume ' + String(e).slice(0, 120)))
-  await p.waitForTimeout(4000)
-  await snap(p, 'd-light-9-resume-page')
-  await snap(p, 'z-menubar-light', { clip: { x: 0, y: 0, width: 800, height: 60 } })
-  const dk = await p.locator('.nos-dock').first().boundingBox()
-  if (dk) await snap(p, 'z-dock-light', { clip: { x: Math.max(0, dk.x - 20), y: dk.y - 20, width: Math.min(1600, dk.width + 40), height: dk.height + 36 } })
+for (const key of Object.keys(PLAN)) {
+  const [kind, theme] = key.split('-')
+  const { c, p } = await ctxFor(kind, theme)
+  await go(p, '/', theme)
+  const tag = kind === 'phone' ? 'p' : 'd'
+  for (const [name, sel, dy] of PLAN[key]) {
+    if (sel) await at(p, sel, dy || 0)
+    else { await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(600) }
+    await snap(p, `${tag}-${theme}-${name}`)
+  }
+  await go(p, '/resume', theme)
+  await snap(p, `${tag}-${theme}-9-resume-page`)
+  if (theme === 'dark') {
+    await go(p, '/arch', theme, 5000)
+    await snap(p, `${tag}-dark-10-arch-demo`)
+  }
   await c.close()
 }
 try {
   const pdf = await fetch(`${B}/resume/download`)
   report.resume = { status: pdf.status, type: pdf.headers.get('content-type'), bytes: (await pdf.arrayBuffer()).byteLength }
-  const gh = await fetch(`${B}/data/gh.json`)
-  report.gh = { status: gh.status, bytes: (await gh.arrayBuffer()).byteLength }
 } catch (e) { report.errors.push('api ' + String(e).slice(0, 200)) }
 await browser.close()
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))

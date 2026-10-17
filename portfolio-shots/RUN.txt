@@ -1,1 +1,1 @@
-v5.2 ghosting-fix proof run for skills-cli-command portfolio-v2 at 2026-10-17T19:41Z
+v5.1 open-layout proof run for portfolio-v2 at 2026-10-17T20:31Z
