@@ -1,1 +1,1 @@
-portfolio-v3 · about fix ddac314 · 03:08:31Z
+v4 proof run for skills-cli-command portfolio-v2 b93133b3eeab1db9c645496d9f9c018a2d5fb874 at 2026-10-17T13:42:47Z
