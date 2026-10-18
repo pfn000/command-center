@@ -11,5 +11,5 @@ for name,ref in pairs:
     W=a.width+r.width+30; H=max(a.height,r.height)+40; c=Image.new('RGB',(W,H),BG); c.paste(r,(10,30)); c.paste(a,(r.width+20,30))
     d=ImageDraw.Draw(c); d.text((12,8),'her sheet: '+name,fill=(220,220,220)); d.text((r.width+22,8),'v3 build: '+name,fill=(220,220,220))
     c.save(P+'/cmp-'+name+'.jpg',quality=88); print('cmp',name)
-for name in ('face','face34','front','side','back'):
+for name in ('face','face34','front','side','back','neckside'):
     if os.path.exists(P+'/'+name+'.png'): onbg(P+'/'+name+'.png',(2000,2000)).save(P+'/'+name+'.jpg',quality=88)

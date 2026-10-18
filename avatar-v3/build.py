@@ -53,11 +53,72 @@ if len(hm)>1: sel(hm,hm[0]); bpy.ops.object.join()
 UM=hm[0]; UM.name='Hair'
 if UM.parent is not UA: mw=UM.matrix_world.copy(); UM.parent=UA; UM.matrix_world=mw
 log('hair bones',[b_.name for b_ in UA.data.bones][:60])
-if P.get('HEAD_SCALE',1.0)!=1.0:
-    hmn,hmx=wbb([FH]); piv=Vector((0,(hmn.y+hmx.y)/2,hmn.z))
-    S_=Matrix.Translation(piv)@Matrix.Scale(P['HEAD_SCALE'],4)@Matrix.Translation(-piv)
-    FA.matrix_world=S_@FA.matrix_world; bpy.context.view_layer.update()
-    sel([FA,FH],FA); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True); log('head scaled',P['HEAD_SCALE'])
+# ---------- v3.2 HEAD FIT: neck lift + head sized to her sheet's ratio + seated on the neck (Saidie 8:13 PM Oct 17: "the head is off and is not sized correctly")
+import numpy as np
+VARIANT=os.environ.get('VARIANT',P.get('VARIANT','A')); rep['variant']=VARIANT; log('VARIANT',VARIANT)
+def wco(o):
+    n=len(o.data.vertices); a=np.empty(n*3); o.data.vertices.foreach_get('co',a); a=a.reshape(-1,3)
+    M=np.array(o.matrix_world); return a@M[:3,:3].T+M[:3,3]
+def wdelta(o,D):
+    # add world-space deltas D (Nx3) to basis + every shape key
+    M=np.array(o.matrix_world.inverted())[:3,:3]; dl=D@M.T; n=len(o.data.vertices)
+    a=np.empty(n*3); o.data.vertices.foreach_get('co',a); o.data.vertices.foreach_set('co',(a.reshape(-1,3)+dl).ravel())
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            b_=np.empty(n*3); kb.data.foreach_get('co',b_); kb.data.foreach_set('co',(b_.reshape(-1,3)+dl).ravel())
+    o.data.update()
+def sstep(t): t=np.clip(t,0,1); return t*t*(3-2*t)
+def bonew(n): return B.matrix_world@B.data.bones[n].head_local if n in B.data.bones else None
+BV=wco(BODY); ztop=float(BV[:,2].max())
+def neck_at(V,z,h=0.006,c=None,r=None):
+    s=V[(V[:,2]>z-h)&(V[:,2]<z+h)]
+    if c is not None: s=s[np.hypot(s[:,0]-c[0],s[:,1]-c[1])<r]
+    if len(s)==0: return None
+    return dict(cx=float((s[:,0].min()+s[:,0].max())/2),cy=float((s[:,1].min()+s[:,1].max())/2),rx=float((s[:,0].max()-s[:,0].min())/2),ry=float((s[:,1].max()-s[:,1].min())/2),front=float(s[:,1].min()),n=len(s))
+nt0=neck_at(BV,ztop-0.025,0.012); NC=(nt0['cx'],nt0['cy']); NR=max(nt0['rx'],nt0['ry'])
+zb=bonew('Neck').z; zhb=bonew('Head').z
+LIFT=P.get('NECK_LIFT',0.035)
+HF={'body_top':ztop,'neck_top_slice':nt0,'neck_bone_z':zb,'head_bone_z0':zhb,'lift':LIFT}
+if LIFT:
+    r_=np.hypot(BV[:,0]-NC[0],BV[:,1]-NC[1]); w_=sstep((BV[:,2]-zb)/P.get('NECK_BLEND',0.06))*(r_<NR*1.45)*(BV[:,2]>zb)
+    D_=np.zeros_like(BV); D_[:,2]=LIFT*w_; wdelta(BODY,D_); HF['lift_verts']=int((w_>0).sum())
+    sel([B]); bpy.ops.object.mode_set(mode='EDIT'); eb_=B.data.edit_bones
+    def sub(b_):
+        yield b_
+        for c_ in b_.children: yield from sub(c_)
+    hd=eb_['Head']; nk=eb_['Neck']; conn=(nk.tail-hd.head).length<1e-4
+    plan_=[(b_,b_.head.copy()+Vector((0,0,LIFT)),b_.tail.copy()+Vector((0,0,LIFT))) for b_ in list(sub(hd))]
+    nkt=nk.tail.copy()+Vector((0,0,LIFT))
+    if conn: nk.tail=nkt
+    for b_,h_,t_ in plan_: b_.head=h_; b_.tail=t_
+    bpy.ops.object.mode_set(mode='OBJECT'); BV=wco(BODY)
+HF['head_bone_z']=bonew('Head').z
+# her head (face shell): chin, eyes, nose, forehead, measured on the mesh
+FV=wco(FH); fmn=FV.min(0); fmx=FV.max(0); hw=(fmx[0]-fmn[0])/2; ymid=(fmn[1]+fmx[1])/2
+em=[i for i,s in enumerate(FH.material_slots) if s.material and 'eye' in s.material.name.lower()]
+eidx=sorted(set(v for p in FH.data.polygons if p.material_index in em for v in p.vertices))
+eye_z=float(FV[eidx,2].mean()) if eidx else float(fmn[2]+0.42*(fmx[2]-fmn[2]))
+cen=FV[(np.abs(FV[:,0]-(fmn[0]+fmx[0])/2)<0.22*hw)&(FV[:,1]<ymid)]
+chin0=float(cen[:,2].min()); top0=float(fmx[2]); h0=top0-chin0
+nb=cen[(cen[:,2]>chin0+0.15*(eye_z-chin0))&(cen[:,2]<eye_z)]; nose_y=float(nb[:,1].min()) if len(nb) else float(cen[:,1].min())
+chf=float(cen[cen[:,2]<chin0+0.012][:,1].min()); fh_=cen[(cen[:,2]>eye_z+0.18*h0)&(cen[:,2]<eye_z+0.30*h0)]; fhy=float(fh_[:,1].min()) if len(fh_) else chf
+pitch=math.degrees(math.atan2(fhy-chf,(eye_z+0.24*h0)-chin0))  # >0: forehead behind chin (face tilted up), <0: forehead ahead (pitched down)
+HF.update(chin0=chin0,top0=top0,h0=h0,eye_z=eye_z,nose_y=nose_y,chin_front_y=chf,forehead_y=fhy,face_pitch_deg=pitch,face_hw=float(hw),fh_bb=[fmn.tolist(),fmx.tolist()])
+# target from her sheet (front-full-1546.jpg: hair top y~30, chin y~232, soles y~1348 -> head = 0.150-0.156 of height); P['HEAD_RATIO']
+r_t=P.get('HEAD_RATIO',0.150); g_=P['HAIR_TOP_GAP']+P['HAIR_DZ']
+zc=chin0+LIFT+P.get('CHIN_DZ',0.0)
+Ht=r_t*zc/(1-r_t); s_=max(0.5,(Ht-g_)/h0)*P.get('HEAD_SCALE',1.0)
+sock_y=nose_y+P.get('SOCKET_K',1.66)*(eye_z-chin0)
+nz_=neck_at(BV,zc+0.012,0.008,NC,NR*1.5) or nt0
+ty=nz_['cy']+P.get('SOCKET_DY',0.0)
+piv=Vector(((fmn[0]+fmx[0])/2,sock_y,chin0)); tgt=Vector((nz_['cx'],ty,zc))
+Rp=Matrix.Rotation(math.radians(P.get('HEAD_PITCH',0.0)),4,'X')
+S_=Matrix.Translation(tgt)@Rp@Matrix.Scale(s_,4)@Matrix.Translation(-piv)
+FA.matrix_world=S_@FA.matrix_world; bpy.context.view_layer.update()
+sel([FA,FH],FA); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+FV=wco(FH); HF.update(scale=s_,target_chin=zc,target_head_total=Ht,socket_y0=sock_y,neck_at_chin=nz_,head_bb_after=[FV.min(0).tolist(),FV.max(0).tolist()],
+   neck_top_inside_head=bool(ztop+LIFT<FV[:,2].max() and ztop+LIFT>zc))
+log('HEADFIT',{k:(round(v,4) if isinstance(v,float) else v) for k,v in HF.items()}); rep['head_fit']=HF
 hmn,hmx=wbb([FH]); umn,umx=wbb([UM])
 head_w=hmx.x-hmn.x; s=head_w*P['HAIR_W_RATIO']/(umx.x-umn.x)
 yc=(hmn.y+hmx.y)/2
@@ -238,20 +299,58 @@ if P.get('HAIR_LEN',1.0)!=1.0 and eL:
         p=mw@v.co
         if p.z<zr: p.z=zr-(zr-p.z)*P['HAIR_LEN']; v.co=mwi@p; n_+=1
     UM.data.update(); log('hair lengthened',P['HAIR_LEN'],n_)
-# ---------- v3.1 BANGS: cut the fringe at the brow line — delete hair-card faces that sit in front of the face below the brows
-if P.get('BANGS_LIFT',True) and eL and eR:
+# ---------- v3.2 FRINGE: wispy, uneven ends instead of the blunt cut (per-strand cut height + tapered tips); also run on hair layer 2 (stray strands over the cheek)
+FRINGE={}
+def fringe(O,tag):
+    if not (eL and eR): return
     cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
     browz=ez0+max(sL.z,sR.z)*P.get('EYE_SZ',0.72)*0.5+P.get('BROW_GAP',0.30)*ipd
     from mathutils.bvhtree import BVHTree as _BVH
     dgh=bpy.context.evaluated_depsgraph_get(); hb=_BVH.FromObject(FH,dgh)
-    mw=UM.matrix_world; bmH=bmesh.new(); bmH.from_mesh(UM.data); kill_=[]
+    mw=O.matrix_world; mwi=mw.inverted(); bmH=bmesh.new(); bmH.from_mesh(O.data); bmH.faces.ensure_lookup_table()
+    isl={}; k=0
+    for f in bmH.faces:
+        if f.index in isl: continue
+        st=[f]; isl[f.index]=k
+        while st:
+            g=st.pop()
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h.index not in isl: isl[h.index]=k; st.append(h)
+        k+=1
+    kill=[]; tv={}; side=0
+    fw=P.get('BANG_W',1.6)*ipd
     for f in bmH.faces:
         c=mw@f.calc_center_median()
-        if c.z>browz or abs(c.x)>P.get('BANG_W',1.15)*ipd: continue
-        h=hb.ray_cast(c,Vector((0,1,0)),P.get('BANG_DEPTH',0.035))
-        if h[0] is not None: kill_.append(f)
-    bmesh.ops.delete(bmH,geom=kill_,context='FACES'); bmH.to_mesh(UM.data); bmH.free(); UM.data.update()
-    log('bangs cut at brow z',round(browz,4),'faces removed',len(kill_)); rep['bangs']={'browz':browz,'removed':len(kill_)}
+        if c.z>browz+0.03: continue
+        h=hb.ray_cast(c,Vector((0,1,0)),P.get('BANG_DEPTH',0.05))
+        if h[0] is None: continue
+        i=isl[f.index]; u=((i*2654435761)%997)/997.0
+        if abs(c.x)<=fw: zi=browz-u*P.get('FRINGE_VAR',0.22)*ipd
+        else: zi=ez0-0.35*ipd  # side strands may frame the face but never cross the cheek
+        if c.z<zi:
+            kill.append(f); tv.setdefault(i,set()).update(v for v in f.verts)
+            if abs(c.x)>fw: side+=1
+    # remember each touched strand's surviving verts before deleting
+    surv={}
+    for f in bmH.faces:
+        i=isl[f.index]
+        if i in tv and f not in kill: surv.setdefault(i,set()).update(f.verts)
+    ks=set(kill); bmesh.ops.delete(bmH,geom=list(ks),context='FACES')
+    tap=0; band=P.get('TIP_BAND',0.35)*ipd
+    for i,vs in surv.items():
+        vs=[v for v in vs if v.is_valid]
+        if len(vs)<3: continue
+        W=[mw@v.co for v in vs]; zmin=min(p.z for p in W); cx=sum(p.x for p in W)/len(W); cy=sum(p.y for p in W)/len(W)
+        for v,p in zip(vs,W):
+            t=1-(p.z-zmin)/band
+            if t>0:
+                t=t*t*P.get('TIP_PINCH',0.7); p2=Vector((p.x+(cx-p.x)*t,p.y+(cy-p.y)*t*0.5,p.z)); v.co=mwi@p2; tap+=1
+    bmH.to_mesh(O.data); bmH.free(); O.data.update()
+    FRINGE[tag]={'browz':browz,'removed':len(ks),'side_removed':side,'strands_cut':len(tv),'tip_verts':tap}
+    log('fringe',tag,FRINGE[tag])
+if P.get('BANGS_LIFT',True): fringe(UM,'layer1')
+rep['bangs']=FRINGE
 
 # ---------- her Meshy eyeball -> iris texture (the .glb is a 368k-tri disc: too heavy for VRChat, so it is rendered once and mapped onto the head's eye UVs)
 EYE_TEX=None
@@ -540,7 +639,8 @@ if P.get('HAIR_LAYER2',True) and HAIR=='blowout_cards':
     U2=UM.copy(); U2.data=UM.data.copy(); U2.name='Hair2'; sc.collection.objects.link(U2)
     M2=Matrix.Translation(piv)@Matrix.Rotation(math.radians(P.get('L2_ROT',7)),4,'Z')@Matrix.Scale(P.get('L2_SCALE',0.955),4)@Matrix.Translation(-piv)
     U2.matrix_world=M2@U2.matrix_world; bpy.context.view_layer.update(); sel([U2]); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
-    # keep the lifted fringe clear of the eyes in layer 2 too: drop its front-face verts below the brow
+    # keep the lifted fringe clear of the eyes in layer 2 too (v3.2: actually do it -> no stray strand across the cheek)
+    fringe(U2,'layer2')
     sel([UM,U2],UM); bpy.ops.object.join(); log('hair layer 2 joined, tris',tris(UM))
 def solidmat(name,col,rough=0.4,metal=0.0):
     m,nt,b=newmat(name); b.inputs['Base Color'].default_value=(*col,1); b.inputs['Roughness'].default_value=rough; b.inputs['Metallic'].default_value=metal; return m,nt,b
@@ -827,6 +927,148 @@ if P.get('SCALP',True):
     snt=scm.node_tree; wv=snt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value=90; wv.bands_direction='X'; wv.inputs['Distortion'].default_value=4
     bp=snt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=0.35; snt.links.new(wv.outputs['Fac'],bp.inputs['Height']); snt.links.new(bp.outputs[0],q.inputs['Normal'])
     SCALP=add_mesh('Scalp',bm,scm,'Head'); log('scalp cap',sc_c,hw)
+# ---------- v3.2 CRANIUM: close the head behind the face shell (skin), so the neck stump never shows behind the jaw / under the hair
+CRAN=None
+if P.get('CRANIUM',True):
+    FV=wco(FH); fmn=FV.min(0); fmx=FV.max(0); hw_=(fmx[0]-fmn[0])/2; hh_=fmx[2]-HF['target_chin']
+    D=P.get('HEAD_DEPTH_K',1.25)*2*hw_
+    cc=Vector(((fmn[0]+fmx[0])/2, fmn[1]+D/2+P.get('CRAN_DY',0.0), HF['target_chin']+P.get('CRAN_ZC',0.56)*hh_))
+    rad=Vector((hw_*P.get('CRAN_RX',0.92), D/2, hh_*P.get('CRAN_RZ',0.44)))
+    bm=bmesh.new(); r=bmesh.ops.create_uvsphere(bm,u_segments=28,v_segments=18,radius=1.0)
+    for v in r['verts']: v.co=Vector((v.co.x*rad.x,v.co.y*rad.y,v.co.z*rad.z))+cc
+    from mathutils.bvhtree import BVHTree as _BVH
+    hb=_BVH.FromObject(FH,bpy.context.evaluated_depsgraph_get()); pushed=0
+    for v in bm.verts:
+        if v.co.y>fmx[1]: continue
+        fwd=hb.ray_cast(v.co,Vector((0,-1,0)),0.5); back=hb.ray_cast(v.co,Vector((0,1,0)),0.5)
+        if fwd[0] is None and back[0] is not None:  # in front of the face shell -> tuck it behind
+            v.co.y=back[0].y+0.004; pushed+=1
+    uvl=bm.loops.layers.uv.new('UVMap')
+    cm=bpy.data.materials.new('HeadSkin'); cm.use_nodes=True; q=cm.node_tree.nodes['Principled BSDF']
+    pk=P.get('PINK',(1,0.92,0.91)); sk_=(skin[0]*pk[0],skin[1]*pk[1],skin[2]*pk[2],1); q.inputs['Roughness'].default_value=0.4
+    cnt_=cm.node_tree; tc_=cnt_.nodes.new('ShaderNodeTexCoord'); sp_=cnt_.nodes.new('ShaderNodeSeparateXYZ'); cnt_.links.new(tc_.outputs['Generated'],sp_.inputs[0])
+    cr_=cnt_.nodes.new('ShaderNodeValToRGB'); e_=cr_.color_ramp.elements; e_[0].position=P.get('CRAN_SKIN_TO',0.42); e_[0].color=sk_; e_[1].position=P.get('CRAN_DARK_FROM',0.55); e_[1].color=(0.015,0.015,0.016,1)
+    cnt_.links.new(sp_.outputs['Z'],cr_.inputs[0]); cnt_.links.new(cr_.outputs[0],q.inputs['Base Color'])
+    q.inputs['Subsurface Weight'].default_value=0.1; q.inputs['Subsurface Radius'].default_value=(1.0,0.35,0.25); q.inputs['Subsurface Scale'].default_value=0.01
+    CRAN=add_mesh('Cranium',bm,cm,'Head')
+    HF['cranium']={'centre':list(cc),'radii':list(rad),'pushed_behind_face':pushed,'neck_top_z':ztop+LIFT,'cranium_z':[cc.z-rad.z,cc.z+rad.z]}; log('cranium',HF['cranium'])
+# ---------- v3.2 VARIANT B: her Meshy model's head + hair grafted onto this rigged body at the same measured size (comparison only)
+if VARIANT=='B':
+    MB=None
+    for cand in (IN+'/meshy/meshy-jena.blend',IN+'/meshy-jena.blend'):
+        if os.path.exists(cand): MB=cand; break
+    log('meshy blend',MB)
+    before=set(bpy.data.objects)
+    with bpy.data.libraries.load(MB,link=False) as (df,dt): dt.objects=list(df.objects)
+    for o in dt.objects:
+        if o is not None: sc.collection.objects.link(o)
+    newo=[o for o in bpy.data.objects if o not in before]; mm=[o for o in newo if o.type=='MESH']
+    log('meshy objects',[(o.name,o.type,len(o.data.vertices) if o.type=='MESH' else 0) for o in newo])
+    for o in newo:
+        if o.type!='MESH': 
+            for c in mm:
+                if c.parent is o: mw=c.matrix_world.copy(); c.parent=None; c.matrix_world=mw
+    for o in newo:
+        if o.type!='MESH': bpy.data.objects.remove(o)
+    for o in mm:
+        for m_ in list(o.modifiers): o.modifiers.remove(m_)
+        if o.data.shape_keys: o.shape_key_clear()
+    if len(mm)>1: sel(mm,mm[0]); bpy.ops.object.join()
+    MH=mm[0]; MH.name='MeshyHead'; sel([MH]); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True)
+    V=wco(MH); ext=V.max(0)-V.min(0); log('meshy bb',V.min(0).tolist(),V.max(0).tolist())
+    up=int(np.argmax(ext))
+    if up==1: MH.data.transform(Matrix.Rotation(math.radians(90),4,'X')); V=wco(MH)
+    elif up==0: MH.data.transform(Matrix.Rotation(math.radians(90),4,'Y')); V=wco(MH)
+    H0=V[:,2].max()-V[:,2].min(); z0=V[:,2].min()
+    bot=V[V[:,2]<z0+0.03*H0]; shin=V[(V[:,2]>z0+0.06*H0)&(V[:,2]<z0+0.10*H0)]
+    dv=bot[:,:2].mean(0)-shin[:,:2].mean(0); ang=math.atan2(dv[1],dv[0]); snap_=round((ang-(-math.pi/2))/(math.pi/2))*(math.pi/2)
+    MH.data.transform(Matrix.Rotation(-snap_,4,'Z')); V=wco(MH)
+    log('meshy facing: toes dir',dv.tolist(),'rot deg',-math.degrees(snap_))
+    total=HF['target_chin']+HF['target_head_total']
+    s=total/(V[:,2].max()-V[:,2].min()); c0=Vector(((V[:,0].min()+V[:,0].max())/2,(V[:,1].min()+V[:,1].max())/2,V[:,2].min()))
+    MH.data.transform(Matrix.Scale(s,4)@Matrix.Translation(-c0)); V=wco(MH); Hm=V[:,2].max()
+    # texture colour per vertex -> hair (neutral grey/black/white) vs skin (warm)
+    me=MH.data; img_=None
+    for sl in MH.material_slots:
+        if sl.material and sl.material.use_nodes:
+            for n_ in sl.material.node_tree.nodes:
+                if n_.type=='TEX_IMAGE' and n_.image and n_.image.size[0]>0 and any(l.to_socket.name=='Base Color' for l in n_.outputs[0].links): img_=n_.image
+    warm=np.zeros(len(me.vertices)); lum=np.zeros(len(me.vertices))
+    if img_ is not None and me.uv_layers:
+        W_,H_=img_.size; px=np.empty(W_*H_*4,dtype=np.float32); img_.pixels.foreach_get(px); px=px.reshape(H_,W_,4)
+        nl=len(me.loops); uv=np.empty(nl*2,dtype=np.float32); me.uv_layers.active.data.foreach_get('uv',uv); uv=uv.reshape(-1,2)
+        lv=np.empty(nl,dtype=np.int64); me.loops.foreach_get('vertex_index',lv)
+        xs=np.clip(((uv[:,0]%1)*W_).astype(int),0,W_-1); ys=np.clip(((uv[:,1]%1)*H_).astype(int),0,H_-1); col=px[ys,xs,:3]
+        cnt=np.bincount(lv,minlength=len(me.vertices)).clip(1)
+        cv=np.stack([np.bincount(lv,col[:,k],minlength=len(me.vertices)) for k in range(3)],1)/cnt[:,None]
+        warm=cv[:,0]-cv[:,2]; lum=cv.mean(1)
+    skinv=(warm>P.get('MB_WARM',0.06))&(lum>0.25)
+    log('meshy texture',img_.name if img_ else None,'skin-coloured verts',int(skinv.sum()),'of',len(warm))
+    # chin + neck of the Meshy head (front profile on the centre line)
+    cxm=0.0; ctr_=V[np.abs(V[:,0]-cxm)<0.012]
+    hb_=ctr_[ctr_[:,2]>Hm-0.25*total]
+    zz=np.arange(Hm-0.25*total,Hm,0.004); prof=[]
+    for z in zz:
+        s_=hb_[(hb_[:,2]>=z)&(hb_[:,2]<z+0.004)]
+        prof.append(s_[:,1].min() if len(s_) else np.nan)
+    prof=np.array(prof); upper=(zz>Hm-0.16*total)&(zz<Hm-0.05*total)
+    ny=np.nanmin(np.where(upper,prof,np.nan)); nzi=int(np.nanargmin(np.where(upper,prof,np.nan)))
+    neckz=Hm-0.20*total; nfy=np.nanmin(prof[np.abs(zz-neckz)<0.006]) if np.any(np.abs(zz-neckz)<0.006) else ny+0.05
+    thr=(ny+nfy)/2; chin_m=None
+    for i in range(nzi,-1,-1):
+        if not np.isnan(prof[i]) and prof[i]>thr: chin_m=float(zz[i]+0.004); break
+    if chin_m is None or abs(chin_m-HF['target_chin'])>0.06: log('meshy chin guess off',chin_m); chin_m=HF['target_chin']
+    # neck front of the Meshy model (skin verts) and of our body at the same height
+    zq=chin_m-0.015
+    msk=V[(np.abs(V[:,2]-zq)<0.005)&skinv&(np.abs(V[:,0])<0.05)]
+    m_front=float(msk[:,1].min()) if len(msk) else float(V[(np.abs(V[:,2]-zq)<0.005)&(np.abs(V[:,0])<0.03)][:,1].min())
+    BVn=wco(BODY); zq2=HF['target_chin']-0.015
+    b_n=neck_at(BVn,zq2,0.005,NC,NR*1.5) or neck_at(BVn,zq2,0.01) or nt0
+    dz=HF['target_chin']-chin_m; dy=b_n['front']-m_front
+    MH.data.transform(Matrix.Translation(Vector((-cxm+b_n['cx'],dy,dz)))); V=wco(MH)
+    zc_=HF['target_chin']
+    # cut: everything above chin-NECK_KEEP; hair-coloured strands kept further down beside/behind the neck
+    r_=np.hypot(V[:,0]-b_n['cx'],V[:,1]-b_n['cy'])
+    keep=(V[:,2]>=zc_-P.get('MB_NECK_KEEP',0.03))|((~skinv)&(V[:,2]>=zc_-P.get('MB_HAIR_KEEP',0.11))&(r_>max(b_n['rx'],b_n['ry'])*1.05))
+    bm=bmesh.new(); bm.from_mesh(MH.data); bm.verts.ensure_lookup_table()
+    bmesh.ops.delete(bm,geom=[bm.verts[i] for i in np.where(~keep)[0]],context='VERTS')
+    # drop tiny floating islands left by the cut
+    bm.verts.ensure_lookup_table(); seen=set(); small=[]
+    for v in bm.verts:
+        if v in seen: continue
+        st=[v]; comp=[v]; seen.add(v)
+        while st:
+            a_=st.pop()
+            for e in a_.link_edges:
+                o_=e.other_vert(a_)
+                if o_ not in seen: seen.add(o_); st.append(o_); comp.append(o_)
+        if len(comp)<P.get('MB_MIN_ISLAND',200): small+=comp
+    bmesh.ops.delete(bm,geom=small,context='VERTS'); bm.to_mesh(MH.data); bm.free(); MH.data.update()
+    tr0=tris(MH); r_dec=min(1.0,P.get('MB_TRIS',30000)/max(1,tr0))
+    if r_dec<0.999:
+        md=MH.modifiers.new('Dec','DECIMATE'); md.ratio=r_dec; sel([MH]); bpy.ops.object.modifier_apply(modifier='Dec')
+    for p in MH.data.polygons: p.use_smooth=True
+    # rig it to the Head bone (neck stub blends into Neck)
+    vg=MH.vertex_groups.new(name='Head'); vn=MH.vertex_groups.new(name='Neck'); V=wco(MH)
+    for i,p in enumerate(V):
+        t=min(1,max(0,(p[2]-(zc_-0.03))/0.04)); vg.add([i],t,'REPLACE')
+        if t<1: vn.add([i],1-t,'REPLACE')
+    MH.parent=B; md=MH.modifiers.new('Armature','ARMATURE'); md.object=B
+    # tuck our body neck inside the Meshy neck where they overlap
+    m2=V[(np.abs(V[:,2]-(zc_-0.005))<0.006)]
+    if len(m2):
+        mrx=(m2[:,0].max()-m2[:,0].min())/2; mry=(m2[:,1].max()-m2[:,1].min())/2; mcy=(m2[:,1].max()+m2[:,1].min())/2
+        BVn=wco(BODY); bq=neck_at(BVn,zc_-0.005,0.006,NC,NR*1.5) or b_n
+        f_=min(1.0,0.93*min(mrx/max(bq['rx'],1e-4),mry/max(bq['ry'],1e-4)))
+        rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02)*(rr<NR*1.45)
+        Dn=np.zeros_like(BVn); Dn[:,0]=(bq['cx']+(BVn[:,0]-bq['cx'])*f_-BVn[:,0])*w_; Dn[:,1]=(mcy+(BVn[:,1]-bq['cy'])*f_-BVn[:,1])*w_; wdelta(BODY,Dn)
+        HF['B_neck_tuck']={'factor':f_,'meshy_neck':[mrx,mry,mcy],'body_neck':bq}
+    for o in (FH,UM,BUN,CLIP,CRAN,globals().get('SCALP')):
+        if o is not None and o.name in bpy.data.objects: bpy.data.objects.remove(o)
+    FH=MH; UM=MH
+    HF['B']={'scale':s,'chin_meshy':chin_m,'dz':dz,'dy':dy,'nose_y':float(ny),'tris_before':tr0,'tris':tris(MH),'skin_verts':int(skinv.sum()),'texture':img_.name if img_ else None}
+    log('VARIANT B',HF['B']); rep['head_fit']=HF
+
 meshes=[o for o in bpy.data.objects if o.type=='MESH']
 tri={o.name:tris(o) for o in meshes}; rep['tris']=tri; rep['tris_total']=sum(tri.values()); rep['bones']=len(B.data.bones)
 rep['materials']=sorted(set(s.material.name for o in meshes for s in o.material_slots if s.material))
@@ -848,9 +1090,11 @@ if P['EXPORT']:
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
 # ---------- proof renders (posed: arms down, like her sheet)
 bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE')
-for name,sgn in (('Left arm',1),('Right arm',-1)):
+SHD=P.get('SHOULDER_DOWN',8)
+for name,sgn,deg in (('Left shoulder',1,SHD),('Right shoulder',-1,SHD),('Left arm',1,P['ARM_DOWN']-SHD),('Right arm',-1,P['ARM_DOWN']-SHD)):
+    if not deg or name not in B.pose.bones: continue
     pb=B.pose.bones[name]; h=pb.head.copy()
-    R=Matrix.Translation(h)@Matrix.Rotation(math.radians(sgn*P['ARM_DOWN']),4,'Y')@Matrix.Translation(-h)
+    R=Matrix.Translation(h)@Matrix.Rotation(math.radians(sgn*deg),4,'Y')@Matrix.Translation(-h)
     pb.matrix=R@pb.matrix; bpy.context.view_layer.update()
 bpy.ops.object.mode_set(mode='OBJECT')
 if P['RENDER']:
@@ -880,9 +1124,11 @@ if P['RENDER']:
         sc.render.filepath=OUT+'/proof/'+name+'.png'; bpy.ops.render.render(write_still=True); log('render',name)
     shot('front','front',768,1376); shot('side','side',768,1376); shot('back','back',864,1536)
     hmn,hmx=wbb([FH]); fc=(hmn+hmx)/2; fc.z+=0.01
-    fc=Vector((0,(hmn.y+hmx.y)/2,hmx.z-0.055))
-    shot('face','front',1024,1024,lens=100,target=fc,h=0.30)
-    shot('face34','q34',1024,1024,lens=100,target=fc,h=0.30)
+    hh_=hmx.z-HF['target_chin']; fc=Vector((0,(hmn.y+hmx.y)/2,HF['target_chin']+0.5*hh_))
+    shot('face','front',1024,1024,lens=100,target=fc,h=hh_*P.get('FACE_FRAME',1.75))
+    shot('face34','q34',1024,1024,lens=100,target=fc,h=hh_*P.get('FACE_FRAME',1.75))
+    # v3.2 head-on-neck close-up from the side (Saidie: head off / not sized)
+    shot('neckside','side',1024,1024,lens=100,target=fc-Vector((0,0,0.35*hh_)),h=hh_*2.6)
 
 if P.get('TT'):
     sh_i=int(os.environ['TT_SHARD']); sh_n=int(os.environ.get('TT_SHARDS','4')); NF=P.get('TT_FRAMES',96)

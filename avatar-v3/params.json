@@ -1,5 +1,5 @@
 {
- "HEAD_SCALE": 1.08,
+ "HEAD_SCALE": 1.0,
  "HAIR_DEC": 1.0,
  "SHORTS_DEC": 1.0,
  "SHORTS_DROP": 0.02,
@@ -133,5 +133,11 @@
  "CLIP_DN": 50,
  "CLIP_TEETH": 5,
  "BLUSH": 0.32,
- "BROW_S": 0.6
+ "BROW_S": 0.6,
+ "NECK_LIFT": 0.035,
+ "HEAD_RATIO": 0.15,
+ "SHOULDER_DOWN": 8,
+ "FRINGE_VAR": 0.22,
+ "CRANIUM": true,
+ "MB_TRIS": 30000
 }

@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix: { variant: [A, B] }
+    env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
       - name: Blender 4.4
@@ -22,12 +26,17 @@ jobs:
       - name: Inputs (private)
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
+          if [ -z "$VARIANT" ]; then export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); fi
           pip install -q huggingface_hub pillow numpy > /dev/null
           python3 -c "
           import os; from huggingface_hub import snapshot_download
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
+          if [ "$VARIANT" = "B" ]; then python3 -c "
+          import os,shutil; from huggingface_hub import hf_hub_download
+          p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
+          os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
       - name: Blender
         if: always()
         run: |
@@ -46,7 +55,7 @@ jobs:
           python3 - <<'EOF'
           import os
           from huggingface_hub import HfApi
-          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out', path_in_repo='avatar-v3/runs/' + os.environ['GITHUB_RUN_ID'],
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out', path_in_repo='avatar-v3/runs/' + os.environ['GITHUB_RUN_ID'] + '/' + os.environ['VARIANT'],
               repo_id='Saidie000/jena-avatar-assets', repo_type='dataset')
           print('uploaded')
           EOF
@@ -68,15 +77,21 @@ jobs:
       - name: Inputs (private)
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
+          if [ -z "$VARIANT" ]; then export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); fi
           pip install -q huggingface_hub pillow numpy > /dev/null
           python3 -c "
           import os; from huggingface_hub import snapshot_download
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
+          if [ "$VARIANT" = "B" ]; then python3 -c "
+          import os,shutil; from huggingface_hub import hf_hub_download
+          p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
+          os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
       - name: Frames
         env: { TT_SHARD: "${{ matrix.shard }}", TT_SHARDS: "4" }
         run: |
+          export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); echo "VARIANT=$VARIANT"
           timeout -k 10 2400 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/build.py -- /tmp/in /tmp/out > /tmp/out/tt-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\] frame|Error|Traceback" /tmp/out/tt-log.txt | tail -40; ls /tmp/out/frames | wc -l
       - uses: actions/upload-artifact@v4
