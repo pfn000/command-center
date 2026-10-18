@@ -1161,7 +1161,7 @@ try:
     # placement: one rigid offset of the whole hair (up/back, each <= 10 mm) and an optional uniform scale <= 3 % about its Head bone,
     # chosen on the dense eye/cheek/face-crossing/body metrics. Residual strands over the brow are reported, not hidden.
     hb_names=[n_ for n_ in rep.get('hair_bones',[]) if n_ in B.data.bones and n_ not in bodyn]
-    piv=FA.matrix_world@FA.data.bones['Head'].head_local if 'Head' in FA.data.bones else Vector(((hmn[0]+hmx[0])/2,(hmn[1]+hmx[1])/2,hmn[2]))
+    piv=B.matrix_world@B.data.bones['Head'].head_local if 'Head' in B.data.bones else Vector(((hmn[0]+hmx[0])/2,(hmn[1]+hmx[1])/2,hmn[2]))   # 6c retry: FA (head's own armature) is already merged+removed here
     me_h=HR.data; n_h=len(me_h.vertices); CO0=np.empty(n_h*3); me_h.vertices.foreach_get('co',CO0); CO0=CO0.reshape(-1,3)
     mwh=np.array(HR.matrix_world); mwhi=np.linalg.inv(mwh)
     def Mof(dy,dz,sc_):
