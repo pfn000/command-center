@@ -239,6 +239,23 @@
    ]
   },
   {
+   "name": "d-dark-06d-ouija",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "d-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
@@ -712,6 +729,23 @@
   },
   {
    "name": "p-dark-06c-moments",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-06d-ouija",
    "overflowX": 0,
    "broken": [],
    "badLinks": [
@@ -1676,5 +1710,25 @@
     295
    ]
   ]
- }
+ },
+ "videos": [
+  {
+   "file": "video-d-dark-home-scroll.mp4",
+   "bytes": 1530014,
+   "duration": 22.833333,
+   "crf": 39
+  },
+  {
+   "file": "video-p-dark-home-scroll.mp4",
+   "bytes": 1556457,
+   "duration": 22.458333,
+   "crf": 36
+  },
+  {
+   "file": "video-p-dark-tap-caption.mp4",
+   "bytes": 923581,
+   "duration": 19.166667,
+   "crf": 30
+  }
+ ]
 }
