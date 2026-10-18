@@ -86,7 +86,7 @@ jobs:
         env: { TT_SHARD: "${{ matrix.shard }}", TT_SHARDS: "4" }
         run: |
           export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); echo "VARIANT=$VARIANT"
-          timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/build.py -- /tmp/in /tmp/out > /tmp/out/tt-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/assemble.py -- /tmp/in /tmp/out > /tmp/out/tt-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\] frame|Error|Traceback" /tmp/out/tt-log.txt | tail -40; ls /tmp/out/frames | wc -l
       - uses: actions/upload-artifact@v4
         with: { name: "frames-${{ matrix.shard }}", path: /tmp/out/frames, retention-days: 2 }
@@ -106,4 +106,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assets-6
+# rev v3.7-assemble-1

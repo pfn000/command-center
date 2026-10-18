@@ -1,0 +1,11 @@
+{
+ "all": {},
+ "A1": {
+  "HAIR": "umeko",
+  "SET": "umeko"
+ },
+ "A2": {
+  "SHIRT": false,
+  "SET": "noshirt"
+ }
+}

@@ -1,2 +1,2 @@
-assets A0 v3.7 step 1b: re-render the 3 assets whose own textures are not in her upload, with her uploaded substitutes
-female-head-plus-hair,umeko-hair,booty-shorts
+assemble A0
+
