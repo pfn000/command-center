@@ -73,7 +73,12 @@
   "SEAM_SMOOTH_STEPS": 10,
   "HAIR_BLOWOUT_TEX": true,
   "BACK_HAIR_DIAG": true,
-  "CLOSE_ALONG": 0.07
+  "CLOSE_ALONG": 0.07,
+  "SEAM_CRUMPLE": true,
+  "CRUMPLE_ITERS": 3,
+  "CRUMPLE_MM": 1.0,
+  "CRUMPLE_RINGS": 3,
+  "CRUMPLE_STEPS": 40
  },
  "A2": {
   "SHIRT": false,

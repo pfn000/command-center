@@ -1883,7 +1883,7 @@ def qa_sweep():
                     band.setdefault(nmr,{})[o.name]={'verts':int(m.sum()),'inside_body_gt_1mm':int((Sm<-0.001).sum()),'min_mm':round(float(Sm.min())*1000,2)}
         out['clipping_by_ring_relaxed_pose']=band; out['hair_through_face_below_brow']=face_cross()
         out['params_pose']={k_:P.get(k_) for k_ in ('ARM_DOWN','SHOULDER_DOWN','ELBOW_BEND')}
-        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear','seam_posed_smooth','posed_converge_after_seam_smooth','hair_texture')}
+        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture')}
         if SHIRT is not None and not SHIRT.hide_render:
             try: pose_relaxed(); out['shirt_selfx_relaxed']=shirt_selfx(SHIRT)
             except Exception as e: out['shirt_selfx_error']=str(e)
@@ -2320,9 +2320,60 @@ def seam_posed_smooth(o):
     if zt(c2)>zt(c0) or zt(c2r)>zt(c0r): set_world(o,X0); r['reverted']=True
     r['secs']=round(_t.time()-t0,1); rep['seam_posed_smooth']=r; log('SEAM smooth',json.dumps(r,default=str)[:1500])
     return not r.get('reverted') and zt(c2)<zt(c0)
+# ---------- run 9d: SEAM CRUMPLE. After 9c the band/sleeve junction on her right no longer self-intersects (pairs_R 1) but still shows a crumpled, dark,
+#            torn-looking patch in the arms-down pose. Measured as the gap between each vertex's posed umbrella-Laplacian and its rest Laplacian carried by
+#            its own skinning (= how far the local cloth shape is bent away from her authored shape). In the shoulder zones the worst vertices (+3 rings) are
+#            relaxed toward their authored local shape IN THE POSED mesh (Laplacian editing, boundary pinned), carried back to rest by inverse LBS,
+#            group-coherent; repeated while the zone crumple drops; reverted if the intersection count or the crumple gets worse.
+def _lap(V,E,deg):
+    A=np.zeros_like(V); np.add.at(A,E[:,0],V[E[:,1]]); np.add.at(A,E[:,1],V[E[:,0]]); return A/deg[:,None]-V
+def seam_crumple(o):
+    t0=_t.time(); r={'passes':[]}; X0=wco(o).copy(); E=WELD[o.name]['E'] if o.name in WELD else np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64)
+    n=len(o.data.vertices); deg=np.zeros(n); np.add.at(deg,E[:,0],1); np.add.at(deg,E[:,1],1); deg=np.maximum(deg,1)
+    zr=float(P.get('SELFX_ZONE_R',0.11))
+    def measure():
+        rest(); Vr,_,_=tri_arr(o); Vr=Vr.astype(np.float64); Lr=_lap(Vr,E,deg)
+        pose_relaxed(); Vp,_,_=tri_arr(o); Vp=Vp.astype(np.float64); Lp=_lap(Vp,E,deg); M=_skin_mats(o)
+        D=np.linalg.norm(Lp-np.einsum('nab,nb->na',M[:,:3,:3],Lr),axis=1)
+        C=_arm_centres(); zone=np.zeros(n,bool)
+        for c in C.values(): zone|=np.linalg.norm(Vp-c,axis=1)<zr
+        return Vp,Lr,M,D,zone
+    def zt(d): return d['pairs_L']+d['pairs_R']
+    Vp,Lr,M,D,zone=measure(); sx0=shirt_selfx(o); rest(); sx0r=shirt_selfx(o)
+    c0={'zone_p99_mm':round(float(np.percentile(D[zone],99))*1000,2),'zone_max_mm':round(float(D[zone].max())*1000,2),'zone_gt1mm':int((D[zone]>0.001).sum())}
+    r['before']={'crumple':c0,'selfx_relaxed':sx0,'selfx_rest':sx0r}; prev=c0['zone_gt1mm']
+    for it in range(int(P.get('CRUMPLE_ITERS',3))):
+        Vp,Lr,M,D,zone=measure()
+        thr=max(float(P.get('CRUMPLE_MM',1.0))/1000.0,float(np.percentile(D[zone],97)))
+        m=zone&(D>thr); seeds=int(m.sum())
+        if not seeds: rest(); break
+        for _ in range(int(P.get('CRUMPLE_RINGS',3))):
+            g=m.copy(); g[E[:,0][m[E[:,1]]]]=True; g[E[:,1][m[E[:,0]]]]=True; m=g
+        dlt=np.einsum('nab,nb->na',M[:,:3,:3],Lr); Vs=Vp.copy()
+        for _ in range(int(P.get('CRUMPLE_STEPS',40))):
+            L=_lap(Vs,E,deg); Vs[m]+=0.5*(L[m]-dlt[m])
+        dp=Vs-Vp; dp[~m]=0
+        R=np.linalg.inv(M[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+        rest(); Xb=wco(o).copy(); dr=group_max(o,dr); set_world(o,wco(o)+dr)
+        Vp2,_,_,D2,zone2=measure(); sx=shirt_selfx(o); rest()
+        c1=int((D2[zone2]>0.001).sum())
+        r['passes'].append({'iter':it,'thr_mm':round(thr*1000,2),'seed_verts':seeds,'region_verts':int(m.sum()),'max_move_mm':round(float(np.linalg.norm(dp,axis=1).max())*1000,2),'zone_gt1mm_after':c1,'selfx_relaxed':sx})
+        if c1>=prev or zt(sx)>zt(sx0): set_world(o,Xb); r['passes'][-1]['undone']=True; break
+        prev=c1
+    Vp,Lr,M,D,zone=measure(); sx1=shirt_selfx(o); rest(); sx1r=shirt_selfx(o)
+    c2={'zone_p99_mm':round(float(np.percentile(D[zone],99))*1000,2),'zone_max_mm':round(float(D[zone].max())*1000,2),'zone_gt1mm':int((D[zone]>0.001).sum())}
+    r['after']={'crumple':c2,'selfx_relaxed':sx1,'selfx_rest':sx1r}
+    if c2['zone_gt1mm']>c0['zone_gt1mm'] or zt(sx1)>zt(sx0) or zt(sx1r)>zt(sx0r): set_world(o,X0); r['reverted']=True
+    r['secs']=round(_t.time()-t0,1); rep['seam_crumple']=r; log('SEAM crumple',json.dumps(r,default=str)[:1500])
+    return not r.get('reverted') and c2['zone_gt1mm']<c0['zone_gt1mm']
 if SHIRT is not None and P.get('SEAM_SMOOTH',False):
     try:
-        if seam_posed_smooth(SHIRT) and P.get('POSED_CONVERGE',False):
+        _ok1=seam_posed_smooth(SHIRT)
+        _ok2=False
+        if P.get('SEAM_CRUMPLE',False):
+            try: _ok2=seam_crumple(SHIRT)
+            except Exception as e: traceback.print_exc(); log('CRUMPLEERR',e); rep['seam_crumple_error']=str(e); rest()
+        if (_ok1 or _ok2) and P.get('POSED_CONVERGE',False):
             P['CONVERGE_ROUNDS']=3; P['CONVERGE_MAX_S']=300; _pc=rep.get('posed_converge'); posed_converge(SHIRT); rep['posed_converge_after_seam_smooth']=rep['posed_converge']; rep['posed_converge']=_pc
     except Exception as e: traceback.print_exc(); log('SEAMSMOOTHERR',e); rep['seam_posed_smooth_error']=str(e); rest()
 if SHIRT is not None and P.get('SELF_CLEAR',False):
@@ -2646,7 +2697,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl','seam_posed_smooth','posed_converge_after_seam_smooth','hair_texture')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
