@@ -1,17 +1,22 @@
 {
- "all": {},
+ "all": {
+  "HAIR_ALIGN": "bbox"
+ },
  "A1": {
   "HAIR": "umeko",
-  "SET": "umeko"
+  "SET": "umeko",
+  "HAIR_W_RATIO": 1.4,
+  "HAIR_DZ": 0.006,
+  "HAIR_DY": 0.0
  },
  "A2": {
   "SHIRT": false,
-  "SET": "noshirt",
-  "HAIR_ALIGN": "bbox"
+  "SET": "noshirt"
  },
  "A3": {
   "SET": "face",
-  "HEAD_TEX": "auto",
-  "FIT": true
+  "HAIR_W_RATIO": 1.7,
+  "HAIR_DY": 0.012,
+  "HAIR_DZ": 0.012
  }
 }

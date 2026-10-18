@@ -11,7 +11,7 @@ argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; os.makedirs(OUT+
 import time as _t; _T0=_t.time()
 def log(*a): print('[v3]',f'{_t.time()-_T0:.0f}s',*a,flush=True)
 VAR=os.environ.get('VARIANT','A0')
-P=dict(SHORTS_TEX='Black.png', HAIR='blowout', SHIRT=True, HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DZ=0.006, HAIR_DY=0.0, HAIR_DEPTH_K=1.1,
+P=dict(SHORTS_TEX='Black.png', HAIR='blowout', SHIRT=True, HAIR_W_RATIO=1.55, HAIR_TOP_GAP=0.010, HAIR_DZ=0.010, HAIR_DY=0.006, HAIR_DEPTH_K=1.1,
        NECK_R_K=0.97, NECK_SINK=0.015, SEAM_BAND=0.035, BRA_COL=(0.012,0.012,0.013), BRA_ROUGH=0.7,
        ARM_DOWN=74, SHOULDER_DOWN=10, ELBOW_BEND=-12, WRIST_BEND=8, RELAX=True, SAMPLES=32, ASM_SAMPLES=16, CRANIUM=True, HEAD_TEX='1.png',
        SET='full', TT=False, TT_FRAMES=96, TT_SAMPLES=12, TT_W=720, TT_H=1280)
@@ -108,12 +108,13 @@ for s in FH.material_slots:
         m.use_nodes=True; bb_=[x for x in m.node_tree.nodes if x.type=='BSDF_PRINCIPLED']
         if bb_: bb_[0].inputs['Alpha'].default_value=0.0
 rep['head_missing_images']=fix_images(); rep['head_materials']=mats_report(FH)
-# ---------- 3. attach: her head's neck ring -> the body's open neck ring. ONE uniform scale from the two ring radii (reported), then the bottom ring
-#            of her head is snapped onto the body's ring (seamless neck; only the neck's last ~2 cm move, every shape key moved the same so visemes/blinks keep working)
+# ---------- 3. attach: her head's under-jaw opening -> the body's open neck ring. ONE uniform scale (run-1 rule: slice radii, reported).
+#            If the two rings line up within 8 mm, the head's bottom ring is snapped onto the body's ring (seamless neck; only the last ~2 cm move,
+#            every shape key moved the same so visemes/blinks keep working); otherwise the run-1 placement (head sunk 1.5 cm into the neck) is kept.
 from collections import Counter
 def boundary(o):
     cnt=Counter(ek for p in o.data.polygons for ek in p.edge_keys)
-    return sorted(set(v for ek,c in cnt.items() if c==1 for v in ek))
+    return set(v for ek,c in cnt.items() if c==1 for v in ek)
 def shift_keys(o,Dw):
     mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices); dl=[mwi3@Vector(d) for d in Dw]
     if o.data.shape_keys:
@@ -124,45 +125,41 @@ def shift_keys(o,Dw):
         if dl[i].length_squared>0: o.data.vertices[i].co+=dl[i]
     o.data.update()
 BV=wco(BODY); zt=float(BV[:,2].max())
-top=BV[BV[:,2]>zt-0.008]; bc0=top[:,:2].mean(0)
-br0=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1])))
-rb=[i for i in boundary(BODY) if BV[i,2]>zt-0.05 and math.hypot(BV[i,0]-bc0[0],BV[i,1]-bc0[1])<1.5*br0]
+top=BV[BV[:,2]>zt-0.008]; bc0=top[:,:2].mean(0); br0=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1])))
+bnd_b=boundary(BODY); rb=[i for i in bnd_b if BV[i,2]>zt-0.05 and math.hypot(BV[i,0]-bc0[0],BV[i,1]-bc0[1])<1.5*br0]
 HV=wco(FH); h_before=float(HV[:,2].max()-HV[:,2].min()); zb=float(HV[:,2].min())
-bot=HV[HV[:,2]<zb+0.006]; hc0=bot[:,:2].mean(0)
-hr0=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1])))
-rh=[i for i in boundary(FH) if HV[i,2]<zb+0.03 and math.hypot(HV[i,0]-hc0[0],HV[i,1]-hc0[1])<1.5*hr0]
-rep['neck_rings']={'body_ring_verts':len(rb),'head_ring_verts':len(rh),'body_ring_zspan':float(np.ptp(BV[rb,2])) if rb else None,'head_ring_zspan':float(np.ptp(HV[rh,2])) if rh else None}; log('neck rings',rep['neck_rings'])
-SNAP=len(rb)>=8 and len(rh)>=8 and P.get('NECK_SNAP',True)
-if SNAP:
-    R_=BV[rb]; bc=R_[:,:2].mean(0); br=float(np.hypot(R_[:,0]-bc[0],R_[:,1]-bc[1]).mean()); bz=float(R_[:,2].mean())
-    H_=HV[rh]; hc=H_[:,:2].mean(0); hr=float(np.hypot(H_[:,0]-hc[0],H_[:,1]-hc[1]).mean()); hz=float(H_[:,2].mean())
-    s_=br/hr*P.get('NECK_R_K_SNAP',1.0)
-    M=Matrix.Translation(Vector((bc[0],bc[1],bz)))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc[0],-hc[1],-hz)))
-else:
-    br=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1]))); hr=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1]))); bc=bc0
-    s_=br/hr*P['NECK_R_K']
-    M=Matrix.Translation(Vector((bc0[0],bc0[1],zt-P['NECK_SINK'])))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc0[0],-hc0[1],-zb)))
-apply_tf([FA,FH],M)
-if SNAP:
-    HV=wco(FH); R_=BV[rb]
+bi=np.where(HV[:,2]<zb+0.006)[0]; bot=HV[bi]; hc0=bot[:,:2].mean(0); hr0=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1])))
+bnd_h=boundary(FH); rh=[int(i) for i in bi if int(i) in bnd_h]
+if len(rh)<8: rh=[int(i) for i in bi]
+s_=br0/hr0*P['NECK_R_K']
+M1=Matrix.Translation(Vector((bc0[0],bc0[1],zt-P['NECK_SINK'])))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc0[0],-hc0[1],-zb)))
+SNAP=False; dR=None
+if len(rb)>=8 and P.get('NECK_SNAP',True):
+    R_=BV[rb]; bc=R_[:,:2].mean(0); bz=float(R_[:,2].mean())
+    H0=HV[rh]; hcr=H0[:,:2].mean(0); hz=float(H0[:,2].mean())
+    M2=Matrix.Translation(Vector((bc[0],bc[1],bz)))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hcr[0],-hcr[1],-hz)))
+    H2=np.array([tuple(M2@Vector(tuple(p))) for p in H0])
     def ang(x,y): return np.arctan2(y-bc[1],x-bc[0])
     ab=ang(R_[:,0],R_[:,1]); ob=np.argsort(ab); ab=ab[ob]; rbv=np.hypot(R_[:,0]-bc[0],R_[:,1]-bc[1])[ob]; zbv=R_[:,2][ob]
     def interp(a,xs,ys): return np.interp(a,np.r_[xs-2*np.pi,xs,xs+2*np.pi],np.r_[ys,ys,ys])
-    H_=HV[rh]; ah=ang(H_[:,0],H_[:,1])
+    ah=ang(H2[:,0],H2[:,1])
     tgt=np.stack([bc[0]+interp(ah,ab,rbv)*np.cos(ah),bc[1]+interp(ah,ab,rbv)*np.sin(ah),interp(ah,ab,zbv)],1)
-    dR=tgt-H_; oh=np.argsort(ah); ahs=ah[oh]; dRs=dR[oh]; zhs=H_[:,2][oh]
+    dR=tgt-H2; mx_=float(np.linalg.norm(dR,axis=1).max())
+    rep['neck_snap_check']={'body_ring_verts':len(rb),'head_ring_verts':len(rh),'max_move_mm':mx_*1000,'mean_move_mm':float(np.linalg.norm(dR,axis=1).mean()*1000)}
+    log('neck snap check',rep['neck_snap_check'])
+    SNAP=mx_<=P.get('SNAP_MAX',0.008)
+apply_tf([FA,FH],M2 if SNAP else M1)
+if SNAP:
+    HV=wco(FH); H_=HV[rh]; ah=ang(H_[:,0],H_[:,1]); oh=np.argsort(ah); ahs=ah[oh]; dRs=dR[oh]; zhs=H_[:,2][oh]
     FALL=P.get('NECK_FALL',0.02); Dw=np.zeros_like(HV)
-    av=ang(HV[:,0],HV[:,1]); zr=interp(av,ahs,zhs); t=np.clip((HV[:,2]-zr)/FALL,0,1); wgt=1-t*t*(3-2*t)
-    wgt[HV[:,2]>zr+FALL]=0
+    av=ang(HV[:,0],HV[:,1]); zr=interp(av,ahs,zhs); t=np.clip((HV[:,2]-zr)/FALL,0,1); wgt=1-t*t*(3-2*t); wgt[HV[:,2]>zr+FALL]=0
     for k in range(3): Dw[:,k]=interp(av,ahs,dRs[:,k])*wgt
     Dw[rh]=dR
-    if float(np.linalg.norm(dR,axis=1).max())<=P.get('SNAP_MAX',0.015): shift_keys(FH,[tuple(d) for d in Dw])
-    else: log('SNAP SKIPPED (would move > limit)',float(np.linalg.norm(dR,axis=1).max())); rep['neck_snap_skipped']=True
-    rep['neck_snap']={'max_move_mm':float(np.linalg.norm(dR,axis=1).max()*1000),'mean_move_mm':float(np.linalg.norm(dR,axis=1).mean()*1000),'verts_moved':int((wgt>0).sum())}
-    log('neck snap',rep['neck_snap'])
+    shift_keys(FH,[tuple(d) for d in Dw]); rep['neck_snap']={'verts_moved':int((wgt>0).sum()),'max_move_mm':float(np.linalg.norm(Dw,axis=1).max()*1000)}
+    log('neck snapped',rep['neck_snap'])
 HV=wco(FH); hmn=HV.min(0); hmx=HV.max(0)
 fz=float(BV[:,2].min())
-rep['attach']={'mode':'ring snap' if SNAP else 'sink','body_neck_top_z':zt,'body_neck_ring_r':br,'head_neck_ring_r':hr,'head_scale_factor':s_,'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),
+rep['attach']={'mode':'ring snap' if SNAP else 'sunk 1.5 cm (run-1 placement)','body_neck_top_z':zt,'body_neck_r':br0,'head_neck_r':hr0,'head_scale_factor':s_,'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),
                'head_w_after':float(hmx[0]-hmn[0]),'total_height':float(hmx[2]-fz),'head_to_height':float((hmx[2]-hmn[2])/(hmx[2]-fz))}
 log('ATTACH',rep['attach'])
 # ---------- 4. her hair (as authored, its own texture; only uniformly scaled + placed onto the head), with its own bone chains
@@ -296,7 +293,8 @@ if P.get('FIT',True):
         try: fit_out(HR,[FH],P.get('FIT_HAIR_OFF',0.0015),deep=0.03,only=lambda X:X[:,1]<float(hmn[1]+hmx[1])/2)
         except Exception as e: traceback.print_exc(); log('FITERR','Hair',e)
     if SHIRT is not None:
-        try: fit_out(SHIRT,[BODY,BRA,SH],P.get('FIT_SHIRT',0.004))
+        try:
+            for tg_ in (BODY,BRA,SH): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.004)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
         except Exception as e: traceback.print_exc(); log('FITERR','Shirt',e)
 # clothes weights: Data Transfer from the Panda body (Vertex Data > Vertex Groups, nearest face interpolated), applied, cleaned, normalized, max 4 influences
 def transfer_weights(o):
