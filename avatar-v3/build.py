@@ -1263,7 +1263,17 @@ if VARIANT in ('B','C'):
         ms=neck_at(Vs_,zb_+0.006,0.006,(bqs['cx'],bqs['cy']),max(bqs['rx'],bqs['ry'])*P.get('MB_SEAM_R',1.3)) if len(Vs_) else None
         if ms:
             dx=V[:,0]-ms['cx']; dy_=V[:,1]-ms['cy']; th=np.arctan2(dy_/max(ms['ry'],1e-4),dx/max(ms['rx'],1e-4))
-            k_=P.get('MB_SEAM_OUT',1.015); tx=bqs['cx']+np.cos(th)*bqs['rx']*k_; ty=bqs['cy']+np.sin(th)*bqs['ry']*k_
+            k_=P.get('MB_SEAM_OUT',1.015); mixk=P.get('MB_SEAM_MIX',0.5)
+            T_=dict(cx=bqs['cx']+(ms['cx']-bqs['cx'])*mixk,cy=bqs['cy']+(ms['cy']-bqs['cy'])*mixk,rx=bqs['rx']+(ms['rx']-bqs['rx'])*mixk,ry=bqs['ry']+(ms['ry']-bqs['ry'])*mixk)
+            tx=T_['cx']+np.cos(th)*T_['rx']*k_; ty=T_['cy']+np.sin(th)*T_['ry']*k_
+            # body neck flares up to the same ellipse below the seam (so neither side steps)
+            if mixk>0:
+                rb_=np.hypot(BVs[:,0]-bqs['cx'],BVs[:,1]-bqs['cy']); FH_=P.get('MB_FLARE_H',0.045)
+                wb=sstep((BVs[:,2]-(zb_-FH_))/FH_)*(BVs[:,2]<=zb_+0.004)*(rb_<NRAD*1.45)
+                thb=np.arctan2((BVs[:,1]-bqs['cy'])/max(bqs['ry'],1e-4),(BVs[:,0]-bqs['cx'])/max(bqs['rx'],1e-4))
+                rel=np.hypot((BVs[:,0]-bqs['cx'])/max(bqs['rx'],1e-4),(BVs[:,1]-bqs['cy'])/max(bqs['ry'],1e-4))
+                bx=T_['cx']+np.cos(thb)*T_['rx']*rel; by=T_['cy']+np.sin(thb)*T_['ry']*rel
+                Db=np.zeros_like(BVs); Db[:,0]=(bx-BVs[:,0])*wb; Db[:,1]=(by-BVs[:,1])*wb; wdelta(BODY,Db)
             tt=1-sstep((V[:,2]-zb_)/SH_)
             sk=(np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))<1.35)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)&skin2
             Ds=np.zeros_like(V); Ds[:,0]=(tx-V[:,0])*tt*sk; Ds[:,1]=(ty-V[:,1])*tt*sk; wdelta(MH,Ds); V=wco(MH)
@@ -1324,6 +1334,7 @@ if VARIANT in ('B','C'):
                     env_={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':os.environ.get('HOME','/home/runner'),'LANG':'C.UTF-8'}
                     srp=os.path.join(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else 'avatar-v3','sr.py')
                     if not os.path.exists(srp): srp='avatar-v3/sr.py'
+                    import shutil as _sh; _sh.copy(srp,td+'/sr_run.py'); srp=td+'/sr_run.py'  # run outside avatar-v3/ (its inspect.py shadows the stdlib)
                     r_=subprocess.run(['/usr/bin/python3',srp,td,str(P.get('MB_SR_F',3)),P.get('MB_SR_MODEL','/tmp/sr/realesr-general-x4v3.pth'),str(P.get('MB_SR_MIX',1.0))],capture_output=True,text=True,timeout=600,env=env_)
                     log('SR',r_.returncode,(r_.stdout+r_.stderr)[-900:])
                     if os.path.exists(td+'/out.npy'):
@@ -1400,10 +1411,12 @@ for sd,sgn in (('L',1),('R',-1)):
 # v3.3 legs closer together like her sheet (knees nearly touch): adduct each thigh about its hip, feet back to flat
 LGI=P.get('LEG_IN',0.0)
 if LGI:
+    KO=P.get('KNEE_OUT',0.0)
     for nm_,sgn in (('Left leg',1),('Right leg',-1)): wrot(nm_,sgn*LGI,'Y')
+    for nm_,sgn in (('Left knee',1),('Right knee',-1)): wrot(nm_,-sgn*KO,'Y')
     for sd_,sgn in (('Left',1),('Right',-1)):
         for nm_ in (sd_+' ankle',sd_+' foot'):
-            if nm_ in B.pose.bones: wrot(nm_,-sgn*LGI,'Y'); break
+            if nm_ in B.pose.bones: wrot(nm_,-sgn*(LGI-KO),'Y'); break
     log('legs adducted',LGI)
 
 bpy.ops.object.mode_set(mode='OBJECT')

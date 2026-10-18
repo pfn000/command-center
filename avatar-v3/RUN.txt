@@ -1,1 +1,1 @@
-build B v3.3 run 2: bigger higher bust, cups cover nipples, straps from cup tops (body-weighted), legs 7 deg in, glutes higher, skin less red (sat 1.1, SSS 0.08), B: SR in clean env + skin-only neck seam; turntable of B
+build B v3.3 run 3: skin warmer+brighter (pink 1.16/.85/.68, sat 1.15, exp -0.35), thighs a bit slimmer, knees together but calves apart (knee out 4), straps cross the shoulder nearer the neck, B: SR runs outside avatar-v3/ (inspect.py shadowed stdlib), neck seam meets halfway (body flares up, Meshy tucks in); turntable of B
