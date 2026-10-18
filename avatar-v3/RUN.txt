@@ -1,1 +1,1 @@
-build A v3.2 run E: B Meshy head scaled x1.077 to the sheet ratio (0.142 -> 0.153); A unchanged
+build B v3.2 run F (final): A hair length 1.0 + hair kept outside the skin; B unchanged (head x1.077); turntable of B

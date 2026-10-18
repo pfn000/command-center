@@ -888,6 +888,17 @@ for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
             n_=h[1].normalized()
             if (p-h[0]).dot(n_)<off: v.co=mwi@(h[0]+n_*off); pushed+=1
     o.data.update(); log('pushed outside skin',o.name,pushed)
+# ---------- v3.2 hair never lies inside the back/shoulders (stray grey strands were stuck on the upper back)
+if P.get('HAIR_PUSH',True):
+    mw=UM.matrix_world; mwi=mw.inverted(); hp_=0; off=P.get('HAIR_OFF',0.006)
+    for v in UM.data.vertices:
+        p=mw@v.co
+        if p.z>HF['target_chin']: continue
+        h=bvh.find_nearest(p)
+        if h and h[0] is not None:
+            n_=h[1].normalized()
+            if (p-h[0]).dot(n_)<off: v.co=mwi@(h[0]+n_*off); hp_+=1
+    UM.data.update(); log('hair pushed outside skin',hp_); HF['hair_pushed']=hp_
 # ---------- scalp cap: the Female head is a face shell; close the back of the head under the hair
 if P.get('SCALP',True):
     hmn,hmx=wbb([FH]); hw=(hmx.x-hmn.x)/2
