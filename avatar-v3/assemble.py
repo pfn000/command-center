@@ -1,5 +1,5 @@
 
-# v3.7 ASSEMBLY, run 4 (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
+# v3.7 ASSEMBLY, run 5 (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
 # her Blowout haircards (B&W.png) [alt: Umeko + her black->white jpg], Outfitriggedpanda shirt (Tshirt-BasicGrey.png) + bra (plain black, her 10:30 ask),
 # Booty Shorts (Textures/Colors/Black.png). ONE armature (Panda's). Clothes weights = Data Transfer from the body. Zero Meshy.
@@ -174,6 +174,12 @@ try:
         log('hair align compare',rep['hair_align_compare'])
         if -0.01 < topb-float(hmx[2]) < 0.05 and (ctr_b-ctr_x).length<0.05: Mh=Mb; how='bone'
 except Exception as e: traceback.print_exc(); log('HAIRALIGNERR',e)
+if P.get('HAIR_ALIGN')=='bone_strict':
+    # run 5 (RUN4-FINDINGS): the hair's own Head bone onto her head's own Head bone, ONE uniform scale (= the head's, or HAIR_SCALE), no offsets, no push
+    hb=HA.matrix_world@HA.data.bones['Head'].head_local; tb=FA.matrix_world@FA.data.bones['Head'].head_local
+    s=float(P.get('HAIR_SCALE') or s_)
+    Mh=Matrix.Translation(tb)@Matrix.Scale(s,4)@Matrix.Translation(-hb); how=f'bone_strict: hair Head bone -> her Head bone, uniform {s:.4f}x, no offsets'
+    rep['hair_offsets_m']={'none':True}; rep['hair_bone_native']=list(hb); rep['head_bone_target']=list(tb)
 rep['hair_align']=how; log('hair align',how)
 apply_tf([x for x in (HA,HR) if x],Mh)
 for e_ in HE: bpy.data.objects.remove(e_)
@@ -354,6 +360,108 @@ def cover_fix(o,unders,off,maxd=0.02,iters=2):
             big=np.linalg.norm(PU,axis=1)>np.linalg.norm(D,axis=1); D[big]=PU[big]
         add_disp(o,D); out.append({'under_verts_poking':hits,'shirt_verts_moved':int((np.linalg.norm(D,axis=1)>1e-4).sum()),'max_mm':round(float(np.linalg.norm(D,axis=1).max())*1000,1)})
     rep.setdefault('cloth_fit',{})['Shirt cover fix']=out; log('cover fix',out)
+
+def _bvh_tris(o):
+    """world-space BVH of an object's evaluated mesh (triangles) + per-tri face normal"""
+    dg=bpy.context.evaluated_depsgraph_get(); e=o.evaluated_get(dg); me=e.to_mesh(); me.calc_loop_triangles(); mw=o.matrix_world
+    V=[tuple(mw@v.co) for v in me.vertices]; F=[tuple(t.vertices) for t in me.loop_triangles]; e.to_mesh_clear()
+    return BVHTree.FromPolygons(V,F),np.array(V)
+def _far_hits(T,org,d,maxd):
+    """distance to the FARTHEST surface of T along ray org+t*d, t in (0,maxd] (walks through every layer)"""
+    far=None; o_=Vector(org); t0=0.0
+    for _ in range(8):
+        loc,nr,idx,dist=T.ray_cast(o_,d,maxd-t0)
+        if loc is None: break
+        t0+=dist; far=t0; o_=loc+d*0.0003; t0+=0.0003
+        if t0>=maxd: break
+    return far
+def shirt_v5(o,unders,off):
+    """run 5 shirt fit (Saidie: no black patches at the waist, no shorts/skin through the shirt):
+       (a) rigid re-seat (pitch + translation, no scale) only if it reduces body penetration and does not make the shirt stand off;
+       (b) every shirt vertex offset OUTWARD ALONG THE BODY NORMAL to clear skin AND the outermost layer of the shorts by `off`;
+       (c) face-level check: any body/shorts vertex still outside the shirt (ray along -body normal hits the shirt) pushes that shirt face out along the body normal."""
+    r={}; TB=world_bvh([BODY])
+    def pen(X):
+        S=np.ones(len(X)); N=np.zeros_like(X); L=np.zeros_like(X)
+        for i,p in enumerate(X):
+            loc,nr,idx,d=TB.find_nearest(Vector(p),0.15)
+            if loc is None: continue
+            S[i]=(Vector(p)-loc).dot(nr); N[i]=tuple(nr); L[i]=tuple(loc)
+        return S,N,L
+    X0=wco(o); S0,_,_=pen(X0)
+    def score(S):
+        m=S>-0.08; P_=np.clip(0.004-S[m],0,None); return float(P_.sum())
+    def gap(S): m=(S>-0.08)&(S<0.10); return float(np.median(S[m]))
+    r['native']={'pen_score':round(score(S0),3),'verts_under_skin':int(((S0<0)&(S0>-0.08)).sum()),'median_gap_mm':round(gap(S0)*1000,1),'min_mm':round(float(S0[S0>-0.08].min())*1000,1)}
+    c=Vector(tuple(X0.mean(0)))
+    def tf(dy,dz,pt): return Matrix.Translation(c+Vector((0,dy,dz)))@Matrix.Rotation(math.radians(pt),4,'X')@Matrix.Translation(-c)
+    def ev(x):
+        M=tf(*x); X=np.array([tuple(M@Vector(p)) for p in X0]); S,_,_=pen(X); return score(S),gap(S)
+    if P.get('SHIRT_RESEAT',True):
+        best=[0.0,0.0,0.0]; bs,bg=ev(best); g0=bg; steps=[0.008,0.008,3.0]; nev=1
+        for rnd in range(4):
+            for k in range(3):
+                for sg in (1,-1):
+                    x=list(best); x[k]+=sg*steps[k]
+                    if abs(x[0])>0.03 or abs(x[1])>0.03 or abs(x[2])>12: continue
+                    sc_,gp_=ev(x); nev+=1
+                    if sc_<bs*0.97 and gp_<g0+0.004: best,bs,bg=x,sc_,gp_
+            steps=[v/2 for v in steps]
+        r['reseat_search']={'evals':nev,'best_dy_dz_pitch':[round(best[0],4),round(best[1],4),round(best[2],2)],'pen_score':round(bs,3),'median_gap_mm':round(bg*1000,1)}
+        if bs<0.6*score(S0):
+            o.matrix_world=tf(*best)@o.matrix_world; sel([o]); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True); bpy.context.view_layer.update(); r['reseat']='applied'
+        else: r['reseat']='skipped (did not cut body penetration by 40%)'
+    TU=[_bvh_tris(u)[0] for u in unders]
+    nb=[[] for _ in range(len(o.data.vertices))]
+    for e in o.data.edges: a_,b_=e.vertices; nb[a_].append(b_); nb[b_].append(a_)
+    def smooth(PU,it=4):
+        D=PU.copy()
+        for _ in range(it):
+            A_=np.array([D[nb[i]].mean(0) if nb[i] else D[i] for i in range(len(D))]); D=0.5*D+0.5*A_
+            big=np.linalg.norm(PU,axis=1)>np.linalg.norm(D,axis=1); D[big]=PU[big]
+        return D
+    # (b) vertex offset along the body normal
+    for it in range(2):
+        X=wco(o); S,N,L=pen(X); PU=np.zeros_like(X); nsh=0
+        for i in range(len(X)):
+            if not (-0.08<S[i]<0.07): continue
+            need=off
+            n_=Vector(tuple(N[i]))
+            for T in TU:
+                h=_far_hits(T,Vector(tuple(L[i]))-n_*0.01,n_,0.08)
+                if h is not None:
+                    h-=0.01
+                    if -0.01<h<0.03: need=max(need,h+off); nsh+=1
+            if S[i]<need: PU[i]=N[i]*(need-S[i])
+        D=smooth(PU); add_disp(o,D); mm=np.linalg.norm(D,axis=1)*1000
+        r[f'normal_offset_pass{it+1}']={'verts_needing_push':int((np.linalg.norm(PU,axis=1)>1e-5).sum()),'over_shorts_checks':nsh,'max_mm':round(float(mm.max()),1),'mean_moved_mm':round(float(mm[mm>0.1].mean()) if (mm>0.1).any() else 0,1)}
+    # (c) face-level: body + shorts vertices still OUTSIDE the shirt
+    def outside_count(push=True):
+        Xs=wco(o); Tsh=BVHTree.FromPolygons([tuple(p) for p in Xs],[tuple(p.vertices) for p in o.data.polygons]); PU=np.zeros_like(Xs); hits=0
+        zlo=float(Xs[:,2].min())-0.005; zhi=float(Xs[:,2].max())
+        for u in [BODY]+list(unders):
+            Uw=wco(u)
+            for p in Uw:
+                if not (zlo<p[2]<zhi): continue
+                loc,nr,idx,d=TB.find_nearest(Vector(p),0.15)
+                if loc is None: continue
+                n_=Vector(nr); hl,hn,hf,hd=Tsh.ray_cast(Vector(p)+n_*0.0002,-n_,0.025)
+                if hl is None: continue
+                hits+=1
+                if push:
+                    vec=np.array(tuple(n_))*(hd+off)
+                    for vi in o.data.polygons[hf].vertices:
+                        if np.dot(vec,vec)>np.dot(PU[vi],PU[vi]): PU[vi]=vec
+        return hits,PU
+    out=[]
+    for it in range(3):
+        h,PU=outside_count(True)
+        if h==0: out.append({'outside_verts':0}); break
+        D=smooth(PU,3); add_disp(o,D); out.append({'outside_verts':h,'shirt_verts_moved':int((np.linalg.norm(D,axis=1)>1e-4).sum()),'max_mm':round(float(np.linalg.norm(D,axis=1).max())*1000,1)})
+    h,_=outside_count(False); out.append({'final_outside_verts':h})
+    r['face_level']=out
+    X=wco(o); S,_,_=pen(X); r['final']={'verts_under_skin':int(((S<0)&(S>-0.08)).sum()),'median_gap_mm':round(gap(S)*1000,1)}
+    rep.setdefault('cloth_fit',{})['Shirt v5']=r; log('SHIRT v5',r)
 BRA_HIDDEN=SHIRT is not None and P.get('BRA_UNDER_SHIRT','hide')=='hide'
 if P.get('FIT',True):
     for o,tg,off in ((BRA,[BODY],P.get('FIT_BRA',0.002)),(SH,[BODY],P.get('FIT_SHORTS',0.0015 if SF=='hug' else 0.0025))):
@@ -364,8 +472,9 @@ if P.get('FIT',True):
         except Exception as e: traceback.print_exc(); log('FITERR','Hair',e)
     if SHIRT is not None:
         try:
-            for tg_ in ((BODY,SH) if BRA_HIDDEN else (BODY,BRA,SH)): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.006)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
-            cover_fix(SHIRT,[BODY,SH] if BRA_HIDDEN else [BODY,BRA,SH],P.get('FIT_SHIRT',0.006))
+            if P.get('SHIRT_FIT','v5')=='v5': shirt_v5(SHIRT,[SH] if BRA_HIDDEN else [BRA,SH],P.get('FIT_SHIRT',0.006))
+            else:
+                for tg_ in ((BODY,SH) if BRA_HIDDEN else (BODY,BRA,SH)): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.006)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
         except Exception as e: traceback.print_exc(); log('FITERR','Shirt',e)
 # clothes weights: Data Transfer from the Panda body (Vertex Data > Vertex Groups, nearest face interpolated), applied, cleaned, normalized, max 4 influences
 def transfer_weights(o):
@@ -509,10 +618,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r4','A2':'jena-v37r4-noshirt'}.get(VAR)
-if SAVE_NAME and not P['TT']:
-    try: bpy.ops.wm.save_as_mainfile(filepath=OUT+'/'+SAVE_NAME+'.blend',compress=True); log('blend saved')
-    except Exception as e: log('BLENDERR',e)
+SAVE_NAME={'A0':'jena-v37r5','A1':'jena-v37r5-umeko','A2':'jena-v37r5-noshirt'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -548,13 +654,13 @@ def unsolo(st):
 HAIRNAME='umeko-hair' if P['HAIR']=='umeko' else 'blowout-haircards'
 ASSETS={'panda-body':[BODY]+BX,'female-head':[FH],HAIRNAME:[HR],'booty-shorts':[SH],'outfit-bra':[BRA]}
 if SHIRT is not None: ASSETS['outfit-shirt-grey']=[SHIRT]
-SETS={'face':[],'full':['panda-body','female-head',HAIRNAME,'booty-shorts','outfit-shirt-grey'],'umeko':[HAIRNAME],'noshirt':['outfit-bra','booty-shorts']}
+SETS={'face':[],'full':['panda-body','female-head',HAIRNAME,'booty-shorts','outfit-shirt-grey','outfit-bra'],'umeko':[HAIRNAME],'noshirt':['outfit-bra','booty-shorts']}
 def wrot(name,deg,axis):
     if not deg or name not in B.pose.bones: return
     pb=B.pose.bones[name]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,axis)@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
 def pose_relaxed(test=False):
     bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE')
-    for pb in B.pose.bones: pb.matrix_basis=Matrix()
+    for pb in B.pose.bones: pb.matrix_basis=BANG.get(pb.name,Matrix()).copy() if 'BANG' in globals() else Matrix()
     bpy.context.view_layer.update()
     SHD=P['SHOULDER_DOWN']
     for name,sgn,deg in (('Left shoulder',1,SHD),('Right shoulder',-1,SHD),('Left arm',1,P['ARM_DOWN']-SHD),('Right arm',-1,P['ARM_DOWN']-SHD)): wrot(name,sgn*deg,'Y')
@@ -572,8 +678,210 @@ def pose_relaxed(test=False):
     bpy.ops.object.mode_set(mode='OBJECT'); bpy.context.view_layer.update()
 def rest():
     bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE')
-    for pb in B.pose.bones: pb.matrix_basis=Matrix()
+    for pb in B.pose.bones: pb.matrix_basis=BANG.get(pb.name,Matrix()).copy() if 'BANG' in globals() else Matrix()
     bpy.ops.object.mode_set(mode='OBJECT'); bpy.context.view_layer.update()
+
+# ---------- run 5: EYE RULE. Both eyes must be fully visible (front + 3/4). Ray test from every visible eye point toward the camera through the
+#            hair (alpha-aware: a ray through a transparent part of a card does not count). If bangs cover an eye, ONLY the implicated front bang
+#            chain(s) are rotated up (pose on the chain's first bone, no mesh edit), smallest angle that clears both views. Cheek/face crossings reported.
+
+# ---------- run 5: SKIN MATCH (Saidie 12:05 PM Oct 18: "I'd also try to make her face color matches her body skin tone"). Her explicit ask, so the
+#            face texture gets ONE per-channel colour grade (linear gain; shape, UVs and every painted detail untouched). Calibrated in the SAME studio
+#            light: clothes + hair hidden, front camera, mean colour of lower-cheek/jaw patches vs upper-chest/neck patches, 3 iterations.
+#            Result baked to face_matched.png (used by the material and embedded in the .fbx); her 1.png stays in the .blend as an unlinked node.
+from bpy_extras.object_utils import world_to_camera_view
+def _s2l(c): c=np.clip(c,0,1); return np.where(c<=0.04045,c/12.92,((c+0.055)/1.055)**2.4)
+def _l2s(c): c=np.clip(c,0,1); return np.where(c<=0.0031308,c*12.92,1.055*c**(1/2.4)-0.055)
+def _lab(rgb):
+    l=_s2l(np.array(rgb)); M=np.array([[0.4124,0.3576,0.1805],[0.2126,0.7152,0.0722],[0.0193,0.1192,0.9505]]); X=M@l/np.array([0.95047,1.0,1.08883])
+    f=np.where(X>0.008856,np.cbrt(X),7.787*X+16/116); return np.array([116*f[1]-16,500*(f[0]-f[1]),200*(f[1]-f[2])])
+def _dE(a,b): return float(np.linalg.norm(_lab(a)-_lab(b)))
+FACE_MAT=[s_l.material for s_l in FH.material_slots if s_l.material and s_l.material.name.lower().startswith('face')]
+def _face_node():
+    for m in FACE_MAT:
+        bsdf=[n for n in m.node_tree.nodes if n.type=='BSDF_PRINCIPLED'][0]
+        for l in m.node_tree.links:
+            if l.to_socket==bsdf.inputs['Base Color'] and l.from_node.type=='TEX_IMAGE': return m,l.from_node
+    return None,None
+def _pts():
+    fv=np.array([tuple(FH.matrix_world@FH.data.vertices[i].co) for p in FH.data.polygons if FH.material_slots[p.material_index].material in FACE_MAT for i in p.vertices])
+    hw=(hmx[0]-hmn[0])/2; h=hmx[2]-hmn[2]; cz=hmn[2]
+    F=[]
+    for sg in (1,-1):
+        m=(np.abs(fv[:,2]-(cz+0.20*h))<0.03*h)&(sg*fv[:,0]>0.22*hw)&(sg*fv[:,0]<0.42*hw)
+        if m.any():
+            q=fv[m]; F.append(q[np.argmin(q[:,1])])
+    bv=wco(BODY); cx=0.0; Bp=[]
+    for zoff,xo in ((-0.11,0.0),(-0.10,0.035),(-0.10,-0.035)):
+        m=(np.abs(bv[:,2]-(hmn[2]+zoff))<0.006)&(np.abs(bv[:,0]-xo)<0.008)
+        if m.any(): q=bv[m]; Bp.append(q[np.argmin(q[:,1])])
+    return [Vector(tuple(p)) for p in F],[Vector(tuple(p)) for p in Bp]
+def _cal(name):
+    keep={BODY,FH}|set(BX)|({CR} if CR else set()); st={o.name:o.hide_render for o in bpy.data.objects if o.type=='MESH'}
+    for o in bpy.data.objects:
+        if o.type=='MESH': o.hide_render=o not in keep
+    hm_,hx_=bbox([FH]); box=(Vector((hm_.x,hm_.y,hm_.z-0.16)),hx_)
+    sc.render.resolution_percentage=100; place([FH],'front',(480,720),1.1,box=box); sc.cycles.samples=16
+    sc.render.filepath=OUT+'/proof/'+name+'.png'; bpy.ops.render.render(write_still=True)
+    for o in bpy.data.objects:
+        if o.type=='MESH' and o.name in st: o.hide_render=st[o.name]
+    im=bpy.data.images.load(OUT+'/proof/'+name+'.png'); W_,H_=im.size; a=np.empty(W_*H_*4,dtype=np.float32); im.pixels.foreach_get(a); a=a.reshape(H_,W_,4)[:,:,:3]; bpy.data.images.remove(im)
+    def samp(P_):
+        out=[]
+        for p in P_:
+            v=world_to_camera_view(sc,cam,p); x=int(v.x*W_); y=int(v.y*H_)
+            if 4<=x<W_-4 and 4<=y<H_-4: out.append(a[y-3:y+4,x-3:x+4].reshape(-1,3).mean(0))
+        return np.mean(out,0) if out else None
+    return samp(FP),samp(BP)
+SKIN={}
+try:
+    if P.get('SKIN_MATCH',True) and FACE_MAT:
+        FP,BP=_pts(); SKIN['points']={'face':[list(map(lambda x:round(x,4),p)) for p in FP],'body':[list(map(lambda x:round(x,4),p)) for p in BP]}
+        fm,node=_face_node(); im0=node.image; W0,H0=im0.size; px0=np.empty(W0*H0*4,dtype=np.float32); im0.pixels.foreach_get(px0); px0=px0.reshape(-1,4)
+        lin0=_s2l(px0[:,:3])
+        new=bpy.data.images.new('face_matched.png',W0,H0,alpha=True); new.filepath_raw=OUT+'/face_matched.png'; new.file_format='PNG'
+        g=np.ones(3); hist=[]
+        for it in range(4):
+            if it==0: node.image=im0
+            else:
+                px=px0.copy(); px[:,:3]=_l2s(lin0*g); new.pixels.foreach_set(px.ravel()); new.update(); node.image=new
+            f_,b_=_cal('skinmatch-cal-'+('before' if it==0 else f'it{it}'))
+            if f_ is None or b_ is None: raise RuntimeError(f'calibration points off-frame face={f_} body={b_}')
+            dE=_dE(f_,b_); hist.append({'iter':it,'gain':[round(x,4) for x in g],'face_rgb':[round(float(x)*255,1) for x in f_],'body_rgb':[round(float(x)*255,1) for x in b_],'dE76':round(dE,2)})
+            log('SKIN',hist[-1])
+            if it==3: break
+            g=np.clip(g*(_s2l(b_)/np.maximum(_s2l(f_),1e-4))**0.9,0.5,1.8)
+        best=min(hist,key=lambda h:h['dE76']); SKIN['iterations']=hist; SKIN['chosen']=best
+        if best['iter']==0: node.image=im0; SKIN['note']='original was already the closest'
+        else:
+            g=np.array(best['gain']); px=px0.copy(); px[:,:3]=_l2s(lin0*g); new.pixels.foreach_set(px.ravel()); new.update(); new.save(); node.image=new
+            keepn=fm.node_tree.nodes.new('ShaderNodeTexImage'); keepn.image=im0; keepn.label='ORIGINAL face 1.png (unlinked; face_matched.png = this x gain '+str(best['gain'])+')'; keepn.location=(node.location.x,node.location.y-320)
+except Exception as e: traceback.print_exc(); log('SKINERR',e); SKIN['error']=str(e)
+rep['skin_match']=SKIN
+BANG={}
+def _hair_alpha():
+    try:
+        im=None
+        for s_l in HR.material_slots:
+            m=s_l.material
+            if m and m.use_nodes:
+                for n in m.node_tree.nodes:
+                    if n.type=='TEX_IMAGE' and n.image: im=n.image
+        if im is None or P['HAIR']=='umeko': return None
+        w_,h_=im.size; a=np.empty(w_*h_*4,dtype=np.float32); im.pixels.foreach_get(a); return a.reshape(h_,w_,4)[:,:,3],w_,h_
+    except Exception as e: log('ALPHAERR',e); return None
+HALPHA=_hair_alpha()
+def _eval_tris(o,mat_ok=None):
+    dg=bpy.context.evaluated_depsgraph_get(); e=o.evaluated_get(dg); me=e.to_mesh(); me.calc_loop_triangles(); mw=o.matrix_world
+    V=np.array([tuple(mw@v.co) for v in me.vertices]); keep=[t for t in me.loop_triangles if mat_ok is None or mat_ok(t.material_index)]
+    F=[tuple(t.vertices) for t in keep]
+    uvl=me.uv_layers.active; UV=[[tuple(uvl.data[l].uv) for l in t.loops] for t in keep] if uvl else None
+    TV=[tuple(t.vertices) for t in keep]; e.to_mesh_clear()
+    return BVHTree.FromPolygons([tuple(v) for v in V],F),V,F,UV,TV
+FH_EYE_MATS={i for i,s_l in enumerate(FH.material_slots) if s_l.material and s_l.material.name.lower().startswith('eyes')}
+FH_SOLID={i for i,s_l in enumerate(FH.material_slots) if s_l.material and not s_l.material.name.lower().startswith('effects')}
+def eye_cover(views=('front','q34')):
+    TF,VF,FF,_,_=_eval_tris(FH,lambda mi:mi in FH_SOLID)
+    TH,VH,FHt,UVH,TVH=_eval_tris(HR)
+    pts=[]
+    dg=bpy.context.evaluated_depsgraph_get(); e=FH.evaluated_get(dg); me=e.to_mesh(); me.calc_loop_triangles(); mw=FH.matrix_world
+    for t in me.loop_triangles:
+        if t.material_index in FH_EYE_MATS:
+            P3=[mw@me.vertices[v].co for v in t.vertices]; pts.append((P3[0]+P3[1]+P3[2])/3); pts+=P3
+    e.to_mesh_clear()
+    out={}; hit_tris=set()
+    for vw in views:
+        d=DIRS_EYE[vw]
+        res={'L':[0,0],'R':[0,0]}
+        for p in pts:
+            sd='L' if p.x>0 else 'R'
+            o_=p+d*0.0006
+            l1,_,_,_=TF.ray_cast(o_,d,0.4)
+            if l1 is not None: continue   # eyelid/face in front: not a visible eye point
+            res[sd][1]+=1; oo=o_; covered=False
+            for _ in range(6):
+                l2,n2,i2,d2=TH.ray_cast(oo,d,0.6)
+                if l2 is None: break
+                a_=1.0
+                if HALPHA is not None and UVH is not None:
+                    A_,w_,h_=HALPHA; a0,b0,c0=[Vector(VH[j]) for j in TVH[i2]]
+                    from mathutils.geometry import barycentric_transform
+                    uvw=barycentric_transform(l2,a0,b0,c0,Vector((1,0,0)),Vector((0,1,0)),Vector((0,0,1)))
+                    uv=sum((Vector(UVH[i2][j])*uvw[j] for j in range(3)),Vector((0,0)))
+                    a_=float(A_[int((uv.y%1.0)*(h_-1)),int((uv.x%1.0)*(w_-1))])
+                if a_>0.35: covered=True; hit_tris.add(i2); break
+                oo=l2+d*0.0003
+            if covered: res[sd][0]+=1
+        out[vw]={sd:{'covered':c_,'visible_pts':n_,'pct':round(100.0*c_/max(n_,1),1)} for sd,(c_,n_) in res.items()}
+    return out,hit_tris,TVH
+DIRS_EYE={'front':Vector((0,-1,0)),'q34':Vector((-0.72,-0.69,0)).normalized()}   # subject -> camera (same as DIRS)
+def cover_pct(ec): return max(v['pct'] for vw in ec.values() for v in vw.values())
+def chains_for(hit_tris,TVH):
+    """first bone (child of the hair root/Head) of every chain whose bones carry the covering hair triangles"""
+    gi={g.index:g.name for g in HR.vertex_groups}; cnt=Counter()
+    for ti in hit_tris:
+        for vi in TVH[ti]:
+            gs=[(ge.weight,gi[ge.group]) for ge in HR.data.vertices[vi].groups if ge.weight>0]
+            if gs: cnt[max(gs)[1]]+=1
+    roots=Counter()
+    for bn_,c_ in cnt.items():
+        if bn_ not in B.data.bones: continue
+        b=B.data.bones[bn_]
+        while b.parent is not None and b.parent.name not in ('Head','Blowout_Root','Hair_root','Hair Root'): b=b.parent
+        if b.name in ('Head','Blowout_Root','Hair_root','Neck','Chest','Spine','Hips'): continue
+        roots[b.name]+=c_
+    return dict(cnt),dict(roots)
+def face_cross():
+    """hair triangles crossing her face skin below the brow line (cheeks/nose/eyes), by bone"""
+    TF,VF,FF,_,_=_eval_tris(FH,lambda mi:mi in FH_SOLID and mi not in FH_EYE_MATS)
+    TH,VH,FHt,UVH,TVH=_eval_tris(HR)
+    ez=EYE_TOP_Z; ov=TH.overlap(TF)
+    bad=set(a for a,b in ov if all(VF[j][2]<ez for j in FF[b]) and VF[FF[b][0]][1]<HEADCY)
+    gi={g.index:g.name for g in HR.vertex_groups}; byb=Counter()
+    for ti in bad:
+        vi=TVH[ti][0]; gs=[(ge.weight,gi[ge.group]) for ge in HR.data.vertices[vi].groups if ge.weight>0]
+        if gs: byb[max(gs)[1]]+=1
+    return {'hair_tris_crossing_face_below_brow':len(bad),'by_bone':dict(byb.most_common(8))}
+try:
+    _eyez=[FH.matrix_world@v.co for v in FH.data.vertices]
+    _ev=[ (FH.matrix_world@FH.data.vertices[i].co) for p in FH.data.polygons if p.material_index in FH_EYE_MATS for i in p.vertices]
+    EYE_TOP_Z=max(v.z for v in _ev)+0.004 if _ev else float(hmx[2]); HEADCY=float((hmn[1]+hmx[1])/2)
+    bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE'); bpy.ops.object.mode_set(mode='OBJECT'); bpy.context.view_layer.update()
+    ec,ht,TVH_=eye_cover(); rep['eyes_before']=ec; rep['face_cross_before']=face_cross(); log('EYES before',ec,'cross',rep['face_cross_before'])
+    if cover_pct(ec)>P.get('EYE_TOL_PCT',1.0):
+        cnt,roots=chains_for(ht,TVH_); rep['eye_cover_bones']=cnt; rep['eye_cover_chains']=roots; log('cover chains',roots,'bones',cnt)
+        front=[r_ for r_ in roots if P['HAIR']=='umeko' or 'Bang' in r_] or [r_ for r_ in roots if any(k in r_ for k in ('Front','Flyaway'))]
+        rep['bang_chains_rotated']=front; tried=[]
+        if front:
+            base={r_:B.pose.bones[r_].matrix_basis.copy() for r_ in front}
+            ok=None
+            # sign: the one that RAISES the chain tips (checked on the bones, not assumed)
+            def tipz():
+                bpy.context.view_layer.update(); return sum((B.matrix_world@B.pose.bones[r_].tail).z for r_ in front)
+            z0=tipz(); [wrot(r_,-10,'X') for r_ in front]; zm=tipz()
+            for r_ in front: B.pose.bones[r_].matrix_basis=base[r_].copy()
+            bpy.context.view_layer.update(); SGN=-1 if zm>=z0 else 1; rep['bang_sign']=SGN
+            for ang in range(5,65,5):
+                for r_ in front: B.pose.bones[r_].matrix_basis=base[r_].copy()
+                bpy.context.view_layer.update()
+                for r_ in front: wrot(r_,SGN*ang,'X')   # tip swings UP (away from the eyes); pose only
+                ec2,ht2,_=eye_cover(); pc=cover_pct(ec2); tried.append((ang,pc)); log('bang up',ang,'deg -> cover %',pc)
+                if pc<=P.get('EYE_TOL_PCT',1.0): ok=ang; break
+            rep['bang_tries']=tried; rep['bang_angle_deg']=ok
+            if ok is None:
+                best=min(tried,key=lambda t:(t[1],t[0]))[0]
+                for r_ in front: B.pose.bones[r_].matrix_basis=base[r_].copy()
+                bpy.context.view_layer.update()
+                for r_ in front: wrot(r_,SGN*best,'X')
+                rep['bang_angle_deg']=best; rep['bang_note']='no angle up to 60 deg fully cleared both eyes; kept the best'
+            for r_ in front: BANG[r_]=B.pose.bones[r_].matrix_basis.copy()
+        ec3,_,_=eye_cover(); rep['eyes_after']=ec3; rep['face_cross_after']=face_cross(); log('EYES after',ec3,'cross',rep['face_cross_after'],'BANG',list(BANG))
+    else: rep['eyes_after']=ec; rep['bang_chains_rotated']=[]
+except Exception as e: traceback.print_exc(); log('EYECHECKERR',e); rep['eyecheck_error']=str(e)
+json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
+if SAVE_NAME and not P['TT']:
+    try: rest(); bpy.ops.wm.save_as_mainfile(filepath=OUT+'/'+SAVE_NAME+'.blend',compress=True); log('blend saved')
+    except Exception as e: log('BLENDERR',e)
 if not P['TT']:
     SET=SETS[P['SET']]
     # A) 1:1 proofs in REST pose (as the solo renders), camera framed on that asset exactly as its solo render was:
@@ -589,6 +897,8 @@ if not P['TT']:
     if P['SET']=='full':
         for v in ('front','side','back','q34'): shot('pose-'+v,ALL,v,res=(768,1376),pad=1.06)
         shot('face',[FH],'front',res=(1024,1024),pad=1.25); shot('face34',[FH],'q34',res=(1024,1024),pad=1.25)
+        if SHIRT is not None: shot('shirt-over-bra-q34',[SHIRT],'q34',res=(1024,1024),pad=1.15)
+        shot('skinmatch-face34',[FH],'q34',res=(1024,1024),pad=1.6,zoff=-0.25*(hx.z-hm.z)); shot('skinmatch-neck',[FH],'front',res=(1024,1024),pad=1.5,zoff=-0.55*(hx.z-hm.z))
         shot('neckside',[FH],'side',res=(1024,1024),pad=1.9,zoff=-0.35*(hx.z-hm.z))
         KB=FH.data.shape_keys.key_blocks if FH.data.shape_keys else {}
         bk=[k for k in ('vrc.blink_left','vrc.blink_right') if k in KB] or [k for k in KB.keys() if 'blink' in k.lower()][:1]; rep['blink_keys']=bk

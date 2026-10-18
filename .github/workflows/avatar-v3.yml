@@ -106,4 +106,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-3
+# rev v3.7-assemble-5

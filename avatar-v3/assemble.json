@@ -1,22 +1,24 @@
 {
  "all": {
-  "HAIR_ALIGN": "bbox",
-  "HAIR_DY": 0.02
+  "HAIR_ALIGN": "bone_strict",
+  "BRA_UNDER_SHIRT": "keep",
+  "SHIRT_FIT": "v5",
+  "FIT_SHIRT": 0.005,
+  "SKIN_MATCH": true,
+  "EYE_TOL_PCT": 1.0
  },
  "A1": {
   "HAIR": "umeko",
   "SET": "umeko",
-  "HAIR_W_RATIO": 1.4,
-  "HAIR_DZ": 0.006,
-  "HAIR_DY": 0.0
+  "HAIR_SCALE": 1.0
  },
  "A2": {
   "SHIRT": false,
   "SET": "noshirt"
  },
  "A3": {
-  "SHIRT": false,
-  "SET": "noshirt",
-  "SHORTS_FIT": "keys"
+  "HAIR": "umeko",
+  "SET": "umeko",
+  "HAIR_SCALE": 1.12
  }
 }
