@@ -1,5 +1,6 @@
 
 # v3.7 ASSEMBLY, run 7 (RUN6B-FINDINGS fixes: shirt seam/shell weld + smoothed pushes + corrective body weights + posed clearance; front locks <=8 deg;
+#   RUN 8b (Saidie 3:38-3:41 PM): head asset's OWN hair (no Blowout), shirt Tshirt-LewdFaceBlack.png, inner-shell flush + backface cull at the band/sleeve seam, seam close-ups.
 #   RUN 8 (on 7b): band+sleeve-top seam weights spatially averaged; posed clearance adds arms-forward frames 166-172; front locks per bone vs body+bra+shirt, stick-out cap 2 cm; final lock gate; Tummy close-ups.
 #   halter loop rides the Neck offset rigidly (no vertex pushes); Tummy hem clearance; variants A0 bang 1:1 / A1 bang curled <=15 deg). Based on run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
@@ -85,8 +86,24 @@ for o in BX: log('extra body-file mesh',o.name)
 # ---------- 2. her Female Head, WITH its armature (bones merged into Panda's later); bunisu pigtails/bangs meshes dropped (she chose other hair)
 HD=IN+'/1691108855vrmodels_store_female-head-by-bunisu/Female head/'; ZP=IN+'/ZinPia_Doe Eyes (Sunny Head)/'
 new=imp_fbx(HD+'Female head + hair.fbx'); FH=[o for o in new if o.type=='MESH' and o.name=='Female Head'][0]; FA=[o for o in new if o.type=='ARMATURE'][0]
+# run 8 (Saidie 3:38 PM: "since there's already hair on the head model, just don't use the blowout hair"): HAIR='head' keeps the head asset's OWN hair meshes
+# (bunisu 'Hair - ...' meshes, their own weights to the head's Hair Root / Bangs / piggy / Back hair bones), 1:1, riding the head's single uniform transform.
+HHM=[o for o in new if o.type=='MESH' and o is not FH and o.name.lower().startswith('hair')] if P.get('HAIR')=='head' else []
+rep['head_fbx_meshes']=[(o.name,o.type,(len(o.data.vertices) if o.type=='MESH' else 0)) for o in new]; log('head fbx objects',rep['head_fbx_meshes'])
 for o in new:
-    if o.type=='MESH' and o is not FH: bpy.data.objects.remove(o)
+    if o.type=='MESH' and o is not FH and o not in HHM: bpy.data.objects.remove(o)
+if P.get('HAIR')=='head' and not HHM: raise RuntimeError('HAIR=head but the head fbx has no hair mesh')
+for o in HHM:
+    for s_l in o.material_slots:
+        m=s_l.material
+        if not m: continue
+        m.use_nodes=True; nt=m.node_tree; bb=[x for x in nt.nodes if x.type=='BSDF_PRINCIPLED']
+        for l in [l for l in nt.links if bb and l.to_socket in (bb[0].inputs['Base Color'],bb[0].inputs['Alpha'])]: nt.links.remove(l)
+        if bb: bb[0].inputs['Base Color'].default_value=(0.03,0.03,0.035,1); bb[0].inputs['Roughness'].default_value=0.45; bb[0].inputs['Alpha'].default_value=1.0
+rep['head_hair_meshes']=[(o.name,len(o.data.vertices),tris(o),[s_l.material.name for s_l in o.material_slots if s_l.material]) for o in HHM]; log('head hair meshes',rep['head_hair_meshes'])
+HAIR_RAW0=None
+if HHM:
+    _hv=np.vstack([wco(o) for o in HHM]); HAIR_RAW0=(_hv.max(0)-_hv.min(0)).tolist()
 rep['head_fbx_bones']=[b.name for b in FA.data.bones]; log('head fbx bones',rep['head_fbx_bones'])
 HT=P['HEAD_TEX']
 if HT=='auto':
@@ -125,7 +142,7 @@ if P.get('HEAD_SCALE'): s_=float(P['HEAD_SCALE'])
 s_=min(max(s_,1.0),2.0)
 M_=Matrix.Translation(pbH)@Matrix.Scale(s_,4)@Matrix.Translation(-hb0)
 HEAD_RAW_DIMS=(wco(FH).max(0)-wco(FH).min(0)).tolist()
-apply_tf([FA,FH],M_)
+apply_tf([FA,FH]+HHM,M_)
 ALIGN={'head_bone_vs_panda_head_mm':round(float(((FA.matrix_world@FA.data.bones['Head'].head_local)-pbH).length)*1000,2)}
 HV=wco(FH); hmn=HV.min(0); hmx=HV.max(0)
 def _dir(a,b):
@@ -147,6 +164,9 @@ rep['attach']['neck_ring']={'verts':len(RING),'z_min':float(RING[:,2].min()) if 
 log('ATTACH',rep['attach'])
 # ---------- 4. her hair (as authored, its own texture; only uniformly scaled + placed onto the head), with its own bone chains
 def hair_import():
+    if P['HAIR']=='head':
+        if len(HHM)>1: sel(HHM,HHM[0]); bpy.ops.object.join()
+        HR=HHM[0]; HR.name='Hair'; return HR,None,[]
     if P['HAIR']=='umeko':
         new=imp_fbx(IN+'/assets/hair_umeko_gift.fbx'); tex=(IN+'/assets/hair_texture_black_to_white_1713.jpg',False)
     else:
@@ -163,35 +183,39 @@ def hair_import():
     return HR,(HA[0] if HA else None),HE
 HR,HA,HE=hair_import(); rep['hair_bones']=[b.name for b in HA.data.bones] if HA else []
 log('hair',P['HAIR'],tris(HR),'bones',len(rep['hair_bones']),'groups',len(HR.vertex_groups))
-UV_=wco(HR); umn=UV_.min(0); umx=UV_.max(0)
-s=(hmx[0]-hmn[0])*P['HAIR_W_RATIO']/(umx[0]-umn[0])
-kh_=s_/1.025   # run-3 offsets were in metres at head scale 1.025; keep them relative to her head at the new scale
-pivot=Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); target=Vector(((hmn[0]+hmx[0])/2,hmn[1]+P['HAIR_DEPTH_K']*(hmx[0]-hmn[0])/2+P['HAIR_DY']*kh_,hmx[2]+(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_))
-rep['hair_offsets_m']={'DY':P['HAIR_DY']*kh_,'DZ_plus_gap':(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_,'W_RATIO':P['HAIR_W_RATIO']}
-Mh=Matrix.Translation(target)@Matrix.Scale(s,4)@Matrix.Translation(-pivot); how='bbox'
-# preferred: the hair's own Head bone onto her head's own Head bone (how the hair was authored to sit on a head), same uniform scale
-try:
-    if P.get('HAIR_ALIGN','bone')=='bone' and HA and 'Head' in HA.data.bones and 'Head' in FA.data.bones:
+if P['HAIR']=='head':
+    s=s_; HAIR_RAW_DIMS=HAIR_RAW0; rep['hair_align']='head asset own hair: rides the head transform (her Head bone -> Panda Head bone, uniform %.4fx), no offsets'%s_
+    rep['hair_offsets_m']={'none':True}; ALIGN['hair_head_bone_vs_head_bone_mm']=0.0; rep['hair_fit']={'hair':'head','scale':s}; log('hair fit (head own hair)',s)
+else:
+    UV_=wco(HR); umn=UV_.min(0); umx=UV_.max(0)
+    s=(hmx[0]-hmn[0])*P['HAIR_W_RATIO']/(umx[0]-umn[0])
+    kh_=s_/1.025   # run-3 offsets were in metres at head scale 1.025; keep them relative to her head at the new scale
+    pivot=Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); target=Vector(((hmn[0]+hmx[0])/2,hmn[1]+P['HAIR_DEPTH_K']*(hmx[0]-hmn[0])/2+P['HAIR_DY']*kh_,hmx[2]+(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_))
+    rep['hair_offsets_m']={'DY':P['HAIR_DY']*kh_,'DZ_plus_gap':(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_,'W_RATIO':P['HAIR_W_RATIO']}
+    Mh=Matrix.Translation(target)@Matrix.Scale(s,4)@Matrix.Translation(-pivot); how='bbox'
+    # preferred: the hair's own Head bone onto her head's own Head bone (how the hair was authored to sit on a head), same uniform scale
+    try:
+        if P.get('HAIR_ALIGN','bone')=='bone' and HA and 'Head' in HA.data.bones and 'Head' in FA.data.bones:
+            hb=HA.matrix_world@HA.data.bones['Head'].head_local; tb=FA.matrix_world@FA.data.bones['Head'].head_local
+            Mb=Matrix.Translation(tb+Vector((0,P['HAIR_DY'],P['HAIR_DZ_BONE'] if 'HAIR_DZ_BONE' in P else 0.0)))@Matrix.Scale(s,4)@Matrix.Translation(-hb)
+            topb=(Mb@Vector((0,0,umx[2]))).z; ctr_b=Mb@Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); ctr_x=Mh@pivot
+            rep['hair_align_compare']={'bone_top_minus_head_top':topb-float(hmx[2]),'bone_vs_bbox_offset':list(ctr_b-ctr_x),'hair_head_bone':list(hb),'head_head_bone':list(tb)}
+            log('hair align compare',rep['hair_align_compare'])
+            if -0.01 < topb-float(hmx[2]) < 0.05 and (ctr_b-ctr_x).length<0.05: Mh=Mb; how='bone'
+    except Exception as e: traceback.print_exc(); log('HAIRALIGNERR',e)
+    if P.get('HAIR_ALIGN')=='bone_strict':
+        # run 5 (RUN4-FINDINGS): the hair's own Head bone onto her head's own Head bone, ONE uniform scale (= the head's, or HAIR_SCALE), no offsets, no push
         hb=HA.matrix_world@HA.data.bones['Head'].head_local; tb=FA.matrix_world@FA.data.bones['Head'].head_local
-        Mb=Matrix.Translation(tb+Vector((0,P['HAIR_DY'],P['HAIR_DZ_BONE'] if 'HAIR_DZ_BONE' in P else 0.0)))@Matrix.Scale(s,4)@Matrix.Translation(-hb)
-        topb=(Mb@Vector((0,0,umx[2]))).z; ctr_b=Mb@Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); ctr_x=Mh@pivot
-        rep['hair_align_compare']={'bone_top_minus_head_top':topb-float(hmx[2]),'bone_vs_bbox_offset':list(ctr_b-ctr_x),'hair_head_bone':list(hb),'head_head_bone':list(tb)}
-        log('hair align compare',rep['hair_align_compare'])
-        if -0.01 < topb-float(hmx[2]) < 0.05 and (ctr_b-ctr_x).length<0.05: Mh=Mb; how='bone'
-except Exception as e: traceback.print_exc(); log('HAIRALIGNERR',e)
-if P.get('HAIR_ALIGN')=='bone_strict':
-    # run 5 (RUN4-FINDINGS): the hair's own Head bone onto her head's own Head bone, ONE uniform scale (= the head's, or HAIR_SCALE), no offsets, no push
-    hb=HA.matrix_world@HA.data.bones['Head'].head_local; tb=FA.matrix_world@FA.data.bones['Head'].head_local
-    s=float(P.get('HAIR_SCALE') or s_)
-    Mh=Matrix.Translation(tb)@Matrix.Scale(s,4)@Matrix.Translation(-hb); how=f'bone_strict: hair Head bone -> her Head bone, uniform {s:.4f}x, no offsets'
-    rep['hair_offsets_m']={'none':True}; rep['hair_bone_native']=list(hb); rep['head_bone_target']=list(tb)
-rep['hair_align']=how; log('hair align',how)
-HAIR_RAW_DIMS=(umx-umn).tolist()
-apply_tf([x for x in (HA,HR) if x],Mh)
-try: ALIGN['hair_head_bone_vs_head_bone_mm']=round(float(((HA.matrix_world@HA.data.bones['Head'].head_local)-(FA.matrix_world@FA.data.bones['Head'].head_local)).length)*1000,2)
-except Exception as e: ALIGN['hair_head_bone_vs_head_bone_mm']=str(e)
-for e_ in HE: bpy.data.objects.remove(e_)
-rep['hair_fit']={'hair':P['HAIR'],'scale':s}; log('hair fit',s)
+        s=float(P.get('HAIR_SCALE') or s_)
+        Mh=Matrix.Translation(tb)@Matrix.Scale(s,4)@Matrix.Translation(-hb); how=f'bone_strict: hair Head bone -> her Head bone, uniform {s:.4f}x, no offsets'
+        rep['hair_offsets_m']={'none':True}; rep['hair_bone_native']=list(hb); rep['head_bone_target']=list(tb)
+    rep['hair_align']=how; log('hair align',how)
+    HAIR_RAW_DIMS=(umx-umn).tolist()
+    apply_tf([x for x in (HA,HR) if x],Mh)
+    try: ALIGN['hair_head_bone_vs_head_bone_mm']=round(float(((HA.matrix_world@HA.data.bones['Head'].head_local)-(FA.matrix_world@FA.data.bones['Head'].head_local)).length)*1000,2)
+    except Exception as e: ALIGN['hair_head_bone_vs_head_bone_mm']=str(e)
+    for e_ in HE: bpy.data.objects.remove(e_)
+    rep['hair_fit']={'hair':P['HAIR'],'scale':s}; log('hair fit',s)
 CR=None
 if P['CRANIUM']:
     import bmesh
@@ -220,7 +244,17 @@ for o in new:
     if o is not BRA and o is not SHIRT: bpy.data.objects.remove(o)
 if SHIRT is not None:
     for s_l in SHIRT.material_slots:
-        if s_l.material: set_tex(s_l.material,IN+'/Tshirt-BasicGrey.png')
+        if s_l.material:
+            set_tex(s_l.material,IN+'/'+P.get('SHIRT_TEX','Tshirt-BasicGrey.png'))
+            # run 8: backfaces of the shirt render transparent (as Unity/VRChat cull them), so the dark inner shell can never show through the outer one
+            if P.get('SHIRT_BACKFACE_CULL',True):
+                try:
+                    m=s_l.material; m.use_backface_culling=True; nt=m.node_tree; out_=[n for n in nt.nodes if n.type=='OUTPUT_MATERIAL'][0]; lk=[l for l in nt.links if l.to_socket==out_.inputs['Surface']]
+                    if lk:
+                        src=lk[0].from_socket; nt.links.remove(lk[0]); g_=nt.nodes.new('ShaderNodeNewGeometry'); tr_=nt.nodes.new('ShaderNodeBsdfTransparent'); mx_=nt.nodes.new('ShaderNodeMixShader')
+                        nt.links.new(g_.outputs['Backfacing'],mx_.inputs[0]); nt.links.new(src,mx_.inputs[1]); nt.links.new(tr_.outputs[0],mx_.inputs[2]); nt.links.new(mx_.outputs[0],out_.inputs['Surface'])
+                except Exception as e: log('BACKFACEERR',e)
+    rep['shirt_texture']=P.get('SHIRT_TEX','Tshirt-BasicGrey.png')
     SHIRT.name='Shirt'
 bm_=bpy.data.materials.new('BraBlack'); bm_.use_nodes=True; bb2=bm_.node_tree.nodes['Principled BSDF']; bb2.inputs['Base Color'].default_value=(*P['BRA_COL'],1); bb2.inputs['Roughness'].default_value=P['BRA_ROUGH']
 BRA.data.materials.clear(); BRA.data.materials.append(bm_)
@@ -1063,7 +1097,7 @@ def kill(name):
     if name in eb:
         for c in list(eb[name].children): kill(c.name)
         eb.remove(eb[name])
-kill('Hair Root')   # bones of the bunisu pigtails/bangs meshes she did not choose
+if P.get('HAIR')!='head': kill('Hair Root')   # bones of the bunisu pigtails/bangs meshes (kept when HAIR='head')
 bpy.ops.object.mode_set(mode='OBJECT')
 def merge_groups(o):
     for g in list(o.vertex_groups):
@@ -1183,7 +1217,7 @@ def sun(name,rot,e,col=(1,1,1)):
     L=bpy.data.lights.new(name,'SUN'); L.energy=e; L.color=col; L.angle=math.radians(8); o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.rotation_euler=[math.radians(a) for a in rot]; return o
 sun('key',(55,0,-35),3.2,(1,0.96,0.92)); sun('fill',(70,0,45),1.1,(0.92,0.95,1)); sun('rim',(60,0,165),2.4)
 cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam; cam.data.lens=85
-DIRS={'front':Vector((0,-1,0)),'back':Vector((0,1,0)),'side':Vector((-1,0,0)),'q34':Vector((-0.72,-0.69,0)).normalized()}
+DIRS={'front':Vector((0,-1,0)),'back':Vector((0,1,0)),'side':Vector((-1,0,0)),'q34':Vector((-0.72,-0.69,0)).normalized(),'q34L':Vector((0.72,-0.69,0)).normalized()}
 def bbox(objs):
     dg=bpy.context.evaluated_depsgraph_get(); pts=[]
     for o in objs:
@@ -1206,7 +1240,7 @@ def solo(objs):
     return st
 def unsolo(st):
     for o in meshes: o.hide_render=st[o.name]
-HAIRNAME='umeko-hair' if P['HAIR']=='umeko' else 'blowout-haircards'
+HAIRNAME='umeko-hair' if P['HAIR']=='umeko' else ('female-head-hair' if P['HAIR']=='head' else 'blowout-haircards')
 ASSETS={'panda-body':[BODY]+BX,'female-head':[FH],HAIRNAME:[HR],'booty-shorts':[SH],'outfit-bra':[BRA]}
 if SHIRT is not None: ASSETS['outfit-shirt-grey']=[SHIRT]
 SETS={'face':[],'full':['panda-body','female-head',HAIRNAME,'booty-shorts','outfit-shirt-grey','outfit-bra'],'umeko':[HAIRNAME],'noshirt':['outfit-bra','booty-shorts']}
@@ -1335,7 +1369,7 @@ def _hair_alpha():
             if m and m.use_nodes:
                 for n in m.node_tree.nodes:
                     if n.type=='TEX_IMAGE' and n.image: im=n.image
-        if im is None or P['HAIR']=='umeko': return None
+        if im is None or P['HAIR'] in ('umeko','head'): return None
         w_,h_=im.size; a=np.empty(w_*h_*4,dtype=np.float32); im.pixels.foreach_get(a); return a.reshape(h_,w_,4)[:,:,3],w_,h_
     except Exception as e: log('ALPHAERR',e); return None
 HALPHA=_hair_alpha()
@@ -1525,9 +1559,10 @@ try:
     def set_hair(M):
         Mm=mwhi@np.array(M)@mwh; X=CO0@Mm[:3,:3].T+Mm[:3,3]; me_h.vertices.foreach_set('co',X.ravel()); me_h.update(); bpy.context.view_layer.update()
     evals=0; grid_=[]; best=None
-    for sc_ in (1.0,1.015,1.03):
-        for dz in (0.0,0.0025,0.005,0.0075,0.01):
-            for dy in (0.0,0.0025,0.005,0.0075,0.01):
+    _HH=P['HAIR']=='head'
+    for sc_ in ((1.0,) if _HH else (1.0,1.015,1.03)):
+        for dz in ((0.0,) if _HH else (0.0,0.0025,0.005,0.0075,0.01)):
+            for dy in ((0.0,) if _HH else (0.0,0.0025,0.005,0.0075,0.01)):
                 set_hair(Mof(dy,dz,sc_)); mm_=metrics(); evals+=1
                 scr=mm_['eye_max_pct']+2*max(0,mm_['cross']-CROSS_MAX)+0.02*mm_['body_pen_total']+0.3*(dy+dz)*100+10*(sc_-1)
                 grid_.append((round(dy*1000,1),round(dz*1000,1),sc_,mm_['eye_max_pct'],mm_['cheek_max_pct'],mm_['cross'],mm_['body_pen_total'],round(scr,2)))
@@ -1811,7 +1846,7 @@ def anim_pose(f):
         for sd in ('Left','Right'): wrot(sd+' toe',35*S,'X')
     else:
         wrot('Head',30*math.sin(4*math.pi*u),'Z')
-        for r_ in [b.name for b in B.pose.bones if b.name.startswith('Blw_') and b.parent and b.parent.name=='Head']: wrot(r_,14*math.sin(4*math.pi*u+0.6),'Y')
+        for r_ in [b.name for b in B.pose.bones if b.parent and ((b.name.startswith('Blw_') and b.parent.name=='Head') or b.parent.name=='Hair Root')]: wrot(r_,14*math.sin(4*math.pi*u+0.6),'Y')
     bpy.context.view_layer.update()
 def qa_rig():
     sh=int(os.environ.get('QA_SHARD','0')); n=int(os.environ.get('QA_SHARDS','1')); os.makedirs(OUT+'/rigqa',exist_ok=True)
@@ -1897,7 +1932,7 @@ for sd,S1 in (('L','Left'),('R','Right')):
         for j,nmj in zip(js,('Proximal','Intermediate','Distal')): HUMANOID[f'{f_}{j}_{sd}']=f'{S1}{U}{nmj}'
 def region_of(n):
     l=n.lower()
-    if n.startswith('Blw_'): return 'hair'
+    if n.startswith('Blw_') or n.startswith(('Bangs','piggy','Back hair','Hair Root')): return 'hair'
     if 'eye' in l: return 'eyes'
     if any(k in l for k in ('finger','thumb')): return 'hands/fingers'
     if 'toe' in l or 'ankle' in l: return 'feet'
@@ -2060,41 +2095,83 @@ if SHIRT is not None and P.get('POSED_CLEAR',True):
     try: posed_clear(SHIRT,frames=tuple(int(x) for x in P.get('POSED_FRAMES',(0,258))))
     except Exception as e: traceback.print_exc(); log('POSEDCLEARERR',e); rep['posed_clear_error']=str(e); rest()
 
-# ---------- run 8: front-lock gate measured on the FINAL meshes (after the shirt's posed clearance): lock tris with a vert > 1 mm inside body/bra/shirt
-def front_locks_final():
+# ---------- run 8 (Saidie 3:38 PM screenshot, HARD gate): no dark slits/specks at the band/sleeve seam. After everything else, the shirt's INNER shell is
+#            kept flush behind its OUTER shell in the proof (relaxed) pose and at rest: inner-layer verts at/outside the outer surface go 0.8 mm behind it,
+#            carried back to the rest mesh through their own skinning (inverse LBS). Only the hidden inner layer moves; the visible outer layer is untouched.
+def shirt_shell_flush(o,gap=0.0008):
+    r={'passes':[]}
+    me=o.data
+    for pose_nm in ('relaxed','rest','relaxed'):
+        if pose_nm=='rest': rest()
+        else: pose_relaxed()
+        V,F,_=tri_arr(o); V=V.astype(np.float64); F=F.astype(np.int64)
+        TB=world_bvh([BODY])
+        C_=V[F].mean(1); N_=np.cross(V[F[:,1]]-V[F[:,0]],V[F[:,2]]-V[F[:,0]]); nl=np.linalg.norm(N_,axis=1); ok=nl>1e-12; N_[ok]/=nl[ok][:,None]
+        side=np.zeros(len(F))
+        for k,c in enumerate(C_):
+            loc,nr,_,d=TB.find_nearest(Vector(tuple(c)),0.10)
+            if loc is None or not ok[k]: continue
+            dv=c-np.array(loc); dn=np.linalg.norm(dv)
+            side[k]=float(np.dot(N_[k],dv/dn)) if dn>1e-6 else float(np.dot(N_[k],np.array(nr)))
+        outer=side>0.25; inner=side<-0.25
+        if outer.sum()<10 or inner.sum()<10: r['passes'].append({'pose':pose_nm,'skipped':'no two-layer split','outer':int(outer.sum()),'inner':int(inner.sum())}); continue
+        TO=BVHTree.FromPolygons(V.tolist(),F[outer].tolist())
+        vin=np.zeros(len(V),bool); vout=np.zeros(len(V),bool); vin[F[inner].ravel()]=True; vout[F[outer].ravel()]=True; cand=np.where(vin&~vout)[0]
+        dp=np.zeros_like(V); nfix=0
+        for i in cand:
+            loc,nr,_,d=TO.find_nearest(Vector(tuple(V[i])),0.006)
+            if loc is None: continue
+            s_=float(np.dot(V[i]-np.array(loc),np.array(nr)))
+            if s_>-gap*0.75: dp[i]=np.array(loc)-np.array(nr)*gap-V[i]; nfix+=1
+        if nfix:
+            M=_skin_mats(o); R=np.linalg.inv(M[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+            rest(); set_world(o,wco(o)+dr)
+        r['passes'].append({'pose':pose_nm,'outer_faces':int(outer.sum()),'inner_faces':int(inner.sum()),'inner_only_verts':int(len(cand)),'flushed':nfix,'max_mm':round(float(np.linalg.norm(dp,axis=1).max())*1000,2)})
+    rest(); rep['shirt_shell_flush']=r; log('SHELL flush',json.dumps(r,default=str)[:800])
+if SHIRT is not None and P.get('SHELL_FLUSH',True):
+    try: shirt_shell_flush(SHIRT)
+    except Exception as e: traceback.print_exc(); log('SHELLERR',e); rep['shirt_shell_flush_error']=str(e); rest()
+# ---------- run 8: hair gate on the FINAL meshes: hair tris with a vert > 1 mm inside body/bra/shirt, per chain root, at rest and in the proof pose
+def hair_final_pen():
     out={}
     try:
         gi_h={g.index:g.name for g in HR.vertex_groups}
+        def root_of(vi):
+            ws=[(ge.weight,gi_h.get(ge.group,'')) for ge in HR.data.vertices[vi].groups if ge.weight>0]
+            if not ws: return '(unweighted)'
+            bn_=max(ws)[1]
+            if bn_ not in B.data.bones: return bn_
+            b=B.data.bones[bn_]
+            while b.parent is not None and b.parent.name not in ('Head','Blowout_Root','Hair_root','Hair Root'): b=b.parent
+            return b.name
+        ROOT=[root_of(v.index) for v in HR.data.vertices]
         for pose_nm in ('rest','relaxed'):
             if pose_nm=='rest': rest()
             else: pose_relaxed()
-            dg=bpy.context.evaluated_depsgraph_get()
-            objs=[o_ for o_ in (BODY,BRA,SHIRT) if o_ is not None and not o_.hide_render]
-            V_=[];F_=[];off_=0
-            for o_ in objs:
-                e_=o_.evaluated_get(dg); me_=e_.to_mesh(); me_.calc_loop_triangles(); mw_=o_.matrix_world
-                V_+= [tuple(mw_@v.co) for v in me_.vertices]; F_+=[tuple(off_+x for x in t.vertices) for t in me_.loop_triangles]; off_+=len(me_.vertices); e_.to_mesh_clear()
-            T=BVHTree.FromPolygons(V_,F_)
-            e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world; Xh=[mw_@v.co for v in me_.vertices]
-            polys=[tuple(p.vertices) for p in me_.polygons]; e_.to_mesh_clear()
-            for root in ('Blw_Front_L','Blw_Front_R'):
-                if root not in B.pose.bones: continue
-                names=set(n_.name for n_ in [B.pose.bones[root]]+list(B.pose.bones[root].children_recursive))
-                idx=set(v.index for v in HR.data.vertices if any(gi_h[ge.group] in names and ge.weight>0.05 for ge in v.groups))
-                bad=set(); mn=1.0
-                for i in idx:
-                    loc,nr,_,_=T.find_nearest(Xh[i],0.06)
-                    if loc is None: continue
-                    s_=(Xh[i]-loc).dot(nr); mn=min(mn,s_)
-                    if s_<-0.001: bad.add(i)
-                tr=sum(len(p)-2 for p in polys if all(x in idx for x in p) and any(x in bad for x in p))
-                out.setdefault(pose_nm,{})[root]={'verts_inside_gt1mm':len(bad),'tris_inside':int(tr),'min_mm':round(mn*1000,1),'lock_verts':len(idx)}
-            out[pose_nm]['total_tris_inside']=sum(v['tris_inside'] for k,v in out[pose_nm].items() if isinstance(v,dict))
+            dg=bpy.context.evaluated_depsgraph_get(); per={}
+            for tag,objs in (('body',[BODY]),('body_bra_shirt',[o_ for o_ in (BODY,BRA,SHIRT) if o_ is not None and not o_.hide_render])):
+                V_=[];F_=[];off_=0
+                for o_ in objs:
+                    e_=o_.evaluated_get(dg); me_=e_.to_mesh(); me_.calc_loop_triangles(); mw_=o_.matrix_world
+                    V_+=[tuple(mw_@v.co) for v in me_.vertices]; F_+=[tuple(off_+x for x in t.vertices) for t in me_.loop_triangles]; off_+=len(me_.vertices); e_.to_mesh_clear()
+                T=BVHTree.FromPolygons(V_,F_)
+                e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world; Xh=[mw_@v.co for v in me_.vertices]; polys=[tuple(p.vertices) for p in me_.polygons]; e_.to_mesh_clear()
+                zmax=float(hmn[2])+0.02; bad=set()
+                for i,p in enumerate(Xh):
+                    if p.z>zmax: continue
+                    loc,nr,_,_=T.find_nearest(p,0.05)
+                    if loc is not None and (p-loc).dot(nr)<-0.001: bad.add(i)
+                cnt={}
+                for p in polys:
+                    if any(x in bad for x in p):
+                        k_=ROOT[p[0]]; cnt[k_]=cnt.get(k_,0)+len(p)-2
+                per[tag]={'verts_inside_gt1mm':len(bad),'tris_inside':int(sum(cnt.values())),'tris_by_chain':cnt}
+            out[pose_nm]=per
         rest()
     except Exception as e: traceback.print_exc(); out['error']=str(e); rest()
-    rep['front_locks_final']=out; log('FRONT LOCKS final',json.dumps(out,default=str)[:800])
-try: front_locks_final()
-except Exception as e: log('FLFERR',e)
+    rep['hair_final_pen']=out; log('HAIR final pen',json.dumps(out,default=str)[:900])
+try: hair_final_pen()
+except Exception as e: log('HFPERR',e)
 QA=os.environ.get('QA')
 if QA:
     try:
@@ -2109,7 +2186,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','front_locks_final','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','head_hair_meshes','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
@@ -2252,6 +2329,14 @@ if not P['TT']:
                 for v in ('front','side','back'): shot('sleeves-closeup-'+v,ALL,v,res=(1024,1024),pad=1.05,box=sbox)
                 cbox=(Vector((-0.06,smn.y,smx.z-0.42*hgt)),Vector((0.06,smx.y,smx.z-0.26*hgt)))
                 shot('shirt-texture-closeup',[SHIRT],'front',res=(1024,1024),pad=1.0,box=cbox)
+                # run 8: Saidie's crop (front 3/4 of the shoulder where the off-shoulder band meets the sleeve), each side, ~2x the sleeves close-up
+                for sd_,vw_ in (('R','q34'),('L','q34L')):
+                    try:
+                        bn_={'R':'Right arm','L':'Left arm'}[sd_]; c_=B.matrix_world@B.pose.bones[bn_].head; h_=float(P.get('SEAM_BOX',0.075))
+                        shot('seam-closeup-'+sd_,ALL,vw_,res=(1024,1024),pad=1.0,box=(c_-Vector((h_,h_,h_)),c_+Vector((h_,h_,h_))))
+                    except Exception as e: log('SEAMSHOTERR',e)
+                pbox=(Vector((-0.19,smn.y,smx.z-0.70*hgt)),Vector((0.19,smx.y,smx.z-0.10*hgt)))
+                shot('shirt-print-front',ALL,'front',res=(1024,1024),pad=1.0,box=pbox); shot('shirt-print-back',ALL,'back',res=(1024,1024),pad=1.0,box=pbox)
             bmn,bmx=bbox([BRA]); nz_=float((B.matrix_world@B.data.bones['Neck'].head_local).z)
             stb=(Vector((bmn.x,bmn.y,nz_-0.13)),Vector((bmx.x,bmx.y,nz_+0.05)))
             for v in ('front','side','back','q34'): shot('strap-'+v,ALL,v,res=(1024,1024),pad=1.08,box=stb)
@@ -2280,6 +2365,14 @@ if not P['TT']:
                 for v in ('front','side','back'): shot('sleeves-closeup-'+v,ALL,v,res=(1024,1024),pad=1.05,box=sbox)
                 cbox=(Vector((-0.06,smn.y,smx.z-0.42*hgt)),Vector((0.06,smx.y,smx.z-0.26*hgt)))
                 shot('shirt-texture-closeup',[SHIRT],'front',res=(1024,1024),pad=1.0,box=cbox)
+                # run 8: Saidie's crop (front 3/4 of the shoulder where the off-shoulder band meets the sleeve), each side, ~2x the sleeves close-up
+                for sd_,vw_ in (('R','q34'),('L','q34L')):
+                    try:
+                        bn_={'R':'Right arm','L':'Left arm'}[sd_]; c_=B.matrix_world@B.pose.bones[bn_].head; h_=float(P.get('SEAM_BOX',0.075))
+                        shot('seam-closeup-'+sd_,ALL,vw_,res=(1024,1024),pad=1.0,box=(c_-Vector((h_,h_,h_)),c_+Vector((h_,h_,h_))))
+                    except Exception as e: log('SEAMSHOTERR',e)
+                pbox=(Vector((-0.19,smn.y,smx.z-0.70*hgt)),Vector((0.19,smx.y,smx.z-0.10*hgt)))
+                shot('shirt-print-front',ALL,'front',res=(1024,1024),pad=1.0,box=pbox); shot('shirt-print-back',ALL,'back',res=(1024,1024),pad=1.0,box=pbox)
             bmn,bmx=bbox([BRA]); nz_=float((B.matrix_world@B.data.bones['Neck'].head_local).z)
             stb=(Vector((bmn.x,bmn.y,nz_-0.13)),Vector((bmx.x,bmx.y,nz_+0.05)))
             for v in ('front','side','back','q34'): shot('strap-'+v,ALL,v,res=(1024,1024),pad=1.08,box=stb)

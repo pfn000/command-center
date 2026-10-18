@@ -17,9 +17,8 @@
   "SHIRT_BODYW": true,
   "POSED_CLEAR": true,
   "TUMMY_CLEAR": true,
-  "FRONT_LOCKS": true,
+  "FRONT_LOCKS": false,
   "POSED_ITERS": 6,
-  "LOCK_MAX_DEG": 15,
   "STRAP_SMOOTH_PUSH": true,
   "STRAP_SCALE_MAX": 1.04,
   "SEAM_AVG": true,
@@ -33,7 +32,10 @@
    170,
    172
   ],
-  "LOCK_STICK": 0.02
+  "HAIR": "head",
+  "SHIRT_TEX": "Tshirt-LewdFaceBlack.png",
+  "SHELL_FLUSH": true,
+  "SHIRT_BACKFACE_CULL": true
  },
  "A2": {
   "SHIRT": false,
