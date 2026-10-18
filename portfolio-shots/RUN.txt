@@ -1,1 +1,1 @@
-v6 proof run 2 (critic fixes) 2026-10-18T21:10:20Z
+v6 proof run 3 (hero crops, trimmed badge) 2026-10-18T21:16:04Z
