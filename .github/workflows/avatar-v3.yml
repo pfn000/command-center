@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [A] }
+      matrix: { variant: [A0, A1, A2] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,6 @@ jobs:
         if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          rm -rf /tmp/out/assets/*.png 2>/dev/null || true
           ls -laR /tmp/out | head -120
           python3 - <<'EOF'
           import os
@@ -105,4 +104,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assets-4
+# rev v3.7-assets-5

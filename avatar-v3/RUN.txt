@@ -1,1 +1,1 @@
-assets A v3.7 step 1: each of her uploaded assets rendered alone (grey bg, 3-point light, her own textures) + texture pictures; no Meshy
+assets A0 v3.7 step 1 (re-run, 3 parallel shards): each of her uploaded assets rendered alone + texture pictures; no Meshy

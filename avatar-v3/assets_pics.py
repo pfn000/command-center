@@ -27,7 +27,14 @@ def tile(p,t=420):
 def sheet(paths,name,label,cols=4):
     paths=[p for p in paths if os.path.exists(p)]
     if not paths: print('no textures for',name); return None
-    ts=[tile(p) for p in paths]; cols=min(cols,len(ts)); rows=(len(ts)+cols-1)//cols; w,h=ts[0].size
+    ts=[]
+    for p in paths:
+        try:
+            if os.path.getsize(p)>24e6: print('skip big',p); continue
+            ts.append(tile(p))
+        except Exception as e: print('tile fail',p,e)
+    if not ts: return None
+    cols=min(cols,len(ts)); rows=(len(ts)+cols-1)//cols; w,h=ts[0].size
     c=Image.new('RGB',(cols*w+(cols+1)*10,rows*h+(rows+1)*10),BG)
     for i,t in enumerate(ts): c.paste(t,(10+(i%cols)*(w+10),10+(i//cols)*(h+10)))
     c=burn(c,label); fn=f'{name}-picture.jpg'; c.save(D+'/'+fn,quality=84); print('picture',fn,len(paths)); return fn
@@ -44,7 +51,10 @@ G={
  'her-photos':(sorted(glob.glob(IN+'/assets/*-*-*-*.jpg')),'assets/*.jpg (her uploaded photos/refs)'),
 }
 PICS={}
-for k,(ps,l) in G.items(): PICS[k]=sheet(ps,k,l,cols=5 if len(ps)>8 else 4)
+SHN=os.environ.get('VARIANT','A0')
+for k,(ps,l) in (G.items() if SHN in ('A0','A') else []):
+    try: PICS[k]=sheet(ps,k,l,cols=5 if len(ps)>8 else 4)
+    except Exception as e: print('sheet fail',k,e)
 man=json.load(open(S+'/manifest.json')) if os.path.exists(S+'/manifest.json') else {'renders':[],'info':{}}
 REN={}
 for r in man['renders']:

@@ -10,7 +10,7 @@ for r,ds,fs in os.walk(IN):
     if '/.cache' in r: continue
     for f in fs: FILES.setdefault(f.lower(),os.path.join(r,f))
 log('files indexed',len(FILES))
-MAN=[]; SAMPLES=int(os.environ.get('AS_SAMPLES','24'))
+MAN=[]; SAMPLES=int(os.environ.get('AS_SAMPLES','16'))
 def reset():
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc=bpy.context.scene; sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=SAMPLES; sc.cycles.use_denoising=True
@@ -49,7 +49,7 @@ def mats_report(objs):
             ims=[n.image.name for n in m.node_tree.nodes if m.use_nodes and n.type=='TEX_IMAGE' and n.image] if m.use_nodes else []
             out.append({'object':o.name,'material':m.name,'textures':ims})
     return out
-def frame_and_render(sc,objs,name,label,views=('front','q34','back'),res=(900,1200)):
+def frame_and_render(sc,objs,name,label,views=('front','q34','back'),res=(780,1040)):
     dg=bpy.context.evaluated_depsgraph_get(); pts=[]
     for o in objs:
         if o.type!='MESH': continue
@@ -72,7 +72,10 @@ def frame_and_render(sc,objs,name,label,views=('front','q34','back'),res=(900,12
 def imp_fbx(path):
     before=set(bpy.data.objects); bpy.ops.import_scene.fbx(filepath=path); return [o for o in bpy.data.objects if o not in before]
 INFO={}
+SH=int(os.environ.get('VARIANT','A0')[-1]) if os.environ.get('VARIANT','A0')[-1].isdigit() else 0; NSH=int(os.environ.get('AS_SHARDS','3')); JI=[0]
 def job(name,label,fn):
+    JI[0]+=1
+    if (JI[0]-1)%NSH!=SH: return
     try:
         sc=reset(); objs,tex=fn(sc); miss=fix_images()
         INFO[name]={'label':label,'objects':[(o.name,o.type,sum(len(p.vertices)-2 for p in o.data.polygons) if o.type=='MESH' else None) for o in objs],'materials':mats_report(objs),'missing_images':miss,'textures':tex}
@@ -127,6 +130,8 @@ def a_eyes(sc):
     head_mats(objs); return objs,['ZinPia doe 5.png']
 # eyes close-up: same head, camera on the eye band
 def eyes_job():
+    JI[0]+=1
+    if (JI[0]-1)%NSH!=SH: return
     try:
         sc=reset(); objs,tex=a_eyes(sc); fix_images()
         fh=[o for o in objs if o.type=='MESH'][0]; me=fh.data; mi={i:(s.material.name.lower() if s.material else '') for i,s in enumerate(fh.material_slots)}
