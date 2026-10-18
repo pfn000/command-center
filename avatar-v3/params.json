@@ -77,7 +77,7 @@
  "SKIN_SAT": 1.1,
  "EYE_SX": 1.0,
  "EYE_SZ": 1.0,
- "BUN_DY": 0.08,
+ "BUN_DY": 0.1,
  "BUN_DZ": 0.04,
  "BAND_H": 0.011,
  "BAND_WING": 0.018,
@@ -139,5 +139,12 @@
  "SHOULDER_DOWN": 8,
  "FRINGE_VAR": 0.22,
  "CRANIUM": true,
- "MB_TRIS": 30000
+ "MB_TRIS": 30000,
+ "HAIR_DY": 0.0,
+ "HEAD_DEPTH_K": 1.1,
+ "CRAN_SKIN_TO": 0.2,
+ "CRAN_DARK_FROM": 0.32,
+ "CRAN_RX": 0.9,
+ "SCALP": false,
+ "FRINGE_SQ": 0.2
 }

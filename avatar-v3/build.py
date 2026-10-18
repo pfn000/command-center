@@ -122,6 +122,7 @@ log('HEADFIT',{k:(round(v,4) if isinstance(v,float) else v) for k,v in HF.items(
 hmn,hmx=wbb([FH]); umn,umx=wbb([UM])
 head_w=hmx.x-hmn.x; s=head_w*P['HAIR_W_RATIO']/(umx.x-umn.x)
 yc=(hmn.y+hmx.y)/2
+if P.get('CRANIUM',True): yc=hmn.y+P.get('HEAD_DEPTH_K',1.1)*(hmx.x-hmn.x)/2  # v3.2: centre of face shell + cranium
 # scale about hair bbox top-center, then move top to head top
 pivot=Vector(((umn.x+umx.x)/2,(umn.y+umx.y)/2,umx.z))
 target=Vector(((hmn.x+hmx.x)/2, yc+P['HAIR_DY'], hmx.z+P['HAIR_TOP_GAP']+P['HAIR_DZ']))
@@ -306,48 +307,19 @@ def fringe(O,tag):
     cL,sL=eL; cR,sR=eR; ipd=abs(cL.x-cR.x); ez0=(cL.z+cR.z)/2
     browz=ez0+max(sL.z,sR.z)*P.get('EYE_SZ',0.72)*0.5+P.get('BROW_GAP',0.30)*ipd
     from mathutils.bvhtree import BVHTree as _BVH
-    dgh=bpy.context.evaluated_depsgraph_get(); hb=_BVH.FromObject(FH,dgh)
-    mw=O.matrix_world; mwi=mw.inverted(); bmH=bmesh.new(); bmH.from_mesh(O.data); bmH.faces.ensure_lookup_table()
-    isl={}; k=0
-    for f in bmH.faces:
-        if f.index in isl: continue
-        st=[f]; isl[f.index]=k
-        while st:
-            g=st.pop()
-            for e in g.edges:
-                for h in e.link_faces:
-                    if h.index not in isl: isl[h.index]=k; st.append(h)
-        k+=1
-    kill=[]; tv={}; side=0
-    fw=P.get('BANG_W',1.6)*ipd
-    for f in bmH.faces:
-        c=mw@f.calc_center_median()
-        if c.z>browz+0.03: continue
-        h=hb.ray_cast(c,Vector((0,1,0)),P.get('BANG_DEPTH',0.05))
+    hb=_BVH.FromObject(FH,bpy.context.evaluated_depsgraph_get())
+    fmn_,fmx_=wbb([FH]); hwf=(fmx_.x-fmn_.x)/2; fw=P.get('FRINGE_XW',0.62)*hwf; fo=P.get('FRINGE_XFADE',0.75)*hwf
+    mw=O.matrix_world; mwi=mw.inverted(); n=0; sq=P.get('FRINGE_SQ',0.2)
+    for v in O.data.vertices:
+        p=mw@v.co
+        if p.z>=browz or abs(p.x)>fo: continue
+        h=hb.ray_cast(p,Vector((0,1,0)),P.get('BANG_DEPTH',0.05))
         if h[0] is None: continue
-        i=isl[f.index]; u=((i*2654435761)%997)/997.0
-        if abs(c.x)<=fw: zi=browz-u*P.get('FRINGE_VAR',0.22)*ipd
-        else: zi=ez0-0.35*ipd  # side strands may frame the face but never cross the cheek
-        if c.z<zi:
-            kill.append(f); tv.setdefault(i,set()).update(v for v in f.verts)
-            if abs(c.x)>fw: side+=1
-    # remember each touched strand's surviving verts before deleting
-    surv={}
-    for f in bmH.faces:
-        i=isl[f.index]
-        if i in tv and f not in kill: surv.setdefault(i,set()).update(f.verts)
-    ks=set(kill); bmesh.ops.delete(bmH,geom=list(ks),context='FACES')
-    tap=0; band=P.get('TIP_BAND',0.35)*ipd
-    for i,vs in surv.items():
-        vs=[v for v in vs if v.is_valid]
-        if len(vs)<3: continue
-        W=[mw@v.co for v in vs]; zmin=min(p.z for p in W); cx=sum(p.x for p in W)/len(W); cy=sum(p.y for p in W)/len(W)
-        for v,p in zip(vs,W):
-            t=1-(p.z-zmin)/band
-            if t>0:
-                t=t*t*P.get('TIP_PINCH',0.7); p2=Vector((p.x+(cx-p.x)*t,p.y+(cy-p.y)*t*0.5,p.z)); v.co=mwi@p2; tap+=1
-    bmH.to_mesh(O.data); bmH.free(); O.data.update()
-    FRINGE[tag]={'browz':browz,'removed':len(ks),'side_removed':side,'strands_cut':len(tv),'tip_verts':tap}
+        wx=1.0 if abs(p.x)<=fw else max(0.0,1-(abs(p.x)-fw)/max(1e-6,fo-fw))
+        nz=browz-(browz-p.z)*sq
+        v.co=mwi@Vector((p.x,p.y-P.get('FRINGE_FWD',0.004)*wx,p.z+(nz-p.z)*wx)); n+=1
+    O.data.update()
+    FRINGE[tag]={'browz':browz,'squashed_verts':n,'x_full':fw,'x_fade':fo,'sq':sq}
     log('fringe',tag,FRINGE[tag])
 if P.get('BANGS_LIFT',True): fringe(UM,'layer1')
 rep['bangs']=FRINGE
@@ -1013,10 +985,11 @@ if VARIANT=='B':
         prof.append(s_[:,1].min() if len(s_) else np.nan)
     prof=np.array(prof); upper=(zz>Hm-0.16*total)&(zz<Hm-0.05*total)
     ny=np.nanmin(np.where(upper,prof,np.nan)); nzi=int(np.nanargmin(np.where(upper,prof,np.nan)))
-    neckz=Hm-0.20*total; nfy=np.nanmin(prof[np.abs(zz-neckz)<0.006]) if np.any(np.abs(zz-neckz)<0.006) else ny+0.05
+    nband=(zz>Hm-P.get('MB_NECK_LO',0.21)*total)&(zz<Hm-P.get('MB_NECK_HI',0.135)*total); nfy=np.nanmax(np.where(nband,prof,np.nan)); log('meshy profile',[(round(float(a_),3),None if np.isnan(b_) else round(float(b_),3)) for a_,b_ in zip(zz[::3],prof[::3])])
     thr=(ny+nfy)/2; chin_m=None
     for i in range(nzi,-1,-1):
         if not np.isnan(prof[i]) and prof[i]>thr: chin_m=float(zz[i]+0.004); break
+    log('meshy nose',float(ny),'neck front',float(nfy),'chin',chin_m)
     if chin_m is None or abs(chin_m-HF['target_chin'])>0.06: log('meshy chin guess off',chin_m); chin_m=HF['target_chin']
     # neck front of the Meshy model (skin verts) and of our body at the same height
     zq=chin_m-0.015

@@ -1,1 +1,1 @@
-build v3.2 run A: head sized to her sheet ratio 0.150, seated on a lifted neck, shoulders down 8, wispy fringe, cranium; matrix A (her head) + B (Meshy head graft)
+build v3.2 run B: hair centred on the whole head, fringe squashed to the brow (no blunt cut), dark cranium, no scalp cap; Meshy chin detector fixed
