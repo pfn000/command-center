@@ -29,5 +29,11 @@ for y in range(0,h,T):
 res=np.zeros((h,w,5),dtype=np.float32); res[:,:,:3]=out; res[:,:,3]=crop[:,:,3] if crop.shape[2]>3 else 1; res[:,:,4]=m*MIX
 np.save(d+'/out.npy',res)
 # before/after previews (flipped to image orientation: Blender rows start at the bottom)
-Image.fromarray(rgb[::-1]).save(d+'/before.png'); Image.fromarray((np.clip(rgb.astype(np.float32)/255*(1-m[...,None]*MIX)+out*m[...,None]*MIX,0,1)*255).astype(np.uint8)[::-1]).save(d+'/after.png')
+bb=Image.fromarray(rgb[::-1]); aa=Image.fromarray((np.clip(rgb.astype(np.float32)/255*(1-m[...,None]*MIX)+out*m[...,None]*MIX,0,1)*255).astype(np.uint8)[::-1])
+ys_,xs_=np.where(m[::-1]>0.5)
+if len(ys_):
+    # previews: the face islands' bounding box, max 1400 px
+    y0,y1,x0,x1=ys_.min(),ys_.max()+1,xs_.min(),xs_.max()+1; bb=bb.crop((x0,y0,x1,y1)); aa=aa.crop((x0,y0,x1,y1))
+s=min(1.0,1400/max(bb.size)); bb=bb.resize((int(bb.width*s),int(bb.height*s))); aa=aa.resize(bb.size)
+bb.save(d+'/before.jpg',quality=88); aa.save(d+'/after.jpg',quality=88)
 print('SR done tiles',done,'secs',round(time.time()-t0,1),flush=True)

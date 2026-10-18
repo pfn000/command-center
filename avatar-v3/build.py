@@ -901,6 +901,25 @@ if P.get('BRA_GEN',True):
     for s in (1,-1):
         pa=cast_(s*asd,cup_top(asd)-0.002,offb); pb_=cast_(s*(math.pi-0.5),crease+BK-0.003,offb)
         BRA_ATT[s]=(pa,pb_)
+    def strap_path(s):
+        # front: straight up from the outer cup top at a fixed angle (horizontal casts); top: vertical casts over the trapezius; back: down to the back band
+        a_f=s*asd; z0=cup_top(asd)-0.003; xs_=None
+        hf=bvh.ray_cast(Vector((s*P.get('STRAP_XS',0.07),tcy_,2.5)),Vector((0,0,-1)),3.0); zsh=float(hf[0].z) if hf[0] is not None else z0+0.2
+        pts_=[]; NF=14
+        for i in range(NF+1):
+            z_=z0+(zsh-0.02-z0)*i/NF; q=cast_(a_f,z_,0.0025)
+            if q is not None: pts_.append(q)
+        if not pts_: return []
+        xs_=pts_[-1].x; yf=pts_[-1].y
+        a_b=s*(math.pi-P.get('STRAP_BACK_A',0.62)); zbk=crease+BK-0.003
+        qb=cast_(a_b,zsh-0.02,0.0025); yb=qb.y if qb is not None else tcy_+0.08
+        for i in range(1,8):
+            y_=yf+(yb-yf)*i/8; h_=bvh.ray_cast(Vector((xs_,y_,zsh+0.3)),Vector((0,0,-1)),0.6)
+            if h_[0] is not None: pts_.append(h_[0]+h_[1].normalized()*0.0025)
+        for i in range(NF+1):
+            z_=zsh-0.02+(zbk-(zsh-0.02))*i/NF; q=cast_(a_b,z_,0.0025)
+            if q is not None: pts_.append(q)
+        return pts_
     old=BRA; bpy.data.objects.remove(old)
     me=bpy.data.meshes.new('Bra'); bmB.to_mesh(me); bmB.free(); BRA=bpy.data.objects.new('Bra',me); sc.collection.objects.link(BRA)
     me.materials.append(bpy.data.materials['BraKnit']); BRA.parent=B
@@ -932,13 +951,8 @@ for sgn in (1,-1):
     x=sgn*P.get('STRAP_X',0.055); pts=[]
     zt=bmx.z-0.004; zs=shz+0.03
     att=BRA_ATT.get(sgn)
-    if att and att[0] is not None and att[1] is not None:
-        pa,pb=att; S=Vector((sgn*P.get('STRAP_XS',0.085),(pa.y+pb.y)/2,zs))
-        for k in range(25):
-            t=k/24.0
-            if t<=0.5: u=2*t; p_=Vector((pa.x+(S.x-pa.x)*u,pa.y+(S.y-pa.y)*u,pa.z+(S.z-pa.z)*math.sin(u*math.pi/2)))
-            else: u=2*t-1; p_=Vector((S.x+(pb.x-S.x)*u,S.y+(pb.y-S.y)*u,S.z+(pb.z-S.z)*(1-math.cos(u*math.pi/2))))
-            pts.append(snap(p_,0.0022))
+    if att and att[0] is not None and 'strap_path' in globals():
+        pts=strap_path(sgn)
     else:
       for k in range(25):
         t=k/24.0; a=math.pi*t
@@ -1275,8 +1289,12 @@ if VARIANT in ('B','C'):
                 bx=T_['cx']+np.cos(thb)*T_['rx']*rel; by=T_['cy']+np.sin(thb)*T_['ry']*rel
                 Db=np.zeros_like(BVs); Db[:,0]=(bx-BVs[:,0])*wb; Db[:,1]=(by-BVs[:,1])*wb; wdelta(BODY,Db)
             tt=1-sstep((V[:,2]-zb_)/SH_)
-            sk=(np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))<1.35)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)&skin2
-            Ds=np.zeros_like(V); Ds[:,0]=(tx-V[:,0])*tt*sk; Ds[:,1]=(ty-V[:,1])*tt*sk; wdelta(MH,Ds); V=wco(MH)
+            nr=np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))
+            sk=(nr<1.6)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)&skin2
+            # scale each point about the neck centre by (target ellipse / Meshy ellipse) along its angle -> keeps the jaw/neck shape, no snapping
+            fx=T_['rx']*k_/max(ms['rx'],1e-4); fy=T_['ry']*k_/max(ms['ry'],1e-4)
+            nx_=T_['cx']+dx*fx; ny_=T_['cy']+dy_*fy
+            Ds=np.zeros_like(V); Ds[:,0]=(nx_-V[:,0])*tt*sk; Ds[:,1]=(ny_-V[:,1])*tt*sk; wdelta(MH,Ds); V=wco(MH)
             HF['B_seam']={'body':bqs,'meshy':ms,'verts':int(sk.sum()),'max_move':float(np.abs(Ds).max())}; log('B neck seam',HF['B_seam'])
     # rig it to the Head bone (neck stub blends into Neck)
     vg=MH.vertex_groups.new(name='Head'); vn=MH.vertex_groups.new(name='Neck'); V=wco(MH)
@@ -1342,7 +1360,7 @@ if VARIANT in ('B','C'):
                         m_=o_[:,:,4:5]; cur[y0:y1,x0:x1,:3]=cur[y0:y1,x0:x1,:3]*(1-m_)+o_[:,:,:3]*m_
                         img_.pixels.foreach_set(cur.ravel()); img_.update(); img_.pack()
                         try:
-                            import shutil; os.makedirs(OUT+'/tex',exist_ok=True); shutil.copy(td+'/before.png',OUT+'/tex/meshy_face_before.png'); shutil.copy(td+'/after.png',OUT+'/tex/meshy_face_after.png')
+                            import shutil; os.makedirs(OUT+'/tex',exist_ok=True); shutil.copy(td+'/before.jpg',OUT+'/tex/meshy_face_before.jpg'); shutil.copy(td+'/after.jpg',OUT+'/tex/meshy_face_after.jpg')
                         except Exception as e2: log('SR copy',e2)
                         HF['B_sr']={'tris':int(len(tri_)),'box':[x0,y0,x1,y1],'tex':[W_,H_]}; log('meshy face SR applied',HF['B_sr'])
             except Exception as e: log('SRERR',repr(e))
