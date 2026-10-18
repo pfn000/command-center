@@ -55,8 +55,8 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
   await snap(p, `${k}-01-home`)
   await lazyAll(p)
   if (full) await snap(p, `${k}-00-home-full`, { fullPage: true, quality: 55 })
-  for (const [n, sel] of [['02-emmi-official', '#emmi-official'], ['03-emmico', '#emmico'], ['04-worlds', '#worlds'], ['05-ncom', '#ncom'], ['06-jena', '#jena'], ['07-resume-preview', '#resume'], ['07b-resume-preview-2', '.pf-cv-grid'], ['08-projects', '#projects'], ['09-companies', '#companies']]) {
-    if (!full && !['03-emmico', '07-resume-preview', '09-companies'].includes(n)) continue
+  for (const [n, sel] of [['02-emmi-official', '#emmi-official'], ['03-emmico', '#emmico'], ['04-worlds', '#worlds'], ['04b-talks', '#talks'], ['05-ncom', '#ncom'], ['05b-ncom-demos', '#nos'], ['06-jena', '#jena'], ['06b-focals', '#focals'], ['06c-moments', '#moments'], ['07-resume-preview', '#resume'], ['07b-resume-preview-2', '.pf-cv-grid'], ['08-projects', '#projects'], ['09-companies', '#companies'], ['09b-writing', '#writing']]) {
+    if (!full && !['03-emmico', '06b-focals', '07-resume-preview', '09-companies', '09b-writing'].includes(n)) continue
     await to(p, sel, 10)
     await snap(p, `${k}-${n}`)
   }
@@ -86,6 +86,16 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
     await to(p, '#docs', 10)
     await snap(p, `${k}-15-plex-docs`)
     // redirects
+    await to(p, '.pf-plex-note', 80)
+    await snap(p, `${k}-14b-plex-note`)
+    for (const slug of ['ai-being-used-wrong', 'future-of-ads']) {
+      await go(p, `/writing/${slug}`, theme, 2500)
+      await snap(p, `${k}-16-article-${slug}`)
+      await p.evaluate(() => window.scrollTo(0, 1400)); await p.waitForTimeout(800)
+      await snap(p, `${k}-16b-article-${slug}`)
+    }
+    await go(p, '/writing', theme, 2000)
+    await snap(p, `${k}-17-writing`)
     await go(p, '/arch', theme, 800)
     report.checks[`${k}-arch-redirect`] = p.url()
   }
