@@ -1,3 +1,3 @@
 assemble A0
 
-#6b
+#6b (6c hair, re-push after cancel)
