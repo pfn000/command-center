@@ -1,1 +1,1 @@
-build v3.2 run B: hair centred on the whole head, fringe squashed to the brow (no blunt cut), dark cranium, no scalp cap; Meshy chin detector fixed
+build v3.2 run C: same A; B Meshy head pitched up 20 deg about the neck + chin detector by neck-front profile

@@ -977,19 +977,27 @@ if VARIANT=='B':
     skinv=(warm>P.get('MB_WARM',0.06))&(lum>0.25)
     log('meshy texture',img_.name if img_ else None,'skin-coloured verts',int(skinv.sum()),'of',len(warm))
     # chin + neck of the Meshy head (front profile on the centre line)
-    cxm=0.0; ctr_=V[np.abs(V[:,0]-cxm)<0.012]
-    hb_=ctr_[ctr_[:,2]>Hm-0.25*total]
-    zz=np.arange(Hm-0.25*total,Hm,0.004); prof=[]
-    for z in zz:
-        s_=hb_[(hb_[:,2]>=z)&(hb_[:,2]<z+0.004)]
-        prof.append(s_[:,1].min() if len(s_) else np.nan)
-    prof=np.array(prof); upper=(zz>Hm-0.16*total)&(zz<Hm-0.05*total)
-    ny=np.nanmin(np.where(upper,prof,np.nan)); nzi=int(np.nanargmin(np.where(upper,prof,np.nan)))
-    nband=(zz>Hm-P.get('MB_NECK_LO',0.21)*total)&(zz<Hm-P.get('MB_NECK_HI',0.135)*total); nfy=np.nanmax(np.where(nband,prof,np.nan)); log('meshy profile',[(round(float(a_),3),None if np.isnan(b_) else round(float(b_),3)) for a_,b_ in zip(zz[::3],prof[::3])])
-    thr=(ny+nfy)/2; chin_m=None
-    for i in range(nzi,-1,-1):
-        if not np.isnan(prof[i]) and prof[i]>thr: chin_m=float(zz[i]+0.004); break
-    log('meshy nose',float(ny),'neck front',float(nfy),'chin',chin_m)
+    def mprof(V):
+        ctr_=V[np.abs(V[:,0])<0.012]; Hm_=V[:,2].max(); hb_=ctr_[ctr_[:,2]>Hm_-0.25*total]
+        zz=np.arange(Hm_-0.25*total,Hm_,0.004); pr=[]
+        for z in zz:
+            q_=hb_[(hb_[:,2]>=z)&(hb_[:,2]<z+0.004)]; pr.append(q_[:,1].min() if len(q_) else np.nan)
+        pr=np.array(pr); up_=(zz>Hm_-0.16*total)&(zz<Hm_-0.05*total)
+        ny_=np.nanmin(np.where(up_,pr,np.nan)); ni_=int(np.nanargmin(np.where(up_,pr,np.nan)))
+        nb_=(zz>Hm_-P.get('MB_NECK_LO',0.21)*total)&(zz<Hm_-P.get('MB_NECK_HI',0.135)*total); nf_=np.nanmax(np.where(nb_,pr,np.nan))
+        ch_=None
+        for i in range(ni_,-1,-1):
+            if not np.isnan(pr[i]) and pr[i]>nf_-P.get('MB_CHIN_TOL',0.012): ch_=float(zz[i]+0.004); break
+        return ny_,nf_,ch_,zz,pr
+    cxm=0.0
+    ny,nfy,chin_m,zz,prof=mprof(V)
+    log('meshy profile',[(round(float(a_),3),None if np.isnan(b_) else round(float(b_),3)) for a_,b_ in zip(zz[::2],prof[::2])])
+    log('meshy nose/bangs',float(ny),'neck front',float(nfy),'chin',chin_m)
+    MBP=P.get('MB_PITCH',20.0)
+    if MBP and chin_m is not None:
+        nk_=V[(np.abs(V[:,2]-(chin_m-0.01))<0.004)&skinv]; pcy=float((nk_[:,1].min()+nk_[:,1].max())/2) if len(nk_) else float(nfy)+0.04
+        pv=Vector((0,pcy,chin_m)); MH.data.transform(Matrix.Translation(pv)@Matrix.Rotation(math.radians(-MBP),4,'X')@Matrix.Translation(-pv)); V=wco(MH)
+        ny,nfy,chin_m,zz,prof=mprof(V); log('meshy pitched up',MBP,'deg; chin now',chin_m,'neck front',float(nfy))
     if chin_m is None or abs(chin_m-HF['target_chin'])>0.06: log('meshy chin guess off',chin_m); chin_m=HF['target_chin']
     # neck front of the Meshy model (skin verts) and of our body at the same height
     zq=chin_m-0.015
