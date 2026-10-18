@@ -3,7 +3,7 @@ name: avatar-v3 build
 # outputs go to her private dataset. No asset is committed to this public repo.
 on:
   push:
-    branches: [avatar-v3]
+    branches: [avatar-v3, avatar-v3-r10]
     paths: [avatar-v3/RUN.txt]
 permissions:
   contents: read
@@ -131,7 +131,20 @@ jobs:
           - { qa: bones, variant: A0, shard: 4, shards: 6 }
           - { qa: bones, variant: A0, shard: 5, shards: 6 }
           - { qa: shapes, variant: A0, shard: 0, shards: 1 }
-    env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}", QA_CLOSE: "1" }
+          - { qa: tests, variant: A0, shard: 0, shards: 4, test: face }
+          - { qa: tests, variant: A0, shard: 1, shards: 4, test: face }
+          - { qa: tests, variant: A0, shard: 2, shards: 4, test: face }
+          - { qa: tests, variant: A0, shard: 3, shards: 4, test: face }
+          - { qa: tests, variant: A0, shard: 0, shards: 1, test: vis }
+          - { qa: tests, variant: A0, shard: 0, shards: 2, test: fing }
+          - { qa: tests, variant: A0, shard: 1, shards: 2, test: fing }
+          - { qa: tests, variant: A0, shard: 0, shards: 4, test: limb }
+          - { qa: tests, variant: A0, shard: 1, shards: 4, test: limb }
+          - { qa: tests, variant: A0, shard: 2, shards: 4, test: limb }
+          - { qa: tests, variant: A0, shard: 3, shards: 4, test: limb }
+          - { qa: tests, variant: A0, shard: 0, shards: 2, test: jump }
+          - { qa: tests, variant: A0, shard: 1, shards: 2, test: jump }
+    env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}", QA_CLOSE: "1", TEST: "${{ matrix.test }}" }
     steps:
       - uses: actions/checkout@v4
       - name: Blender 4.4
@@ -159,5 +172,5 @@ jobs:
           rm -rf /tmp/out/proof/skinmatch-cal-* ; du -sh /tmp/out
           python3 -c "
           import os; from huggingface_hub import HfApi
-          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-run9b
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+os.environ.get('TEST','')+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+# rev v3.7-assemble-run10
