@@ -39,11 +39,13 @@ jobs:
         if: always()
         run: |
           MODE=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f1)
+          export AS_ONLY="$(sed -n 2p avatar-v3/RUN.txt)"
           timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\]|Error|Traceback|line [0-9]+" /tmp/out/blender-log.txt | cut -c1-400 | head -300 || true
       - name: Compose proofs
         if: always()
         run: |
+          export AS_ONLY="$(sed -n 2p avatar-v3/RUN.txt)"
           [ -f avatar-v3/compose.py ] && python3 avatar-v3/compose.py /tmp/in /tmp/out || true
       - name: Upload outputs (private)
         if: always()
@@ -104,4 +106,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assets-5
+# rev v3.7-assets-6

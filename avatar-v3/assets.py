@@ -35,7 +35,9 @@ def set_tex(mat,path,alpha=False):
     if not path or not os.path.exists(path): return False
     mat.use_nodes=True; nt=mat.node_tree; b=[n for n in nt.nodes if n.type=='BSDF_PRINCIPLED']
     if not b: b=[nt.nodes.new('ShaderNodeBsdfPrincipled')]; nt.links.new(b[0].outputs[0],[n for n in nt.nodes if n.type=='OUTPUT_MATERIAL'][0].inputs[0])
-    b=b[0]; t=nt.nodes.new('ShaderNodeTexImage'); t.image=bpy.data.images.load(path,check_existing=True)
+    b=b[0]
+    for l in [l for l in nt.links if l.to_socket==b.inputs['Base Color'] or (alpha and l.to_socket==b.inputs['Alpha'])]: nt.links.remove(l)
+    t=nt.nodes.new('ShaderNodeTexImage'); t.image=bpy.data.images.load(path,check_existing=True)
     nt.links.new(t.outputs[0],b.inputs['Base Color'])
     if alpha: nt.links.new(t.outputs[1],b.inputs['Alpha'])
     return True
@@ -73,9 +75,12 @@ def imp_fbx(path):
     before=set(bpy.data.objects); bpy.ops.import_scene.fbx(filepath=path); return [o for o in bpy.data.objects if o not in before]
 INFO={}
 SH=int(os.environ.get('VARIANT','A0')[-1]) if os.environ.get('VARIANT','A0')[-1].isdigit() else 0; NSH=int(os.environ.get('AS_SHARDS','3')); JI=[0]
+ONLY=[x for x in os.environ.get('AS_ONLY','').split(',') if x]
 def job(name,label,fn):
     JI[0]+=1
-    if (JI[0]-1)%NSH!=SH: return
+    if ONLY:
+        if name not in ONLY or ONLY.index(name)%NSH!=SH: return
+    elif (JI[0]-1)%NSH!=SH: return
     try:
         sc=reset(); objs,tex=fn(sc); miss=fix_images()
         INFO[name]={'label':label,'objects':[(o.name,o.type,sum(len(p.vertices)-2 for p in o.data.polygons) if o.type=='MESH' else None) for o in objs],'materials':mats_report(objs),'missing_images':miss,'textures':tex}
@@ -115,8 +120,16 @@ def head_mats(objs,face='1.png'):
                 if b: b[0].inputs['Alpha'].default_value=0.0
 def a_headhair(sc):
     objs=imp_fbx(HD+'Female head + hair.fbx'); head_mats(objs)
+    for o in objs:
+        if o.type=='MESH' and o.name.startswith('Hair'):
+            for s in o.material_slots:
+                m=s.material
+                if not m: continue
+                m.use_nodes=True; nt=m.node_tree; bb=[x for x in nt.nodes if x.type=='BSDF_PRINCIPLED']
+                for l in [l for l in nt.links if bb and l.to_socket==bb[0].inputs['Base Color']]: nt.links.remove(l)
+                if bb: bb[0].inputs['Base Color'].default_value=(0.03,0.03,0.035,1); bb[0].inputs['Roughness'].default_value=0.45
     return objs,['female head textures/1.png','ZinPia doe 5.png']
-job('female-head-plus-hair',"Female head + hair.fbx (bunisu) as shipped  [face: female head textures/1.png, eyes: ZinPia doe 5]",a_headhair)
+job('female-head-plus-hair',"Female head + hair.fbx (bunisu)  [face 1.png, eyes ZinPia doe 5; pigtail texture not uploaded -> plain dark]",a_headhair)
 def a_head(sc):
     objs=imp_fbx(HD+'Female head + hair.fbx')
     for o in list(objs):
@@ -131,7 +144,7 @@ def a_eyes(sc):
 # eyes close-up: same head, camera on the eye band
 def eyes_job():
     JI[0]+=1
-    if (JI[0]-1)%NSH!=SH: return
+    if ONLY or (JI[0]-1)%NSH!=SH: return
     try:
         sc=reset(); objs,tex=a_eyes(sc); fix_images()
         fh=[o for o in objs if o.type=='MESH'][0]; me=fh.data; mi={i:(s.material.name.lower() if s.material else '') for i,s in enumerate(fh.material_slots)}
@@ -160,15 +173,20 @@ def a_blowsolid(sc):
     objs=imp_fbx(IN+'/Blowout Solid textures.fbx'); return objs,['(materials as in the FBX)']
 job('blowout-solid',"Blowout Solid textures.fbx  [materials as in the FBX]",a_blowsolid)
 def a_umeko(sc):
-    objs=imp_fbx(IN+'/assets/hair_umeko_gift.fbx'); return objs,['(materials as in the FBX)']
-job('umeko-hair',"hair_umeko_gift.fbx  [materials as in the FBX]",a_umeko)
+    objs=imp_fbx(IN+'/assets/hair_umeko_gift.fbx')
+    for o in objs:
+        if o.type=='MESH':
+            for s in o.material_slots:
+                if s.material: set_tex(s.material,IN+'/assets/hair_texture_black_to_white_1713.jpg')
+    return objs,['assets/hair_texture_black_to_white_1713.jpg (her upload; the FBX expects BLONDEblack2.png, not uploaded)']
+job('umeko-hair',"hair_umeko_gift.fbx  [her hair_texture_black_to_white_1713.jpg; FBX's own BLONDEblack2.png not uploaded]",a_umeko)
 # 4 clothes
 def a_shorts(sc):
     objs=imp_fbx(IN+'/Booty Shorts by Beanie.fbx')
     for o in objs:
         if o.type=='MESH':
             for s in o.material_slots:
-                if s.material and not any(n.type=='TEX_IMAGE' and n.image and n.image.size[0]>0 for n in s.material.node_tree.nodes): set_tex(s.material,IN+'/Textures/Colors/Black.png')
+                if s.material: set_tex(s.material,IN+'/Textures/Colors/Black.png')
     return objs,['Textures/Colors/Black.png (+ Textures/Main AO/Roughness)']
 job('booty-shorts',"Booty Shorts by Beanie.fbx  [Textures/Colors/Black.png]",a_shorts)
 def a_outfit(sc):

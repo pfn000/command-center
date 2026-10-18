@@ -52,7 +52,7 @@ G={
 }
 PICS={}
 SHN=os.environ.get('VARIANT','A0')
-for k,(ps,l) in (G.items() if SHN in ('A0','A') else []):
+for k,(ps,l) in (G.items() if SHN in ('A0','A') and not os.environ.get('AS_ONLY') else []):
     try: PICS[k]=sheet(ps,k,l,cols=5 if len(ps)>8 else 4)
     except Exception as e: print('sheet fail',k,e)
 man=json.load(open(S+'/manifest.json')) if os.path.exists(S+'/manifest.json') else {'renders':[],'info':{}}
