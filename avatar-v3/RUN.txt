@@ -1,1 +1,1 @@
-build B v3.5 run 1: A + B (Meshy hair, un-yawed, level inpainted doe eyes) + B2 (Meshy face on her Blowout hair), rear thong band, straight back straps + clasp, form shading, relaxed hands
+build B v3.5 run 2: per-texel eye inpaint, face strands cut at the brow, full-width rear panel under one band, neutral form AO; B3 = B with higher-contrast light + dewier coat

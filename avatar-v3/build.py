@@ -1403,9 +1403,12 @@ if VARIANT in ('B','C'):
         lumv=lum_v
         nz_=V[(V[:,2]>zc_+0.04)&(V[:,2]<zc_+0.10)&(np.abs(V[:,0]-b_n['cx'])<0.04)&skinv&(lumv>0.45)]
         nose=nz_[int(np.argmin(nz_[:,1]))] if len(nz_) else None
-        rd=(warm_v>P.get('LIP_WARM',0.16))&(V[:,2]>zc_+0.012)&(V[:,2]<zc_+0.05)&(np.abs(V[:,0]-b_n['cx'])<0.035)&(V[:,1]<b_n['cy']-0.06)
+        rd=(warm_v>P.get('LIP_WARM',0.16))&(V[:,2]>zc_+0.012)&(V[:,2]<zc_+0.05)&(np.abs(V[:,0]-b_n['cx'])<0.035)&(V[:,1]<(float(nose[1])+0.035 if nose is not None else b_n['cy']))
         lips=V[rd]; lx=float(np.median(lips[:,0])) if len(lips)>20 else None
         return nose,lx,int(rd.sum())
+    try:
+        _nf,_lf,_nl=mh_feats(V); HF['B_feats']={'nose':None if _nf is None else [float(q) for q in _nf],'lips_x':_lf,'lip_verts':_nl}; log('B feats',HF['B_feats'])
+    except Exception as e: log('FEATS ERR',repr(e))
     if P.get('MB_YAW_FIX',False):
         nose_,lx_,nl_=mh_feats(V)
         if nose_ is not None:
@@ -1545,6 +1548,15 @@ if VARIANT in ('B','C'):
             # also the thin arc of the loop above the crown: everything over the dome's 97th-percentile top + tol
             ztop_=np.nanpercentile(zmx,97); lp|=top&keep&(V[:,2]>ztop_+P.get('LOOP_TOL',0.010))
             keep=keep&~lp; HF['B_loop_cut']={'verts':int(lp.sum()),'dome_top':float(ztop_)}; log('B wire loop cut',HF['B_loop_cut'])
+    if VARIANT=='B' and P.get('MB_STRAND_CUT',False) and MEYE:
+        # v3.5: hair strands hanging IN FRONT of the face (over the eyes / nose) are cut at the brow line -> bangs that end above the eyes
+        _bvs,_Vs=mh_bvh(); ezS=MEYE['z']; cxS=MEYE['cx']
+        cand=np.where(keep&(V[:,1]<b_n['cy']-0.03)&(np.abs(V[:,0]-cxS)<P.get('MB_SC_HW',0.05))&(V[:,2]>zc_+0.005)&(V[:,2]<ezS+P.get('MB_SC_ZUP',0.022))&((warm_v<0.07)|(lum_v<0.4)))[0]
+        cut=np.zeros(len(V),bool)
+        for i in cand:
+            h=_bvs.ray_cast(Vector(V[i])+Vector((0,0.0015,0)),Vector((0,1,0)),P.get('MB_SC_D',0.04))
+            if h[0] is not None and (h[0].y-V[i][1])>0.003: cut[i]=True
+        keep=keep&~cut; HF['B_strand_cut']={'cand':int(len(cand)),'cut':int(cut.sum())}; log('B face strands cut',HF['B_strand_cut'])
     bm=bmesh.new(); bm.from_mesh(MH.data); bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm,geom=[bm.verts[i] for i in np.where(~keep)[0]],context='VERTS')
     # drop tiny floating islands left by the cut
@@ -1637,6 +1649,8 @@ if VARIANT in ('B','C'):
             Vn=wco(MH); nose_,_lx,_n=mh_feats(Vn) if len(Vn)==len(skinv) else (None,None,0)
             cxE=MEYE['cx'] if (nose_ is None or not P.get('EYE_CX_NOSE',True)) else 0.5*(MEYE['cx']+float(nose_[0]))
             if nose_ is None and HF.get('B_yaw',{}).get('after_nose_x') is not None and P.get('EYE_CX_NOSE',True): cxE=0.5*(MEYE['cx']+HF['B_yaw']['after_nose_x'])
+            elif nose_ is None and (HF.get('B_feats') or {}).get('nose') and P.get('EYE_CX_NOSE',True):
+                _fx=[HF['B_feats']['nose'][0]]+([HF['B_feats']['lips_x']] if HF['B_feats'].get('lips_x') is not None else []); cxE=0.5*(MEYE['cx']+float(np.mean(_fx)))
             if VARIANT=='C' and HF.get('C_fit'): cxE=0.5*(MEYE['cx']+HF['C_fit']['cx'])
             ezE=MEYE['z']+P.get('EYE_ZOFF2',0.0); ipdE=MEYE['ipd']*P.get('EYE_IPD_K',1.0)
             MEYE['eyes_meshy']=list(MEYE['eyes']); MEYE['eyes']=[(cxE-ipdE/2,ezE),(cxE+ipdE/2,ezE)]; MEYE['roll_meshy']=MEYE.get('roll',0.0); MEYE['roll']=0.0
@@ -1650,51 +1664,57 @@ if VARIANT in ('B','C'):
             em_=MEYE.get('eyes_meshy') or MEYE['eyes']; cxm=MEYE['cx']
             pc=np.array([p.center for p in me_.polygons]); pn=np.array([p.normal for p in me_.polygons])
             Mw=np.array(MH.matrix_world); pc=pc@Mw[:3,:3].T+Mw[:3,3]; pn=pn@Mw[:3,:3].T
-            vm=np.zeros(len(Vw),np.float32); ring_cols=[]
+            # v3.5 run 2: per-TEXEL mask from the interpolated 3D position (the decimated head has too few vertices around the eyes for a vertex mask)
+            ells=[]
             for (ex,ez),ev in zip(em_,MEYE['eyes']):
                 outer=1 if ex>cxm else -1
-                for (x0_,z0_) in ((ex,ez),ev):   # clean both the Meshy eye and the spot the new eye goes
-                    ax=np.where((Vw[:,0]-x0_)*outer>0,ewm*P.get('INP_AOUT',1.0),ewm*P.get('INP_AIN',0.72)); bz_=ewm*P.get('INP_B',0.5)
-                    d=np.sqrt(((Vw[:,0]-x0_)/ax)**2+((Vw[:,2]-z0_)/bz_)**2)
-                    fr=(Vw[:,1]<cyH-0.03)
-                    m=(1-sstep((d-0.7)/0.4))*fr
-                    if P.get('INP_STRAND_TEST',True):
-                        _bvi,_=mh_bvh()
-                        for i in np.where(m>0.001)[0]:
-                            h=_bvi.ray_cast(Vector(Vw[i])+Vector((0,0.0015,0)),Vector((0,1,0)),0.03)
-                            if h[0] is not None and (h[0].y-Vw[i][1])>0.0025: m[i]=0.0   # a strand floating in front of the face keeps its hair colour
-                    vm=np.maximum(vm,m.astype(np.float32))
-                    rg=fr&(d>1.15)&(d<1.7)&skinv[:len(Vw)] if len(skinv)==len(Vw) else fr&(d>1.15)&(d<1.7)
-                    ring_cols.append(rg)
-            # skin fill colour: texels sampled at ring vertices (skin only, bright, warm), median
+                for (x0_,z0_) in ((ex,ez),ev): ells.append((x0_,z0_,outer))
+            AO_,AI_,BZ_=ewm*P.get('INP_AOUT',1.0),ewm*P.get('INP_AIN',0.72),ewm*P.get('INP_B',0.5)
+            def emask(X,Z):
+                m=np.zeros(X.shape,np.float32)
+                for (x0_,z0_,outer) in ells:
+                    ax=np.where((X-x0_)*outer>0,AO_,AI_); d=np.sqrt(((X-x0_)/ax)**2+((Z-z0_)/BZ_)**2); m=np.maximum(m,1-sstep((d-0.72)/0.38))
+                return m
             nl=len(me_.loops); uvs=np.empty(nl*2,np.float32); uvd.foreach_get('uv',uvs); uvs=uvs.reshape(-1,2); lvx=np.empty(nl,np.int64); me_.loops.foreach_get('vertex_index',lvx)
-            rgm=np.zeros(len(Vw),bool)
-            for rg in ring_cols: rgm|=rg
+            fr=(Vw[:,1]<cyH-0.03)
+            if P.get('INP_STRAND_TEST',True):
+                _bvi,_=mh_bvh()
+                for i in np.where(fr&(emask(Vw[:,0],Vw[:,2])>0.0)|fr&(np.abs(Vw[:,0]-cxm)<0.09)&(np.abs(Vw[:,2]-MEYE['z'])<0.03))[0]:
+                    h=_bvi.ray_cast(Vector(Vw[i])+Vector((0,0.0015,0)),Vector((0,1,0)),0.03)
+                    if h[0] is not None and (h[0].y-Vw[i][1])>0.0025: fr[i]=False   # a strand floating in front of the face keeps its hair colour
+            # fill colour: texels of front skin vertices in a ring around the eyes
+            dmin=np.full(len(Vw),9.0)
+            for (x0_,z0_,outer) in ells: dmin=np.minimum(dmin,np.sqrt(((Vw[:,0]-x0_)/AO_)**2+((Vw[:,2]-z0_)/BZ_)**2))
+            rgm=fr&(dmin>1.15)&(dmin<2.2)&(Vw[:,2]<MEYE['z']+0.004)
             li=np.where(rgm[lvx])[0]
             cs_=pa[np.clip((uvs[li,1]%1*H_).astype(int),0,H_-1),np.clip((uvs[li,0]%1*W_).astype(int),0,W_-1),:3] if len(li) else np.zeros((0,3))
             ok_=(cs_.mean(1)>0.55)&((cs_[:,0]-cs_[:,2])>0.08)&((cs_[:,0]-cs_[:,2])<0.3) if len(cs_) else np.zeros(0,bool)
-            fill=np.median(cs_[ok_],0) if ok_.sum()>10 else np.array([0.88,0.72,0.68])
-            # rasterise every polygon that touches the mask in UV space, mask interpolated from its vertices
-            npx=0
+            fill=np.percentile(cs_[ok_],P.get('INP_PCT',60),axis=0) if ok_.sum()>10 else np.array([0.88,0.72,0.68])
+            npx=0; npoly=0
             for p in me_.polygons:
                 vs=list(p.vertices)
-                if max(vm[v] for v in vs)<=0.001: continue
-                lis=list(p.loop_indices); uv_=[(uvs[l][0]%1*W_,uvs[l][1]%1*H_) for l in lis]; mv=[vm[v] for v in vs]
+                if not any(fr[v] for v in vs): continue
+                if min(dmin[v] for v in vs)>2.5: continue
+                lis=list(p.loop_indices); uv_=[(uvs[l][0]%1*W_,uvs[l][1]%1*H_) for l in lis]; X_=[Vw[v] for v in vs]
                 if max(q[0] for q in uv_)-min(q[0] for q in uv_)>W_*0.5 or max(q[1] for q in uv_)-min(q[1] for q in uv_)>H_*0.5: continue
+                npoly+=1
                 for t_ in range(1,len(vs)-1):
-                    (x0,y0),(x1,y1),(x2,y2)=uv_[0],uv_[t_],uv_[t_+1]; m0,m1,m2=mv[0],mv[t_],mv[t_+1]
+                    (x0,y0),(x1,y1),(x2,y2)=uv_[0],uv_[t_],uv_[t_+1]; P0,P1,P2=X_[0],X_[t_],X_[t_+1]
                     bx0,bx1=int(max(0,math.floor(min(x0,x1,x2)))),int(min(W_-1,math.ceil(max(x0,x1,x2)))); by0,by1=int(max(0,math.floor(min(y0,y1,y2)))),int(min(H_-1,math.ceil(max(y0,y1,y2))))
                     if bx1<bx0 or by1<by0: continue
                     gy,gx=np.mgrid[by0:by1+1,bx0:bx1+1].astype(np.float32); gx+=0.5; gy+=0.5
                     den=(y1-y2)*(x0-x2)+(x2-x1)*(y0-y2)
                     if abs(den)<1e-9: continue
                     w0=((y1-y2)*(gx-x2)+(x2-x1)*(gy-y2))/den; w1=((y2-y0)*(gx-x2)+(x0-x2)*(gy-y2))/den; w2=1-w0-w1
-                    ins=(w0>=-0.02)&(w1>=-0.02)&(w2>=-0.02)
+                    ins=(w0>=-0.03)&(w1>=-0.03)&(w2>=-0.03)
                     if not ins.any(): continue
-                    mm=np.clip(w0*m0+w1*m1+w2*m2,0,1)*ins
-                    blk=pa[by0:by1+1,bx0:bx1+1,:3]; pa[by0:by1+1,bx0:bx1+1,:3]=blk*(1-mm[...,None])+fill[None,None,:]*mm[...,None]; npx+=int(ins.sum())
+                    X=w0*P0[0]+w1*P1[0]+w2*P2[0]; Z=w0*P0[2]+w1*P1[2]+w2*P2[2]
+                    mm=emask(X,Z)*ins
+                    if mm.max()<=0.001: continue
+                    blk=pa[by0:by1+1,bx0:bx1+1,:3]; pa[by0:by1+1,bx0:bx1+1,:3]=blk*(1-mm[...,None])+fill[None,None,:]*mm[...,None]; npx+=int((mm>0.01).sum())
+            vm=dmin
             img_.pixels.foreach_set(pa.ravel()); img_.update(); img_.pack()
-            HF['B_inpaint']={'fill':fill.tolist(),'ring_texels':int(ok_.sum()),'masked_verts':int((vm>0.01).sum()),'px':npx}; log('eye inpaint',HF['B_inpaint'])
+            HF['B_inpaint']={'fill':fill.tolist(),'ring_texels':int(ok_.sum()),'polys':npoly,'px':npx}; log('eye inpaint',HF['B_inpaint'])
         except Exception as e:
             import traceback; log('INPAINT ERR',repr(e),traceback.format_exc()[-800:])
     # ---------- v3.4 crisp hand-painted eyes for the Meshy face: a thin decal that follows the face skin, painted here (sclera, her Doe gray iris,

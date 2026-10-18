@@ -80,11 +80,11 @@
  },
  "SAMPLES": 40,
  "PINK": [
-  1.16,
-  0.88,
-  0.66
+  1.12,
+  0.9,
+  0.74
  ],
- "SKIN_SAT": 1.15,
+ "SKIN_SAT": 1.0,
  "EYE_SX": 1.0,
  "EYE_SZ": 1.0,
  "BUN_DY": 0.1,
@@ -193,7 +193,7 @@
  "TOP_N": 0.02,
  "TOP_S": 0.03,
  "WING_H": 0.028,
- "BACK_H": 0.014,
+ "BACK_H": 0.018,
  "STRAP_DA": 0.28,
  "STRAP_XS": 0.1,
  "MB_SEAM": true,
@@ -215,11 +215,11 @@
  "THONG_W": [
   0.62,
   0.09,
-  0.08,
-  0.3
+  0.07,
+  0.85
  ],
  "STRING_RISE": 0.06,
- "BACK_UP": 0.04,
+ "BACK_UP": 0.05,
  "BOW_S": 1.6,
  "RIB_UV": true,
  "RIB_SCALE": 80,
@@ -252,28 +252,28 @@
  "EYE_OPEN": 0.47,
  "STRAP_X0": 0.092,
  "MB_HAIR_ROUGH": 0.55,
- "SIDE_COOL": 0.35,
+ "SIDE_COOL": 0.45,
  "SIDE_TINT": [
   0.88,
   0.9,
   1.0
  ],
- "SIDE_SAT": 0.9,
+ "SIDE_SAT": 0.85,
  "FACE_COAT_K": 0.5,
  "MB_COAT_K": 0.45,
  "BOW_V2": true,
  "EYE_WK": 1.2,
  "EYE_TOPK": 0.5,
  "LASH_T": 0.095,
- "WING": 0.22,
+ "WING": 0.2,
  "LOOP_TOL": 0.005,
  "BAND_V35": true,
- "PEAK_T": 0.35,
- "BAND_K": 1.7,
- "BACK_POW": 1.6,
- "THONG_ROUGH": 0.62,
- "THONG_SHEEN": 0.12,
- "THONG_SPEC": 0.3,
+ "PEAK_T": 0.4,
+ "BAND_K": 1.9,
+ "BACK_POW": 2.4,
+ "THONG_ROUGH": 0.82,
+ "THONG_SHEEN": 0.0,
+ "THONG_SPEC": 0.2,
  "STRAP_BACK_STRAIGHT": true,
  "CLASP": true,
  "WRIST_BEND": 10,
@@ -281,13 +281,13 @@
  "CURL2": 30,
  "CURL3": 20,
  "THUMB_CURL": 16,
- "AO2_STR": 0.55,
+ "AO2_STR": 0.5,
  "AO2_DIST": 0.18,
  "AO2_LO": 0.3,
  "AO2_COL": [
-  0.66,
-  0.55,
-  0.55
+  0.6,
+  0.57,
+  0.58
  ],
  "AO2_HEAD_K": 0.4,
  "MB_YAW_FIX": true,
@@ -295,9 +295,9 @@
  "MB_YAW_MAX": 14,
  "EYE_LEVEL": true,
  "EYE_INPAINT": true,
- "INP_AOUT": 1.05,
- "INP_AIN": 0.72,
- "INP_B": 0.5,
+ "INP_AOUT": 1.3,
+ "INP_AIN": 0.8,
+ "INP_B": 0.62,
  "DECAL_V35": true,
  "EYE_MARG": 1.9,
  "DEC_NX": 40,
@@ -307,7 +307,7 @@
   0.506,
   0.25
  ],
- "ES_A": 0.8,
+ "ES_A": 0.7,
  "CATCH_R": 0.0,
  "SCL_COL": [
   0.74,
@@ -327,13 +327,22 @@
  "EYE_TILT": 0.1,
  "MB_CROWN_FILL": true,
  "VARIANTS": {
-  "B2": {
-   "VARIANT_AS": "C",
-   "MC_GEOM": true,
-   "MC_FIT": true,
-   "MB_LOOP_CUT": false,
-   "MB_CROWN_FILL": false,
-   "MB_TRIS": 18000
+  "B3": {
+   "VARIANT_AS": "B",
+   "KEY_SIZE": 0.9,
+   "FILL_E": 12,
+   "WORLD_E": 0.1,
+   "RIM_E": 160,
+   "EXPOSURE": -0.08,
+   "SKIN_COAT_ALL": 0.35,
+   "COAT_R": 0.12,
+   "SPEC_E": 14,
+   "AO2_STR": 0.65
   }
- }
+ },
+ "STRAP_BACK_XK": 0.86,
+ "INP_PCT": 60,
+ "MB_STRAND_CUT": true,
+ "MB_SC_HW": 0.05,
+ "MB_SC_ZUP": 0.022
 }
