@@ -17,7 +17,11 @@
   "SHIRT_BODYW": true,
   "POSED_CLEAR": true,
   "TUMMY_CLEAR": true,
-  "FRONT_LOCKS": true
+  "FRONT_LOCKS": true,
+  "POSED_ITERS": 4,
+  "LOCK_MAX_DEG": 15,
+  "STRAP_SMOOTH_PUSH": true,
+  "STRAP_SCALE_MAX": 1.04
  },
  "A2": {
   "SHIRT": false,

@@ -303,6 +303,12 @@ def weld_snap(o,tag=''):
     set_world(o,Xn); after=weld_gap(o)
     r={'before':before,'after':after,'max_vertex_move_mm':round(float(np.linalg.norm(Xn-X,axis=1).max())*1000,2)}
     rep['weld'][o.name]['snap'+tag]=r; log('WELD snap',o.name,tag,r); return r
+def group_max(o,D):
+    if o.name not in WELD: return D
+    nrm=np.linalg.norm(D,axis=1); out=D.copy()
+    for gg in WELD[o.name]['groups']:
+        j=gg[int(np.argmax(nrm[gg]))]; out[gg]=D[j]
+    return out
 def smooth_field(o,D,iters=25,cap=None):
     """Laplacian falloff of a push field: every required push is kept (projection), its neighbours ease in, so no edge is torn by a step change"""
     E=WELD[o.name]['E'] if o.name in WELD else np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64); n=len(D)
@@ -756,7 +762,7 @@ def strap_rigid(o,off):
             return m
         base=minclr(X); r['before_min_clearance_mm']=round(base*1000,2); cand=[]
         if base<off:
-            for s in (1.0,1.02,1.04,1.06,1.08):
+            for s in tuple(x for x in (1.0,1.02,1.04,1.06,1.08) if x<=float(P.get('STRAP_SCALE_MAX',1.04))+1e-9):
                 for dy in (0.0,0.0025,0.005,0.0075,0.01):
                     for dz in (0.0,0.0025,0.005):
                         if s==1.0 and dy==0 and dz==0: continue
@@ -765,6 +771,36 @@ def strap_rigid(o,off):
             pick=max(ok,key=lambda c:c[1]) if ok else max(cand,key=lambda c:c[1])
             _,_,dy,dz,s,m=pick; set_world(o,Xof(dy,dz,s)); r.update({'move_back_mm':dy*1000,'move_up_mm':dz*1000,'uniform_scale':s,'after_min_clearance_mm':round(m*1000,2),'cleared':bool(ok),'evals':len(cand)})
         else: r['after_min_clearance_mm']=r['before_min_clearance_mm']; r['cleared']=True
+        if not r.get('cleared') and P.get('STRAP_SMOOTH_PUSH',True):
+            # run 7b: residual = ONE smooth bulge along the loop (group-coherent, Laplacian falloff over the strap), never per-vertex spikes
+            hist=[]; ringm=f_>0.001
+            for it in range(4):
+                Xc=wco(o); PU=np.zeros_like(Xc); mn=1.0
+                def nrm_at(q):
+                    best=None
+                    for T in (TBd,TF_):
+                        loc,nr,idx,d=T.find_nearest(Vector(tuple(q)),0.03)
+                        if loc is None: continue
+                        if best is None or d<best[0]: best=(d,(Vector(tuple(q))-loc).dot(nr),np.array(tuple(nr)))
+                    return best
+                for i in np.where(ringm)[0]:
+                    b_=nrm_at(Xc[i])
+                    if b_ is None: continue
+                    mn=min(mn,b_[1])
+                    if b_[1]<off: v=b_[2]*(off-b_[1]); PU[i]=v if v@v>PU[i]@PU[i] else PU[i]
+                for fc in faces:
+                    q=Xc[list(fc)].mean(0); b_=nrm_at(q)
+                    if b_ is None: continue
+                    mn=min(mn,b_[1])
+                    if b_[1]<off*0.75:
+                        v=b_[2]*(off*0.75-b_[1])
+                        for vi in fc:
+                            if v@v>PU[vi]@PU[vi]: PU[vi]=v
+                mm=np.linalg.norm(PU,axis=1)
+                hist.append({'iter':it,'min_clearance_mm':round(mn*1000,2),'verts_needing':int((mm>1e-5).sum()),'max_need_mm':round(float(mm.max())*1000,2)})
+                if (mm>1e-5).sum()==0: break
+                PU=group_max(o,PU); PU=smooth_field(o,PU,iters=40); PU[~ringm]=0; set_world(o,Xc+PU)
+            r['smooth_residual_push']=hist
         # shape check: pairwise distances inside the fully-rigid part change only by the uniform scale
         Xa=wco(o); rg=np.where(f_>0.999)[0]
         if len(rg)>3:
@@ -802,12 +838,6 @@ def shirt_need_body(o,off,T=None):
         s=(Vector(tuple(p))-loc).dot(nr); S[i]=s
         if -0.08<s<off: N[i]=np.array(tuple(nr))*(off-s)
     return N,S
-def group_max(o,D):
-    if o.name not in WELD: return D
-    nrm=np.linalg.norm(D,axis=1); out=D.copy()
-    for gg in WELD[o.name]['groups']:
-        j=gg[int(np.argmax(nrm[gg]))]; out[gg]=D[j]
-    return out
 def tummy_clear(o,off=0.0015,cap=0.025):
     r={}
     kb=SH.data.shape_keys.key_blocks.get('Tummy') if SH.data.shape_keys else None
@@ -1519,19 +1549,47 @@ try:
         DONE=[]
         # fix 3: the two long front locks only, forward (tip away from the chest), smallest angle <= 8 deg that gets each to <= 5 verts inside the body
         if P.get('FRONT_LOCKS',True):
+            # run 7b: each bone of the lock, root -> tip, gets the smallest forward angle (<= LOCK_MAX_DEG per bone) that lifts ITS OWN segment off the
+            # skin (<= 1 vert > 2 mm inside), so the lock follows her chest instead of swinging out stiffly; stick-out vs 6b <= 10 mm for the whole lock.
+            bmax=float(P.get('LOCK_MAX_DEG',15))
+            gidx_h={g.name:g.index for g in HR.vertex_groups}
+            def seg_verts(bname):
+                gi_=gidx_h.get(bname)
+                if gi_ is None: return np.zeros(0,dtype=np.int64)
+                out=[]
+                for v in HR.data.vertices:
+                    ws=[(ge.weight,ge.group) for ge in v.groups if ge.weight>0]
+                    if ws and max(ws)[1]==gi_: out.append(v.index)
+                return np.array(out,dtype=np.int64)
+            def pen_idx(idx,Xe):
+                c=0
+                for i in idx:
+                    p=Vector(tuple(Xe[i])); lb,nb_,_,_=TBb.find_nearest(p,0.06)
+                    if lb is not None and (p-lb).dot(nb_)<-0.002: c+=1
+                return c
+            def rot_bone(bn_,deg):
+                pb=B.pose.bones[bn_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,AXW((1,0,0)))@Matrix.Translation(-h)@pb.matrix
+                bpy.context.view_layer.update()
             for root,side in (('Blw_Front_L','L'),('Blw_Front_R','R')):
                 if root not in B.pose.bones: H7[root]={'missing':True}; continue
-                s_sw,s_lf=signs(root,side); idx=chain_verts(root); p0=pen_of(root); rec={'pen_before':p0,'lift_sign':s_lf,'tried':[]}
-                pick=0
-                if p0>5:
-                    for a in range(1,9):
-                        curl(root,s_lf*a,(1,0,0)); pa=pen_of(root); so=stick_out(idx,hair_world_eval()); rec['tried'].append((a,pa,round(so*1000,1)))
-                        if pa<=5 and so<=0.010: pick=a; break
-                    if not pick:
-                        ok=[t for t in rec['tried'] if t[2]<=10.0]; pick=min(ok,key=lambda t:(t[1],t[0]))[0] if ok else 0
-                if pick: curl(root,s_lf*pick,(1,0,0)); DONE.append(root)
-                else: uncurl(root)
-                rec['angle_deg']=pick; rec['pen_after']=pen_of(root); rec['stick_out_mm']=round(stick_out(idx,hair_world_eval())*1000,1); H7[root]=rec
+                s_sw,s_lf=signs(root,side); idx=chain_verts(root); uncurl(root); p0=pen_of(root); rec={'pen_before':p0,'lift_sign':s_lf,'per_bone':[]}
+                for bn_ in chain_bones(root):
+                    sv=seg_verts(bn_); Xe=hair_world_eval(); pb0=pen_idx(sv,Xe); best=(0,pb0,0.0)
+                    if pb0>1:
+                        mb0=B.pose.bones[bn_].matrix_basis.copy()
+                        for a in range(1,int(bmax)+1):
+                            B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update(); rot_bone(bn_,s_lf*a)
+                            Xe=hair_world_eval(); pa=pen_idx(sv,Xe); so=stick_out(idx,Xe)
+                            if so>0.010: break
+                            best=(a,pa,so)
+                            if pa<=1: break
+                        B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update()
+                        if best[0]: rot_bone(bn_,s_lf*best[0])
+                    rec['per_bone'].append((bn_,int(len(sv)),pb0,best[0],best[1],round(best[2]*1000,1)))
+                rec['pen_after']=pen_of(root); rec['stick_out_mm']=round(stick_out(idx,hair_world_eval())*1000,1)
+                rec['angle_deg']=max([t[3] for t in rec['per_bone']]+[0])
+                if rec['angle_deg']>0: DONE.append(root)
+                H7[root]=rec
         # fix 7 / variant A1: curl ONLY the chain that covers each eye (right: Blw_Bangs_R), smallest angle <= 15 deg (lift, sweep, or both) that gets
         # that eye under 15 % in every proof view, with the wing check (stick-out <= 10 mm vs 6b). A0 keeps the bang 1:1.
         if P.get('BANG_LIFT'):
@@ -1545,37 +1603,32 @@ try:
                 ch=chain_of_tris(h0,TV0); cands=[c for c,_ in ch.most_common() if c in B.pose.bones and c not in DONE]
                 if sd=='R' and 'Blw_Bangs_R' in cands: cands=['Blw_Bangs_R']
                 if not cands: rec['note']='no posable chain'; H7['bang_'+sd]=rec; continue
-                root=cands[0]; rec['chain']=root; s_sw,s_lf=signs(root,sd); idx=chain_verts(root); tried=[]; pick=None
-                for a in (3,6,9,12,15):
-                    for mode in ('lift','sweep','both'):
-                        uncurl(root)
-                        if mode=='lift': curl(root,s_lf*a,(1,0,0))
-                        elif mode=='sweep': curl(root,s_sw*a,(0,1,0))
-                        else:
-                            curl(root,s_lf*a*0.7071,(1,0,0))
-                            bn=chain_bones(root)
-                            for n_ in bn:
-                                pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(s_sw*a*0.7071/len(bn)),4,AXW((0,1,0)))@Matrix.Translation(-h)@pb.matrix
-                                bpy.context.view_layer.update()
-                        e1,_,_=cover({sd:EYEP[sd]},CAMS,EYE_VIEWS); p1=max(e1[vw][sd]['pct'] for vw in e1); so=stick_out(idx,hair_world_eval())
-                        fc=face_cross()['hair_tris_crossing_face_below_brow']
-                        tried.append((a,mode,p1,round(so*1000,1),fc))
-                    good=[t for t in tried if t[0]==a and t[2]<15 and t[3]<=10.0 and t[4]<=CROSS_MAX]
-                    if good: pick=min(good,key=lambda t:(t[2],t[3])); break
-                if pick is None:
-                    ok=[t for t in tried if t[3]<=10.0 and t[4]<=CROSS_MAX]
-                    pick=min(ok,key=lambda t:(t[2],t[0])) if ok else None
-                uncurl(root)
-                if pick:
-                    a,mode=pick[0],pick[1]
-                    if mode=='lift': curl(root,s_lf*a,(1,0,0))
-                    elif mode=='sweep': curl(root,s_sw*a,(0,1,0))
+                root=cands[0]; rec['chain']=root; idx=chain_verts(root); tried=[]; pick=None
+                # run 7b: both signs, three world axes, whole-chain curl AND root-only swing, 3..15 deg
+                def apply_b(mode,ax,sg,a):
+                    uncurl(root)
+                    if mode=='curl': curl(root,sg*a,ax)
                     else:
-                        curl(root,s_lf*a*0.7071,(1,0,0)); bn=chain_bones(root)
-                        for n_ in bn:
-                            pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(s_sw*a*0.7071/len(bn)),4,AXW((0,1,0)))@Matrix.Translation(-h)@pb.matrix
-                            bpy.context.view_layer.update()
-                    DONE.append(root); rec.update({'angle_deg':a,'mode':mode,'pct_after':pick[2],'stick_out_mm':pick[3],'face_cross':pick[4]})
+                        pb=B.pose.bones[root]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(sg*a),4,AXW(ax))@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
+                for a in (3,6,9,12,15):
+                    for mode in ('curl','swing'):
+                        for ax in ((1,0,0),(0,1,0),(0,0,1)):
+                            for sg in (1,-1):
+                                apply_b(mode,ax,sg,a)
+                                e1,_,_=cover({sd:EYEP[sd]},CAMS,EYE_VIEWS); p1=max(e1[vw][sd]['pct'] for vw in e1); so=stick_out(idx,hair_world_eval())
+                                fc=face_cross()['hair_tris_crossing_face_below_brow']
+                                tried.append((a,mode,'xyz'[ax.index(1)],sg,p1,round(so*1000,1),fc))
+                    good=[t for t in tried if t[0]==a and t[4]<15 and t[5]<=10.0 and t[6]<=CROSS_MAX]
+                    if good: pick=min(good,key=lambda t:(t[4],t[5])); break
+                uncurl(root)
+                ok=[t for t in tried if t[5]<=10.0 and t[6]<=CROSS_MAX]
+                bestok=min(ok,key=lambda t:(t[4],t[0])) if ok else None
+                rec['best_within_limits']=bestok
+                if pick is None and bestok is not None and bestok[4]<=p_-5: pick=bestok; rec['note']='15 % not reachable within 15 deg + 10 mm stick-out; applied the best within limits'
+                elif pick is None: rec['note']='15 % not reachable and nothing within limits helps by >= 5 points; bang left 1:1'
+                if pick:
+                    a,mode,axn,sg=pick[0],pick[1],pick[2],pick[3]; apply_b(mode,{'x':(1,0,0),'y':(0,1,0),'z':(0,0,1)}[axn],sg,a)
+                    DONE.append(root); rec.update({'angle_deg':a,'mode':mode,'axis':axn,'sign':sg,'pct_after':pick[4],'stick_out_mm':pick[5],'face_cross':pick[6]})
                 rec['tried']=tried; H7['bang_'+sd]=rec; log('A1 bang',sd,{k:v for k,v in rec.items() if k!='tried'})
         # bake the chosen chain poses into her rig's rest (pose applied to those hair bones + the hair mesh written in that pose) so the .blend/.fbx carry it
         if DONE:
@@ -1910,7 +1963,7 @@ def _posed_signed(o):
     return S,N
 def posed_clear(o,frames=(0,258),off=0.002):
     r={'frames':list(frames),'passes':[]}
-    for it in range(2):
+    for it in range(int(P.get('POSED_ITERS',3))):
         Drest=np.zeros((len(o.data.vertices),3)); st={}
         for f in frames:
             anim_pose(f); S,N=_posed_signed(o); m=(S>-0.06)&(S<off)
