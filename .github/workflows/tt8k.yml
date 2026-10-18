@@ -1,0 +1,93 @@
+name: tt8k turntable
+# 8K 360 turntable of the run-9c model (saved .blend from the private HF dataset, rendered as-is). Outputs go to the private dataset.
+on:
+  push:
+    branches: [avatar-v3]
+    paths: [avatar-v3/TT8K.txt]
+permissions:
+  contents: read
+env:
+  RUNID: "39172605668"
+  NF: "300"
+  SHARDS: "20"
+  SAMPLES: "10"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Probe frames (720x1280 + one 8K timing frame)
+        run: |
+          mkdir -p /tmp/out
+          TT_W=720 TT_H=1280 TT_NF=$NF TT_SAMPLES=12 TT_ONLY=0,75,150,225 timeout -k 10 1200 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/out/small 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
+          TT_NF=$NF TT_SAMPLES=$SAMPLES TT_ONLY=40 TT_Q=88 timeout -k 10 1200 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/out/big 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600 | tee /tmp/out/big-log.txt
+          ls -la /tmp/out/*
+      - name: Upload probe
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python3 -c "
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/$RUNID/turntable-8k/probe',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: { shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Frames
+        env: { TT_SHARD: "${{ matrix.shard }}" }
+        run: |
+          TT_NF=$NF TT_SHARDS=$SHARDS TT_SAMPLES=$SAMPLES timeout -k 10 6600 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
+          ls /tmp/frames | wc -l; du -sh /tmp/frames
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "tt8k-${{ matrix.shard }}", path: /tmp/frames, retention-days: 2, compression-level: 0 }
+  encode:
+    needs: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: { q: [small, hq] }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { pattern: "tt8k-*", path: /tmp/frames, merge-multiple: true }
+      - name: HEVC
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}", Q: "${{ matrix.q }}" }
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          N=$(ls /tmp/frames | wc -l); echo "frames $N"; mkdir -p /tmp/o; cd /tmp/o
+          VF="scale=in_range=full:out_range=tv,format=yuv420p"
+          COL="-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv"
+          if [ "$Q" = small ]; then
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=1:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -an -f null /dev/null
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=2:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an v37r9-turntable-8k.mp4
+            rm -f x265_2pass.log*
+          else
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset medium -crf 14 -x265-params log-level=error $COL -tag:v hvc1 -movflags +faststart -an v37r9-turntable-8k-hq.mp4
+          fi
+          ls -la /tmp/o; ffprobe -v error -show_entries stream=width,height,codec_name,codec_tag_string,r_frame_rate,nb_frames:format=duration,size *.mp4
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/$RUNID/turntable-8k',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
