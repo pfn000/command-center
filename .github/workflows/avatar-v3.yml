@@ -1,5 +1,5 @@
 name: avatar-v3 build
-# Jena avatar v3 (Saidie's own rigged assets). Purchased inputs come from her PRIVATE HF dataset via a repo secret;
+# Jena avatar v3.7 (Saidie's own assets ONLY; zero Meshy). Inputs come from her PRIVATE HF dataset via a repo secret;
 # outputs go to her private dataset. No asset is committed to this public repo.
 on:
   push:
@@ -10,10 +10,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [B, B6] }
+      matrix: { variant: [A] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -21,37 +21,26 @@ jobs:
         run: |
           curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
           mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
-          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 fonts-dejavu-core > /dev/null
           /opt/blender/blender --version | head -1
-      - name: Inputs (private)
+      - name: Inputs (private, no Meshy)
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          if [ -z "$VARIANT" ]; then export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); fi
+          MODE=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f1)
           pip install -q huggingface_hub pillow numpy > /dev/null
           python3 -c "
           import os; from huggingface_hub import snapshot_download
-          p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
+          ig=['avatar-v3/*','*Meshy*','*.glb']+([] if '$MODE'=='assets' else ['*Normal_OpenGL.png','*Normal.png','*Height.png'])
+          p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=ig)
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "${VARIANT:0:1}" = "B" ] || [ "${VARIANT:0:1}" = "C" ]; then python3 -c "
-          import os,shutil; from huggingface_hub import hf_hub_download
-          p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
-          os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
-      - name: SR deps (B face texture)
-        run: |
-          V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "${V:0:1}" = "B" ] || [ "${V:0:1}" = "C" ]; then
-            pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
-            mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
-            curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
-            ls -la /tmp/sr; python3 -c "import torch,spandrel;print('torch',torch.__version__)"
-          fi
+          find /tmp/in -iname '*meshy*' | head; echo "meshy files present: $(find /tmp/in -iname '*meshy*' | wc -l)"
       - name: Blender
         if: always()
         run: |
           MODE=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f1)
-          timeout -k 10 1100 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
-          grep -E "^\[v3\]|Error|Traceback|line [0-9]+" /tmp/out/blender-log.txt | cut -c1-400 | head -250 || true
+          timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "^\[v3\]|Error|Traceback|line [0-9]+" /tmp/out/blender-log.txt | cut -c1-400 | head -300 || true
       - name: Compose proofs
         if: always()
         run: |
@@ -60,7 +49,8 @@ jobs:
         if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          ls -laR /tmp/out | head -80
+          rm -rf /tmp/out/assets/*.png 2>/dev/null || true
+          ls -laR /tmp/out | head -120
           python3 - <<'EOF'
           import os
           from huggingface_hub import HfApi
@@ -72,7 +62,7 @@ jobs:
   turntable:
     if: contains(github.event.head_commit.message, '[tt]')
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 55
     strategy:
       matrix: { shard: [0, 1, 2, 3] }
     steps:
@@ -82,35 +72,20 @@ jobs:
           curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
           mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
           sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
-          /opt/blender/blender --version | head -1
-      - name: Inputs (private)
+      - name: Inputs (private, no Meshy)
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          if [ -z "$VARIANT" ]; then export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); fi
           pip install -q huggingface_hub pillow numpy > /dev/null
           python3 -c "
           import os; from huggingface_hub import snapshot_download
-          p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
+          p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Meshy*','*.glb','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
-          cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "${VARIANT:0:1}" = "B" ] || [ "${VARIANT:0:1}" = "C" ]; then python3 -c "
-          import os,shutil; from huggingface_hub import hf_hub_download
-          p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
-          os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
-      - name: SR deps (B face texture)
-        run: |
-          V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "${V:0:1}" = "B" ] || [ "${V:0:1}" = "C" ]; then
-            pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
-            mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
-            curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
-            ls -la /tmp/sr; python3 -c "import torch,spandrel;print('torch',torch.__version__)"
-          fi
+          cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; mkdir -p /tmp/out/proof
       - name: Frames
         env: { TT_SHARD: "${{ matrix.shard }}", TT_SHARDS: "4" }
         run: |
           export VARIANT=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2); echo "VARIANT=$VARIANT"
-          timeout -k 10 2400 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/build.py -- /tmp/in /tmp/out > /tmp/out/tt-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/build.py -- /tmp/in /tmp/out > /tmp/out/tt-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\] frame|Error|Traceback" /tmp/out/tt-log.txt | tail -40; ls /tmp/out/frames | wc -l
       - uses: actions/upload-artifact@v4
         with: { name: "frames-${{ matrix.shard }}", path: /tmp/out/frames, retention-days: 2 }
@@ -130,6 +105,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev 1792298442227465512
-# rev 1792299656280823012
-# rev v3.6-2
+# rev v3.7-assets-4

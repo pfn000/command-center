@@ -1,1 +1,1 @@
-build B v3.6 run 2 (final): lock = floating pieces reaching 1 cm below the eye line, cut at brow+1.2 cm in a narrow x band (no fringe holes); seam tucks the ragged neck tongue + pale front skin; back panel extended up to the band; gloss middle; B6 = cut at brow+0.6 cm, longer seam blend; B turntable
+assets A v3.7 step 1: each of her uploaded assets rendered alone (grey bg, 3-point light, her own textures) + texture pictures; no Meshy

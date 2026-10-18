@@ -1,4 +1,9 @@
 
+import sys,os,subprocess
+_mode=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'RUN.txt')).read().split()[0]
+if _mode=='assets':
+    subprocess.run([sys.executable,os.path.join(os.path.dirname(os.path.abspath(__file__)),'assets_pics.py')]+sys.argv[1:]); sys.exit(0)
+
 import sys,os
 from PIL import Image, ImageDraw
 IN,OUT=sys.argv[1],sys.argv[2]; P=OUT+'/proof'; BG=(51,51,51)
