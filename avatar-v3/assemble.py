@@ -1,5 +1,5 @@
 
-# v3.7 ASSEMBLY. Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
+# v3.7 ASSEMBLY, run 4 (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
 # her Blowout haircards (B&W.png) [alt: Umeko + her black->white jpg], Outfitriggedpanda shirt (Tshirt-BasicGrey.png) + bra (plain black, her 10:30 ask),
 # Booty Shorts (Textures/Colors/Black.png). ONE armature (Panda's). Clothes weights = Data Transfer from the body. Zero Meshy.
@@ -11,7 +11,7 @@ argv=sys.argv[sys.argv.index('--')+1:]; IN,OUT=argv[0],argv[1]; os.makedirs(OUT+
 import time as _t; _T0=_t.time()
 def log(*a): print('[v3]',f'{_t.time()-_T0:.0f}s',*a,flush=True)
 VAR=os.environ.get('VARIANT','A0')
-P=dict(SHORTS_TEX='Black.png', HAIR='blowout', SHIRT=True, HAIR_W_RATIO=1.55, HAIR_TOP_GAP=0.010, HAIR_DZ=0.010, HAIR_DY=0.006, HAIR_DEPTH_K=1.1,
+P=dict(HEAD_K=6.75, SHORTS_FIT='hug', HUG_OFF=0.0025, FIT_HAIR=False, FIT_SHIRT=0.006, SEAM_BLEND=False, BRA_UNDER_SHIRT='hide', CRAN_BELOW=0.02, SHORTS_TEX='Black.png', HAIR='blowout', SHIRT=True, HAIR_W_RATIO=1.55, HAIR_TOP_GAP=0.010, HAIR_DZ=0.010, HAIR_DY=0.006, HAIR_DEPTH_K=1.1,
        NECK_R_K=0.97, NECK_SINK=0.015, SEAM_BAND=0.035, BRA_COL=(0.012,0.012,0.013), BRA_ROUGH=0.7,
        ARM_DOWN=74, SHOULDER_DOWN=10, ELBOW_BEND=-12, WRIST_BEND=8, RELAX=True, SAMPLES=32, ASM_SAMPLES=16, CRANIUM=True, HEAD_TEX='1.png',
        SET='full', TT=False, TT_FRAMES=96, TT_SAMPLES=12, TT_W=720, TT_H=1280)
@@ -108,59 +108,37 @@ for s in FH.material_slots:
         m.use_nodes=True; bb_=[x for x in m.node_tree.nodes if x.type=='BSDF_PRINCIPLED']
         if bb_: bb_[0].inputs['Alpha'].default_value=0.0
 rep['head_missing_images']=fix_images(); rep['head_materials']=mats_report(FH)
-# ---------- 3. attach: her head's under-jaw opening -> the body's open neck ring. ONE uniform scale (run-1 rule: slice radii, reported).
-#            If the two rings line up within 8 mm, the head's bottom ring is snapped onto the body's ring (seamless neck; only the last ~2 cm move,
-#            every shape key moved the same so visemes/blinks keep working); otherwise the run-1 placement (head sunk 1.5 cm into the neck) is kept.
+# ---------- 3. attach (run 4). Her Female Head is a front shell (open at the back, no neck of its own; the Neck/Head bones it ships with
+#            are where it expects the body's Neck/Head bones). So: her head's own Head bone goes onto Panda's Head bone (that is how the head was
+#            authored to sit on a body), ONE uniform scale about that bone, no rotation, no reshape. Scale = proportion rule (Saidie 11:27 "shrunken head"):
+#            crown-to-chin = total height / HEAD_K (anime 6.5-7). Panda's neck top then sits inside the jaw shell; its back is covered by the cranium below.
+BV=wco(BODY); zt=float(BV[:,2].max()); fz=float(BV[:,2].min())
+HV=wco(FH); h_before=float(HV[:,2].max()-HV[:,2].min()); top0=float(HV[:,2].max()); chin0=float(HV[:,2].min())
+hb0=FA.matrix_world@FA.data.bones['Head'].head_local; nb0=FA.matrix_world@FA.data.bones['Neck'].head_local if 'Neck' in FA.data.bones else None
+pbH=B.matrix_world@B.data.bones['Head'].head_local; pbN=B.matrix_world@B.data.bones['Neck'].head_local if 'Neck' in B.data.bones else None
+h0=top0-chin0; a0=top0-hb0.z; K=P.get('HEAD_K',6.75)
+s_=(pbH.z-fz)/(K*h0-a0) if K*h0>a0 else 1.4
+if P.get('HEAD_SCALE'): s_=float(P['HEAD_SCALE'])
+s_=min(max(s_,1.0),2.0)
+M_=Matrix.Translation(pbH)@Matrix.Scale(s_,4)@Matrix.Translation(-hb0)
+apply_tf([FA,FH],M_)
+HV=wco(FH); hmn=HV.min(0); hmx=HV.max(0)
+def _dir(a,b):
+    if a is None or b is None: return None
+    d=(b-a).normalized(); return [round(x,4) for x in d]
+rep['attach']={'mode':'her Head bone -> Panda Head bone, uniform scale, no rotation','head_scale_factor':s_,'HEAD_K':K,'head_bone_native':list(hb0),'panda_head_bone':list(pbH),
+               'head_neck_to_head_dir':_dir(nb0,hb0),'panda_neck_to_head_dir':_dir(pbN,pbH),'rotation_applied_deg':0.0,
+               'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),'head_w_after':float(hmx[0]-hmn[0]),'chin_z':float(hmn[2]),'crown_z':float(hmx[2]),'body_neck_top_z':zt,
+               'total_height':float(hmx[2]-fz),'height_over_head':float((hmx[2]-fz)/(hmx[2]-hmn[2]))}
+# neck check: Panda's open neck ring vs her head shell (front of the ring must be above the jaw underside, back covered by the cranium)
 from collections import Counter
 def boundary(o):
     cnt=Counter(ek for p in o.data.polygons for ek in p.edge_keys)
     return set(v for ek,c in cnt.items() if c==1 for v in ek)
-def shift_keys(o,Dw):
-    mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices); dl=[mwi3@Vector(d) for d in Dw]
-    if o.data.shape_keys:
-        for kb in o.data.shape_keys.key_blocks:
-            for i in range(n):
-                if dl[i].length_squared>0: kb.data[i].co+=dl[i]
-    for i in range(n):
-        if dl[i].length_squared>0: o.data.vertices[i].co+=dl[i]
-    o.data.update()
-BV=wco(BODY); zt=float(BV[:,2].max())
-top=BV[BV[:,2]>zt-0.008]; bc0=top[:,:2].mean(0); br0=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1])))
-bnd_b=boundary(BODY); rb=[i for i in bnd_b if BV[i,2]>zt-0.05 and math.hypot(BV[i,0]-bc0[0],BV[i,1]-bc0[1])<1.5*br0]
-HV=wco(FH); h_before=float(HV[:,2].max()-HV[:,2].min()); zb=float(HV[:,2].min())
-bi=np.where(HV[:,2]<zb+0.006)[0]; bot=HV[bi]; hc0=bot[:,:2].mean(0); hr0=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1])))
-bnd_h=boundary(FH); rh=[int(i) for i in bi if int(i) in bnd_h]
-if len(rh)<8: rh=[int(i) for i in bi]
-s_=br0/hr0*P['NECK_R_K']
-M1=Matrix.Translation(Vector((bc0[0],bc0[1],zt-P['NECK_SINK'])))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc0[0],-hc0[1],-zb)))
-SNAP=False; dR=None
-if len(rb)>=8 and P.get('NECK_SNAP',True):
-    R_=BV[rb]; bc=R_[:,:2].mean(0); bz=float(R_[:,2].mean())
-    H0=HV[rh]; hcr=H0[:,:2].mean(0); hz=float(H0[:,2].mean())
-    M2=Matrix.Translation(Vector((bc[0],bc[1],bz)))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hcr[0],-hcr[1],-hz)))
-    H2=np.array([tuple(M2@Vector(tuple(p))) for p in H0])
-    def ang(x,y): return np.arctan2(y-bc[1],x-bc[0])
-    ab=ang(R_[:,0],R_[:,1]); ob=np.argsort(ab); ab=ab[ob]; rbv=np.hypot(R_[:,0]-bc[0],R_[:,1]-bc[1])[ob]; zbv=R_[:,2][ob]
-    def interp(a,xs,ys): return np.interp(a,np.r_[xs-2*np.pi,xs,xs+2*np.pi],np.r_[ys,ys,ys])
-    ah=ang(H2[:,0],H2[:,1])
-    tgt=np.stack([bc[0]+interp(ah,ab,rbv)*np.cos(ah),bc[1]+interp(ah,ab,rbv)*np.sin(ah),interp(ah,ab,zbv)],1)
-    dR=tgt-H2; mx_=float(np.linalg.norm(dR,axis=1).max())
-    rep['neck_snap_check']={'body_ring_verts':len(rb),'head_ring_verts':len(rh),'max_move_mm':mx_*1000,'mean_move_mm':float(np.linalg.norm(dR,axis=1).mean()*1000)}
-    log('neck snap check',rep['neck_snap_check'])
-    SNAP=mx_<=P.get('SNAP_MAX',0.008)
-apply_tf([FA,FH],M2 if SNAP else M1)
-if SNAP:
-    HV=wco(FH); H_=HV[rh]; ah=ang(H_[:,0],H_[:,1]); oh=np.argsort(ah); ahs=ah[oh]; dRs=dR[oh]; zhs=H_[:,2][oh]
-    FALL=P.get('NECK_FALL',0.02); Dw=np.zeros_like(HV)
-    av=ang(HV[:,0],HV[:,1]); zr=interp(av,ahs,zhs); t=np.clip((HV[:,2]-zr)/FALL,0,1); wgt=1-t*t*(3-2*t); wgt[HV[:,2]>zr+FALL]=0
-    for k in range(3): Dw[:,k]=interp(av,ahs,dRs[:,k])*wgt
-    Dw[rh]=dR
-    shift_keys(FH,[tuple(d) for d in Dw]); rep['neck_snap']={'verts_moved':int((wgt>0).sum()),'max_move_mm':float(np.linalg.norm(Dw,axis=1).max()*1000)}
-    log('neck snapped',rep['neck_snap'])
-HV=wco(FH); hmn=HV.min(0); hmx=HV.max(0)
-fz=float(BV[:,2].min())
-rep['attach']={'mode':'ring snap' if SNAP else 'sunk 1.5 cm (run-1 placement)','body_neck_top_z':zt,'body_neck_r':br0,'head_neck_r':hr0,'head_scale_factor':s_,'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),
-               'head_w_after':float(hmx[0]-hmn[0]),'total_height':float(hmx[2]-fz),'head_to_height':float((hmx[2]-hmn[2])/(hmx[2]-fz))}
+bnd_b=boundary(BODY); RING=np.array([BV[i] for i in bnd_b if BV[i,2]>zt-0.08 and abs(BV[i,0])<0.09]) if bnd_b else np.zeros((0,3))
+rim_y=float(hmx[1])
+rep['attach']['neck_ring']={'verts':len(RING),'z_min':float(RING[:,2].min()) if len(RING) else None,'z_max':float(RING[:,2].max()) if len(RING) else None,
+                            'y_min':float(RING[:,1].min()) if len(RING) else None,'y_max':float(RING[:,1].max()) if len(RING) else None,'head_shell_back_y':rim_y}
 log('ATTACH',rep['attach'])
 # ---------- 4. her hair (as authored, its own texture; only uniformly scaled + placed onto the head), with its own bone chains
 def hair_import():
@@ -182,7 +160,9 @@ HR,HA,HE=hair_import(); rep['hair_bones']=[b.name for b in HA.data.bones] if HA 
 log('hair',P['HAIR'],tris(HR),'bones',len(rep['hair_bones']),'groups',len(HR.vertex_groups))
 UV_=wco(HR); umn=UV_.min(0); umx=UV_.max(0)
 s=(hmx[0]-hmn[0])*P['HAIR_W_RATIO']/(umx[0]-umn[0])
-pivot=Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); target=Vector(((hmn[0]+hmx[0])/2,hmn[1]+P['HAIR_DEPTH_K']*(hmx[0]-hmn[0])/2+P['HAIR_DY'],hmx[2]+P['HAIR_TOP_GAP']+P['HAIR_DZ']))
+kh_=s_/1.025   # run-3 offsets were in metres at head scale 1.025; keep them relative to her head at the new scale
+pivot=Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); target=Vector(((hmn[0]+hmx[0])/2,hmn[1]+P['HAIR_DEPTH_K']*(hmx[0]-hmn[0])/2+P['HAIR_DY']*kh_,hmx[2]+(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_))
+rep['hair_offsets_m']={'DY':P['HAIR_DY']*kh_,'DZ_plus_gap':(P['HAIR_TOP_GAP']+P['HAIR_DZ'])*kh_,'W_RATIO':P['HAIR_W_RATIO']}
 Mh=Matrix.Translation(target)@Matrix.Scale(s,4)@Matrix.Translation(-pivot); how='bbox'
 # preferred: the hair's own Head bone onto her head's own Head bone (how the hair was authored to sit on a head), same uniform scale
 try:
@@ -203,7 +183,12 @@ if P['CRANIUM']:
     import bmesh
     cx=(hmn[0]+hmx[0])/2; hw=(hmx[0]-hmn[0])/2; zc=hmn[2]+0.62*(hmx[2]-hmn[2]); cy=hmn[1]+1.05*hw
     bm=bmesh.new(); bmesh.ops.create_uvsphere(bm,u_segments=32,v_segments=16,radius=1.0)
-    for v in bm.verts: v.co=Vector((cx+v.co.x*hw*0.93, cy+v.co.y*hw*1.02, zc+v.co.z*(hmx[2]-zc)*0.97))
+    ru=(hmx[2]-zc)*0.97; rl=ru
+    # run 4: reach down behind her head shell far enough to cover the back of Panda's open neck top (the 'stump' seen behind the jaw in run 3)
+    back=RING[RING[:,1]>rim_y-0.004] if len(RING) else RING
+    if len(back): rl=max(ru,zc-(float(back[:,2].min())-P.get('CRAN_BELOW',0.012)))
+    rep['cranium']={'upper_r':ru,'lower_r':rl,'bottom_z':zc-rl,'ring_back_verts':int(len(back))}; log('cranium',rep['cranium'])
+    for v in bm.verts: v.co=Vector((cx+v.co.x*hw*0.93, cy+v.co.y*hw*1.02, zc+v.co.z*(ru if v.co.z>0 else rl)))
     dv=[v for v in bm.verts if v.co.y < hmn[1]+0.55*hw]; bmesh.ops.delete(bm,geom=dv,context='VERTS')
     me=bpy.data.meshes.new('Cranium'); bm.to_mesh(me); bm.free(); CR=bpy.data.objects.new('Cranium',me); sc.collection.objects.link(CR)
     cm=bpy.data.materials.new('ScalpDark'); cm.use_nodes=True; cb=cm.node_tree.nodes['Principled BSDF']; cb.inputs['Base Color'].default_value=(0.012,0.012,0.014,1); cb.inputs['Roughness'].default_value=0.6; me.materials.append(cm)
@@ -285,16 +270,102 @@ for o in CLOTH:
         if kb.name in BK_ and BK_[kb.name]>0.001 and kb!=o.data.shape_keys.reference_key: kb.value=BK_[kb.name]; matched[kb.name]=kb.value
     rep.setdefault('cloth_keys',{})[o.name]={'keys':ks[:60],'matched_to_body':matched}; log('cloth keys',o.name,ks[:60],'matched',matched)
 bpy.context.view_layer.update()
+# ---- run 4 shorts (Saidie 11:27 "her shorts aren't correct size"). Measured offline on her FBXs: at their native transform the shorts float ~28 mm off
+#      this Panda body (median) while the back waistband sits up to 30 mm inside it, i.e. they were seated for a differently tilted pelvis. So: a RIGID re-seat
+#      (pitch + translation, no scale), her own shape keys (Thicc/Cheeks/Tummy), then a layer-preserving shrinkwrap to HUG_OFF over the skin.
+from mathutils.kdtree import KDTree as _KD
+def signed(o,T):
+    dg=bpy.context.evaluated_depsgraph_get(); ev=o.evaluated_get(dg); mw=o.matrix_world
+    X=np.array([tuple(mw@v.co) for v in ev.data.vertices]); S=np.ones(len(X)); N=np.zeros_like(X)
+    for i,p in enumerate(X):
+        loc,nr,idx,d=T.find_nearest(Vector(p),0.25)
+        if loc is None: continue
+        S[i]=(Vector(p)-loc).dot(nr); N[i]=tuple(nr)
+    return X,S,N
+def sstats(S): return {'poke_lt0':int((S<0).sum()),'poke_lt3mm':int((S<-0.003).sum()),'poke_lt10mm':int((S<-0.01).sum()),'min_mm':round(float(S.min())*1000,1),
+                       'gap_p25_50_75_90_mm':[round(float(x)*1000,1) for x in np.percentile(S,[25,50,75,90])]}
+def add_disp(o,Dw):
+    mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices); Dl=[mwi3@Vector(tuple(d)) for d in Dw]
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            for i in range(n): kb.data[i].co+=Dl[i]
+    for i in range(n): o.data.vertices[i].co+=Dl[i]
+    o.data.update(); bpy.context.view_layer.update()
+def hug(o,target,lo=-0.035,hi=0.045,r_layer=0.008,r_smooth=0.010):
+    T=world_bvh([BODY]); X,S,N=signed(o,T); n=len(X)
+    kd=_KD(n)
+    for i,p in enumerate(X): kd.insert(Vector(p),i)
+    kd.balance()
+    m=np.array([min(S[j] for _,j,_ in kd.find_range(Vector(p),r_layer)) for p in X])   # innermost layer at this spot (keeps waistband/trim thickness)
+    Z=(m>lo)&(m<hi); D=N*np.where(Z,target-m,0.0)[:,None]
+    zi=np.where(Z)[0]
+    if len(zi)==0: return {'zone_verts':0}
+    kz=_KD(len(zi))
+    for k,i in enumerate(zi): kz.insert(Vector(X[i]),k)
+    kz.balance(); D2=np.zeros_like(D)
+    for i,p in enumerate(X):
+        js=[zi[k] for _,k,_ in kz.find_range(Vector(p),r_smooth)]
+        if js: D2[i]=D[js].mean(0)
+        else: _,k,_=kz.find(Vector(p)); D2[i]=D[zi[k]]
+    add_disp(o,D2); mv=np.linalg.norm(D2,axis=1)*1000
+    return {'zone_verts':int(Z.sum()),'move_mm_p50_90_99_max':[round(float(x),1) for x in np.percentile(mv,[50,90,99,100])]}
+SF=P.get('SHORTS_FIT','hug'); rep['shorts_fit']={'mode':SF}
+try:
+    TB=world_bvh([BODY]); _,S0,_=signed(SH,TB); rep['shorts_fit']['native']=sstats(S0)
+    kv=P.get('SHORTS_KEYS',{'Thicc':1.0,'Cheeks':1.0,'Tummy':0.0})
+    if SH.data.shape_keys:
+        for kb in SH.data.shape_keys.key_blocks:
+            if kb.name in kv: kb.value=kv[kb.name]
+    rep['shorts_fit']['keys']={kb.name:kb.value for kb in SH.data.shape_keys.key_blocks} if SH.data.shape_keys else {}
+    bpy.context.view_layer.update(); _,S1,_=signed(SH,TB); rep['shorts_fit']['with_keys']=sstats(S1)
+    dy,dz,pitch=P.get('SHORTS_RIGID',(0.0145,0.0133,-10.25))
+    c=Vector(tuple(wco(SH).mean(0)))
+    Mr=Matrix.Translation(c+Vector((0,dy,dz)))@Matrix.Rotation(math.radians(pitch),4,'X')@Matrix.Translation(-c)
+    mw0=SH.matrix_world.copy(); SH.matrix_world=Mr@mw0; bpy.context.view_layer.update(); _,S2,_=signed(SH,TB)
+    if float(np.median(np.abs(S2)))<float(np.median(np.abs(S1))):
+        sel([SH]); bpy.ops.object.transform_apply(location=True,rotation=True,scale=True); rep['shorts_fit']['rigid']={'dy_m':dy,'dz_m':dz,'pitch_deg':pitch,'scale':1.0,'after':sstats(S2)}
+    else:
+        SH.matrix_world=mw0; bpy.context.view_layer.update(); rep['shorts_fit']['rigid']={'skipped':'did not improve','would_be':sstats(S2)}
+    if SF=='hug': rep['shorts_fit']['hug']=hug(SH,P.get('HUG_OFF',0.0025))
+    _,S3,_=signed(SH,TB); rep['shorts_fit']['after_hug']=sstats(S3)
+except Exception as e: traceback.print_exc(); log('SHORTSERR',e)
+log('shorts fit',rep['shorts_fit'])
+def cover_fix(o,unders,off,maxd=0.02,iters=2):
+    """shirt faces that dip under a body/shorts vertex (the black patches in run 3): push those faces out over it"""
+    out=[]
+    nb=[[] for _ in range(len(o.data.vertices))]
+    for e in o.data.edges: a_,b_=e.vertices; nb[a_].append(b_); nb[b_].append(a_)
+    for it in range(iters):
+        dg=bpy.context.evaluated_depsgraph_get(); mw=o.matrix_world; Xs=[tuple(mw@v.co) for v in o.data.vertices]
+        Tsh=BVHTree.FromPolygons(Xs,[tuple(p.vertices) for p in o.data.polygons]); n=len(Xs); PU=np.zeros((n,3)); hits=0
+        for u in unders:
+            ev=u.evaluated_get(dg); me=ev.to_mesh(); mwu=u.matrix_world; r3=mwu.to_3x3()
+            for v in me.vertices:
+                co=mwu@v.co; nr=(r3@v.normal).normalized()
+                loc,fn,fi,d=Tsh.ray_cast(co+nr*0.0002,-nr,maxd)
+                if loc is None: continue
+                hits+=1; vec=np.array(tuple(nr))*(d+off)
+                for vi in o.data.polygons[fi].vertices:
+                    if np.dot(vec,vec)>np.dot(PU[vi],PU[vi]): PU[vi]=vec
+            ev.to_mesh_clear()
+        D=PU.copy()
+        for _ in range(3):
+            A=np.array([D[nb[i]].mean(0) if nb[i] else D[i] for i in range(n)]); D=0.5*D+0.5*A
+            big=np.linalg.norm(PU,axis=1)>np.linalg.norm(D,axis=1); D[big]=PU[big]
+        add_disp(o,D); out.append({'under_verts_poking':hits,'shirt_verts_moved':int((np.linalg.norm(D,axis=1)>1e-4).sum()),'max_mm':round(float(np.linalg.norm(D,axis=1).max())*1000,1)})
+    rep.setdefault('cloth_fit',{})['Shirt cover fix']=out; log('cover fix',out)
+BRA_HIDDEN=SHIRT is not None and P.get('BRA_UNDER_SHIRT','hide')=='hide'
 if P.get('FIT',True):
-    for o,tg,off in ((BRA,[BODY],P.get('FIT_BRA',0.002)),(SH,[BODY],P.get('FIT_SHORTS',0.0025))):
+    for o,tg,off in ((BRA,[BODY],P.get('FIT_BRA',0.002)),(SH,[BODY],P.get('FIT_SHORTS',0.0015 if SF=='hug' else 0.0025))):
         try: fit_out(o,tg,off)
         except Exception as e: traceback.print_exc(); log('FITERR',o.name,e)
-    if P.get('FIT_HAIR',True):
+    if P.get('FIT_HAIR',False):   # run 4: OFF (it flattened her hair cards onto the face in runs 2-3)
         try: fit_out(HR,[FH],P.get('FIT_HAIR_OFF',0.0015),deep=0.03,only=lambda X:X[:,1]<float(hmn[1]+hmx[1])/2)
         except Exception as e: traceback.print_exc(); log('FITERR','Hair',e)
     if SHIRT is not None:
         try:
-            for tg_ in (BODY,BRA,SH): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.004)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
+            for tg_ in ((BODY,SH) if BRA_HIDDEN else (BODY,BRA,SH)): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.006)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
+            cover_fix(SHIRT,[BODY,SH] if BRA_HIDDEN else [BODY,BRA,SH],P.get('FIT_SHIRT',0.006))
         except Exception as e: traceback.print_exc(); log('FITERR','Shirt',e)
 # clothes weights: Data Transfer from the Panda body (Vertex Data > Vertex Groups, nearest face interpolated), applied, cleaned, normalized, max 4 influences
 def transfer_weights(o):
@@ -382,6 +453,7 @@ rep['hair_unweighted_to_head']=ensure_head(HR)
 if CR: ensure_head(CR)
 # head neck seam: bottom band of her head takes the body's own neck weights (blended up to her head's weights) so the seam never opens when posed. Weights only, no geometry change.
 try:
+    if not P.get('SEAM_BLEND',False): raise StopIteration('seam weight blend off in run 4 (no ring seam: Panda neck tucks into her head shell)')
     bw={}; KD=KDTree(len(BODY.data.vertices)); gi={g.index:g.name for g in BODY.vertex_groups}; n_=0
     for v in BODY.data.vertices:
         co=BODY.matrix_world@v.co
@@ -400,6 +472,7 @@ try:
             g=FH.vertex_groups.get(k) or FH.vertex_groups.new(name=k); g.add([v.index],w/tot,'REPLACE')
         changed+=1
     rep['neck_seam_weight_blend']={'body_neck_verts':n_,'head_verts_blended':changed,'band_m':band}; log('seam weights',rep['neck_seam_weight_blend'])
+except StopIteration as e: rep['neck_seam_weight_blend']=str(e)
 except Exception as e: traceback.print_exc(); log('SEAMERR',e)
 # every mesh: child of the ONE armature with an Armature modifier
 MESHES=[x for x in (BODY,)+tuple(BX)+(FH,HR,CR)+tuple(CLOTH) if x]
@@ -428,14 +501,17 @@ def bones_txt():
         miss=[g.name for g in o.vertex_groups if g.name not in bn]
         L.append(f'  {o.name}: parent={o.parent.name if o.parent else None}, armature_mod={am}, groups={len(o.vertex_groups)}, max_infl={mx}, unweighted={nz}, groups_without_bone={miss[:12]}, tris={tris(o)}')
     return '\n'.join(L)
+if BRA_HIDDEN:
+    BRA.hide_render=True; BRA.hide_set(True); rep['bra']='hidden under the shirt (kept in the .blend; unhide it for the no-shirt look)'; log('bra hidden under shirt')
 BT=bones_txt(); open(OUT+'/proof/v37-bones.txt','w').write(BT); log('BONES\n'+BT[:3000])
 meshes=MESHES
 rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].values())
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-if VAR=='A0' and not P['TT']:
-    try: bpy.ops.wm.save_as_mainfile(filepath=OUT+'/jena-v37.blend',compress=True); log('blend saved')
+SAVE_NAME={'A0':'jena-v37r4','A2':'jena-v37r4-noshirt'}.get(VAR)
+if SAVE_NAME and not P['TT']:
+    try: bpy.ops.wm.save_as_mainfile(filepath=OUT+'/'+SAVE_NAME+'.blend',compress=True); log('blend saved')
     except Exception as e: log('BLENDERR',e)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
@@ -535,11 +611,11 @@ if not P['TT']:
         if P['SET']=='full':
             hm,hx=bbox([FH]); shot('posetest-neck',[FH],'q34',res=(1024,1024),pad=1.9,zoff=-0.35*(hx.z-hm.z))
     rest()
-    if VAR=='A0':
+    if SAVE_NAME:
         try:
-            sel([B]+meshes,B)
-            bpy.ops.export_scene.fbx(filepath=OUT+'/jena-v37.fbx',use_selection=True,add_leaf_bones=False,bake_anim=False,mesh_smooth_type='FACE',armature_nodetype='NULL',apply_scale_options='FBX_SCALE_ALL',path_mode='COPY',embed_textures=True)
-            log('fbx',os.path.getsize(OUT+'/jena-v37.fbx'))
+            sel([B]+[m for m in meshes if m.visible_get()],B)
+            bpy.ops.export_scene.fbx(filepath=OUT+'/'+SAVE_NAME+'.fbx',use_selection=True,add_leaf_bones=False,bake_anim=False,mesh_smooth_type='FACE',armature_nodetype='NULL',apply_scale_options='FBX_SCALE_ALL',path_mode='COPY',embed_textures=True)
+            log('fbx',os.path.getsize(OUT+'/'+SAVE_NAME+'.fbx'))
         except Exception as e: log('FBXERR',e)
 else:
     # turntable frames: relaxed pose, same studio; subject turns on the spot
