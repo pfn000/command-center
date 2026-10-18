@@ -1,1 +1,1 @@
-v6 r12 proof run (forks / not-her repos removed: AuraVT, LiteVtuber, LocalLLM-iOS, MS-Outlook-MCP, linux + GitHub forks) 2026-10-18T23:37Z
+v7 r12 proof run (multi-page restructure, glass nav, slates, aura shader, asset pipeline) 2026-10-19T00:01Z
