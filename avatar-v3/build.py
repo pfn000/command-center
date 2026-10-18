@@ -1180,7 +1180,7 @@ if P.get('BOTTOM','thong')=='thong':
     hc=bvh.ray_cast(Vector((0,cy,smn.z-0.5)),Vector((0,0,1)),1.0); crz=hc[0].z if hc[0] is not None else smn.z+0.05
     zpt=crz+P.get('PANEL_H',0.085); zO=crz+max(0.11,P.get('PANEL_H',0.085)+0.035); zbt=zpt+P.get('BACK_UP',0.045)
     FW0,FW1,BW0,BW1=[hx*v for v in P.get('THONG_W',(0.40,0.09,0.07,0.11))]
-    off=0.0022; rows=[]
+    off=0.0022; rows=[]; rows_back=[]
     def cast(x,th):
         d=Vector((0,-math.cos(th),-math.sin(th))); o_=Vector((x,cy,zO))+d*0.5; h=bvh.ray_cast(o_,-d,0.7)
         return (h[0]+h[1].normalized()*off) if h[0] is not None else None
@@ -1194,7 +1194,7 @@ if P.get('BOTTOM','thong')=='thong':
         if front: t=max(0,min(1,(zpt-c.z)/max(1e-4,zpt-crz))); hw=FW0+(FW1-FW0)*t**0.75
         else: t=max(0,min(1,(c.z-crz)/max(1e-4,zbt-crz))); hw=BW0+(BW1-BW0)*t**P.get('BACK_POW',1.0)
         row=[cast(hw*(j/3.0-1),th) for j in range(7)]
-        if all(r_ is not None for r_ in row): rows.append(row)
+        if all(r_ is not None for r_ in row): rows.append(row); rows_back.append(not front)
     bmT=bmesh.new(); vr=[[bmT.verts.new(p) for p in r_] for r_ in rows]
     for a,b2 in zip(vr,vr[1:]):
         for j in range(6): bmT.faces.new((a[j],a[j+1],b2[j+1],b2[j]))
@@ -1220,6 +1220,20 @@ if P.get('BOTTOM','thong')=='thong':
             cur=(bmT.verts.new(p0),bmT.verts.new(p1))
             if prev: bmT.faces.new((prev[0],cur[0],cur[1],prev[1]))
             prev=cur
+    if P.get('PANEL_CLAMP_BAND') and P.get('BAND_V35'):
+        # v3.6: clamp the back panel's top edge to just under the band at every x -> panel and band meet across the whole width (no hip-corner slits)
+        tp=P.get('PEAK_T',0.35); R_=P.get('STRING_RISE',0.035); zbe=zbt+P.get('BAND_BACK_DZ',0.0); ncl=0
+        for rw,isb in zip(vr,rows_back):
+            if not isb: continue
+            for v_ in rw:
+                p=v_.co; a=math.atan2(p.x,-(p.y-cy)); aa=abs(a); t=max(0.0,min(1.0,(aa-ac)/max(1e-4,math.pi-ac)))
+                z=zpt+R_*math.sin(min(1,t/tp)*math.pi/2) if t<tp else zpt+R_-(R_-(zbe-zpt))*float(sstep((t-tp)/(1-tp)))
+                sh_=SHt*(1+(P.get('BAND_K',1.0)-1)*float(sstep((t-0.3)/0.5)))
+                lim=z-sh_/2+P.get('PANEL_UNDER',0.004)
+                if p.z>lim:
+                    q=ring_pt(math.copysign(aa,a) if a!=0 else aa,lim,off)
+                    if q is not None: v_.co=q; ncl+=1
+        log('panel clamped to band',ncl)
     bmT.loops.layers.uv.new('UVMap')
     me=bpy.data.meshes.new('Thong'); bmT.to_mesh(me); bmT.free(); TH=bpy.data.objects.new('Thong',me); sc.collection.objects.link(TH)
     tm,tnt,tb_=newmat('ThongBlack'); tb_.inputs['Base Color'].default_value=(0.012,0.012,0.013,1); tb_.inputs['Roughness'].default_value=P.get('THONG_ROUGH',0.42); tb_.inputs['Sheen Weight'].default_value=P.get('THONG_SHEEN',0.3); tb_.inputs['Specular IOR Level'].default_value=P.get('THONG_SPEC',0.5)
@@ -1426,6 +1440,17 @@ if VARIANT in ('B','C'):
     from mathutils.bvhtree import BVHTree as _BVHm
     def mh_bvh():
         Vb=wco(MH); return _BVHm.FromPolygons([tuple(p) for p in Vb],[tuple(p.vertices) for p in MH.data.polygons]),Vb
+    def floats_fwd(bvh_,p,D=0.05,gap=0.0025):
+        # v3.6: march +y (into the head); skip back-facing hits (the strand's own far side / head interior); a point is a FLOATING strand
+        # when the first front-facing (-y normal) surface behind it is more than gap away. Face skin never has a front-facing surface behind it.
+        o_=Vector((float(p[0]),float(p[1])+0.0015,float(p[2]))); left=D
+        for _k in range(8):
+            h=bvh_.ray_cast(o_,Vector((0,1,0)),left)
+            if h[0] is None: return False
+            if h[1].y<0: return (h[0].y-float(p[1]))>gap
+            left-=(h[0].y-o_.y)+0.0005; o_=Vector((o_.x,h[0].y+0.0005,o_.z))
+            if left<=0: return False
+        return False
     MEYE=None
     try:
         _bv,_Vb=mh_bvh(); Ht_=HF['target_head_total']; cy0=float(b_n['cy']); cx0=float(b_n['cx'])
@@ -1561,6 +1586,40 @@ if VARIANT in ('B','C'):
             h=_bvs.ray_cast(Vector(V[i])+Vector((0,0.0015,0)),Vector((0,1,0)),P.get('MB_SC_D',0.04))
             if h[0] is not None and (h[0].y-V[i][1])>0.003: cut[i]=True
         keep=keep&~cut; HF['B_strand_cut']={'cand':int(len(cand)),'cut':int(cut.sum())}; log('B face strands cut',HF['B_strand_cut'])
+    if VARIANT=='B' and P.get('MB_LOCK_CUT',False) and MEYE:
+        # v3.6: remove ONLY the lock hanging over the face (uncut hair otherwise). Seeds = floating strand verts below the eye line near the
+        # centre; grow through floating verts inside a narrow band around them up to brow+ZUP. No colour test (its light tips go too).
+        try:
+            _bvl,V_=mh_bvh(); ezS=MEYE['z']; cxS=MEYE['cx']; nzS=MEYE.get('nose_z',ezS-0.02); cyS=float(b_n['cy'])
+            zup=ezS+P.get('MB_LC_ZUP',0.03)
+            reg=keep&(V_[:,1]<cyS)&(np.abs(V_[:,0]-cxS)<P.get('MB_LC_HW',0.045))&(V_[:,2]>nzS-P.get('MB_LC_ZDN',0.03))&(V_[:,2]<zup)
+            fl=np.zeros(len(V_),bool)
+            for i in np.where(reg)[0]: fl[i]=floats_fwd(_bvl,V_[i],P.get('MB_LC_D',0.05),P.get('MB_LC_GAP',0.0025))
+            seed=fl&(V_[:,2]<ezS+P.get('MB_LC_SEEDZ',0.004))&(np.abs(V_[:,0]-cxS)<P.get('MB_LC_SEEDX',0.035))
+            ne_=len(MH.data.edges); ev_=np.empty(ne_*2,np.int64); MH.data.edges.foreach_get('vertices',ev_); ev_=ev_.reshape(-1,2)
+            adj={}
+            ok_=fl
+            for a_,b_ in ev_[ok_[ev_[:,0]]&ok_[ev_[:,1]]]:
+                adj.setdefault(int(a_),[]).append(int(b_)); adj.setdefault(int(b_),[]).append(int(a_))
+            lock=np.zeros(len(V_),bool); st=[int(i) for i in np.where(seed)[0]]; lock[st]=True
+            # x band: seeds' x range (+ margin) widened linearly with height (the lock runs diagonally up to the part)
+            if len(st):
+                sx0,sx1=float(V_[seed,0].min()),float(V_[seed,0].max()); mg=P.get('MB_LC_XMARG',0.008); slope=P.get('MB_LC_XSLOPE',0.6)
+                while st:
+                    a_=st.pop()
+                    for b_ in adj.get(a_,()):
+                        if lock[b_]: continue
+                        wid=mg+slope*max(0.0,V_[b_,2]-ezS)
+                        if sx0-wid<=V_[b_,0]<=sx1+wid: lock[b_]=True; st.append(b_)
+            # every floating fragment left below the eye line near the centre (tips resting on the nose) is the lock too
+            lock|=fl&(V_[:,2]<ezS-0.004)&(np.abs(V_[:,0]-cxS)<P.get('MB_LC_SEEDX',0.035))
+            keep=keep&~lock
+            zl=zup-P.get('INP_LOCK_ZTOP',0.006); lp_=V_[lock]; HF['lock_pts']=lp_[lp_[:,2]<zl][:,[0,2]] if len(lp_) else np.zeros((0,2))
+            HF['B_lock_cut']={'region':int(reg.sum()),'floating':int(fl.sum()),'seeds':int(seed.sum()),'cut':int(lock.sum()),
+                              'x':[float(lp_[:,0].min()),float(lp_[:,0].max())] if len(lp_) else None,'z':[float(lp_[:,2].min()),float(lp_[:,2].max())] if len(lp_) else None}
+            log('B lock cut',HF['B_lock_cut'])
+        except Exception as e:
+            import traceback; log('LOCK CUT ERR',repr(e),traceback.format_exc()[-600:])
     bm=bmesh.new(); bm.from_mesh(MH.data); bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm,geom=[bm.verts[i] for i in np.where(~keep)[0]],context='VERTS')
     # drop tiny floating islands left by the cut
@@ -1641,7 +1700,7 @@ if VARIANT in ('B','C'):
         mrx=(m2[:,0].max()-m2[:,0].min())/2; mry=(m2[:,1].max()-m2[:,1].min())/2; mcy=(m2[:,1].max()+m2[:,1].min())/2
         BVn=wco(BODY); bq=neck_at(BVn,zc_-0.005,0.006,NC,NRAD*1.5) or b_n
         f_=min(1.0,0.93*min(mrx/max(bq['rx'],1e-4),mry/max(bq['ry'],1e-4)))
-        rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=(sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)+0.002))/0.018) if P.get('MB_SEAM',True) else sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02))*(rr<NRAD*1.45)
+        rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=(sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)+P.get('MB_TUCK_PRE',0.002)))/P.get('MB_TUCK_RAMP',0.018)) if P.get('MB_SEAM',True) else sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02))*(rr<NRAD*1.45)
         Dn=np.zeros_like(BVn); Dn[:,0]=(bq['cx']+(BVn[:,0]-bq['cx'])*f_-BVn[:,0])*w_; Dn[:,1]=(mcy+(BVn[:,1]-bq['cy'])*f_-BVn[:,1])*w_; wdelta(BODY,Dn)
         HF['B_neck_tuck']={'factor':f_,'meshy_neck':[mrx,mry,mcy],'body_neck':bq}
 
@@ -1676,20 +1735,40 @@ if VARIANT in ('B','C'):
             AO_,AI_,BZ_=ewm*P.get('INP_AOUT',1.0),ewm*P.get('INP_AIN',0.72),ewm*P.get('INP_B',0.5)
             BR_=P.get('INP_BRIDGE')   # [ax, bz, dz]: painted hair streaks over the nose bridge / between the eyes
             cxB=0.5*(MEYE['eyes'][0][0]+MEYE['eyes'][1][0]); ezB=0.5*(MEYE['eyes'][0][1]+MEYE['eyes'][1][1])
+            LK_=HF.get('lock_pts') if P.get('INP_LOCK',False) else None
+            if LK_ is not None and not len(LK_): LK_=None
+            LR_=P.get('INP_LOCK_R',0.004)
+            def lockd(X,Z):
+                q=LK_[(LK_[:,0]>X.min()-3*LR_)&(LK_[:,0]<X.max()+3*LR_)&(LK_[:,1]>Z.min()-3*LR_)&(LK_[:,1]<Z.max()+3*LR_)]
+                if not len(q): return np.full(X.shape,9.0,np.float32)
+                d=np.full(X.shape,9.0,np.float32)
+                for k0 in range(0,len(q),256):
+                    qq=q[k0:k0+256]; d=np.minimum(d,np.sqrt((X[...,None]-qq[:,0])**2+(Z[...,None]-qq[:,1])**2).min(-1))
+                return d
             def emask(X,Z):
                 m=np.zeros(X.shape,np.float32)
+                if LK_ is not None:
+                    m=np.maximum(m,(1-sstep((lockd(X,Z)-LR_)/LR_)).astype(np.float32))
                 if BR_:
                     d=np.sqrt(((X-cxB)/BR_[0])**2+((Z-(ezB+BR_[2]))/BR_[1])**2); m=np.maximum(m,1-sstep((d-0.7)/0.4))
                 for (x0_,z0_,outer) in ells:
                     ax=np.where((X-x0_)*outer>0,AO_,AI_); d=np.sqrt(((X-x0_)/ax)**2+((Z-z0_)/BZ_)**2); m=np.maximum(m,1-sstep((d-0.72)/0.38))
                 return m
             nl=len(me_.loops); uvs=np.empty(nl*2,np.float32); uvd.foreach_get('uv',uvs); uvs=uvs.reshape(-1,2); lvx=np.empty(nl,np.int64); me_.loops.foreach_get('vertex_index',lvx)
-            fr=(Vw[:,1]<cyH-0.03)
+            fr=(Vw[:,1]<cyH-P.get('INP_FRONT_DY',0.03))
+            if P.get('INP_FRONT_NY') is not None:
+                # v3.6: the Meshy face sits only ~2 cm ahead of the neck centre, so 'front' = facing the camera, not a 3 cm depth cut
+                vn_=np.empty(len(me_.vertices)*3); me_.vertices.foreach_get('normal',vn_); vn_=vn_.reshape(-1,3)@Mw[:3,:3].T
+                vn_/=np.linalg.norm(vn_,axis=1,keepdims=True).clip(1e-9); fr&=(vn_[:,1]<-P['INP_FRONT_NY'])
+            nfr0=int(fr.sum()); nst=0
             if P.get('INP_STRAND_TEST',True):
                 _bvi,_=mh_bvh()
                 for i in np.where(fr&(emask(Vw[:,0],Vw[:,2])>0.0)|fr&(np.abs(Vw[:,0]-cxm)<0.09)&(np.abs(Vw[:,2]-MEYE['z'])<0.03))[0]:
+                    if P.get('INP_ST_NRM',False):
+                        if floats_fwd(_bvi,Vw[i],0.03,0.0025): fr[i]=False; nst+=1
+                        continue
                     h=_bvi.ray_cast(Vector(Vw[i])+Vector((0,0.0015,0)),Vector((0,1,0)),0.03)
-                    if h[0] is not None and (h[0].y-Vw[i][1])>0.0025: fr[i]=False   # a strand floating in front of the face keeps its hair colour
+                    if h[0] is not None and (h[0].y-Vw[i][1])>0.0025: fr[i]=False; nst+=1   # a strand floating in front of the face keeps its hair colour
             # fill colour: texels of front skin vertices in a ring around the eyes
             dmin=np.full(len(Vw),9.0)
             for (x0_,z0_,outer) in ells: dmin=np.minimum(dmin,np.sqrt(((Vw[:,0]-x0_)/AO_)**2+((Vw[:,2]-z0_)/BZ_)**2))
@@ -1699,10 +1778,11 @@ if VARIANT in ('B','C'):
             ok_=(cs_.mean(1)>0.55)&((cs_[:,0]-cs_[:,2])>0.08)&((cs_[:,0]-cs_[:,2])<0.3) if len(cs_) else np.zeros(0,bool)
             fill=np.percentile(cs_[ok_],P.get('INP_PCT',60),axis=0) if ok_.sum()>10 else np.array([0.88,0.72,0.68])
             npx=0; npoly=0
+            dl_=lockd(Vw[:,0],Vw[:,2]) if LK_ is not None else None
             for p in me_.polygons:
                 vs=list(p.vertices)
                 if not any(fr[v] for v in vs): continue
-                if min(dmin[v] for v in vs)>2.5: continue
+                if min(dmin[v] for v in vs)>2.5 and (LK_ is None or min(dl_[v] for v in vs)>3*LR_): continue
                 lis=list(p.loop_indices); uv_=[(uvs[l][0]%1*W_,uvs[l][1]%1*H_) for l in lis]; X_=[Vw[v] for v in vs]
                 if max(q[0] for q in uv_)-min(q[0] for q in uv_)>W_*0.5 or max(q[1] for q in uv_)-min(q[1] for q in uv_)>H_*0.5: continue
                 npoly+=1
@@ -1722,7 +1802,7 @@ if VARIANT in ('B','C'):
                     blk=pa[by0:by1+1,bx0:bx1+1,:3]; pa[by0:by1+1,bx0:bx1+1,:3]=blk*(1-mm[...,None])+fill[None,None,:]*mm[...,None]; npx+=int((mm>0.01).sum())
             vm=dmin
             img_.pixels.foreach_set(pa.ravel()); img_.update(); img_.pack()
-            HF['B_inpaint']={'fill':fill.tolist(),'ring_texels':int(ok_.sum()),'polys':npoly,'px':npx}; log('eye inpaint',HF['B_inpaint'])
+            HF['B_inpaint']={'fill':fill.tolist(),'ring_texels':int(ok_.sum()),'polys':npoly,'px':npx,'front_verts':nfr0,'strand_excluded':nst,'lock_pts':0 if LK_ is None else int(len(LK_))}; log('eye inpaint',HF['B_inpaint'])
         except Exception as e:
             import traceback; log('INPAINT ERR',repr(e),traceback.format_exc()[-800:])
     # ---------- v3.4 crisp hand-painted eyes for the Meshy face: a thin decal that follows the face skin, painted here (sclera, her Doe gray iris,

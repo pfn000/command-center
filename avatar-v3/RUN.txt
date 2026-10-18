@@ -1,1 +1,1 @@
-build B v3.5 run 3 (final): decal alpha-mix + head AO local (no veil), bridge inpaint, curtain bang cut, band overlaps the rear panel, B3 light; B4 = no strand cut; B turntable
+build B v3.6 run 1: lock-only hair cut (normal-aware float test), face-front inpaint by normal + lock footprint, less gloss, seam tuck, panel clamped to band; B5 = higher lock cut + less gloss + longer seam blend; B turntable
