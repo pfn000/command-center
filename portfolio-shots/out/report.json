@@ -1,12 +1,147 @@
 {
  "shots": [
   {
-   "name": "d-dark-01-home",
+   "name": "d-dark-08-projects-01",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-02",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-03",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-04",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-05",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-06",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-07",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-08-projects-08",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -24,6 +159,8 @@
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -35,352 +172,27 @@
    ]
   },
   {
-   "name": "d-dark-01b-about",
+   "name": "d-dark-20-projects-more-on-github-01",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
-   "oldNos": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
    "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02-emmi-official",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-growth",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02c-smalls",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-04-worlds",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-04b-talks",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-05-ncom",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-05b-ncom-demos",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-06-jena",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-06b-focals",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-06c-moments",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-06d-ouija",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-07-resume-preview",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-07b-resume-preview-2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-09-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-09b-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-10-panel-open",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-11-footer-badge",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-12-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -388,12 +200,18 @@
    "monoLogos": []
   },
   {
-   "name": "d-dark-13-resume-logos",
+   "name": "d-dark-30-vault",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -401,12 +219,18 @@
    "monoLogos": []
   },
   {
-   "name": "d-dark-12b-resume-full",
+   "name": "d-dark-30b-vault-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -414,129 +238,242 @@
    "monoLogos": []
   },
   {
-   "name": "d-dark-14-plex",
+   "name": "p-dark-08-projects-01",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-15-plex-docs",
+   "name": "p-dark-08-projects-02",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-14b-plex-note",
+   "name": "p-dark-08-projects-03",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-16-article-ai-being-used-wrong",
+   "name": "p-dark-08-projects-04",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-16b-article-ai-being-used-wrong",
+   "name": "p-dark-08-projects-05",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-16-article-future-of-ads",
+   "name": "p-dark-08-projects-06",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-16b-article-future-of-ads",
+   "name": "p-dark-08-projects-07",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-17-writing",
+   "name": "p-dark-08-projects-08",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "d-dark-18-404",
+   "name": "p-dark-08-projects-09",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   },
   {
-   "name": "p-dark-01-home",
+   "name": "p-dark-08-projects-10",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-08-projects-11",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-08-projects-12",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-08-projects-13",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -554,6 +491,8 @@
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -565,352 +504,27 @@
    ]
   },
   {
-   "name": "p-dark-01b-about",
+   "name": "p-dark-20-projects-more-on-github-01",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
-   "oldNos": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
    "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02-emmi-official",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-growth",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02c-smalls",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-04-worlds",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-04b-talks",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-05-ncom",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-05b-ncom-demos",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-06-jena",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-06b-focals",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-06c-moments",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-06d-ouija",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-07-resume-preview",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-07b-resume-preview-2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-09-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-09b-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-10-panel-open",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-11-footer-badge",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-12-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -918,12 +532,27 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-13-resume-logos",
+   "name": "p-dark-20-projects-more-on-github-02",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
-   "oldNos": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -931,12 +560,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-12b-resume-full",
+   "name": "p-dark-30-vault",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -944,12 +579,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-14-plex",
+   "name": "p-dark-30b-vault-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -957,12 +598,179 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-15-plex-docs",
+   "name": "d-light-08-projects-01",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-02",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-03",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-04",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-05",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-06",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-07",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-08-projects-08",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-20-projects-more-on-github-01",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -970,12 +778,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-14b-plex-note",
+   "name": "d-light-30-vault",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -983,12 +797,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-16-article-ai-being-used-wrong",
+   "name": "d-light-30b-vault-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -996,12 +816,274 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-16b-article-ai-being-used-wrong",
+   "name": "p-light-08-projects-01",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-02",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-03",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-04",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-05",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-06",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-07",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-08",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-09",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-10",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-11",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-12",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-08-projects-13",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-20-projects-more-on-github-01",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1009,12 +1091,27 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-16-article-future-of-ads",
+   "name": "p-light-20-projects-more-on-github-02",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
-   "oldNos": [],
+   "badLinks": [
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos",
+    "/nos"
+   ],
+   "oldNos": [
+    "/work/nos-window-desktop.jpg",
+    "/work/nos-window-menu.jpg",
+    "/work/nos-pill-info-live.jpg",
+    "/work/nos-window-desktop.jpg"
+   ],
    "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1022,12 +1119,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-16b-article-future-of-ads",
+   "name": "p-light-30-vault",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1035,383 +1138,18 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-17-writing",
+   "name": "p-light-30b-vault-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/nos"
+   ],
    "oldNos": [],
    "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-18-404",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-01-home",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-01b-about",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-06b-focals",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-07-resume-preview",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-09-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-09b-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-10-panel-open",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-11-footer-badge",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-12-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-13-resume-logos",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-light-01-home",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-01b-about",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-06b-focals",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-07-resume-preview",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-09-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-09b-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-10-panel-open",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-11-footer-badge",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-12-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-light-13-resume-logos",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
+   "notMine": [],
+   "counts": [
+    "17 repos"
+   ],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1421,378 +1159,390 @@
  ],
  "errors": [
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "p-dark: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)"
  ],
  "checks": {
-  "d-dark-panel": {
-   "h": 223,
-   "w": 346,
-   "vw": 1600,
-   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
+  "d-dark-home-repos": {
+   "cards": [
+    "NCOM AudeX",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "S-Pen Control Centre",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "JenaAI",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "NCOM AI",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "rest": [
+    "KhonXR"
+   ],
+   "kick": "PROJECTS · FROM MY GITHUB"
   },
-  "d-dark-badge": {
-   "w": 512,
-   "right_gap": 32,
-   "bottom": 882,
-   "vh": 900,
-   "docBottomGap": 18
+  "d-dark-08-projects-box": {
+   "top": 13442.59375,
+   "h": 11661.21875,
+   "vh": 900
   },
-  "d-dark-resume-logos": [
-   [
-    "/logos/resonite.png",
-    128
-   ],
-   [
-    "/logos/yellow-dog-man-studios.png",
-    256
-   ],
-   [
-    "/logos/emmico.png",
-    200
-   ],
-   [
-    "/logos/fiverr.png",
-    496
-   ],
-   [
-    "/logos/mr-magic.png",
-    320
-   ],
-   [
-    "/logos/paragon-sysco.png",
-    240
-   ],
-   [
-    "/logos/sysco.png",
-    350
-   ],
-   [
-    "/logos/giant-eagle.png",
-    320
-   ],
-   [
-    "/logos/perfect-power-wash.png",
-    225
-   ],
-   [
-    "/logos/home-depot.png",
-    320
-   ],
-   [
-    "/logos/osl-retail.png",
-    321
-   ],
-   [
-    "/logos/applebees.png",
-    320
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/phaa.png",
-    320
-   ],
-   [
-    "/logos/bc3.png",
-    225
-   ],
-   [
-    "/logos/landmark.png",
-    344
-   ],
-   [
-    "/logos/ave-maria.png",
-    295
-   ]
+  "d-dark-projects-more": [
+   "NCOM-AudeX",
+   "sexy-s-pen",
+   "live",
+   "JenaAI",
+   "jena-heavy",
+   "KhonXR",
+   "RADcam",
+   "backup-automation"
   ],
-  "d-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
-  "p-dark-panel": {
-   "h": 221,
-   "w": 334,
-   "vw": 390,
-   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
+  "d-dark-20-projects-more-on-github-box": {
+   "top": 4855.96875,
+   "h": 610.5,
+   "vh": 900
   },
-  "p-dark-badge": {
-   "w": 354,
-   "right_gap": 16,
-   "bottom": 826,
-   "vh": 844,
-   "docBottomGap": 18
-  },
-  "p-dark-resume-logos": [
-   [
-    "/logos/resonite.png",
-    128
-   ],
-   [
-    "/logos/yellow-dog-man-studios.png",
-    256
-   ],
-   [
-    "/logos/emmico.png",
-    200
-   ],
-   [
-    "/logos/fiverr.png",
-    496
-   ],
-   [
-    "/logos/mr-magic.png",
-    320
-   ],
-   [
-    "/logos/paragon-sysco.png",
-    240
-   ],
-   [
-    "/logos/sysco.png",
-    350
-   ],
-   [
-    "/logos/giant-eagle.png",
-    320
-   ],
-   [
-    "/logos/perfect-power-wash.png",
-    225
-   ],
-   [
-    "/logos/home-depot.png",
-    320
-   ],
-   [
-    "/logos/osl-retail.png",
-    321
-   ],
-   [
-    "/logos/applebees.png",
-    320
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/phaa.png",
-    320
-   ],
-   [
-    "/logos/bc3.png",
-    225
-   ],
-   [
-    "/logos/landmark.png",
-    344
-   ],
-   [
-    "/logos/ave-maria.png",
-    295
+  "d-dark-vault": {
+   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
+   "links": [
+    "/vault/jena-magic-screen",
+    "/vault/command-center",
+    "/vault/jena-heavy",
+    "/vault/NCOM-AudeX",
+    "/vault/sexy-s-pen",
+    "/vault/NCOM-AI",
+    "/vault/PleX",
+    "/vault/Portfolio-",
+    "/vault/NCOM",
+    "/vault/JenaAI",
+    "/vault/Jena",
+    "/vault/backup-automation",
+    "/vault/ClaudePleX",
+    "/vault/pfn000",
+    "/vault/RADcam",
+    "/vault/ncomsignin",
+    "/vault/KhonXR"
    ]
+  },
+  "vault-AuraVT": 404,
+  "vault-LiteVtuber": 404,
+  "vault-LocalLLM-iOS": 404,
+  "vault-MS-Outlook-MCP": 404,
+  "vault-linux": 404,
+  "p-dark-home-repos": {
+   "cards": [
+    "NCOM AudeX",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "S-Pen Control Centre",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "JenaAI",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "NCOM AI",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "rest": [
+    "KhonXR"
+   ],
+   "kick": "PROJECTS · FROM MY GITHUB"
+  },
+  "p-dark-08-projects-box": {
+   "top": 15955.109375,
+   "h": 9608.8125,
+   "vh": 844
+  },
+  "p-dark-projects-more": [
+   "NCOM-AudeX",
+   "sexy-s-pen",
+   "live",
+   "JenaAI",
+   "jena-heavy",
+   "KhonXR",
+   "RADcam",
+   "backup-automation"
   ],
-  "p-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
-  "d-light-panel": {
-   "h": 223,
-   "w": 346,
-   "vw": 1600,
-   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
+  "p-dark-20-projects-more-on-github-box": {
+   "top": 7932,
+   "h": 1053.25,
+   "vh": 844
   },
-  "d-light-badge": {
-   "w": 512,
-   "right_gap": 32,
-   "bottom": 882,
-   "vh": 900,
-   "docBottomGap": 18
-  },
-  "d-light-resume-logos": [
-   [
-    "/logos/resonite.png",
-    128
-   ],
-   [
-    "/logos/yellow-dog-man-studios.png",
-    256
-   ],
-   [
-    "/logos/emmico.png",
-    200
-   ],
-   [
-    "/logos/fiverr.png",
-    496
-   ],
-   [
-    "/logos/mr-magic.png",
-    320
-   ],
-   [
-    "/logos/paragon-sysco.png",
-    240
-   ],
-   [
-    "/logos/sysco.png",
-    350
-   ],
-   [
-    "/logos/giant-eagle.png",
-    320
-   ],
-   [
-    "/logos/perfect-power-wash.png",
-    225
-   ],
-   [
-    "/logos/home-depot.png",
-    320
-   ],
-   [
-    "/logos/osl-retail.png",
-    321
-   ],
-   [
-    "/logos/applebees.png",
-    320
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/phaa.png",
-    320
-   ],
-   [
-    "/logos/bc3.png",
-    225
-   ],
-   [
-    "/logos/landmark.png",
-    344
-   ],
-   [
-    "/logos/ave-maria.png",
-    295
+  "p-dark-vault": {
+   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
+   "links": [
+    "/vault/jena-magic-screen",
+    "/vault/command-center",
+    "/vault/jena-heavy",
+    "/vault/NCOM-AudeX",
+    "/vault/sexy-s-pen",
+    "/vault/NCOM-AI",
+    "/vault/PleX",
+    "/vault/Portfolio-",
+    "/vault/NCOM",
+    "/vault/JenaAI",
+    "/vault/Jena",
+    "/vault/backup-automation",
+    "/vault/ClaudePleX",
+    "/vault/pfn000",
+    "/vault/RADcam",
+    "/vault/ncomsignin",
+    "/vault/KhonXR"
    ]
+  },
+  "d-light-home-repos": {
+   "cards": [
+    "NCOM AudeX",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "S-Pen Control Centre",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "JenaAI",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "NCOM AI",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "rest": [
+    "KhonXR"
+   ],
+   "kick": "PROJECTS · FROM MY GITHUB"
+  },
+  "d-light-08-projects-box": {
+   "top": 13442.59375,
+   "h": 11661.21875,
+   "vh": 900
+  },
+  "d-light-projects-more": [
+   "NCOM-AudeX",
+   "sexy-s-pen",
+   "live",
+   "JenaAI",
+   "jena-heavy",
+   "KhonXR",
+   "RADcam",
+   "backup-automation"
   ],
-  "p-light-panel": {
-   "h": 221,
-   "w": 334,
-   "vw": 390,
-   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
+  "d-light-20-projects-more-on-github-box": {
+   "top": 4855.96875,
+   "h": 610.5,
+   "vh": 900
   },
-  "p-light-badge": {
-   "w": 354,
-   "right_gap": 16,
-   "bottom": 826,
-   "vh": 844,
-   "docBottomGap": 18
-  },
-  "p-light-resume-logos": [
-   [
-    "/logos/resonite.png",
-    128
-   ],
-   [
-    "/logos/yellow-dog-man-studios.png",
-    256
-   ],
-   [
-    "/logos/emmico.png",
-    200
-   ],
-   [
-    "/logos/fiverr.png",
-    496
-   ],
-   [
-    "/logos/mr-magic.png",
-    320
-   ],
-   [
-    "/logos/paragon-sysco.png",
-    240
-   ],
-   [
-    "/logos/sysco.png",
-    350
-   ],
-   [
-    "/logos/giant-eagle.png",
-    320
-   ],
-   [
-    "/logos/perfect-power-wash.png",
-    225
-   ],
-   [
-    "/logos/home-depot.png",
-    320
-   ],
-   [
-    "/logos/osl-retail.png",
-    321
-   ],
-   [
-    "/logos/applebees.png",
-    320
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/alison.png",
-    180
-   ],
-   [
-    "/logos/phaa.png",
-    320
-   ],
-   [
-    "/logos/bc3.png",
-    225
-   ],
-   [
-    "/logos/landmark.png",
-    344
-   ],
-   [
-    "/logos/ave-maria.png",
-    295
+  "d-light-vault": {
+   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
+   "links": [
+    "/vault/jena-magic-screen",
+    "/vault/command-center",
+    "/vault/jena-heavy",
+    "/vault/NCOM-AudeX",
+    "/vault/sexy-s-pen",
+    "/vault/NCOM-AI",
+    "/vault/PleX",
+    "/vault/Portfolio-",
+    "/vault/NCOM",
+    "/vault/JenaAI",
+    "/vault/Jena",
+    "/vault/backup-automation",
+    "/vault/ClaudePleX",
+    "/vault/pfn000",
+    "/vault/RADcam",
+    "/vault/ncomsignin",
+    "/vault/KhonXR"
    ]
-  ]
+  },
+  "p-light-home-repos": {
+   "cards": [
+    "NCOM AudeX",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "S-Pen Control Centre",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "JenaAI",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "NCOM AI",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "rest": [
+    "KhonXR"
+   ],
+   "kick": "PROJECTS · FROM MY GITHUB"
+  },
+  "p-light-08-projects-box": {
+   "top": 15955.109375,
+   "h": 9608.8125,
+   "vh": 844
+  },
+  "p-light-projects-more": [
+   "NCOM-AudeX",
+   "sexy-s-pen",
+   "live",
+   "JenaAI",
+   "jena-heavy",
+   "KhonXR",
+   "RADcam",
+   "backup-automation"
+  ],
+  "p-light-20-projects-more-on-github-box": {
+   "top": 7932,
+   "h": 1053.25,
+   "vh": 844
+  },
+  "p-light-vault": {
+   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
+   "links": [
+    "/vault/jena-magic-screen",
+    "/vault/command-center",
+    "/vault/jena-heavy",
+    "/vault/NCOM-AudeX",
+    "/vault/sexy-s-pen",
+    "/vault/NCOM-AI",
+    "/vault/PleX",
+    "/vault/Portfolio-",
+    "/vault/NCOM",
+    "/vault/JenaAI",
+    "/vault/Jena",
+    "/vault/backup-automation",
+    "/vault/ClaudePleX",
+    "/vault/pfn000",
+    "/vault/RADcam",
+    "/vault/ncomsignin",
+    "/vault/KhonXR"
+   ]
+  }
  },
  "videos": [
   {
    "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 1512639,
-   "duration": 22.791667,
+   "bytes": 1587429,
+   "duration": 22.75,
    "crf": 39
   },
   {
    "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 1599381,
-   "duration": 22.291667,
+   "bytes": 1527069,
+   "duration": 22.583333,
    "crf": 36
-  },
-  {
-   "file": "video-p-dark-tap-caption.mp4",
-   "bytes": 990797,
-   "duration": 19.208333,
-   "crf": 30
   }
  ]
 }
