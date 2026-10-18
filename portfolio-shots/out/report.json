@@ -76,6 +76,21 @@
    ]
   },
   {
+   "name": "d-dark-04b-talks",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "d-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
@@ -91,7 +106,52 @@
    ]
   },
   {
+   "name": "d-dark-05b-ncom-demos",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "d-dark-06-jena",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-06b-focals",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -152,6 +212,21 @@
   },
   {
    "name": "d-dark-09-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -251,6 +326,72 @@
    "monoLogos": []
   },
   {
+   "name": "d-dark-14b-plex-note",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-16-article-ai-being-used-wrong",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-16b-article-ai-being-used-wrong",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-16-article-future-of-ads",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-16b-article-future-of-ads",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-17-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
    "name": "p-dark-01-home",
    "overflowX": 0,
    "broken": [],
@@ -326,6 +467,21 @@
    ]
   },
   {
+   "name": "p-dark-04b-talks",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "p-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
@@ -341,7 +497,52 @@
    ]
   },
   {
+   "name": "p-dark-05b-ncom-demos",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "p-dark-06-jena",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-06b-focals",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -402,6 +603,21 @@
   },
   {
    "name": "p-dark-09-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -501,6 +717,72 @@
    "monoLogos": []
   },
   {
+   "name": "p-dark-14b-plex-note",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-16-article-ai-being-used-wrong",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-16b-article-ai-being-used-wrong",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-16-article-future-of-ads",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-16b-article-future-of-ads",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-17-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
    "name": "d-light-01-home",
    "overflowX": 0,
    "broken": [],
@@ -531,6 +813,21 @@
    ]
   },
   {
+   "name": "d-light-06b-focals",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
    "name": "d-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
@@ -547,6 +844,21 @@
   },
   {
    "name": "d-light-09-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-09b-writing",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -643,6 +955,21 @@
    ]
   },
   {
+   "name": "p-light-06b-focals",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
    "name": "p-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
@@ -659,6 +986,21 @@
   },
   {
    "name": "p-light-09-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-09b-writing",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -728,8 +1070,8 @@
  "errors": [],
  "checks": {
   "d-dark-panel": {
-   "h": 178,
-   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
+   "h": 223,
+   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "d-dark-badge": {
    "w": 512,
@@ -754,6 +1096,10 @@
    [
     "/logos/fiverr.png",
     496
+   ],
+   [
+    "/logos/mr-magic.png",
+    320
    ],
    [
     "/logos/paragon-sysco.png",
@@ -810,8 +1156,8 @@
   ],
   "d-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
   "p-dark-panel": {
-   "h": 247,
-   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
+   "h": 428,
+   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "p-dark-badge": {
    "w": 354,
@@ -836,6 +1182,10 @@
    [
     "/logos/fiverr.png",
     496
+   ],
+   [
+    "/logos/mr-magic.png",
+    320
    ],
    [
     "/logos/paragon-sysco.png",
@@ -892,8 +1242,8 @@
   ],
   "p-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
   "d-light-panel": {
-   "h": 178,
-   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
+   "h": 223,
+   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "d-light-badge": {
    "w": 512,
@@ -918,6 +1268,10 @@
    [
     "/logos/fiverr.png",
     496
+   ],
+   [
+    "/logos/mr-magic.png",
+    320
    ],
    [
     "/logos/paragon-sysco.png",
@@ -973,8 +1327,8 @@
    ]
   ],
   "p-light-panel": {
-   "h": 247,
-   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
+   "h": 428,
+   "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "p-light-badge": {
    "w": 354,
@@ -999,6 +1353,10 @@
    [
     "/logos/fiverr.png",
     496
+   ],
+   [
+    "/logos/mr-magic.png",
+    320
    ],
    [
     "/logos/paragon-sysco.png",
