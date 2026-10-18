@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 const T0 = Date.now()
-// v6 r4 proof (light-mode tool logos, Cuddle Cove hero crop, old email removed): headline work (Emmi_Official, EmmiCO, worlds), tap-to-explain glass panels, résumé logos, companies, /plex docs page, big legal badge bottom-right; 1600x900 + 390x844, dark + light
+// v6 r11 proof (emmi-thumb 404 fixed, phone caption spans full row, Unity/VRChat/VS Code logos out, Liberapay out of /plex): headline work (Emmi_Official, EmmiCO, worlds), tap-to-explain glass panels, résumé logos, companies, /plex docs page, big legal badge bottom-right; 1600x900 + 390x844, dark + light
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {} }
@@ -12,11 +12,13 @@ async function audit(page) {
   return page.evaluate(() => ({
     overflowX: document.documentElement.scrollWidth - window.innerWidth,
     broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.style.display !== 'none').map((i) => i.getAttribute('src')).slice(0, 8),
-    badLinks: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => /tiktok|twitch|youtube|emmiofficial|vr_emmi|notion\.site|instagram|beacons|linkedin|\/arch$|\/nos$/i.test(h)).slice(0, 8),
+    badLinks: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => /tiktok|twitch|youtube|emmiofficial|vr_emmi|notion\.site|instagram|beacons|linkedin|liberapay|\/arch$|\/nos$/i.test(h)).slice(0, 8),
     oldNos: [...document.images].map((i) => i.getAttribute('src') || '').filter((s) => /nos-|arch-demo|explore-terminal|dev-mama|takeover/.test(s)).slice(0, 8),
     peter: /peter/i.test(document.body.innerText || ''),
     oldEmail: /official_emmi|emmi@outlook/i.test(document.documentElement.outerHTML),
     mailto: [...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')).slice(0, 4),
+    cutLogos: [...document.images].map((i) => i.getAttribute('src') || '').filter((x) => /\/logos\/(unity|vrchat|vscode)\.svg/.test(x)).length,
+    liberapay: /liberapay/i.test(document.body.innerText || '') || [...document.images].some((i) => /liberapay/i.test(i.src)),
     monoLogos: [...document.querySelectorAll('img[src$=".svg"]')].filter((i) => /unity|blender|vrchat|github|git\.svg/.test(i.getAttribute('src'))).map((i) => getComputedStyle(i).filter).slice(0, 3),
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
@@ -66,7 +68,7 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
   await to(p, '#emmico .pf-shot', 30)
   const btn = await p.$('#emmico .pf-shot .pf-shot-img')
   if (btn) { await btn.click(); await p.waitForTimeout(900) }
-  const panel = await p.evaluate(() => { const el = document.querySelector('#emmico .pf-shot.open .pf-shot-panel > div'); if (!el) return null; const r = el.getBoundingClientRect(); return { h: Math.round(r.height), text: el.innerText.slice(0, 120) } })
+  const panel = await p.evaluate(() => { const el = document.querySelector('#emmico .pf-shot.open .pf-shot-panel > div'); if (!el) return null; const r = el.getBoundingClientRect(); return { h: Math.round(r.height), w: Math.round(r.width), vw: window.innerWidth, text: el.innerText.slice(0, 120) } })
   report.checks[`${k}-panel`] = panel
   await to(p, '#emmico .pf-shot', 30)
   await snap(p, `${k}-10-panel-open`)
