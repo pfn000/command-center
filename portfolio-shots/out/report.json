@@ -4,13 +4,13 @@
    "name": "d-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -21,13 +21,13 @@
    "name": "d-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -38,13 +38,13 @@
    "name": "d-dark-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -55,13 +55,13 @@
    "name": "d-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -72,13 +72,13 @@
    "name": "d-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -89,13 +89,13 @@
    "name": "d-dark-02c-smalls",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -106,13 +106,13 @@
    "name": "d-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -123,13 +123,13 @@
    "name": "d-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -140,13 +140,13 @@
    "name": "d-dark-04b-talks",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -157,13 +157,13 @@
    "name": "d-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -174,13 +174,13 @@
    "name": "d-dark-05b-ncom-demos",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -191,13 +191,13 @@
    "name": "d-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -208,13 +208,13 @@
    "name": "d-dark-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -225,13 +225,13 @@
    "name": "d-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -242,13 +242,13 @@
    "name": "d-dark-06d-ouija",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -259,13 +259,13 @@
    "name": "d-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -276,13 +276,13 @@
    "name": "d-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -293,13 +293,13 @@
    "name": "d-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -310,13 +310,13 @@
    "name": "d-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -327,13 +327,13 @@
    "name": "d-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -344,13 +344,13 @@
    "name": "d-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -361,13 +361,13 @@
    "name": "d-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -383,6 +383,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -394,6 +396,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -405,6 +409,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -416,6 +422,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -427,6 +435,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -438,6 +448,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -449,6 +461,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -460,6 +474,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -471,6 +487,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -482,6 +500,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -493,6 +513,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -504,19 +526,21 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
    "name": "p-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -527,13 +551,13 @@
    "name": "p-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -544,13 +568,13 @@
    "name": "p-dark-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -561,13 +585,13 @@
    "name": "p-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -578,13 +602,13 @@
    "name": "p-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -595,13 +619,13 @@
    "name": "p-dark-02c-smalls",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -612,13 +636,13 @@
    "name": "p-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -629,13 +653,13 @@
    "name": "p-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -646,13 +670,13 @@
    "name": "p-dark-04b-talks",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -663,13 +687,13 @@
    "name": "p-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -680,13 +704,13 @@
    "name": "p-dark-05b-ncom-demos",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -697,13 +721,13 @@
    "name": "p-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -714,13 +738,13 @@
    "name": "p-dark-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -731,13 +755,13 @@
    "name": "p-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -748,13 +772,13 @@
    "name": "p-dark-06d-ouija",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -765,13 +789,13 @@
    "name": "p-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -782,13 +806,13 @@
    "name": "p-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -799,13 +823,13 @@
    "name": "p-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -816,13 +840,13 @@
    "name": "p-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -833,13 +857,13 @@
    "name": "p-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -850,13 +874,13 @@
    "name": "p-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -867,13 +891,13 @@
    "name": "p-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "none",
     "none",
@@ -889,6 +913,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -900,6 +926,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -911,6 +939,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -922,6 +952,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -933,6 +965,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -944,6 +978,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -955,6 +991,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -966,6 +1004,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -977,6 +1017,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -988,6 +1030,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -999,6 +1043,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -1010,159 +1056,161 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
    "name": "d-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "d-light-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
@@ -1174,6 +1222,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -1185,159 +1235,161 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
    "name": "p-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
    "name": "p-light-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/images/emmi-youtube-thumb.jpg"
-   ],
+   "badLinks": [],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
    "monoLogos": [
     "brightness(0) opacity(0.82)",
     "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
+    "none"
    ]
   },
   {
@@ -1349,6 +1401,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   },
   {
@@ -1360,6 +1414,8 @@
    "peter": false,
    "oldEmail": false,
    "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
    "monoLogos": []
   }
  ],
@@ -1370,6 +1426,8 @@
  "checks": {
   "d-dark-panel": {
    "h": 223,
+   "w": 346,
+   "vw": 1600,
    "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "d-dark-badge": {
@@ -1455,7 +1513,9 @@
   ],
   "d-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
   "p-dark-panel": {
-   "h": 428,
+   "h": 221,
+   "w": 334,
+   "vw": 390,
    "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "p-dark-badge": {
@@ -1542,6 +1602,8 @@
   "p-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
   "d-light-panel": {
    "h": 223,
+   "w": 346,
+   "vw": 1600,
    "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "d-light-badge": {
@@ -1626,7 +1688,9 @@
    ]
   ],
   "p-light-panel": {
-   "h": 428,
+   "h": 221,
+   "w": 334,
+   "vw": 390,
    "text": "TALK · CARPALOS\n\nPresenting carpalOS\n\nMe presenting my carpalOS for avatar quick settings: a radial menu that hovers ove"
   },
   "p-light-badge": {
@@ -1714,20 +1778,20 @@
  "videos": [
   {
    "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 1530014,
-   "duration": 22.833333,
+   "bytes": 1512639,
+   "duration": 22.791667,
    "crf": 39
   },
   {
    "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 1556457,
-   "duration": 22.458333,
+   "bytes": 1599381,
+   "duration": 22.291667,
    "crf": 36
   },
   {
    "file": "video-p-dark-tap-caption.mp4",
-   "bytes": 923581,
-   "duration": 19.166667,
+   "bytes": 990797,
+   "duration": 19.208333,
    "crf": 30
   }
  ]
