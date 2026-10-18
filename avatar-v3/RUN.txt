@@ -1,1 +1,1 @@
-build B v3.3 run 4: straps rebuilt as surface paths (cup top -> over trapezius -> back band), skin warmer (1.18/.86/.66, SSS .04, exp -0.28, rough .32), bust 0.24; B: SR at 2x downscale mixed 0.8, neck seam = radial scale toward the halfway ellipse (no snapping); turntable of B
+build B v3.3 run 5 (final candidate): straps cross mid-shoulder (x 0.10), B: Meshy neck edge tucks just inside the flared body neck (no open edge), head skin warmed to the body; turntable of B

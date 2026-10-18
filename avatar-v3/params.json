@@ -195,9 +195,9 @@
  "WING_H": 0.028,
  "BACK_H": 0.018,
  "STRAP_DA": 0.28,
- "STRAP_XS": 0.07,
+ "STRAP_XS": 0.1,
  "MB_SEAM": true,
- "MB_SEAM_OUT": 1.015,
+ "MB_SEAM_OUT": 0.985,
  "MB_SEAM_H": 0.02,
  "MB_SR": true,
  "MB_SR_F": 2,
@@ -205,5 +205,10 @@
  "MB_SR_MIX": 0.8,
  "KNEE_S": 0.1,
  "KNEE_OUT": 4.0,
- "MB_SEAM_MIX": 0.5
+ "MB_SEAM_MIX": 0.5,
+ "MB_TONE_MUL": [
+  1.04,
+  0.97,
+  0.92
+ ]
 }

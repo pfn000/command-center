@@ -1367,6 +1367,7 @@ if VARIANT in ('B','C'):
         sk_m=np.median(cv[skinv],0) if 'cv' in dir() and skinv.sum()>50 else None
         mt=(1,1,1)
         if sk_m is not None and BODY_MED is not None: mt=tuple(float(min(1.25,max(0.8,BODY_MED[k_]/max(sk_m[k_],1e-3))))*PINK[k_] for k_ in range(3))
+        _tm=P.get('MB_TONE_MUL',[1,1,1]); mt=tuple(float(mt[k_]*_tm[k_]) for k_ in range(3))
         nt_=mmat.node_tree; bb_=[n for n in nt_.nodes if n.type=='BSDF_PRINCIPLED'][0]; lk_=[l for l in nt_.links if l.to_socket==bb_.inputs['Base Color']]
         if lk_:
             s_=lk_[0].from_socket; nt_.links.remove(lk_[0]); mx_=nt_.nodes.new('ShaderNodeMix'); mx_.data_type='RGBA'; mx_.blend_type='MULTIPLY'; mx_.inputs['Factor'].default_value=1.0; mx_.inputs['B'].default_value=(*mt,1)
