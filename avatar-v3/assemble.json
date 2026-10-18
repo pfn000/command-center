@@ -44,7 +44,7 @@
   "WELD_SMOOTH": true,
   "WELD_SMOOTH_ITERS": 12,
   "SEAM_RELAX_DILATE": 8,
-  "ARM_DOWN": 55,
+  "ARM_DOWN": 45,
   "GROUP_MAX_AFTER_SMOOTH": true,
   "POSED_CONVERGE": true,
   "CONVERGE_ROUNDS": 5,
@@ -65,8 +65,15 @@
   ],
   "BACK_HAIR_MAX_DEG": 15,
   "BACK_HAIR_BAKE": true,
-  "HAIR_TEX_PROBE": true,
-  "BACK_HAIR_AXIS_SEARCH": true
+  "HAIR_TEX_PROBE": false,
+  "BACK_HAIR_AXIS_SEARCH": true,
+  "SEAM_SMOOTH": true,
+  "SEAM_SMOOTH_ITERS": 4,
+  "SEAM_SMOOTH_RINGS": 3,
+  "SEAM_SMOOTH_STEPS": 10,
+  "HAIR_BLOWOUT_TEX": true,
+  "BACK_HAIR_DIAG": true,
+  "CLOSE_ALONG": 0.07
  },
  "A2": {
   "SHIRT": false,
@@ -75,18 +82,7 @@
  "P55": {
   "ARM_DOWN": 55
  },
- "P55s3": {
-  "ARM_DOWN": 55,
-  "SHOULDER_DOWN": 3
- },
  "P50": {
   "ARM_DOWN": 50
- },
- "P45": {
-  "ARM_DOWN": 45
- },
- "P45s3": {
-  "ARM_DOWN": 45,
-  "SHOULDER_DOWN": 3
  }
 }

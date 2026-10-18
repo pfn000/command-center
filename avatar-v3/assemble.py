@@ -1865,7 +1865,7 @@ def qa_sweep():
         # run 9b: 360 seam close-up sweep around each shoulder (her slit crop), arms-down proof pose
         for sd_,bn_ in (('R','Right arm'),('L','Left arm')):
             if bn_ not in B.pose.bones: continue
-            c_=B.matrix_world@B.pose.bones[bn_].head+Vector((0,0,0.01))
+            pb_=B.pose.bones[bn_]; h_=B.matrix_world@pb_.head; t_=B.matrix_world@pb_.tail; c_=h_+(t_-h_).normalized()*float(P.get('CLOSE_ALONG',0.07))
             for a_ in range(0,360,20):
                 _setcam(c_,a_,8,float(P.get('CLOSE_DIST',0.42))); pth=OUT+f'/sweep/close_{sd_}_angle_{a_:03d}.jpg'; sc.render.filepath=pth
                 try: bpy.ops.render.render(write_still=True)
@@ -1883,7 +1883,7 @@ def qa_sweep():
                     band.setdefault(nmr,{})[o.name]={'verts':int(m.sum()),'inside_body_gt_1mm':int((Sm<-0.001).sum()),'min_mm':round(float(Sm.min())*1000,2)}
         out['clipping_by_ring_relaxed_pose']=band; out['hair_through_face_below_brow']=face_cross()
         out['params_pose']={k_:P.get(k_) for k_ in ('ARM_DOWN','SHOULDER_DOWN','ELBOW_BEND')}
-        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear')}
+        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear','seam_posed_smooth','posed_converge_after_seam_smooth','hair_texture')}
         if SHIRT is not None and not SHIRT.hide_render:
             try: pose_relaxed(); out['shirt_selfx_relaxed']=shirt_selfx(SHIRT)
             except Exception as e: out['shirt_selfx_error']=str(e)
@@ -2286,6 +2286,45 @@ def posed_converge(o):
 if SHIRT is not None and P.get('POSED_CONVERGE',False):
     try: posed_converge(SHIRT)
     except Exception as e: traceback.print_exc(); log('CONVERGEERR',e); rep['posed_converge_error']=str(e); rest()
+# ---------- run 9b: SEAM TEETH. The visible band/sleeve "teeth" (her slit screenshot) sit exactly where the two shirt surfaces cut through each other in
+#            the arms-down pose (shirt_selfx pairs in the shoulder zones). Those vertices + 3 rings are Taubin-smoothed IN THE POSED shape (removes the
+#            high-frequency zig-zag, no shrink), the posed correction is carried back to rest through inverse LBS (group-coherent), repeated while the
+#            zone count drops; reverted if the arms-down or rest count gets worse. Run before the final posed-clearance rounds.
+def seam_posed_smooth(o):
+    t0=_t.time(); r={'passes':[]}; X0=wco(o).copy(); E=WELD[o.name]['E'] if o.name in WELD else np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64)
+    n=len(o.data.vertices); deg=np.zeros(n); np.add.at(deg,E[:,0],1); np.add.at(deg,E[:,1],1); deg=np.maximum(deg,1)
+    def zt(d): return d['pairs_L']+d['pairs_R']
+    pose_relaxed(); c0=shirt_selfx(o); rest(); c0r=shirt_selfx(o); r['before']={'relaxed':c0,'rest':c0r}
+    prev=zt(c0)
+    for it in range(int(P.get('SEAM_SMOOTH_ITERS',4))):
+        pose_relaxed(); cnt,keep,V,F=shirt_selfx(o,detail=True); keep=[k for k in keep if k[2] in ('L','R')]
+        if not keep: rest(); break
+        m=np.zeros(n,bool)
+        for a,b,z in keep: m[F[a]]=True; m[F[b]]=True
+        seeds=int(m.sum())
+        for _ in range(int(P.get('SEAM_SMOOTH_RINGS',3))):
+            g=m.copy(); g[E[:,0][m[E[:,1]]]]=True; g[E[:,1][m[E[:,0]]]]=True; m=g
+        Vs=V.astype(np.float64).copy()
+        for _ in range(int(P.get('SEAM_SMOOTH_STEPS',10))):
+            for lam in (0.5,-0.53):
+                A=np.zeros_like(Vs); np.add.at(A,E[:,0],Vs[E[:,1]]); np.add.at(A,E[:,1],Vs[E[:,0]]); A/=deg[:,None]
+                Vs[m]+=lam*(A[m]-Vs[m])
+        dp=Vs-V; dp[~m]=0
+        M=_skin_mats(o); R=np.linalg.inv(M[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+        rest(); Xb=wco(o).copy(); dr=group_max(o,dr); set_world(o,wco(o)+dr)
+        pose_relaxed(); c1=shirt_selfx(o); rest()
+        r['passes'].append({'iter':it,'relaxed_before':cnt,'relaxed_after':c1,'seed_verts':seeds,'region_verts':int(m.sum()),'max_mm':round(float(np.linalg.norm(dp,axis=1).max())*1000,2)})
+        if zt(c1)>=prev: set_world(o,Xb); r['passes'][-1]['undone']=True; break
+        prev=zt(c1)
+    pose_relaxed(); c2=shirt_selfx(o); rest(); c2r=shirt_selfx(o); r['after']={'relaxed':c2,'rest':c2r}
+    if zt(c2)>zt(c0) or zt(c2r)>zt(c0r): set_world(o,X0); r['reverted']=True
+    r['secs']=round(_t.time()-t0,1); rep['seam_posed_smooth']=r; log('SEAM smooth',json.dumps(r,default=str)[:1500])
+    return not r.get('reverted') and zt(c2)<zt(c0)
+if SHIRT is not None and P.get('SEAM_SMOOTH',False):
+    try:
+        if seam_posed_smooth(SHIRT) and P.get('POSED_CONVERGE',False):
+            P['CONVERGE_ROUNDS']=3; P['CONVERGE_MAX_S']=300; _pc=rep.get('posed_converge'); posed_converge(SHIRT); rep['posed_converge_after_seam_smooth']=rep['posed_converge']; rep['posed_converge']=_pc
+    except Exception as e: traceback.print_exc(); log('SEAMSMOOTHERR',e); rep['seam_posed_smooth_error']=str(e); rest()
 if SHIRT is not None and P.get('SELF_CLEAR',False):
     try:
         shirt_self_clear(SHIRT)
@@ -2333,6 +2372,87 @@ def shirt_shell_flush(o,gap=0.0008):
 if SHIRT is not None and P.get('SHELL_FLUSH',True):
     try: shirt_shell_flush(SHIRT)
     except Exception as e: traceback.print_exc(); log('SHELLERR',e); rep['shirt_shell_flush_error']=str(e); rest()
+# ---------- run 9b (Saidie 6:16 PM: "use the other hair's texture from blow out but apply the textures correctly"): her head hair's own maps
+#            (Hair Texture/Standard 03.png, Emmision/Gr1.png) are not in her upload. The Blowout hair's map Textures/B&W.png (RGBA, Cicera Works
+#            strand atlas) has a full-height black->white strand card at u 0.766-0.970, v 0.00-0.98, and every UV island of her head hair already
+#            lies in u 0.776-0.968, v 0.01-0.97 (one strand strip per island), so the islands land on that card as authored. Per island, the strand
+#            must run root (black, top of the card) -> tip (white, bottom): the root end is the end weighted to bones nearer the Hair Root
+#            (chain depth), falling back to height; an island whose root sits at the bottom of the card is mirrored in v inside the card.
+#            UV0 = this map (what Unity reads); her original UVs stay as a second layer 'UV_her_original'. Alpha from the map (hashed / cutout).
+#            Geometry untouched.
+def hair_blowout_tex():
+    r={}
+    tp=FILES.get('b&w.png') or (IN+'/Textures/B&W.png')
+    if not os.path.exists(tp): r['error']='Textures/B&W.png missing'; rep['hair_texture']=r; return
+    me=HR.data; ul=me.uv_layers.active
+    if ul is None: r['error']='hair has no UV layer'; rep['hair_texture']=r; return
+    nl=len(me.loops); UV=np.empty(nl*2); ul.data.foreach_get('uv',UV); UV=UV.reshape(-1,2); UV0=UV.copy()
+    LV=np.empty(nl,dtype=np.int64); me.loops.foreach_get('vertex_index',LV)
+    if 'UV_her_original' not in me.uv_layers:
+        ko=me.uv_layers.new(name='UV_her_original'); ko.data.foreach_set('uv',UV0.ravel())
+    me.uv_layers.active=ul
+    # UV islands: loops sharing a vertex at the same UV, plus every loop of a polygon
+    key={}; kid=np.empty(nl,dtype=np.int64)
+    for i in range(nl):
+        k=(int(LV[i]),round(float(UV[i,0]),5),round(float(UV[i,1]),5)); kid[i]=key.setdefault(k,len(key))
+    par=np.arange(len(key))
+    def f(a):
+        while par[a]!=a: par[a]=par[par[a]]; a=par[a]
+        return a
+    for p in me.polygons:
+        a=f(kid[p.loop_start])
+        for li in range(p.loop_start+1,p.loop_start+p.loop_total):
+            b=f(kid[li])
+            if a!=b: par[b]=a
+    isl=np.array([f(kid[i]) for i in range(nl)])
+    # chain depth per vertex (0 = Hair Root)
+    gi={g.index:g.name for g in HR.vertex_groups}
+    def depth(bn):
+        if bn not in B.data.bones: return None
+        b=B.data.bones[bn]; d=0
+        while b is not None and b.name not in ('Hair Root','Head'): d+=1; b=b.parent
+        return d
+    DB={n_:depth(n_) for n_ in gi.values()}
+    VD=np.full(len(me.vertices),np.nan)
+    for v in me.vertices:
+        s=0.0; w=0.0
+        for ge in v.groups:
+            d=DB.get(gi.get(ge.group))
+            if d is not None and ge.weight>0: s+=d*ge.weight; w+=ge.weight
+        if w>0: VD[v.index]=s/w
+    Z=wco(HR)[:,2]
+    U0,U1,V0,V1=0.766,0.970,0.0,0.98
+    flipped=0; kept=0; flat=0; out_of_card=0
+    for k_ in np.unique(isl):
+        L=np.where(isl==k_)[0]; vv=UV[L,1]
+        if len(L)<4: flat+=1; continue
+        lo=vv<=np.percentile(vv,20); hi=vv>=np.percentile(vv,80)
+        dl=np.nanmean(VD[LV[L[lo]]]) if np.isfinite(VD[LV[L[lo]]]).any() else np.nan; dh=np.nanmean(VD[LV[L[hi]]]) if np.isfinite(VD[LV[L[hi]]]).any() else np.nan
+        root_low=None
+        if np.isfinite(dl) and np.isfinite(dh) and abs(dl-dh)>0.15: root_low=dl<dh
+        else:
+            zl=Z[LV[L[lo]]].mean(); zh=Z[LV[L[hi]]].mean()
+            if abs(zl-zh)>0.004: root_low=zl>zh
+        if root_low is None: flat+=1; continue
+        if root_low:
+            UV[L,1]=(V0+V1)-UV[L,1]; flipped+=1
+        else: kept+=1
+    out_of_card=int(((UV[:,0]<U0)|(UV[:,0]>U1)|(UV[:,1]<V0)|(UV[:,1]>V1)).sum())
+    ul.data.foreach_set('uv',UV.ravel()); me.update()
+    for s_l in HR.material_slots:
+        m=s_l.material
+        if not m: continue
+        set_tex(m,tp,alpha=True); m.blend_method='HASHED'
+        try: m.shadow_method='HASHED'
+        except Exception: pass
+        bb=[x for x in m.node_tree.nodes if x.type=='BSDF_PRINCIPLED']
+        if bb: bb[0].inputs['Roughness'].default_value=0.42
+    r.update({'texture':'Textures/B&W.png (Blowout hair map)','islands':int(len(np.unique(isl))),'kept_root_at_top':kept,'mirrored_in_v':flipped,'no_clear_direction':flat,
+              'loops_outside_card':out_of_card,'loops':int(nl),'uv0':ul.name,'original_kept_as':'UV_her_original','alpha':'hashed (cutout in Unity)'})
+    rep['hair_texture']=r; log('HAIR texture',r)
+if P.get('HAIR_BLOWOUT_TEX',False) and P.get('HAIR')=='head':
+    try: hair_blowout_tex()
+    except Exception as e: traceback.print_exc(); log('HAIRTEXERR',e); rep['hair_texture_error']=str(e)
 # ---------- run 9 (RUN8 fix 2): BACK-HAIR CURL, pose only. The head asset's own Back hair chains whose tips sit inside her back (8c: .006/.008/.020/.021/.022,
 #            206 tris at rest, 144 in the proof pose) are curled backward, the SAME angle on every bone of the chain (root -> tip), 1 deg steps, <= 15 deg
 #            per bone, the smallest angle that leaves 0 hair tris >1 mm inside body/bra/shirt at rest AND in the proof pose. The curl plane is the chain's
@@ -2422,6 +2542,18 @@ def back_hair_curl():
         for r_ in list(pend):
             if r_ in hit: done[r_]=(hit[r_],k); pend.remove(r_); AX[r_]=cand(r_,k); set_chain(r_,hit[r_])
             else: set_chain(r_,0)
+    # diagnostic only (NOT applied): for a chain that cannot reach 0 within the 15 deg cap, the smallest angle on its best plane that would
+    if pend and P.get('BACK_HAIR_DIAG',True):
+        need={}
+        for r_ in pend: AX[r_]=cand(r_,best[r_][2])
+        for a in range(16,41):
+            live=[r_ for r_ in pend if r_ not in need]
+            if not live: break
+            for r_ in live: set_chain(r_,a)
+            cr,_,_,_,_=count('rest'); cx,_,_,_,_=count('relaxed'); rest()
+            for r_ in live:
+                if cr.get(r_,0)+cx.get(r_,0)==0: need[r_]=a
+        out['diag_deg_needed_for_zero_not_applied']={r_:need.get(r_,'>40') for r_ in pend}
     for r_ in pend: AX[r_]=cand(r_,best[r_][2]); set_chain(r_,best[r_][1])   # not reachable in 15 deg: keep the best plane+angle seen
     done={r_:v[0] for r_,v in done.items()}; out['planes']={r_:(best[r_][2] if r_ in best else 0) for r_ in roots}
     rest(); Xa=hair_X()
@@ -2512,7 +2644,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl','seam_posed_smooth','posed_converge_after_seam_smooth','hair_texture')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
@@ -2676,6 +2808,11 @@ if not P['TT']:
         for k in bk: KB[k].value=0.0
         for vk in ('vrc.v_aa','vrc.v_oh'):
             if vk in KB: KB[vk].value=1.0; bpy.context.view_layer.update(); shot('viseme-'+vk.split('_')[-1],[FH],'front',res=(768,768),pad=0.75,zoff=-0.1*(hx.z-hm.z)); KB[vk].value=0.0
+        if P.get('HAIR_BLOWOUT_TEX',False):
+            try:
+                hb_=bbox([FH,HR])
+                for v_ in ('front','side','back','q34'): shot('hair-'+v_,[FH,HR],v_,res=(1024,1024),pad=1.08)
+            except Exception as e: traceback.print_exc(); log('HAIRSHOTERR',e)
         # run 9 (fix 4): her hair's own maps ('Hair Texture/Standard 03.png', 'Emmision/Gr1.png') are NOT in her dataset. PROBE ONLY (not saved, not exported):
         # the one hair map she did upload (assets/hair_texture_black_to_white_1713.jpg, the Umeko atlas) has nothing in the strip her head hair's UVs use
         # (u 0.776-0.968), so the probe maps that strip onto the atlas' long black->white strand (u 0.651-0.753) to show what a strand map would look like.

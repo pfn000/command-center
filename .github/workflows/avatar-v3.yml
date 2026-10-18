@@ -131,7 +131,7 @@ jobs:
           - { qa: bones, variant: A0, shard: 4, shards: 6 }
           - { qa: bones, variant: A0, shard: 5, shards: 6 }
           - { qa: shapes, variant: A0, shard: 0, shards: 1 }
-    env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}" }
+    env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}", QA_CLOSE: "1" }
     steps:
       - uses: actions/checkout@v4
       - name: Blender 4.4
@@ -160,4 +160,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-run9
+# rev v3.7-assemble-run9b
