@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
-// v6 proof: headline work (Emmi_Official, EmmiCO, worlds), tap-to-explain glass panels, résumé logos, companies, /plex docs page, big legal badge bottom-right; 1600x900 + 390x844, dark + light
+// v6 r4 proof (light-mode tool logos, Cuddle Cove hero crop, old email removed): headline work (Emmi_Official, EmmiCO, worlds), tap-to-explain glass panels, résumé logos, companies, /plex docs page, big legal badge bottom-right; 1600x900 + 390x844, dark + light
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {} }
@@ -13,6 +13,9 @@ async function audit(page) {
     badLinks: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => /tiktok|twitch|youtube|emmiofficial|vr_emmi|notion\.site|instagram|beacons|linkedin|\/arch$|\/nos$/i.test(h)).slice(0, 8),
     oldNos: [...document.images].map((i) => i.getAttribute('src') || '').filter((s) => /nos-|arch-demo|explore-terminal|dev-mama|takeover/.test(s)).slice(0, 8),
     peter: /peter/i.test(document.body.innerText || ''),
+    oldEmail: /official_emmi|emmi@outlook/i.test(document.documentElement.outerHTML),
+    mailto: [...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')).slice(0, 4),
+    monoLogos: [...document.querySelectorAll('img[src$=".svg"]')].filter((i) => /unity|blender|vrchat|github|git\.svg/.test(i.getAttribute('src'))).map((i) => getComputedStyle(i).filter).slice(0, 3),
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
 async function snap(page, name, opts = {}) {
