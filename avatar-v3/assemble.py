@@ -1,5 +1,5 @@
 
-# v3.7 ASSEMBLY, run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
+# v3.7 ASSEMBLY, run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
 # her Blowout haircards (B&W.png) [alt: Umeko + her black->white jpg], Outfitriggedpanda shirt (Tshirt-BasicGrey.png) + bra (plain black, her 10:30 ask),
 # Booty Shorts (Textures/Colors/Black.png). ONE armature (Panda's). Clothes weights = Data Transfer from the body. Zero Meshy.
@@ -1157,71 +1157,41 @@ try:
     build_points()
     m0=metrics(); rep['eyes_before']=m0; log('EYES before',json.dumps(m0,default=str)[:1500])
     CROSS_MAX=max(10,m0['cross']); rep['cross_max']=CROSS_MAX
-    # run 6b: run 6 cleared the eyes by swinging Blw_Bangs_R 45 deg at its root -> a flat 'wing' sticking out of her head (sweep ring 02, turntable).
-    # Now: the chain is CURLED (root + its two child bones, small steps, coordinate descent) so the lock bends round the eye toward the temple,
-    # and every candidate pays for STICK-OUT = chain verts farther than 12 mm from her unposed hair/head surface (the envelope she authored).
-    TENV=None
+    # run 6c (root 17:27Z): NO chain lifts at all - her hair keeps its authored rest pose 1:1. The eyes are helped only by the hair's own
+    # placement: one rigid offset of the whole hair (up/back, each <= 10 mm) and an optional uniform scale <= 3 % about its Head bone,
+    # chosen on the dense eye/cheek/face-crossing/body metrics. Residual strands over the brow are reported, not hidden.
+    hb_names=[n_ for n_ in rep.get('hair_bones',[]) if n_ in B.data.bones and n_ not in bodyn]
+    piv=FA.matrix_world@FA.data.bones['Head'].head_local if 'Head' in FA.data.bones else Vector(((hmn[0]+hmx[0])/2,(hmn[1]+hmx[1])/2,hmn[2]))
+    me_h=HR.data; n_h=len(me_h.vertices); CO0=np.empty(n_h*3); me_h.vertices.foreach_get('co',CO0); CO0=CO0.reshape(-1,3)
+    mwh=np.array(HR.matrix_world); mwhi=np.linalg.inv(mwh)
+    def Mof(dy,dz,sc_):
+        return Matrix.Translation(piv+Vector((0,dy,dz)))@Matrix.Scale(sc_,4)@Matrix.Translation(-piv)
+    def set_hair(M):
+        Mm=mwhi@np.array(M)@mwh; X=CO0@Mm[:3,:3].T+Mm[:3,3]; me_h.vertices.foreach_set('co',X.ravel()); me_h.update(); bpy.context.view_layer.update()
+    evals=0; grid_=[]; best=None
+    for sc_ in (1.0,1.015,1.03):
+        for dz in (0.0,0.0025,0.005,0.0075,0.01):
+            for dy in (0.0,0.0025,0.005,0.0075,0.01):
+                set_hair(Mof(dy,dz,sc_)); mm_=metrics(); evals+=1
+                scr=mm_['eye_max_pct']+2*max(0,mm_['cross']-CROSS_MAX)+0.02*mm_['body_pen_total']+0.3*(dy+dz)*100+10*(sc_-1)
+                grid_.append((round(dy*1000,1),round(dz*1000,1),sc_,mm_['eye_max_pct'],mm_['cheek_max_pct'],mm_['cross'],mm_['body_pen_total'],round(scr,2)))
+                if best is None or scr<best[0]: best=(scr,dy,dz,sc_)
+    set_hair(Matrix()); _,dy,dz,sc_=best; M=Mof(dy,dz,sc_)
+    set_hair(M)
     try:
-        dgE=bpy.context.evaluated_depsgraph_get(); VV=[]; FF=[]
-        for o_ in [x for x in (HR,FH,CR) if x is not None]:
-            e_=o_.evaluated_get(dgE); me_=e_.to_mesh(); me_.calc_loop_triangles(); off_=len(VV); mw_=o_.matrix_world
-            VV+=[tuple(mw_@v.co) for v in me_.vertices]; FF+=[tuple(off_+i for i in t.vertices) for t in me_.loop_triangles]; e_.to_mesh_clear()
-        TENV=BVHTree.FromPolygons(VV,FF)
-    except Exception as e: log('ENVERR',e)
-    def chain_bones(root):
-        out=[root]; b_=B.pose.bones[root]
-        while b_.children and len(out)<3: b_=max(b_.children,key=lambda c:len(c.children_recursive)); out.append(b_.name)
-        return out
-    def chain_verts(names):
-        gi={g.index:g.name for g in HR.vertex_groups}; nm_s=set(names)
-        return [v.index for v in HR.data.vertices if any(ge.weight>0.3 and gi.get(ge.group) in nm_s for ge in v.groups)]
-    def stickout(vidx):
-        if TENV is None or not vidx: return 0
-        dg=bpy.context.evaluated_depsgraph_get(); e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world; n_=0
-        for i in vidx[::2]:
-            loc,nr,idx,d=TENV.find_nearest(mw_@me_.vertices[i].co,0.05)
-            if loc is None or d>0.012: n_+=1
-        e_.to_mesh_clear(); return n_*2
-    def set_curl(names,ang,sg):
-        for nm_ in names: B.pose.bones[nm_].matrix_basis=Matrix()
-        bpy.context.view_layer.update()
-        for nm_,(sw,lf) in zip(names,ang):
-            pb=B.pose.bones[nm_]; h=pb.head.copy()
-            R=Matrix.Rotation(math.radians(sg[1]*lf),4,AXW((1,0,0)))@Matrix.Rotation(math.radians(sg[0]*sw),4,AXW((0,1,0)))
-            pb.matrix=Matrix.Translation(h)@R@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
-    done=set(); evals=0; tried={}
-    for rnd in range(3):
-        m=metrics(); evals+=1
-        cand=Counter(); [cand.update({k:3*v}) for k,v in m['eye_chains'].items()]; [cand.update({k:v}) for k,v in m['cheek_chains'].items()]; [cand.update({k:2*v}) for k,v in m['body_pen_chains'].items()]
-        cand=[c for c,_ in cand.most_common() if c in B.pose.bones and c not in done]
-        if not cand: break
-        for c in cand[:6]:
-            hint='L' if sum(m['eye'][vw]['L']['covered'] for vw in EYE_VIEWS)>=sum(m['eye'][vw]['R']['covered'] for vw in EYE_VIEWS) else 'R'
-            sg=chain_signs(c,hint); names=chain_bones(c); vidx=chain_verts(names); base=metrics(); evals+=1
-            other_e0=sum(v for k,v in base['eye_chains'].items() if k!=c)
-            def score(mm_,ang):
-                oe,oc=mm_['eye_chains'].get(c,0),mm_['cheek_chains'].get(c,0); so=stickout(vidx); ob=mm_['body_pen_chains'].get(c,0)
-                other_e=sum(v for k,v in mm_['eye_chains'].items() if k!=c)
-                return oe*5+oc+ob*2+max(0,mm_['cross']-CROSS_MAX)*3+max(0,other_e-other_e0)*5+so*4+0.05*sum(abs(x) for p in ang for x in p),(oe,oc,mm_['cross'],so,ob)
-            ang=[[0,0] for _ in names]; cur,info=score(base,ang); hist=[(json.dumps(ang),)+info+(round(cur,1),)]
-            LIM=[(25,16),(40,24),(45,24)]
-            for step in range(16):
-                if info[0]==0 and info[1]<=2 and info[4]==0 and info[3]<=max(4,len(vidx)//50): break
-                best=None
-                for j in range(len(names)):
-                    for k_,dv in ((0,8),(1,8)):
-                        a2=[list(p) for p in ang]; a2[j][k_]+=dv
-                        if a2[j][k_]>LIM[min(j,2)][k_]: continue
-                        set_curl(names,a2,sg); mm_=metrics(); evals+=1; sc2,inf2=score(mm_,a2)
-                        if best is None or sc2<best[0]: best=(sc2,a2,inf2)
-                if best is None or best[0]>=cur-0.5: break
-                cur,ang,info=best; hist.append((json.dumps(ang),)+info+(round(cur,1),))
-                if evals>360: break
-            set_curl(names,ang,sg)
-            for nm_ in names: BANG[nm_]=B.pose.bones[nm_].matrix_basis.copy()
-            done.add(c); tried[c]={'bones':names,'signs':sg,'angles_sweep_lift_deg':ang,'final_own_eye_cheek_cross_stickout_bodypen':info,'path':hist[-10:],'chain_verts':len(vidx)}
-            log('chain',c,tried[c])
-    rep['chain_pose_search']=tried; rep['eye_evals']=evals
+        if hb_names and (dy or dz or sc_!=1.0):
+            Ma=B.matrix_world.inverted()@M@B.matrix_world
+            bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='EDIT')
+            for n_ in hb_names:
+                eb_=B.data.edit_bones.get(n_)
+                if eb_ is not None: eb_.head=Ma@eb_.head; eb_.tail=Ma@eb_.tail
+            bpy.ops.object.mode_set(mode='OBJECT'); bpy.context.view_layer.update()
+    except Exception as e: traceback.print_exc(); log('HAIRBONEMOVEERR',e)
+    BANG.clear()
+    tried={'mode':'rigid whole-hair placement only (no chain poses)','chosen_dy_back_mm':round(dy*1000,1),'chosen_dz_up_mm':round(dz*1000,1),'chosen_uniform_scale':sc_,
+           'grid_dy_dz_scale_eye_cheek_cross_bodypen_score':sorted(grid_,key=lambda g:g[-1])[:12],'hair_bones_moved':len(hb_names)}
+    log('hair placement',tried)
+    rep['hair_placement_search']=tried; rep['eye_evals']=evals
     mf=metrics(); rep['eyes_after']=mf; log('EYES after',json.dumps(mf,default=str)[:1500],'BANG',list(BANG))
 except Exception as e: traceback.print_exc(); log('EYECHECKERR',e); rep['eyecheck_error']=str(e)
 
