@@ -1023,7 +1023,7 @@ if VARIANT=='B':
             for e in a_.link_edges:
                 o_=e.other_vert(a_)
                 if o_ not in seen: seen.add(o_); st.append(o_); comp.append(o_)
-        if len(comp)<P.get('MB_MIN_ISLAND',200): small+=comp
+        if len(comp)<P.get('MB_MIN_ISLAND',200) or max(q_.co.z for q_ in comp)<zc_+P.get('MB_ISLAND_ZMIN',0.0): small+=comp  # floating bits (necklace/strap/chest fragments) that never reach the head
     bmesh.ops.delete(bm,geom=small,context='VERTS'); bm.to_mesh(MH.data); bm.free(); MH.data.update()
     tr0=tris(MH); r_dec=min(1.0,P.get('MB_TRIS',30000)/max(1,tr0))
     if r_dec<0.999:
