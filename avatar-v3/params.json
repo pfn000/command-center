@@ -146,5 +146,6 @@
  "CRAN_DARK_FROM": 0.32,
  "CRAN_RX": 0.9,
  "SCALP": false,
- "FRINGE_SQ": 0.2
+ "FRINGE_SQ": 0.2,
+ "MB_HEAD_SCALE": 1.077
 }

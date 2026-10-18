@@ -1008,6 +1008,8 @@ if VARIANT=='B':
     dz=HF['target_chin']-chin_m; dy=b_n['front']-m_front
     MH.data.transform(Matrix.Translation(Vector((-cxm+b_n['cx'],dy,dz)))); V=wco(MH)
     zc_=HF['target_chin']
+    if P.get('MB_HEAD_SCALE',1.0)!=1.0:
+        pv=Vector((b_n['cx'],b_n['cy'],zc_)); MH.data.transform(Matrix.Translation(pv)@Matrix.Scale(P['MB_HEAD_SCALE'],4)@Matrix.Translation(-pv)); V=wco(MH)
     # cut: everything above chin-NECK_KEEP; hair-coloured strands kept further down beside/behind the neck
     r_=np.hypot(V[:,0]-b_n['cx'],V[:,1]-b_n['cy'])
     keep=(V[:,2]>=zc_-P.get('MB_NECK_KEEP',0.03))|((~skinv)&(V[:,2]>=zc_-P.get('MB_HAIR_KEEP',0.11))&(r_>max(b_n['rx'],b_n['ry'])*1.05))
