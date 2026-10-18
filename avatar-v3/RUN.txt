@@ -1,1 +1,1 @@
-build B v3.2 run H2: lighting with real falloff (world 0.15, fill 12, key 170/1.8, AO 0.8), skin sheen back (rough 0.38 coat 0.25), bra hem up 3 cm; B = Meshy head with its own hair; C = Meshy face + our hair cards + cranium; turntable of B
+build B v3.3 run 1: curvy shape key (thighs meet, hip shelf, glutes, bust), legs 5 deg in, warm peach skin, bra rebuilt on body (balconette cups end at crease, lace top, bow, no band strip), B: Meshy face texture 4x SR + neck seam flare; turntable of B

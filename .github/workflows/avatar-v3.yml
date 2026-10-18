@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 50
     strategy:
       fail-fast: false
-      matrix: { variant: [A, B, C] }
+      matrix: { variant: [A, B] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +37,15 @@ jobs:
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
+      - name: SR deps (B face texture)
+        run: |
+          V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
+          if [ "$V" = "B" ]; then
+            pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
+            mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+            curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+            ls -la /tmp/sr; python3 -c "import torch,spandrel;print('torch',torch.__version__)"
+          fi
       - name: Blender
         if: always()
         run: |
@@ -88,6 +97,15 @@ jobs:
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
+      - name: SR deps (B face texture)
+        run: |
+          V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
+          if [ "$V" = "B" ]; then
+            pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
+            mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
+            curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+            ls -la /tmp/sr; python3 -c "import torch,spandrel;print('torch',torch.__version__)"
+          fi
       - name: Frames
         env: { TT_SHARD: "${{ matrix.shard }}", TT_SHARDS: "4" }
         run: |

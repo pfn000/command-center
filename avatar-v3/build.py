@@ -689,6 +689,77 @@ if CUR:
     for o in (BODY,BRA,SH):
         md=o.modifiers.new('Armature','ARMATURE'); md.object=B
     log('curvy applied',list(CUR))
+
+from mathutils.bvhtree import BVHTree
+# ---------- v3.3 CURVY SHAPE KEY on her Panda body (the .blend ships no shape keys: sculpted here as key 'Curvy' and baked):
+# her sheet = thighs that meet from the crotch to the knee, hip shelf, round high glutes, fuller bust. Same field moves the bra/shorts.
+if P.get('SHAPE',True):
+    BV3=wco(BODY); zmin3=float(BV3[:,2].min()); zmax3=float(BV3[:,2].max()); Hb=zmax3-zmin3
+    def bz(n,f):
+        b_=bonew(n); return float(b_.z) if b_ is not None else zmin3+f*Hb
+    log('leg bones',[b_.name for b_ in B.data.bones if any(k in b_.name.lower() for k in ('leg','knee','ankle','foot','toe','breast','hip','spine','chest'))])
+    zH=bz('Left leg',0.50); zK=bz('Left knee',0.28); zCh=bz('Chest',0.70)
+    _hb=bonew('Hips'); hy=float(_hb.y) if _hb is not None else float(np.median(BV3[:,1]))
+    _bv3=BVHTree.FromObject(BODY,bpy.context.evaluated_depsgraph_get())
+    _hc=_bv3.ray_cast(Vector((0,hy,zmin3+0.05)),Vector((0,0,1)),2.0); zC=float(_hc[0].z) if _hc[0] is not None else zH-0.04
+    tor=BV3[np.abs(BV3[:,0])<0.16]; zz3=np.arange(zC+0.08,zC+0.36,0.01); wd3=[]
+    for z_ in zz3:
+        q_=tor[np.abs(tor[:,2]-z_)<0.005]; wd3.append(q_[:,0].max()-q_[:,0].min() if len(q_)>10 else 9)
+    zW=float(zz3[int(np.argmin(wd3))])
+    ch=BV3[(BV3[:,2]>zW+0.06)&(BV3[:,2]<zmin3+0.80*Hb)]; apex=[]
+    for s in (1,-1):
+        q_=ch[(ch[:,0]*s>0.02)&(ch[:,0]*s<0.16)]
+        if len(q_): apex.append(q_[int(np.argmin(q_[:,1]))])
+    SHP=dict(zC=zC,zH=zH,zK=zK,zW=zW,zCh=zCh,hy=hy,apex=[a_.tolist() for a_ in apex],Hb=Hb); log('SHAPE landmarks',SHP); rep['shape_landmarks']=SHP
+    # thigh axes per height (each side), from the body itself
+    zb3=np.arange(zK-0.02,zC+0.08,0.01); TAX={}
+    for s in (1,-1):
+        cx_,cy_=[],[]
+        for z_ in zb3:
+            q_=BV3[(np.abs(BV3[:,2]-z_)<0.006)&(BV3[:,0]*s>0)&(np.abs(BV3[:,0])<0.3)]
+            cx_.append((q_[:,0].min()+q_[:,0].max())/2 if len(q_) else s*0.08); cy_.append((q_[:,1].min()+q_[:,1].max())/2 if len(q_) else hy)
+        TAX[s]=(np.array(cx_),np.array(cy_))
+    def shape_field(V):
+        D=np.zeros_like(V); x=V[:,0]; y=V[:,1]; z=V[:,2]
+        # 1) hip shelf: widen |x| about the centre line, peak just above the crotch
+        zp=zC+P.get('HIP_PEAK',0.05); dn=P.get('HIP_DN',0.14)
+        wh=np.where(z<zp,sstep((z-(zp-dn))/dn),1-sstep((z-zp)/max(0.03,zW-zp)))*(np.abs(x)<0.25)
+        D[:,0]+=x*P.get('HIP_W',0.06)*wh
+        # 2) thighs: radial about each thigh's axis, more toward the inside so they meet like her sheet; 0 at the knee
+        u=np.clip((z-zK)/max(0.05,zC-zK),0,1)
+        wt=np.sin(u*math.pi/2)**P.get('THIGH_POW',1.2)*(1-sstep((z-zC)/0.06))*(z>zK)
+        for s in (1,-1):
+            m_=(x*s>0)&(wt>0)&(np.abs(x)<0.3)
+            if not m_.any(): continue
+            cx_=np.interp(z[m_],zb3,TAX[s][0]); cy_=np.interp(z[m_],zb3,TAX[s][1])
+            dx=x[m_]-cx_; dy=y[m_]-cy_; r=np.hypot(dx,dy)+1e-6
+            inner=np.clip(-s*dx/r,0,1); front=np.clip(-dy/r,0,1); back=np.clip(dy/r,0,1)
+            f=P.get('THIGH_K',0.10)*(1+P.get('THIGH_INNER',0.8)*inner+P.get('THIGH_FRONT',0.3)*front+P.get('THIGH_BACK',0.2)*back)*wt[m_]
+            nx=x[m_]+dx*f; nx=np.where(s*nx<0.002,s*0.002,nx)
+            D[m_,0]+=nx-x[m_]; D[m_,1]+=dy*f
+        # 3) glutes: rounder + higher, pushed back
+        zg=zC+P.get('GLUTE_PEAK',0.035); wg=np.exp(-((z-zg)/P.get('GLUTE_SZ',0.075))**2)
+        lat=np.exp(-((np.abs(x)-P.get('GLUTE_X',0.065))/0.065)**2); bk=sstep((y-hy)/0.06)
+        D[:,1]+=P.get('GLUTE_D',0.02)*wg*lat*bk
+        # 4) bust: fuller + a little lift, about each breast's centre
+        RB=P.get('BUST_R',0.09)
+        for a_ in apex:
+            c=np.array([a_[0],a_[1]+0.55*RB,a_[2]]); d=V-c; r=np.linalg.norm(d,axis=1)
+            w=(1-sstep(r/RB))*(y<a_[1]+1.2*RB)
+            D+=d*(P.get('BUST_K',0.12)*w)[:,None]; D[:,2]+=P.get('BUST_LIFT',0.006)*w
+        return D
+    D_b=shape_field(BV3)
+    try:
+        BODY.shape_key_add(name='Basis',from_mix=False); kb_=BODY.shape_key_add(name='Curvy',from_mix=False)
+        Mi=np.array(BODY.matrix_world.inverted())[:3,:3]; n_=len(BODY.data.vertices); a_=np.empty(n_*3); kb_.data.foreach_get('co',a_)
+        kb_.data.foreach_set('co',(a_.reshape(-1,3)+D_b@Mi.T).ravel()); kb_.value=1.0; BODY.data.update()
+        sel([BODY]); bpy.ops.object.shape_key_remove(all=True,apply_mix=True); log('shape key Curvy sculpted + baked, max move',float(np.linalg.norm(D_b,axis=1).max()))
+    except Exception as e:
+        log('shape key path failed',e); 
+        if BODY.data.shape_keys: BODY.shape_key_clear()
+        wdelta(BODY,D_b)
+    for o in (BRA,SH): wdelta(o,shape_field(wco(o)))
+    rep['shape']={k:P.get(k) for k in ('HIP_W','THIGH_K','THIGH_INNER','GLUTE_D','BUST_K','LEG_IN')}
 # ---------- bun + black claw clip + cross necklace (rigid to Head / Chest)
 def add_mesh(name,bm,mat,group):
     me=bpy.data.meshes.new(name); bm.to_mesh(me); bm.free(); o=bpy.data.objects.new(name,me); sc.collection.objects.link(o)
@@ -763,12 +834,88 @@ NECK=add_mesh('CrossNecklace',bm,silver,'Chest')
 blk=bpy.data.materials.new('StrapBlack'); blk.use_nodes=True; kb=blk.node_tree.nodes['Principled BSDF']; kb.inputs['Base Color'].default_value=(0.012,0.012,0.013,1); kb.inputs['Roughness'].default_value=0.5
 dg0=bpy.context.evaluated_depsgraph_get(); bvh=BVHTree.FromObject(BODY,dg0)
 # v3.2: bra hem up to just under the cups (it read as a crop top)
-if P.get('BRA_HEM_UP',0.0):
+if P.get('BRA_HEM_UP',0.0) and not P.get('BRA_GEN',True):
     _mn,_mx=wbb([BRA]); zt_=_mn.z+P['BRA_HEM_UP']; mw=BRA.matrix_world; mwi=mw.inverted(); hm_=0
     for v in BRA.data.vertices:
         p=mw@v.co
         if p.z<zt_: v.co=mwi@Vector((p.x,p.y,zt_-(zt_-p.z)*P.get('BRA_HEM_SQ',0.25))); hm_+=1
     BRA.data.update(); log('bra hem raised',P['BRA_HEM_UP'],hm_)
+# ---------- v3.3 BRA rebuilt ON her body like her sheet: balconette knit cups that end at the under-bust crease (no separate band strip),
+# low centre gore with the bow, top edge just over the nipple line rising to the strap points, narrow side wings + back band
+BRA_ATT={}
+if P.get('BRA_GEN',True):
+    _ch=B.matrix_world@B.data.bones['Chest'].head_local if 'Chest' in B.data.bones else Vector((0,0,0)); tcy_=float(_ch.y)
+    BVb=wco(BODY); zmin_=float(BVb[:,2].min()); Hb_=float(BVb[:,2].max())-zmin_
+    ap_=[]
+    for s in (1,-1):
+        q_=BVb[(BVb[:,0]*s>0.02)&(BVb[:,0]*s<0.16)&(BVb[:,2]>zmin_+0.62*Hb_)&(BVb[:,2]<zmin_+0.80*Hb_)]
+        ap_.append(q_[int(np.argmin(q_[:,1]))])
+    zn=float((ap_[0][2]+ap_[1][2])/2); xn=float((abs(ap_[0][0])+abs(ap_[1][0]))/2); yn=float((ap_[0][1]+ap_[1][1])/2)
+    def fr(z,x=xn):
+        h=bvh.ray_cast(Vector((x,-1.0,z)),Vector((0,1,0)),2.0); return h[0].y if h[0] is not None else None
+    yrib=fr(zn-0.14) or yn+0.08; crease=zn-0.05
+    for k in range(1,80):
+        z_=zn-0.002*k; y_=fr(z_)
+        if y_ is not None and y_>=yrib-0.25*(yrib-yn): crease=z_; break
+    crease-=P.get('CUP_UNDER',0.006)
+    an=math.atan2(xn,-(yn-tcy_)); asd=an+P.get('STRAP_DA',0.55)
+    GH=P.get('GORE_H',0.028); TN=P.get('TOP_N',0.006); TS=P.get('TOP_S',0.035); WG=P.get('WING_H',0.028); BK=P.get('BACK_H',0.018)
+    def ztop(a):
+        a=abs(a); ag=P.get('GORE_A',0.07)
+        if a<ag: return crease+GH
+        if a<an: return crease+GH+(zn+TN-crease-GH)*sstep((a-ag)/(an-ag))
+        if a<asd: return zn+TN+(TS-TN)*float(sstep((a-an)/(asd-an)))
+        if a<math.pi/2+0.25: return zn+TS+(crease+WG-zn-TS)*float(sstep((a-asd)/(math.pi/2+0.25-asd)))
+        return crease+WG+(BK-WG)*float(sstep((a-math.pi/2-0.25)/(math.pi/2-0.25)))
+    def zbot(a): return crease
+    NRb=P.get('BRA_NR',120); NVb=P.get('BRA_NV',12); offb=P.get('BRA_OFF',0.0035)
+    def cast_(a,z,off):
+        dr=Vector((math.sin(a),-math.cos(a),0)); o_=Vector((0,tcy_,z))+dr*0.5
+        h=bvh.ray_cast(o_,-dr,0.6)
+        return (h[0]+h[1].normalized()*off) if h[0] is not None else None
+    bmB=bmesh.new(); uvB=bmB.loops.layers.uv.new('UVMap'); grid=[]
+    for k in range(NRb):
+        a=-math.pi+2*math.pi*k/NRb; lo,hi=zbot(a),ztop(a); col=[]
+        for j in range(NVb+1):
+            p_=cast_(a,lo+(hi-lo)*j/NVb,offb); col.append(bmB.verts.new(p_) if p_ is not None else None)
+        grid.append(col)
+    for k in range(NRb):
+        a_,b_=grid[k],grid[(k+1)%NRb]
+        for j in range(NVb):
+            q4=(a_[j],b_[j],b_[j+1],a_[j+1])
+            if all(v is not None for v in q4):
+                f_=bmB.faces.new(q4)
+                for li,(uu,vv) in zip(f_.loops,((k,j),(k+1,j),(k+1,j+1),(k,j+1))): li[uvB].uv=(uu/NRb,vv/NVb)
+    # lace trim along the top edge (darker grey, see-through lace like her sheet)
+    bmL=bmesh.new(); uvL=bmL.loops.layers.uv.new('UVMap'); prevL=None; LH=P.get('LACE_H',0.007)
+    for k in range(NRb+1):
+        a=-math.pi+2*math.pi*k/NRb; hi=ztop(a)
+        if abs(a)>math.pi/2+0.3: prevL=None; continue
+        p0=cast_(a,hi-0.002,offb+0.0006); p1=cast_(a,hi+LH,offb*0.7)
+        if p0 is None or p1 is None: prevL=None; continue
+        cur=(bmL.verts.new(p0),bmL.verts.new(p1))
+        if prevL: 
+            f_=bmL.faces.new((prevL[0],cur[0],cur[1],prevL[1]))
+            for li,(uu,vv) in zip(f_.loops,((k-1,0),(k,0),(k,1),(k-1,1))): li[uvL].uv=(uu/NRb*6,vv)
+        prevL=cur
+    for s in (1,-1):
+        pa=cast_(s*asd,ztop(asd)-0.002,offb); pb_=cast_(s*(math.pi-0.5),crease+BK-0.003,offb)
+        BRA_ATT[s]=(pa,pb_)
+    old=BRA; bpy.data.objects.remove(old)
+    me=bpy.data.meshes.new('Bra'); bmB.to_mesh(me); bmB.free(); BRA=bpy.data.objects.new('Bra',me); sc.collection.objects.link(BRA)
+    me.materials.append(bpy.data.materials['BraKnit']); BRA.parent=B
+    for p_ in me.polygons: p_.use_smooth=True
+    lm,lnt,lb=newmat('BraLace'); lb.inputs['Base Color'].default_value=(0.16,0.155,0.165,1); lb.inputs['Roughness'].default_value=0.6
+    vo=lnt.nodes.new('ShaderNodeTexVoronoi'); vo.inputs['Scale'].default_value=P.get('LACE_SCALE',260.0); tc=lnt.nodes.new('ShaderNodeTexCoord'); lnt.links.new(tc.outputs['UV'],vo.inputs['Vector'])
+    cr=lnt.nodes.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].position=0.25; cr.color_ramp.elements[1].position=0.45
+    lnt.links.new(vo.outputs['Distance'],cr.inputs[0]); lnt.links.new(cr.outputs[0],lb.inputs['Alpha'])
+    try: lm.blend_method='HASHED'
+    except Exception: pass
+    meL=bpy.data.meshes.new('BraLace'); bmL.to_mesh(meL); bmL.free(); LACE=bpy.data.objects.new('BraLace',meL); sc.collection.objects.link(LACE)
+    meL.materials.append(lm); LACE.parent=B
+    for p_ in meL.polygons: p_.use_smooth=True
+    rep['bra']={'apex':[list(map(float,a_)) for a_ in ap_],'crease':crease,'zn':zn,'apex_angle':an,'strap_angle':asd,'tris':tris(BRA),'lace_tris':tris(LACE)}
+    log('BRA generated',rep['bra'])
 bmn,bmx=wbb([BRA])
 def snap(p,off):
     h=bvh.find_nearest(p)
@@ -784,7 +931,16 @@ sh_l=B.data.bones['Left shoulder']; shz=(B.matrix_world@sh_l.tail_local).z
 for sgn in (1,-1):
     x=sgn*P.get('STRAP_X',0.055); pts=[]
     zt=bmx.z-0.004; zs=shz+0.03
-    for k in range(25):
+    att=BRA_ATT.get(sgn)
+    if att and att[0] is not None and att[1] is not None:
+        pa,pb=att; S=Vector((sgn*P.get('STRAP_XS',0.085),(pa.y+pb.y)/2,zs))
+        for k in range(25):
+            t=k/24.0
+            if t<=0.5: u=2*t; p_=Vector((pa.x+(S.x-pa.x)*u,pa.y+(S.y-pa.y)*u,pa.z+(S.z-pa.z)*math.sin(u*math.pi/2)))
+            else: u=2*t-1; p_=Vector((S.x+(pb.x-S.x)*u,S.y+(pb.y-S.y)*u,S.z+(pb.z-S.z)*(1-math.cos(u*math.pi/2))))
+            pts.append(snap(p_,0.0022))
+    else:
+      for k in range(25):
         t=k/24.0; a=math.pi*t
         y=-0.10*math.cos(a)+0.03; z=zt+(zs-zt)*math.sin(a)
         pts.append(snap(Vector((x+sgn*0.012*math.sin(a),y,z)),0.0022))
@@ -819,22 +975,23 @@ def strip(bm,ring,lo,hi,off):
     for i in range(len(rows)):
         a=rows[i]; b2=rows[(i+1)%len(rows)]
         for j in range(4): bm.faces.new((a[j],b2[j],b2[j+1],a[j+1]))
-bm=bmesh.new(); zb=bmn.z+P.get('BAND_DZ2',0.004); NR=72; ring=[]
-_ch=B.matrix_world@B.data.bones['Chest'].head_local if 'Chest' in B.data.bones else Vector((0,0,zb)); tcx,tcy=0.0,_ch.y
-bh=P.get('BAND_H',0.020); wing=P.get('BAND_WING',0.035)
-for k in range(NR):
-    a=2*math.pi*k/NR; x=0.25*math.sin(a); y=-0.25*math.cos(a)   # a=0 front, pi/2 left side, pi back
-    side=math.sin(a)**2
-    front=max(0.0,math.cos(a))
-    zl=zb-0.006; zh=zb+bh+wing*side**3-0.006*front
-    ring.append((x,y,zl,zh))
-strip(bm,ring,None,None,P.get('BAND_OFF',0.0030))
-_h=bvh.ray_cast(Vector((0,tcy+0.45,zb+bh*0.5)),Vector((0,-1,0)),0.6); cl=(_h[0]+Vector((0,0.0042,0))) if _h[0] is not None else snap(Vector((0,0.3,zb+bh*0.5)),0.0042)
-r=bmesh.ops.create_cube(bm,size=1.0)
-for v in r['verts']: v.co=Vector((v.co.x*0.016,v.co.y*0.003,v.co.z*bh*0.9))+cl
-pts=[0]
-uvl=bm.loops.layers.uv.new('UVMap')
-BAND=add_mesh('BraBand',bm,bpy.data.materials['BraKnit'],'Chest'); log('bra band pts',len(pts))
+if not P.get('BRA_GEN',True):
+    bm=bmesh.new(); zb=bmn.z+P.get('BAND_DZ2',0.004); NR=72; ring=[]
+    _ch=B.matrix_world@B.data.bones['Chest'].head_local if 'Chest' in B.data.bones else Vector((0,0,zb)); tcx,tcy=0.0,_ch.y
+    bh=P.get('BAND_H',0.020); wing=P.get('BAND_WING',0.035)
+    for k in range(NR):
+        a=2*math.pi*k/NR; x=0.25*math.sin(a); y=-0.25*math.cos(a)   # a=0 front, pi/2 left side, pi back
+        side=math.sin(a)**2
+        front=max(0.0,math.cos(a))
+        zl=zb-0.006; zh=zb+bh+wing*side**3-0.006*front
+        ring.append((x,y,zl,zh))
+    strip(bm,ring,None,None,P.get('BAND_OFF',0.0030))
+    _h=bvh.ray_cast(Vector((0,tcy+0.45,zb+bh*0.5)),Vector((0,-1,0)),0.6); cl=(_h[0]+Vector((0,0.0042,0))) if _h[0] is not None else snap(Vector((0,0.3,zb+bh*0.5)),0.0042)
+    r=bmesh.ops.create_cube(bm,size=1.0)
+    for v in r['verts']: v.co=Vector((v.co.x*0.016,v.co.y*0.003,v.co.z*bh*0.9))+cl
+    pts=[0]
+    uvl=bm.loops.layers.uv.new('UVMap')
+    BAND=add_mesh('BraBand',bm,bpy.data.materials['BraKnit'],'Chest'); log('bra band pts',len(pts))
 # ---------- shorts: lower the waistband onto the hips (compress the top band down, keep it on the skin)
 if P.get('SHORTS_DROP',0.035)>0:
     smn,smx=wbb([SH]); top=smx.z; z0=top-P.get('SHORTS_BAND',0.11); f=1-P['SHORTS_DROP']/(top-z0); moved=0
@@ -914,6 +1071,11 @@ if P.get('BOTTOM','thong')=='thong':
     bmR.loops.layers.uv.new('UVMap')
     RINGS=add_mesh('ThongRings',bmR,bpy.data.materials['Silver'],'Hips')
     bpy.data.objects.remove(SH); SH=TH
+if P.get('BRA_GEN',True):
+    for o_ in (BRA,globals().get('LACE')):
+        if o_ is None: continue
+        weights_from_body(o_); md=o_.modifiers.new('Armature','ARMATURE'); md.object=B
+    log('generated bra weighted from body')
 # ---------- keep clothes outside the (curvier) skin
 for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
     mw=o.matrix_world; mwi=mw.inverted(); pushed=0
@@ -1081,6 +1243,18 @@ if VARIANT in ('B','C'):
     if r_dec<0.999:
         md=MH.modifiers.new('Dec','DECIMATE'); md.ratio=r_dec; sel([MH]); bpy.ops.object.modifier_apply(modifier='Dec')
     for p in MH.data.polygons: p.use_smooth=True
+    # v3.3 neck seam: the Meshy neck's cut edge flares/tucks onto our body's neck ellipse (+1.5%), fading out over MB_SEAM_H
+    if P.get('MB_SEAM',True):
+        zb_=zc_-P.get('MB_NECK_KEEP',0.03); V=wco(MH); BVs=wco(BODY); SH_=P.get('MB_SEAM_H',0.022)
+        bqs=neck_at(BVs,zb_+0.003,0.004,NC,NRAD*1.5) or b_n
+        ms=neck_at(V,zb_+0.006,0.006,(bqs['cx'],bqs['cy']),max(bqs['rx'],bqs['ry'])*P.get('MB_SEAM_R',1.3))
+        if ms:
+            dx=V[:,0]-ms['cx']; dy_=V[:,1]-ms['cy']; th=np.arctan2(dy_/max(ms['ry'],1e-4),dx/max(ms['rx'],1e-4))
+            k_=P.get('MB_SEAM_OUT',1.015); tx=bqs['cx']+np.cos(th)*bqs['rx']*k_; ty=bqs['cy']+np.sin(th)*bqs['ry']*k_
+            tt=1-sstep((V[:,2]-zb_)/SH_)
+            sk=(np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))<1.35)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)
+            Ds=np.zeros_like(V); Ds[:,0]=(tx-V[:,0])*tt*sk; Ds[:,1]=(ty-V[:,1])*tt*sk; wdelta(MH,Ds); V=wco(MH)
+            HF['B_seam']={'body':bqs,'meshy':ms,'verts':int(sk.sum()),'max_move':float(np.abs(Ds).max())}; log('B neck seam',HF['B_seam'])
     # rig it to the Head bone (neck stub blends into Neck)
     vg=MH.vertex_groups.new(name='Head'); vn=MH.vertex_groups.new(name='Neck'); V=wco(MH)
     for i,p in enumerate(V):
@@ -1093,7 +1267,7 @@ if VARIANT in ('B','C'):
         mrx=(m2[:,0].max()-m2[:,0].min())/2; mry=(m2[:,1].max()-m2[:,1].min())/2; mcy=(m2[:,1].max()+m2[:,1].min())/2
         BVn=wco(BODY); bq=neck_at(BVn,zc_-0.005,0.006,NC,NRAD*1.5) or b_n
         f_=min(1.0,0.93*min(mrx/max(bq['rx'],1e-4),mry/max(bq['ry'],1e-4)))
-        rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02)*(rr<NRAD*1.45)
+        rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=(sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)+0.002))/0.018) if P.get('MB_SEAM',True) else sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02))*(rr<NRAD*1.45)
         Dn=np.zeros_like(BVn); Dn[:,0]=(bq['cx']+(BVn[:,0]-bq['cx'])*f_-BVn[:,0])*w_; Dn[:,1]=(mcy+(BVn[:,1]-bq['cy'])*f_-BVn[:,1])*w_; wdelta(BODY,Dn)
         HF['B_neck_tuck']={'factor':f_,'meshy_neck':[mrx,mry,mcy],'body_neck':bq}
     KEEP_HAIR=(VARIANT=='C')
@@ -1103,6 +1277,9 @@ if VARIANT in ('B','C'):
     # Meshy skin tone -> our body's, same skin shader; sharpen its soft texture (unsharp mask)
     try:
         mmat=[sl.material for sl in MH.material_slots if sl.material and sl.material.use_nodes][0]
+        _a0=None
+        if img_ is not None:
+            _a0=np.empty(img_.size[0]*img_.size[1]*4,dtype=np.float32); img_.pixels.foreach_get(_a0); _a0=_a0.reshape(img_.size[1],img_.size[0],4)
         if img_ is not None and P.get('MB_SHARPEN',1.2):
             W_,H_=img_.size; a=np.empty(W_*H_*4,dtype=np.float32); img_.pixels.foreach_get(a); a=a.reshape(H_,W_,4)
             k=np.array([1,4,6,4,1],dtype=np.float32); k/=k.sum(); bl=a[:,:,:3].copy()
@@ -1113,6 +1290,38 @@ if VARIANT in ('B','C'):
                 bl2=sum(np.roll(bl2,s-2,axis=ax)*k[s] for s in range(5))
             a[:,:,:3]=np.clip(a[:,:,:3]+P.get('MB_SHARPEN',1.2)*(a[:,:,:3]-bl2),0,1)
             img_.pixels.foreach_set(a.ravel()); img_.update(); img_.pack(); log('meshy texture sharpened',W_,H_)
+        # v3.3 crisp face: learned 4x super-resolution of the Meshy FACE area of its texture (eyes/brows/lips), blended back by a UV mask
+        if _a0 is not None and P.get('MB_SR',True):
+            try:
+                import subprocess, tempfile
+                W_,H_=img_.size; me_=MH.data; Mw=np.array(MH.matrix_world); Ht_=HF['target_head_total']
+                pc=np.array([Mw[:3,:3]@np.array(p.center)+Mw[:3,3] for p in me_.polygons]); pn=np.array([Mw[:3,:3]@np.array(p.normal) for p in me_.polygons])
+                zlo=zc_-0.012; zhi=zc_+P.get('MB_SR_TOP',0.66)*Ht_
+                fz=(pc[:,2]>zlo)&(pc[:,2]<zhi)&(np.abs(pc[:,0]-b_n['cx'])<P.get('MB_SR_HW',0.075))
+                nose_=pc[fz&(np.abs(pc[:,0]-b_n['cx'])<0.02)]; fy=float(nose_[:,1].min()) if len(nose_) else float(pc[fz][:,1].min())
+                sel_=fz&(pn[:,1]<-0.15)&(pc[:,1]<fy+P.get('MB_SR_DEPTH',0.07))
+                uvd=me_.uv_layers.active.data; tri_=[]
+                for pi_ in np.where(sel_)[0]:
+                    p=me_.polygons[int(pi_)]; uvs=[(uvd[li].uv[0]%1*W_,uvd[li].uv[1]%1*H_) for li in p.loop_indices]
+                    for t_ in range(1,len(uvs)-1): tri_.append([uvs[0],uvs[t_],uvs[t_+1]])
+                tri_=np.array(tri_,dtype=np.float32)
+                if len(tri_):
+                    pad=24; x0=max(0,int(tri_[:,:,0].min())-pad); y0=max(0,int(tri_[:,:,1].min())-pad); x1=min(W_,int(tri_[:,:,0].max())+pad); y1=min(H_,int(tri_[:,:,1].max())+pad)
+                    td=tempfile.mkdtemp(); np.save(td+'/crop.npy',_a0[y0:y1,x0:x1]); tri_[:,:,0]-=x0; tri_[:,:,1]-=y0; np.save(td+'/tris.npy',tri_)
+                    env_={k:v for k,v in os.environ.items() if k not in ('PYTHONHOME','PYTHONPATH')}
+                    srp=os.path.join(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else 'avatar-v3','sr.py')
+                    if not os.path.exists(srp): srp='avatar-v3/sr.py'
+                    r_=subprocess.run(['python3',srp,td,str(P.get('MB_SR_F',3)),P.get('MB_SR_MODEL','/tmp/sr/realesr-general-x4v3.pth'),str(P.get('MB_SR_MIX',1.0))],capture_output=True,text=True,timeout=600,env=env_)
+                    log('SR',r_.returncode,(r_.stdout+r_.stderr)[-900:])
+                    if os.path.exists(td+'/out.npy'):
+                        o_=np.load(td+'/out.npy'); cur=np.empty(W_*H_*4,dtype=np.float32); img_.pixels.foreach_get(cur); cur=cur.reshape(H_,W_,4)
+                        m_=o_[:,:,4:5]; cur[y0:y1,x0:x1,:3]=cur[y0:y1,x0:x1,:3]*(1-m_)+o_[:,:,:3]*m_
+                        img_.pixels.foreach_set(cur.ravel()); img_.update(); img_.pack()
+                        try:
+                            import shutil; os.makedirs(OUT+'/tex',exist_ok=True); shutil.copy(td+'/before.png',OUT+'/tex/meshy_face_before.png'); shutil.copy(td+'/after.png',OUT+'/tex/meshy_face_after.png')
+                        except Exception as e2: log('SR copy',e2)
+                        HF['B_sr']={'tris':int(len(tri_)),'box':[x0,y0,x1,y1],'tex':[W_,H_]}; log('meshy face SR applied',HF['B_sr'])
+            except Exception as e: log('SRERR',repr(e))
         sk_m=np.median(cv[skinv],0) if 'cv' in dir() and skinv.sum()>50 else None
         mt=(1,1,1)
         if sk_m is not None and BODY_MED is not None: mt=tuple(float(min(1.25,max(0.8,BODY_MED[k_]/max(sk_m[k_],1e-3))))*PINK[k_] for k_ in range(3))
@@ -1175,6 +1384,14 @@ for sd,sgn in (('L',1),('R',-1)):
         for j,a_ in ((1,P.get('CURL1',14)),(2,P.get('CURL2',24)),(3,P.get('CURL3',16))):
             wrot(f'{f_}{j}_{sd}',sgn*a_*(1.0+0.15*('Ring' in f_ or 'Little' in f_)),'Y')
     for j in (1,2): wrot(f'Thumb{j}_{sd}',sgn*P.get('THUMB_CURL',10),'Y')
+# v3.3 legs closer together like her sheet (knees nearly touch): adduct each thigh about its hip, feet back to flat
+LGI=P.get('LEG_IN',0.0)
+if LGI:
+    for nm_,sgn in (('Left leg',1),('Right leg',-1)): wrot(nm_,sgn*LGI,'Y')
+    for sd_,sgn in (('Left',1),('Right',-1)):
+        for nm_ in (sd_+' ankle',sd_+' foot'):
+            if nm_ in B.pose.bones: wrot(nm_,-sgn*LGI,'Y'); break
+    log('legs adducted',LGI)
 
 bpy.ops.object.mode_set(mode='OBJECT')
 if P['RENDER']:
