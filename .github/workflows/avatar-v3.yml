@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [A0, A1, A2, A3] }
+      matrix: { variant: [A0, A2] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -106,4 +106,52 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-5
+
+  qa:
+    # run 6 QA gates (Saidie 12:48-12:51): helical 360 sweep (shirt on: shards 0-3, shirt off: shards 4-5) and the rig motion test (shards 6-9)
+    runs-on: ubuntu-latest
+    timeout-minutes: 58
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { qa: sweep, variant: A0, shard: 0, shards: 4 }
+          - { qa: sweep, variant: A0, shard: 1, shards: 4 }
+          - { qa: sweep, variant: A0, shard: 2, shards: 4 }
+          - { qa: sweep, variant: A0, shard: 3, shards: 4 }
+          - { qa: sweep, variant: A2, shard: 0, shards: 2 }
+          - { qa: sweep, variant: A2, shard: 1, shards: 2 }
+          - { qa: rigqa, variant: A0, shard: 0, shards: 4 }
+          - { qa: rigqa, variant: A0, shard: 1, shards: 4 }
+          - { qa: rigqa, variant: A0, shard: 2, shards: 4 }
+          - { qa: rigqa, variant: A0, shard: 3, shards: 4 }
+    env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender 4.4
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+      - name: Inputs (private, no Meshy)
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          pip install -q huggingface_hub pillow numpy > /dev/null
+          python3 -c "
+          import os; from huggingface_hub import snapshot_download
+          p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Meshy*','*.glb','*Normal_OpenGL.png','*Normal.png','*Height.png'])
+          print(p)"
+          cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; mkdir -p /tmp/out/proof
+      - name: Blender QA
+        run: |
+          timeout -k 10 3000 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/assemble.py -- /tmp/in /tmp/out > /tmp/out/qa-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "^\[v3\] (EYES|chain|QA|still 0|rigqa frame)|Error|Traceback" /tmp/out/qa-log.txt | cut -c1-300 | tail -60 || true
+      - name: Upload QA (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          rm -rf /tmp/out/proof/skinmatch-cal-* ; du -sh /tmp/out
+          python3 -c "
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+# rev v3.7-assemble-6
