@@ -1,505 +1,901 @@
 {
  "shots": [
   {
-   "name": "d-dark-1-home",
+   "name": "d-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-2-work",
+   "name": "d-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-2b-work-pairs",
+   "name": "d-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-3-now",
+   "name": "d-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-3b-now-more",
+   "name": "d-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-4-projects",
+   "name": "d-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-4b-projects-more",
+   "name": "d-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-5-plex",
+   "name": "d-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-5b-plex-code",
+   "name": "d-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-6-emmi",
+   "name": "d-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-7-resume-sec",
+   "name": "d-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-8-contact",
+   "name": "d-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-9-resume-page",
+   "name": "d-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-dark-10-arch-demo",
+   "name": "d-dark-12-resume",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": true,
-   "windows": 1,
-   "navResume": 0
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "d-dark-11-arch-menu-resume",
+   "name": "d-dark-13-resume-logos",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "d-dark-11b-arch-menu-resume-bottom",
+   "name": "d-dark-12b-resume-full",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "d-light-1-home",
+   "name": "d-dark-14-plex",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "d-light-2-work",
+   "name": "d-dark-15-plex-docs",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "d-light-3-now",
+   "name": "p-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-light-4-projects",
+   "name": "p-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-light-5-plex",
+   "name": "p-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-light-8-contact",
+   "name": "p-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "d-light-9-resume-page",
+   "name": "p-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-1-home",
+   "name": "p-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-2-work",
+   "name": "p-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-2b-work-pairs",
+   "name": "p-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-3-now",
+   "name": "p-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-4-projects",
+   "name": "p-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-4b-projects-more",
+   "name": "p-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-4c-projects-3",
+   "name": "p-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-4d-projects-4",
+   "name": "p-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-4e-projects-5",
+   "name": "p-dark-12-resume",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-dark-5-plex",
+   "name": "p-dark-13-resume-logos",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-dark-5b-plex-code",
+   "name": "p-dark-12b-resume-full",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-dark-6-emmi",
+   "name": "p-dark-14-plex",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-dark-8-contact",
+   "name": "p-dark-15-plex-docs",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-dark-9-resume-page",
+   "name": "d-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-10-arch-demo",
+   "name": "d-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": true,
-   "windows": 1,
-   "navResume": 0
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-11-arch-menu-resume",
+   "name": "d-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-dark-11b-arch-menu-resume-bottom",
+   "name": "d-light-09-companies",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-light-1-home",
+   "name": "d-light-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-light-3-now",
+   "name": "d-light-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-light-4-projects",
+   "name": "d-light-12-resume",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-light-4b-projects-more",
+   "name": "d-light-13-resume-logos",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   },
   {
-   "name": "p-light-4c-projects-3",
+   "name": "p-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-light-8-contact",
+   "name": "p-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
   },
   {
-   "name": "p-light-9-resume-page",
+   "name": "p-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "peter": false,
-   "dock": false,
-   "windows": 0,
-   "navResume": 1
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
+  },
+  {
+   "name": "p-light-09-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
+  },
+  {
+   "name": "p-light-10-panel-open",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
+  },
+  {
+   "name": "p-light-11-footer-badge",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/explore-terminal.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dev-mama.jpg",
+    "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/takeover.jpg"
+   ],
+   "peter": false
+  },
+  {
+   "name": "p-light-12-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
+  },
+  {
+   "name": "p-light-13-resume-logos",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false
   }
  ],
  "errors": [],
- "clip": {
-  "desk-dark": {
-   "count": 0,
-   "items": []
+ "checks": {
+  "d-dark-panel": {
+   "h": 178,
+   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
   },
-  "desk-light": {
-   "count": 0,
-   "items": []
+  "d-dark-badge": {
+   "w": 380,
+   "right_gap": 32,
+   "bottom": 882,
+   "vh": 900,
+   "docBottomGap": 18
   },
-  "phone-dark": {
-   "count": 0,
-   "items": []
+  "d-dark-resume-logos": [
+   [
+    "/logos/resonite.png",
+    128
+   ],
+   [
+    "/logos/yellow-dog-man-studios.png",
+    256
+   ],
+   [
+    "/logos/emmico.png",
+    200
+   ],
+   [
+    "/logos/fiverr.png",
+    496
+   ],
+   [
+    "/logos/paragon-sysco.png",
+    240
+   ],
+   [
+    "/logos/sysco.png",
+    350
+   ],
+   [
+    "/logos/giant-eagle.png",
+    320
+   ],
+   [
+    "/logos/perfect-power-wash.png",
+    225
+   ],
+   [
+    "/logos/home-depot.png",
+    320
+   ],
+   [
+    "/logos/osl-retail.png",
+    321
+   ],
+   [
+    "/logos/applebees.png",
+    320
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/phaa.png",
+    320
+   ],
+   [
+    "/logos/bc3.png",
+    225
+   ],
+   [
+    "/logos/landmark.png",
+    344
+   ],
+   [
+    "/logos/ave-maria.png",
+    295
+   ]
+  ],
+  "d-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
+  "p-dark-panel": {
+   "h": 247,
+   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
   },
-  "phone-light": {
-   "count": 0,
-   "items": []
-  }
- },
- "archResume": {
-  "desk": {
-   "url": "http://localhost:3000/resume",
-   "windows": 0
+  "p-dark-badge": {
+   "w": 320,
+   "right_gap": 16,
+   "bottom": 826,
+   "vh": 844,
+   "docBottomGap": 18
   },
-  "phone": {
-   "url": "http://localhost:3000/resume",
-   "windows": 0
-  }
- },
- "videos": [
-  {
-   "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 5275341,
-   "duration": 14.6,
-   "size": {
-    "width": 1600,
-    "height": 900
-   }
+  "p-dark-resume-logos": [
+   [
+    "/logos/resonite.png",
+    128
+   ],
+   [
+    "/logos/yellow-dog-man-studios.png",
+    256
+   ],
+   [
+    "/logos/emmico.png",
+    200
+   ],
+   [
+    "/logos/fiverr.png",
+    496
+   ],
+   [
+    "/logos/paragon-sysco.png",
+    240
+   ],
+   [
+    "/logos/sysco.png",
+    350
+   ],
+   [
+    "/logos/giant-eagle.png",
+    320
+   ],
+   [
+    "/logos/perfect-power-wash.png",
+    225
+   ],
+   [
+    "/logos/home-depot.png",
+    320
+   ],
+   [
+    "/logos/osl-retail.png",
+    321
+   ],
+   [
+    "/logos/applebees.png",
+    320
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/phaa.png",
+    320
+   ],
+   [
+    "/logos/bc3.png",
+    225
+   ],
+   [
+    "/logos/landmark.png",
+    344
+   ],
+   [
+    "/logos/ave-maria.png",
+    295
+   ]
+  ],
+  "p-dark-arch-redirect": "http://localhost:3000/?theme=dark#ncom",
+  "d-light-panel": {
+   "h": 178,
+   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
   },
-  {
-   "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 5815510,
-   "duration": 14.12,
-   "size": {
-    "width": 402,
-    "height": 874
-   }
+  "d-light-badge": {
+   "w": 380,
+   "right_gap": 32,
+   "bottom": 882,
+   "vh": 900,
+   "docBottomGap": 18
   },
-  {
-   "file": "video-d-light-home-scroll.mp4",
-   "bytes": 5282906,
-   "duration": 14.48,
-   "size": {
-    "width": 1600,
-    "height": 900
-   }
+  "d-light-resume-logos": [
+   [
+    "/logos/resonite.png",
+    128
+   ],
+   [
+    "/logos/yellow-dog-man-studios.png",
+    256
+   ],
+   [
+    "/logos/emmico.png",
+    200
+   ],
+   [
+    "/logos/fiverr.png",
+    496
+   ],
+   [
+    "/logos/paragon-sysco.png",
+    240
+   ],
+   [
+    "/logos/sysco.png",
+    350
+   ],
+   [
+    "/logos/giant-eagle.png",
+    320
+   ],
+   [
+    "/logos/perfect-power-wash.png",
+    225
+   ],
+   [
+    "/logos/home-depot.png",
+    320
+   ],
+   [
+    "/logos/osl-retail.png",
+    321
+   ],
+   [
+    "/logos/applebees.png",
+    320
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/phaa.png",
+    320
+   ],
+   [
+    "/logos/bc3.png",
+    225
+   ],
+   [
+    "/logos/landmark.png",
+    344
+   ],
+   [
+    "/logos/ave-maria.png",
+    295
+   ]
+  ],
+  "p-light-panel": {
+   "h": 247,
+   "text": "EMMICO · VRCHAT · CARPALOS\n\ncarpalOS: a quick menu on your hand\n\ncarpalOS is an avatar-customization quick menu. The rad"
   },
-  {
-   "file": "video-p-light-home-scroll.mp4",
-   "bytes": 5848857,
-   "duration": 14.12,
-   "size": {
-    "width": 402,
-    "height": 874
-   }
-  }
- ],
- "resume": {
-  "status": 200,
-  "type": "application/pdf",
-  "bytes": 9485,
-  "info": "Title:           Saidie Newara - Resume\nCustom Metadata: no\nMetadata Stream: no\nTagged:          no\nUserProperties:  no\nSuspects:        no\nForm:            none\nJavaScript:      no\nPages:           2\nEncrypted:       no\nPage size:       612 x 792 pts (letter)\nPage rot:        0\nFile size:       9485 bytes\nOptimized:       no\nPDF version:     1.4\n",
-  "text": "Saidie Quinn Newara\nXR UI/UX concept designer · Graphics & UI concepts\nPittsburgh, PA · official_emmi@outlook.com · github.com/pfn000 · X @SaidieQN\n\n\nPROFILE\nGraphics and UI/UX concept designer working across visual identity, spatial interfaces, illustration and\ninteractive worlds. Put me in a room with a bunch of geniuses and nerds and I can quickly sketch up\nconcepts for their UIs and UXs, then prototype them in XR.\n\n\nEXPERIENCE\n\nCode Development — Resonite                                                                     Nov 2022 – Jan 2025\nFreelance & Dev Volunteer · Yellow Dog Man Studios\nWorked privately with FrooxEngine to help develop and migrate the game engine graphics & logic code from\n\"ProtoFlux\" to \"LogiX\". Focused on prototyping, coding, troubleshooting, private collaboration, and handling\nlegally licensed code. Promoted LogiX, tutored, trained, and mentored future team members and moderators.\nRan an open call push-chain when shipping patches and testing, and assisted with C# and game development in\nopen-ended co-work through the platform transition.\n\nFounder — EmmiCO (3D & Commissions)                                                            Feb 2020 – May 2023\nEmmiCO Systems · Fiverr Contracts & Commissions · Pittsburgh, PA · Remote\nSelf-established studio building custom 3D modeling commissions and virtual content. Delivered contracted 3D\nwork through Fiverr using Unity, the VRChat Creator Companion SDK, Blender, VSCode, and the Meta Quest\nSDK / Quest 3 Pro headset.\n\nNon-CDL Local Delivery Driver                                                                    Feb 2023 – Jul 2024\nParagon Foods — Sysco\nRan delivery routes efficiently, meeting or exceeding route times in all weather and visibility conditions. Handled\npallet jacks, electric jacks, dollies, and gate lifts; performed pre- and post-trip inspections per PA DOT regulations\nand Sysco policy. Frequently lifted, pushed, or moved product 1–75 lbs (up to 100 lbs).\n\nPrepared Foods Associate                                                                        Oct 2023 – Dec 2023\nGiant Eagle, Inc.\nMaintained food safety and hygiene routines, temperature checks, and code-date procedures. Handled stocking,\nmerchandising, customer service, cashier duties, and phone orders. Served alcohol under a certified PA\nrestaurant serving license.\n\nTechnician (Seasonal)                                                                          May 2023 – Aug 2023\nPerfect Power Wash\nPower washed walls, treated roofs, concrete, and fences for commercial and residential customers. Pulled\ninventory, loaded trucks, set up equipment, and navigated a light box truck through urban, residential, and\ninterstate traffic.\n\n\n\n\n                                                                                                             1/2\n\fAppliance Retailer                                                                          Mar 2023 – Apr 2023\nThe Home Depot\nAssisted customers in selecting large and small appliances, located product, and adjusted product displays.\n\nMobile Expert                                                                               Jun 2022 – Dec 2022\nOSL Retail Services\nEducated buyers on mobile devices and carrier plans, sold phones, accessories, and prepaid cards, and\nmonitored device inventory. Registered, set up, and troubleshot phones and plans.\n\nGeneral Utilities Associate & Food Prep                                                      Jul 2020 – Jun 2022\nApplebee's Neighborhood Grill + Bar\nKept a clean and orderly environment per Safe-Serve protocols, prepared food, cleaned plates and cutlery, and\nmanaged supply placement and quantity.\n\n\nSKILLS\nEngine & XR\nUnity 3D · C# · ProtoFlux / LogiX · VRChat Creator Companion · Meta Quest SDK · Spatial UI/UX\n\nSystems & Code\nPleX Code (language design) · Compiler / memory management · Python · Node.js · Git & GitHub · Bare-metal\nconcepting\n\nCreative\nBlender · 3D Modeling · VRChat world building · VTuber production · Live streaming · Community management\n\nOperations\nLogistics & delivery · Route optimization · Inventory management · Customer service · Food safety · Team\nmentoring\n\n\nEDUCATION & CERTIFICATES\n\nCertificate — Graphic Design                                                                            Dec 2022\nAlison\n\nCertificate — Video Editing 102                                                                         Dec 2022\nAlison\n\nHigh School Diploma · 3.5 GPA                                                                                  2017\nPA Homeschoolers Association Program\n\nGeneral Studies                                                                                     2017 – 2018\nBC3 — Cranberry Township, PA\n\nGeneral Studies                                                                                               ~2018\nLandmark College — Putney, VT\n\nExercise Phys to Communications                                                                     2019 – 2021\nAve Maria University — Ave Maria, FL\n\n\n                                                                                                        2/2\n\f",
-  "pages": [
-   "resume-pdf-page-1.png",
-   "resume-pdf-page-2.png"
+  "p-light-badge": {
+   "w": 320,
+   "right_gap": 16,
+   "bottom": 826,
+   "vh": 844,
+   "docBottomGap": 18
+  },
+  "p-light-resume-logos": [
+   [
+    "/logos/resonite.png",
+    128
+   ],
+   [
+    "/logos/yellow-dog-man-studios.png",
+    256
+   ],
+   [
+    "/logos/emmico.png",
+    200
+   ],
+   [
+    "/logos/fiverr.png",
+    496
+   ],
+   [
+    "/logos/paragon-sysco.png",
+    240
+   ],
+   [
+    "/logos/sysco.png",
+    350
+   ],
+   [
+    "/logos/giant-eagle.png",
+    320
+   ],
+   [
+    "/logos/perfect-power-wash.png",
+    225
+   ],
+   [
+    "/logos/home-depot.png",
+    320
+   ],
+   [
+    "/logos/osl-retail.png",
+    321
+   ],
+   [
+    "/logos/applebees.png",
+    320
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/alison.png",
+    180
+   ],
+   [
+    "/logos/phaa.png",
+    320
+   ],
+   [
+    "/logos/bc3.png",
+    225
+   ],
+   [
+    "/logos/landmark.png",
+    344
+   ],
+   [
+    "/logos/ave-maria.png",
+    295
+   ]
   ]
  }
 }
