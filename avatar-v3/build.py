@@ -459,6 +459,18 @@ def skin_detail(mat,ao=None):
     b.inputs['Roughness'].default_value=P.get('SKIN_ROUGH_ALL',0.5); b.inputs['Coat Weight'].default_value=P.get('SKIN_COAT_ALL',0.05); b.inputs['Specular IOR Level'].default_value=0.45
     b.inputs['Subsurface Weight'].default_value=P.get('SSS_W',0.15); b.inputs['Subsurface Radius'].default_value=tuple(P.get('SSS_RAD',(1.0,0.4,0.25))); b.inputs['Subsurface Scale'].default_value=P.get('SSS_SCALE',0.012)
     if P.get('COAT_R') is not None: b.inputs['Coat Roughness'].default_value=P['COAT_R']
+    if mat.name.lower().startswith('face'): b.inputs['Coat Weight'].default_value*=P.get('FACE_COAT_K',1.0)
+    if P.get('SIDE_COOL'):
+        # v3.4: surfaces turning away from the camera/key (limb sides, under-curves) shift to a cooler, less saturated tint -> no salmon falloff
+        lw=nt.nodes.new('ShaderNodeLayerWeight'); lw.inputs['Blend'].default_value=0.5
+        mr=nt.nodes.new('ShaderNodeMapRange'); mr.inputs[1].default_value=P.get('SIDE_LO',0.25); mr.inputs[2].default_value=0.95; mr.inputs[4].default_value=P['SIDE_COOL']; nt.links.new(lw.outputs['Facing'],mr.inputs[0])
+        lk2=[l for l in nt.links if l.to_socket==b.inputs['Base Color']]
+        if lk2:
+            src2=lk2[0].from_socket; nt.links.remove(lk2[0])
+            hs2=nt.nodes.new('ShaderNodeHueSaturation'); hs2.inputs['Saturation'].default_value=P.get('SIDE_SAT',0.7); nt.links.new(src2,hs2.inputs['Color'])
+            ml=nt.nodes.new('ShaderNodeMix'); ml.data_type='RGBA'; ml.blend_type='MULTIPLY'; ml.inputs['Factor'].default_value=1.0; ml.inputs['B'].default_value=(*P.get('SIDE_TINT',(0.86,0.9,1.0)),1); nt.links.new(hs2.outputs['Color'],ml.inputs['A'])
+            mx2=nt.nodes.new('ShaderNodeMix'); mx2.data_type='RGBA'; nt.links.new(mr.outputs[0],mx2.inputs['Factor']); nt.links.new(src2,mx2.inputs['A']); nt.links.new(ml.outputs['Result'],mx2.inputs['B'])
+            nt.links.new(mx2.outputs['Result'],b.inputs['Base Color'])
     if P.get('SKIN_SPEC') is not None: b.inputs['Specular IOR Level'].default_value=P['SKIN_SPEC']
 def img_skin_median(im):
     if im is None or im.size[0]==0: return None
@@ -995,12 +1007,22 @@ for sgn in (1,-1):
 # bow at the center gore
 gv=[BRA.matrix_world@v.co for v in BRA.data.vertices if abs((BRA.matrix_world@v.co).x)<0.01]
 if gv and P.get('BOW',True):
-    g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
-    for sx in (-1,1):
-        r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
-        for v in r['verts']: _bs=P.get('BOW_S',1.0); v.co=Vector((v.co.x*0.0038*_bs,v.co.y*0.0016*_bs,v.co.z*0.0026*_bs))+gc+Vector((sx*0.0038*_bs,0,0))
-    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0016*P.get('BOW_S',1.0))
-    for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
+    g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01)); _bs=P.get('BOW_S',1.0)
+    if P.get('BOW_V2',False):
+        # v3.4 bow: two flat tapered loops angled up-out, a knot, two short tails angled down-out (not two buttons)
+        def ell(c,sx_,sy_,sz_,ang):
+            r=bmesh.ops.create_uvsphere(bm,u_segments=10,v_segments=6,radius=1.0); R=Matrix.Rotation(ang,3,'Y')
+            for v in r['verts']: v.co=R@Vector((v.co.x*sx_,v.co.y*sy_,v.co.z*sz_))+c
+        for sx in (-1,1):
+            ell(gc+Vector((sx*0.0052*_bs,0,0.0012*_bs)),0.0050*_bs,0.0012*_bs,0.0024*_bs,-sx*0.30)
+            ell(gc+Vector((sx*0.0030*_bs,0.0002,-0.0052*_bs)),0.0011*_bs,0.0009*_bs,0.0045*_bs,sx*0.35)
+        ell(gc+Vector((0,-0.0008,0)),0.0016*_bs,0.0014*_bs,0.0018*_bs,0.0)
+    else:
+        for sx in (-1,1):
+            r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
+            for v in r['verts']: v.co=Vector((v.co.x*0.0038*_bs,v.co.y*0.0016*_bs,v.co.z*0.0026*_bs))+gc+Vector((sx*0.0038*_bs,0,0))
+        r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0016*_bs)
+        for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
 # v3.1 bra: ONE continuous garment — a conforming knit underband all the way round (overlapping the cup bottoms), side wings up to the cups, back clasp
@@ -1485,7 +1507,7 @@ if VARIANT in ('B','C'):
                 # sharp upper lash line: thick at the outer half, with a wing past the outer corner
                 LT=P.get('LASH_T',0.06); th=LT*(0.55+0.9*np.clip((u+0.2)/1.2,0,1))
                 ul=(v>=up-0.012)&(v<up+th)&(u>-1.02)&(u<1.0)
-                wing=(u>=0.92)&(u<1.0+P.get('WING',0.22))&(np.abs(v-(EH*0.05+TILT*0.25+(u-0.92)*P.get('WING_UP',0.55)))<th*np.clip(1-(u-0.92)/(P.get('WING',0.22)+0.08),0,1)*0.9)
+                wing=(u>=0.92)&(u<1.0+P.get('WING',0.22))&(np.abs(v-(EH*(1-0.92**2)**0.62+TILT*0.96*0.25+0.5*LT+(u-0.92)*P.get('WING_UP',0.55)))<th*np.clip(1-(u-0.92)/(P.get('WING',0.22)+0.08),0,1)*0.9)
                 ll=(v<=lo+0.006)&(v>lo-P.get('LOWLASH_T',0.022))&(np.abs(u)<0.95)
                 lash=ul|wing; col=np.where(lash[...,None],np.array([0.018,0.016,0.02]),col); col=np.where((ll&~lash)[...,None],np.array([0.20,0.17,0.17]),col)
                 a=(inside|lash|ll).astype(np.float32)
@@ -1594,7 +1616,7 @@ if VARIANT in ('B','C'):
                 spc=nt_.nodes.new('ShaderNodeSeparateColor'); nt_.links.new(tn_[0].outputs[0],spc.inputs[0])
                 sb_=nt_.nodes.new('ShaderNodeMath'); sb_.operation='SUBTRACT'; nt_.links.new(spc.outputs[0],sb_.inputs[0]); nt_.links.new(spc.outputs[2],sb_.inputs[1])
                 mr_=nt_.nodes.new('ShaderNodeMapRange'); mr_.inputs[1].default_value=0.015; mr_.inputs[2].default_value=0.07; nt_.links.new(sb_.outputs[0],mr_.inputs[0])
-                cw_=nt_.nodes.new('ShaderNodeMath'); cw_.operation='MULTIPLY'; cw_.inputs[1].default_value=bb_.inputs['Coat Weight'].default_value; nt_.links.new(mr_.outputs[0],cw_.inputs[0]); nt_.links.new(cw_.outputs[0],bb_.inputs['Coat Weight'])
+                cw_=nt_.nodes.new('ShaderNodeMath'); cw_.operation='MULTIPLY'; cw_.inputs[1].default_value=bb_.inputs['Coat Weight'].default_value*P.get('MB_COAT_K',1.0); nt_.links.new(mr_.outputs[0],cw_.inputs[0]); nt_.links.new(cw_.outputs[0],bb_.inputs['Coat Weight'])
                 rg_=nt_.nodes.new('ShaderNodeMapRange'); rg_.inputs[3].default_value=P.get('MB_HAIR_ROUGH',0.55); rg_.inputs[4].default_value=bb_.inputs['Roughness'].default_value; nt_.links.new(mr_.outputs[0],rg_.inputs[0]); nt_.links.new(rg_.outputs[0],bb_.inputs['Roughness'])
                 log('meshy gloss masked to skin')
     except Exception as e: log('MBTONEERR',e)

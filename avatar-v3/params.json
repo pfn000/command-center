@@ -80,11 +80,11 @@
  },
  "SAMPLES": 40,
  "PINK": [
-  1.18,
-  0.87,
-  0.62
+  1.16,
+  0.88,
+  0.68
  ],
- "SKIN_SAT": 1.15,
+ "SKIN_SAT": 1.05,
  "EYE_SX": 1.0,
  "EYE_SZ": 1.0,
  "BUN_DY": 0.1,
@@ -160,17 +160,17 @@
  "MB_HEAD_SCALE": 1.077,
  "ARM_DOWN": 79,
  "ELBOW_BEND": -12,
- "SKIN_ROUGH_ALL": 0.38,
- "SKIN_COAT_ALL": 0.35,
+ "SKIN_ROUGH_ALL": 0.42,
+ "SKIN_COAT_ALL": 0.3,
  "AO_STR": 0.8,
  "AO_DIST": 0.05,
  "WORLD_E": 0.15,
  "KEY_E": 170,
  "KEY_SIZE": 1.8,
- "FILL_E": 22,
+ "FILL_E": 28,
  "RIM_E": 140,
  "RIM2_E": 50,
- "SPEC_E": 20,
+ "SPEC_E": 15,
  "GROUND": true,
  "MB_OUR_HAIR": false,
  "MB_SHARPEN": 0.8,
@@ -220,7 +220,7 @@
  ],
  "STRING_RISE": 0.06,
  "BACK_UP": 0.03,
- "BOW_S": 1.8,
+ "BOW_S": 1.6,
  "RIB_UV": true,
  "RIB_SCALE": 80,
  "RIB_BUMP": 0.5,
@@ -231,8 +231,8 @@
   0.6
  ],
  "FILL_COL": [
-  0.78,
-  0.86,
+  0.74,
+  0.84,
   1.0
  ],
  "RIM_COL": [
@@ -245,11 +245,26 @@
   0.65,
   0.55
  ],
- "COAT_R": 0.07,
+ "COAT_R": 0.09,
  "SKIN_SPEC": 0.5,
  "IRIS_R": 0.46,
  "PUPIL": 0.33,
  "EYE_OPEN": 0.47,
- "STRAP_X0": 0.1,
- "MB_HAIR_ROUGH": 0.55
+ "STRAP_X0": 0.092,
+ "MB_HAIR_ROUGH": 0.55,
+ "SIDE_COOL": 0.55,
+ "SIDE_TINT": [
+  0.88,
+  0.9,
+  1.0
+ ],
+ "SIDE_SAT": 0.75,
+ "FACE_COAT_K": 0.5,
+ "MB_COAT_K": 0.45,
+ "BOW_V2": true,
+ "EYE_WK": 1.2,
+ "EYE_TOPK": 0.5,
+ "LASH_T": 0.1,
+ "WING": 0.28,
+ "LOOP_TOL": 0.007
 }
