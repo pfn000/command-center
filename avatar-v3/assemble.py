@@ -1281,7 +1281,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r8-final','A1':'jena-v37r8-A1','A2':'jena-v37r8-noshirt'}.get(VAR)
+SAVE_NAME={'A0':'jena-v37r9-final','A1':'jena-v37r9-A1','A2':'jena-v37r9-noshirt'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -1871,6 +1871,9 @@ def qa_sweep():
                     Sm=_signed_to_q(TBq,V_[m],0.06)
                     band.setdefault(nmr,{})[o.name]={'verts':int(m.sum()),'inside_body_gt_1mm':int((Sm<-0.001).sum()),'min_mm':round(float(Sm.min())*1000,2)}
         out['clipping_by_ring_relaxed_pose']=band; out['hair_through_face_below_brow']=face_cross()
+        if SHIRT is not None and not SHIRT.hide_render:
+            try: pose_relaxed(); out['shirt_selfx_relaxed']=shirt_selfx(SHIRT)
+            except Exception as e: out['shirt_selfx_error']=str(e)
     json.dump(out,open(OUT+f'/sweep/sweep-{VAR}-shard{sh}.json','w'),indent=1,default=str)
 QA_ANIM=[(0,36,'head turn L/R'),(36,60,'nod'),(60,90,'eyes L/R/up/down'),(90,120,'blink + visemes aa/oh/ee'),(120,150,'spine twist + bend'),(150,190,'arms raise/forward + elbow bend'),
          (190,225,'fingers curl + spread'),(225,265,'leg raise + knee bend + squat'),(265,280,'toes curl'),(280,300,'head shake + hair swing')]
@@ -1979,6 +1982,9 @@ def qa_rig():
                     if sdd<-0.003: c3+=1
                     mn_=min(mn_,sdd)
                 rf[o.name]['inside_body_gt3mm_x2']=c3; rf[o.name]['min_signed_mm']=round(mn_*1000,1)
+            if SHIRT is not None and SHIRT in vis:
+                try: rf['shirt_selfx']=shirt_selfx(SHIRT)
+                except Exception as e: rf['shirt_selfx']={'error':str(e)}
         rad=joint_rad(cur[BODY.name],PB); rf['joint_radius_ratio']={j:round(rad[j]/rad0[j],3) for j in rad if j in rad0}
         ey={}
         for sd,ix in eyesel.items():
@@ -2145,9 +2151,9 @@ def _posed_signed(o):
         if loc is None: continue
         S[i]=(Vector(tuple(p))-loc).dot(nr); N[i]=tuple(nr)
     return S,N
-def posed_clear(o,frames=(0,258),off=0.002):
+def posed_clear(o,frames=(0,258),off=0.002,iters=None,tag='posed_clear'):
     r={'frames':list(frames),'passes':[]}
-    for it in range(int(P.get('POSED_ITERS',3))):
+    for it in range(int(iters if iters is not None else P.get('POSED_ITERS',3))):
         Drest=np.zeros((len(o.data.vertices),3)); st={}
         for f in frames:
             anim_pose(f); S,N=_posed_signed(o); m=(S>-0.06)&(S<off)
@@ -2159,16 +2165,124 @@ def posed_clear(o,frames=(0,258),off=0.002):
         rest()
         r['passes'].append({'iter':it,'per_frame_before':st,'verts_pushed':int((np.linalg.norm(Drest,axis=1)>1e-5).sum()),'max_mm':round(float(np.linalg.norm(Drest,axis=1).max())*1000,1)})
         if (np.linalg.norm(Drest,axis=1)>1e-5).sum()==0: break
-        Drest=group_max(o,Drest); Drest=smooth_field(o,Drest,iters=15,cap=float(P.get('PUSH_CAP',0.025))); set_world(o,wco(o)+Drest)
+        Drest=group_max(o,Drest); Drest=smooth_field(o,Drest,iters=15,cap=float(P.get('PUSH_CAP',0.025)))
+        if P.get('GROUP_MAX_AFTER_SMOOTH',False): Drest=group_max(o,Drest)   # run 9: weld groups keep the full push (the weld snap's mean no longer halves it)
+        set_world(o,wco(o)+Drest)
         if P.get('POSED_WELD_EACH',False): weld_snap(o,f'posed{it}')
     fin={}
     for f in frames:
         anim_pose(f); S,_=_posed_signed(o); fin[f]={'lt_minus3mm':int((S<-0.003).sum()),'min_mm':round(float(S[S>-0.06].min())*1000,1)}
     rest(); r['after']=fin; r['weld']=weld_snap(o,'posed')
-    rep['posed_clear']=r; log('POSED clear',json.dumps(r,default=str)[:1500])
+    if tag=='posed_clear': rep['posed_clear']=r
+    else: rep.setdefault(tag,[]).append(r)
+    log('POSED clear',tag,json.dumps(r,default=str)[:1500])
 if SHIRT is not None and P.get('POSED_CLEAR',True):
     try: posed_clear(SHIRT,frames=tuple(int(x) for x in P.get('POSED_FRAMES',(0,258))))
     except Exception as e: traceback.print_exc(); log('POSEDCLEARERR',e); rep['posed_clear_error']=str(e); rest()
+
+# ---------- run 9 (RUN8 fixes 1 + 3). (a) POSED CONVERGENCE: the rig motion test's 150 sampled frames (every 2nd of 300) are all checked; the worst failing
+#            frames (frame 164 included) get posed-clearance passes, round after round, until 0 frames have a shirt vert >2 mm inside the body (the
+#            QA gate is 3 mm) or the time cap is hit. (b) SEAM SELF-COLLISION: in the arms-down proof pose the off-shoulder band folds into the sleeve top
+#            and the two shirt surfaces cut through each other (her slit screenshot). Every intersecting pair of non-adjacent shirt triangles near
+#            the shoulders is separated: the triangle nearer the body goes behind the outer one by 0.8 mm (only as far as the body allows), the rest
+#            of the separation pushes the outer one out; group-coherent, smoothed, carried back to rest through inverse LBS. Proof pose arm = ARM_DOWN.
+SELFX_GAP=0.0008
+def _arm_centres():
+    return {sd:np.array(tuple(B.matrix_world@B.pose.bones[bn].head)) for sd,bn in (('L','Left arm'),('R','Right arm')) if bn in B.pose.bones}
+def shirt_selfx(o,zone_r=None,detail=False):
+    """intersecting pairs of non-adjacent shirt triangles (they do not share a vertex and no two of their corners are within 1.5 mm, so seams,
+       welded twins and the double-layer shell do not count); counted per shoulder zone (centroid within zone_r of the posed upper-arm head)"""
+    zone_r=float(zone_r or P.get('SELFX_ZONE_R',0.11))
+    V,F,_=tri_arr(o); V=V.astype(np.float64); F=F.astype(np.int64)
+    T=BVHTree.FromPolygons(V.tolist(),F.tolist()); pairs=T.overlap(T)
+    C=_arm_centres(); Cn=V[F].mean(1); keep=[]; cnt={'L':0,'R':0,'other':0}
+    for a,b in pairs:
+        if a>=b: continue
+        fa=F[a]; fb=F[b]
+        if fa[0]==fb[0] or fa[0]==fb[1] or fa[0]==fb[2] or fa[1]==fb[0] or fa[1]==fb[1] or fa[1]==fb[2] or fa[2]==fb[0] or fa[2]==fb[1] or fa[2]==fb[2]: continue
+        dm=np.linalg.norm(V[fa][:,None,:]-V[fb][None,:,:],axis=2).min()
+        if dm<0.0015: continue
+        z='other'
+        for sd,c in C.items():
+            if np.linalg.norm(Cn[a]-c)<zone_r or np.linalg.norm(Cn[b]-c)<zone_r: z=sd; break
+        cnt[z]+=1; keep.append((a,b,z))
+    out={'pairs_L':cnt['L'],'pairs_R':cnt['R'],'pairs_other':cnt['other']}
+    if detail: return out,keep,V,F
+    return out
+def shirt_self_clear(o):
+    t0=_t.time(); r={'passes':[]}; X0=wco(o).copy()
+    def zone_total(d): return d['pairs_L']+d['pairs_R']
+    pose_relaxed(); before=shirt_selfx(o); rest(); before_rest=shirt_selfx(o)
+    r['before']={'relaxed':before,'rest':before_rest}
+    for it in range(int(P.get('SELF_ITERS',5))):
+        pose_relaxed(); cnt,keep,V,F=shirt_selfx(o,detail=True)
+        keep=[k for k in keep if k[2] in ('L','R')]
+        if not keep: rest(); r['passes'].append({'iter':it,'relaxed':cnt,'moved':0}); break
+        Sb,Nb=_posed_signed(o); TB=world_bvh([BODY])
+        dp=np.zeros_like(V)
+        def put(i,d):
+            if np.linalg.norm(d)>np.linalg.norm(dp[i]): dp[i]=d
+        for a,b,z in keep:
+            ca=V[F[a]].mean(0); cb=V[F[b]].mean(0)
+            la=TB.find_nearest(Vector(tuple(ca)),0.2); lb=TB.find_nearest(Vector(tuple(cb)),0.2)
+            da=(ca-np.array(la[0])).dot(np.array(la[1])) if la[0] is not None else 1.0
+            db=(cb-np.array(lb[0])).dot(np.array(lb[1])) if lb[0] is not None else 1.0
+            outer,inner=(a,b) if da>=db else (b,a)
+            po=V[F[outer]]; n=np.cross(po[1]-po[0],po[2]-po[0]); nl=np.linalg.norm(n)
+            if nl<1e-12: continue
+            n/=nl; co=po.mean(0); lo=TB.find_nearest(Vector(tuple(co)),0.2)
+            if lo[0] is not None and n.dot(co-np.array(lo[0]))<0: n=-n
+            for vi in F[inner]:
+                s=float((V[vi]-co).dot(n))
+                if s<=-SELFX_GAP: continue
+                need=s+SELFX_GAP; allow=max(0.0,float(Sb[vi])-0.002) if Sb[vi]<0.9 else need
+                mi=min(need,allow); put(vi,-n*mi)
+                rest_=need-mi
+                if rest_>1e-6:
+                    for vo in F[outer]: put(vo,n*rest_)
+        k=np.linalg.norm(dp,axis=1)>1e-7
+        M=_skin_mats(o); R=np.linalg.inv(M[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+        rest(); dr=group_max(o,dr); dr=smooth_field(o,dr,iters=8,cap=float(P.get('SELF_CAP',0.008))); dr=group_max(o,dr); set_world(o,wco(o)+dr)
+        r['passes'].append({'iter':it,'relaxed_before':cnt,'verts_moved':int(k.sum()),'max_mm':round(float(np.linalg.norm(dp,axis=1).max())*1000,2)})
+    pose_relaxed(); after=shirt_selfx(o); rest(); after_rest=shirt_selfx(o)
+    r['after']={'relaxed':after,'rest':after_rest}
+    if zone_total(after)>zone_total(before) or zone_total(after_rest)>zone_total(before_rest):
+        set_world(o,X0); r['reverted']=True
+    r['secs']=round(_t.time()-t0,1); rep['shirt_self_clear']=r; log('SELF clear',json.dumps(r,default=str)[:1500])
+def posed_converge(o):
+    t0=_t.time(); cap=float(P.get('CONVERGE_MAX_S',540)); FR=list(range(0,300,2)); rounds=[]
+    def evalall():
+        bad={}
+        for f in FR:
+            anim_pose(f); S,_=_posed_signed(o); m=S>-0.06
+            c=int((S[m]<-0.002).sum())
+            if c: bad[f]=(c,round(float(S[m].min())*1000,1))
+        rest(); return bad
+    bad=evalall(); rounds.append({'round':0,'failing_frames':len(bad),'worst':sorted(bad.items(),key=lambda kv:kv[1][1])[:8],'secs':round(_t.time()-t0,1)})
+    log('CONVERGE eval',rounds[-1])
+    for rd in range(1,int(P.get('CONVERGE_ROUNDS',5))+1):
+        if not bad or _t.time()-t0>cap: break
+        worst=[f for f,_ in sorted(bad.items(),key=lambda kv:(kv[1][1],-kv[1][0]))][:int(P.get('CONVERGE_FRAMES',12))]
+        if 164 not in worst and 164 in bad: worst=worst[:-1]+[164]
+        posed_clear(o,frames=tuple(worst),iters=int(P.get('CONVERGE_ITERS',2)),tag='posed_converge_passes')
+        bad=evalall(); rounds.append({'round':rd,'cleared_frames':worst,'failing_frames':len(bad),'worst':sorted(bad.items(),key=lambda kv:kv[1][1])[:8],'secs':round(_t.time()-t0,1)})
+        log('CONVERGE round',rounds[-1])
+    anim_pose(164); S,_=_posed_signed(o); m=S>-0.06; f164={'lt_minus2mm':int((S[m]<-0.002).sum()),'lt_minus3mm':int((S[m]<-0.003).sum()),'min_mm':round(float(S[m].min())*1000,1)}; rest()
+    rep['posed_converge']={'rounds':rounds,'final_failing_frames_gt2mm':len(bad),'final_bad':{str(k):v for k,v in bad.items()},'frame164':f164,'secs':round(_t.time()-t0,1),'converged':len(bad)==0}
+    log('CONVERGE done',json.dumps(rep['posed_converge'],default=str)[:1200])
+if SHIRT is not None and P.get('POSED_CONVERGE',False):
+    try: posed_converge(SHIRT)
+    except Exception as e: traceback.print_exc(); log('CONVERGEERR',e); rep['posed_converge_error']=str(e); rest()
+if SHIRT is not None and P.get('SELF_CLEAR',False):
+    try:
+        shirt_self_clear(SHIRT)
+        if P.get('POSED_CONVERGE',False) and not rep['shirt_self_clear'].get('reverted'):
+            P['CONVERGE_ROUNDS']=2; P['CONVERGE_MAX_S']=240; _pc=rep.get('posed_converge'); posed_converge(SHIRT); rep['posed_converge_after_selfclear']=rep['posed_converge']; rep['posed_converge']=_pc
+    except Exception as e: traceback.print_exc(); log('SELFCLEARERR',e); rep['shirt_self_clear_error']=str(e); rest()
+if SHIRT is not None:
+    try:
+        pose_relaxed(); _a=shirt_selfx(SHIRT); rest(); _b=shirt_selfx(SHIRT); rep['shirt_selfx_final']={'relaxed':_a,'rest':_b}; log('SELFX final',rep['shirt_selfx_final'])
+    except Exception as e: traceback.print_exc(); log('SELFXERR',e); rest()
 
 # ---------- run 8 (Saidie 3:38 PM screenshot, HARD gate): no dark slits/specks at the band/sleeve seam. After everything else, the shirt's INNER shell is
 #            kept flush behind its OUTER shell in the proof (relaxed) pose and at rest: inner-layer verts at/outside the outer surface go 0.8 mm behind it,
@@ -2206,6 +2320,110 @@ def shirt_shell_flush(o,gap=0.0008):
 if SHIRT is not None and P.get('SHELL_FLUSH',True):
     try: shirt_shell_flush(SHIRT)
     except Exception as e: traceback.print_exc(); log('SHELLERR',e); rep['shirt_shell_flush_error']=str(e); rest()
+# ---------- run 9 (RUN8 fix 2): BACK-HAIR CURL, pose only. The head asset's own Back hair chains whose tips sit inside her back (8c: .006/.008/.020/.021/.022,
+#            206 tris at rest, 144 in the proof pose) are curled backward, the SAME angle on every bone of the chain (root -> tip), 1 deg steps, <= 15 deg
+#            per bone, the smallest angle that leaves 0 hair tris >1 mm inside body/bra/shirt at rest AND in the proof pose. The curl plane is the chain's
+#            own direction and the body's outward normal at its buried part. Then baked into the rest pose (bones + hair mesh), so the .blend/.fbx carry it.
+def back_hair_curl():
+    out={'chains':{}}
+    roots=[r_ for r_ in P.get('BACK_HAIR_CHAINS',['Back hair.006','Back hair.008','Back hair.020','Back hair.021','Back hair.022']) if r_ in B.pose.bones]
+    if not roots: out['error']='no chain roots found'; rep['back_hair_curl']=out; return
+    gi_h={g.index:g.name for g in HR.vertex_groups}
+    def root_of(vi):
+        ws=[(ge.weight,gi_h.get(ge.group,'')) for ge in HR.data.vertices[vi].groups if ge.weight>0]
+        if not ws: return None
+        bn_=max(ws)[1]
+        if bn_ not in B.data.bones: return None
+        b=B.data.bones[bn_]
+        while b.parent is not None and b.parent.name not in ('Head','Blowout_Root','Hair_root','Hair Root'): b=b.parent
+        return b.name
+    ROOTV=[root_of(v.index) for v in HR.data.vertices]; polys=[tuple(p.vertices) for p in HR.data.polygons]
+    chain_bones={r_:[r_]+[c.name for c in sorted(B.pose.bones[r_].children_recursive,key=lambda c:len(c.parent_recursive))] for r_ in roots}
+    zmax=float(hmn[2])+0.02
+    def hair_X():
+        dg=bpy.context.evaluated_depsgraph_get(); e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world
+        X=np.array([tuple(mw_@v.co) for v in me_.vertices]); e_.to_mesh_clear(); return X
+    objs=[o_ for o_ in (BODY,BRA,SHIRT) if o_ is not None and not o_.hide_render]
+    def count(pose_nm):
+        if pose_nm=='rest': rest()
+        else: pose_relaxed()
+        T=world_bvh(objs); X=hair_X(); bad=set(); cnt={r_:0 for r_ in roots}; cnt_all={}
+        for i,p in enumerate(X):
+            if p[2]>zmax: continue
+            loc,nr,_,_=T.find_nearest(Vector(tuple(p)),0.05)
+            if loc is not None and (Vector(tuple(p))-loc).dot(nr)<-0.001: bad.add(i)
+        for pl in polys:
+            if any(x in bad for x in pl):
+                k_=ROOTV[pl[0]]; cnt_all[k_]=cnt_all.get(k_,0)+len(pl)-2
+                if k_ in cnt: cnt[k_]+=len(pl)-2
+        return cnt,cnt_all,X,bad,T
+    rest(); c0,all0,X0,bad0,T0=count('rest'); c0r,all0r,_,_,_=count('relaxed'); rest()
+    out['before']={'rest':all0,'relaxed':all0r}
+    # curl axis per chain (armature space): cross(chain direction, outward body normal at its buried verts / its tip)
+    mwi3=B.matrix_world.inverted().to_3x3(); AX={}
+    rest(); X0=hair_X()
+    for r_ in roots:
+        idx=[i for i,k_ in enumerate(ROOTV) if k_==r_]
+        if not idx: continue
+        bi=[i for i in idx if i in bad0] or idx
+        pc=X0[bi].mean(0); loc,nr,_,_=T0.find_nearest(Vector(tuple(pc)),0.2)
+        hb=B.matrix_world@B.pose.bones[r_].head; tb=B.matrix_world@B.pose.bones[chain_bones[r_][-1]].tail
+        d=(tb-hb).normalized(); o_=Vector(tuple(nr)) if loc is not None else Vector((0,1,0))
+        ax=d.cross(o_)
+        if ax.length<1e-6: ax=d.cross(Vector((0,1,0)))
+        AX[r_]=(mwi3@ax.normalized()).normalized()
+    def set_chain(r_,a):
+        for n_ in chain_bones[r_]: B.pose.bones[n_].matrix_basis=Matrix(); BANG.pop(n_,None)
+        rest()
+        if a:
+            for n_ in chain_bones[r_]:
+                pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(a),4,AX[r_])@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
+            for n_ in chain_bones[r_]: BANG[n_]=B.pose.bones[n_].matrix_basis.copy()
+    pend=[r_ for r_ in roots if r_ in AX and (c0.get(r_,0)+c0r.get(r_,0))>0]; best={r_:(c0.get(r_,0)+c0r.get(r_,0),0) for r_ in pend}; done={}
+    steps=[]
+    for a in range(1,int(P.get('BACK_HAIR_MAX_DEG',15))+1):
+        if not pend: break
+        for r_ in pend: set_chain(r_,a)
+        cr,_,_,_,_=count('rest'); cx,_,_,_,_=count('relaxed'); rest()
+        steps.append({'deg':a,'rest':{r_:cr.get(r_,0) for r_ in pend},'relaxed':{r_:cx.get(r_,0) for r_ in pend}})
+        for r_ in list(pend):
+            tot=cr.get(r_,0)+cx.get(r_,0)
+            if tot<best[r_][0]: best[r_]=(tot,a)
+            if tot==0: done[r_]=a; pend.remove(r_)
+    for r_ in pend: set_chain(r_,best[r_][1])   # not reachable in 15 deg: keep the best angle seen
+    rest(); Xa=hair_X()
+    for r_ in roots:
+        idx=[i for i,k_ in enumerate(ROOTV) if k_==r_]
+        out['chains'][r_]={'bones':len(chain_bones.get(r_,[])),'deg_per_bone':done.get(r_,best.get(r_,(0,0))[1]),'reached_zero':r_ in done or (c0.get(r_,0)+c0r.get(r_,0))==0,
+                           'tris_before':{'rest':c0.get(r_,0),'relaxed':c0r.get(r_,0)},'tip_move_mm':round(float(np.linalg.norm(Xa[idx]-X0[idx],axis=1).max())*1000,1) if idx else 0}
+    out['steps']=steps
+    c1,all1,_,_,_=count('rest'); c1r,all1r,_,_,_=count('relaxed'); rest()
+    out['after']={'rest':all1,'relaxed':all1r,'rest_total':int(sum(all1.values())),'relaxed_total':int(sum(all1r.values()))}
+    # bake the curled chains into the rest pose (as run 7b did for the bangs): pose applied to those bones, hair mesh written in that pose
+    bake=[n_ for r_ in roots if out['chains'].get(r_,{}).get('deg_per_bone') for n_ in chain_bones[r_]]
+    if bake and P.get('BACK_HAIR_BAKE',True):
+        try:
+            rest(); Xe=hair_X(); mwi_=np.linalg.inv(np.array(HR.matrix_world)); XL=Xe@mwi_[:3,:3].T+mwi_[:3,3]; n_h2=len(HR.data.vertices)
+            if len(XL)==n_h2:
+                bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE')
+                for pb in B.pose.bones: pb.bone.select=pb.name in bake
+                bpy.ops.pose.armature_apply(selected=True)
+                for pb in B.pose.bones: pb.bone.select=False
+                bpy.ops.object.mode_set(mode='OBJECT')
+                if HR.data.shape_keys:
+                    a_=np.empty(n_h2*3); HR.data.vertices.foreach_get('co',a_); dl=XL-a_.reshape(-1,3)
+                    for kb in HR.data.shape_keys.key_blocks:
+                        b_=np.empty(n_h2*3); kb.data.foreach_get('co',b_); kb.data.foreach_set('co',(b_.reshape(-1,3)+dl).ravel())
+                HR.data.vertices.foreach_set('co',XL.ravel()); HR.data.update()
+                for n_ in bake: B.pose.bones[n_].matrix_basis=Matrix(); BANG.pop(n_,None)
+                bpy.context.view_layer.update(); rest()
+                out['baked']={'bones':len(bake),'max_drift_mm_after_bake':round(float(np.linalg.norm(hair_X()-Xe,axis=1).max())*1000,3)}
+            else: out['baked']={'error':'evaluated vertex count differs; kept as pose'}
+        except Exception as e: traceback.print_exc(); out['baked']={'error':str(e)}
+    rep['back_hair_curl']=out; log('BACK HAIR curl',json.dumps({k:v for k,v in out.items() if k!='steps'},default=str)[:1500])
+if P.get('BACK_HAIR_CURL',False) and P.get('HAIR')=='head':
+    try: back_hair_curl()
+    except Exception as e: traceback.print_exc(); log('BACKHAIRERR',e); rep['back_hair_curl_error']=str(e); rest()
 # ---------- run 8: hair gate on the FINAL meshes: hair tris with a vert > 1 mm inside body/bra/shirt, per chain root, at rest and in the proof pose
 def hair_final_pen():
     out={}
@@ -2261,7 +2479,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
@@ -2425,6 +2643,23 @@ if not P['TT']:
         for k in bk: KB[k].value=0.0
         for vk in ('vrc.v_aa','vrc.v_oh'):
             if vk in KB: KB[vk].value=1.0; bpy.context.view_layer.update(); shot('viseme-'+vk.split('_')[-1],[FH],'front',res=(768,768),pad=0.75,zoff=-0.1*(hx.z-hm.z)); KB[vk].value=0.0
+        # run 9 (fix 4): her hair's own maps ('Hair Texture/Standard 03.png', 'Emmision/Gr1.png') are NOT in her dataset. PROBE ONLY (not saved, not exported):
+        # the one hair map she did upload (assets/hair_texture_black_to_white_1713.jpg, the Umeko atlas) has nothing in the strip her head hair's UVs use
+        # (u 0.776-0.968), so the probe maps that strip onto the atlas' long black->white strand (u 0.651-0.753) to show what a strand map would look like.
+        if P.get('HAIR_TEX_PROBE',False) and P.get('HAIR')=='head':
+            try:
+                tp=IN+'/assets/hair_texture_black_to_white_1713.jpg'
+                if os.path.exists(tp):
+                    sv=[s_l.material for s_l in HR.material_slots]; pm=bpy.data.materials.new('hair_probe_1713'); pm.use_nodes=True; nt=pm.node_tree
+                    bs=[n_ for n_ in nt.nodes if n_.type=='BSDF_PRINCIPLED'][0]; tc=nt.nodes.new('ShaderNodeTexCoord'); mp=nt.nodes.new('ShaderNodeMapping'); ti=nt.nodes.new('ShaderNodeTexImage')
+                    ti.image=bpy.data.images.load(tp,check_existing=True); su=float(P.get('PROBE_SU',0.53)); mp.inputs['Scale'].default_value=(su,1.0,1.0); mp.inputs['Location'].default_value=(0.651-0.776*su,0.0,0.0)
+                    nt.links.new(tc.outputs['UV'],mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'],ti.inputs['Vector']); nt.links.new(ti.outputs['Color'],bs.inputs['Base Color']); bs.inputs['Roughness'].default_value=0.45
+                    for s_l in HR.material_slots: s_l.material=pm
+                    shot('hairprobe-back',ALL,'back',res=(768,1376),pad=1.06); shot('hairprobe-q34',[FH,HR],'q34',res=(1024,1024),pad=1.15); shot('hairprobe-front',ALL,'front',res=(768,1376),pad=1.06)
+                    for s_l,m_ in zip(HR.material_slots,sv): s_l.material=m_
+                    bpy.data.materials.remove(pm); rep['hair_tex_probe']={'texture':'assets/hair_texture_black_to_white_1713.jpg','uv_strip_u':[0.776,0.968],'mapped_to_u':[0.651,0.753],'saved':False}
+                else: rep['hair_tex_probe']={'missing':tp}
+            except Exception as e: traceback.print_exc(); log('PROBEERR',e)
     elif P['SET']=='face':
         shot('face',[FH],'front',res=(1024,1024),pad=1.25); shot('face34',[FH],'q34',res=(1024,1024),pad=1.25); shot('neckside',[FH],'side',res=(1024,1024),pad=1.9,zoff=-0.35*(hx.z-hm.z))
     elif P['SET']=='umeko':

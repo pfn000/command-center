@@ -27,6 +27,7 @@
   "POSED_FRAMES": [
    0,
    258,
+   164,
    166,
    168,
    170,
@@ -42,7 +43,29 @@
   "PRE_HARMONIZE": true,
   "WELD_SMOOTH": true,
   "WELD_SMOOTH_ITERS": 12,
-  "SEAM_RELAX_DILATE": 8
+  "SEAM_RELAX_DILATE": 8,
+  "ARM_DOWN": 55,
+  "GROUP_MAX_AFTER_SMOOTH": true,
+  "POSED_CONVERGE": true,
+  "CONVERGE_ROUNDS": 5,
+  "CONVERGE_MAX_S": 540,
+  "CONVERGE_FRAMES": 12,
+  "CONVERGE_ITERS": 2,
+  "SELF_CLEAR": true,
+  "SELF_ITERS": 5,
+  "SELF_CAP": 0.008,
+  "SELFX_ZONE_R": 0.11,
+  "BACK_HAIR_CURL": true,
+  "BACK_HAIR_CHAINS": [
+   "Back hair.006",
+   "Back hair.008",
+   "Back hair.020",
+   "Back hair.021",
+   "Back hair.022"
+  ],
+  "BACK_HAIR_MAX_DEG": 15,
+  "BACK_HAIR_BAKE": true,
+  "HAIR_TEX_PROBE": true
  },
  "A2": {
   "SHIRT": false,

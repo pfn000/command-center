@@ -40,7 +40,7 @@ jobs:
         run: |
           MODE=$(head -1 avatar-v3/RUN.txt | cut -d' ' -f1)
           export AS_ONLY="$(sed -n 2p avatar-v3/RUN.txt)"
-          timeout -k 10 2700 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          timeout -k 10 3250 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/$MODE.py -- /tmp/in /tmp/out > /tmp/out/blender-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\]|Error|Traceback|line [0-9]+" /tmp/out/blender-log.txt | cut -c1-400 | head -300 || true
       - name: Compose proofs
         if: always()
@@ -150,7 +150,7 @@ jobs:
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; mkdir -p /tmp/out/proof
       - name: Blender QA
         run: |
-          timeout -k 10 3000 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/assemble.py -- /tmp/in /tmp/out > /tmp/out/qa-log.txt 2>&1 || echo "BLENDER EXIT $?"
+          timeout -k 10 3250 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/assemble.py -- /tmp/in /tmp/out > /tmp/out/qa-log.txt 2>&1 || echo "BLENDER EXIT $?"
           grep -E "^\[v3\] (EYES|chain|QA|still 0|rigqa frame)|Error|Traceback" /tmp/out/qa-log.txt | cut -c1-300 | tail -60 || true
       - name: Upload QA (private)
         if: always()
@@ -160,4 +160,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-run8
+# rev v3.7-assemble-run9
