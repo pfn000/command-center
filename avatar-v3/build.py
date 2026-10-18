@@ -1072,9 +1072,13 @@ if P.get('BOTTOM','thong')=='thong':
     RINGS=add_mesh('ThongRings',bmR,bpy.data.materials['Silver'],'Hips')
     bpy.data.objects.remove(SH); SH=TH
 if P.get('BRA_GEN',True):
-    for o_ in (BRA,globals().get('LACE')):
+    for o_ in (BRA,globals().get('LACE'),globals().get('STR')):
         if o_ is None: continue
-        weights_from_body(o_); md=o_.modifiers.new('Armature','ARMATURE'); md.object=B
+        has_arm=any(m_.type=='ARMATURE' for m_ in o_.modifiers)
+        if has_arm:
+            for g_ in list(o_.vertex_groups): o_.vertex_groups.remove(g_)
+        weights_from_body(o_)
+        if not has_arm: md=o_.modifiers.new('Armature','ARMATURE'); md.object=B
     log('generated bra weighted from body')
 # ---------- keep clothes outside the (curvier) skin
 for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
@@ -1247,12 +1251,21 @@ if VARIANT in ('B','C'):
     if P.get('MB_SEAM',True):
         zb_=zc_-P.get('MB_NECK_KEEP',0.03); V=wco(MH); BVs=wco(BODY); SH_=P.get('MB_SEAM_H',0.022)
         bqs=neck_at(BVs,zb_+0.003,0.004,NC,NRAD*1.5) or b_n
-        ms=neck_at(V,zb_+0.006,0.006,(bqs['cx'],bqs['cy']),max(bqs['rx'],bqs['ry'])*P.get('MB_SEAM_R',1.3))
+        skin2=np.ones(len(V),bool)
+        if img_ is not None and MH.data.uv_layers:
+            me2=MH.data; W2,H2=img_.size; px2=np.empty(W2*H2*4,dtype=np.float32); img_.pixels.foreach_get(px2); px2=px2.reshape(H2,W2,4)
+            nl2=len(me2.loops); uv2=np.empty(nl2*2,dtype=np.float32); me2.uv_layers.active.data.foreach_get('uv',uv2); uv2=uv2.reshape(-1,2)
+            lv2=np.empty(nl2,dtype=np.int64); me2.loops.foreach_get('vertex_index',lv2)
+            c2=px2[np.clip(((uv2[:,1]%1)*H2).astype(int),0,H2-1),np.clip(((uv2[:,0]%1)*W2).astype(int),0,W2-1),:3]
+            n2=np.bincount(lv2,minlength=len(V)).clip(1); cv2=np.stack([np.bincount(lv2,c2[:,k],minlength=len(V)) for k in range(3)],1)/n2[:,None]
+            skin2=((cv2[:,0]-cv2[:,2])>P.get('MB_WARM',0.06))&(cv2.mean(1)>0.25); del px2
+        Vs_=V[skin2]
+        ms=neck_at(Vs_,zb_+0.006,0.006,(bqs['cx'],bqs['cy']),max(bqs['rx'],bqs['ry'])*P.get('MB_SEAM_R',1.3)) if len(Vs_) else None
         if ms:
             dx=V[:,0]-ms['cx']; dy_=V[:,1]-ms['cy']; th=np.arctan2(dy_/max(ms['ry'],1e-4),dx/max(ms['rx'],1e-4))
             k_=P.get('MB_SEAM_OUT',1.015); tx=bqs['cx']+np.cos(th)*bqs['rx']*k_; ty=bqs['cy']+np.sin(th)*bqs['ry']*k_
             tt=1-sstep((V[:,2]-zb_)/SH_)
-            sk=(np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))<1.35)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)
+            sk=(np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))<1.35)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)&skin2
             Ds=np.zeros_like(V); Ds[:,0]=(tx-V[:,0])*tt*sk; Ds[:,1]=(ty-V[:,1])*tt*sk; wdelta(MH,Ds); V=wco(MH)
             HF['B_seam']={'body':bqs,'meshy':ms,'verts':int(sk.sum()),'max_move':float(np.abs(Ds).max())}; log('B neck seam',HF['B_seam'])
     # rig it to the Head bone (neck stub blends into Neck)
@@ -1308,10 +1321,10 @@ if VARIANT in ('B','C'):
                 if len(tri_):
                     pad=24; x0=max(0,int(tri_[:,:,0].min())-pad); y0=max(0,int(tri_[:,:,1].min())-pad); x1=min(W_,int(tri_[:,:,0].max())+pad); y1=min(H_,int(tri_[:,:,1].max())+pad)
                     td=tempfile.mkdtemp(); np.save(td+'/crop.npy',_a0[y0:y1,x0:x1]); tri_[:,:,0]-=x0; tri_[:,:,1]-=y0; np.save(td+'/tris.npy',tri_)
-                    env_={k:v for k,v in os.environ.items() if k not in ('PYTHONHOME','PYTHONPATH')}
+                    env_={'PATH':'/usr/local/bin:/usr/bin:/bin','HOME':os.environ.get('HOME','/home/runner'),'LANG':'C.UTF-8'}
                     srp=os.path.join(os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else 'avatar-v3','sr.py')
                     if not os.path.exists(srp): srp='avatar-v3/sr.py'
-                    r_=subprocess.run(['python3',srp,td,str(P.get('MB_SR_F',3)),P.get('MB_SR_MODEL','/tmp/sr/realesr-general-x4v3.pth'),str(P.get('MB_SR_MIX',1.0))],capture_output=True,text=True,timeout=600,env=env_)
+                    r_=subprocess.run(['/usr/bin/python3',srp,td,str(P.get('MB_SR_F',3)),P.get('MB_SR_MODEL','/tmp/sr/realesr-general-x4v3.pth'),str(P.get('MB_SR_MIX',1.0))],capture_output=True,text=True,timeout=600,env=env_)
                     log('SR',r_.returncode,(r_.stdout+r_.stderr)[-900:])
                     if os.path.exists(td+'/out.npy'):
                         o_=np.load(td+'/out.npy'); cur=np.empty(W_*H_*4,dtype=np.float32); img_.pixels.foreach_get(cur); cur=cur.reshape(H_,W_,4)
