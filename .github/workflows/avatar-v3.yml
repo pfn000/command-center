@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 50
     strategy:
       fail-fast: false
-      matrix: { variant: [A, B] }
+      matrix: { variant: [A, B, B2] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -33,14 +33,14 @@ jobs:
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "$VARIANT" = "B" ] || [ "$VARIANT" = "C" ]; then python3 -c "
+          if [ "${VARIANT:0:1}" = "B" ] || [ "${VARIANT:0:1}" = "C" ]; then python3 -c "
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
       - name: SR deps (B face texture)
         run: |
           V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "$V" = "B" ] || [ "$V" = "C" ]; then
+          if [ "${V:0:1}" = "B" ] || [ "${V:0:1}" = "C" ]; then
             pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
             mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
             curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
@@ -93,14 +93,14 @@ jobs:
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "$VARIANT" = "B" ] || [ "$VARIANT" = "C" ]; then python3 -c "
+          if [ "${VARIANT:0:1}" = "B" ] || [ "${VARIANT:0:1}" = "C" ]; then python3 -c "
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
       - name: SR deps (B face texture)
         run: |
           V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "$V" = "B" ] || [ "$V" = "C" ]; then
+          if [ "${V:0:1}" = "B" ] || [ "${V:0:1}" = "C" ]; then
             pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
             mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
             curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
@@ -132,3 +132,4 @@ jobs:
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
 # rev 1792298442227465512
 # rev 1792299656280823012
+# rev v3.5-1
