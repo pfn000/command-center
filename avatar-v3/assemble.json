@@ -7,12 +7,23 @@
   "SHIRT_RESEAT": false,
   "SHIRT_RETARGET": true,
   "SHIRT_WEIGHTS": "original",
-  "STRAP_PUSH": 0.002,
+  "STRAP_PUSH": 0,
   "SKIN_MATCH": true,
-  "EYE_TOL_PCT": 0.5
+  "EYE_TOL_PCT": 0.5,
+  "BRA_NECK": "rigid",
+  "STRAP_RIGID": 0.0015,
+  "WELD": true,
+  "PUSH_CAP": 0.025,
+  "SHIRT_BODYW": true,
+  "POSED_CLEAR": true,
+  "TUMMY_CLEAR": true,
+  "FRONT_LOCKS": true
  },
  "A2": {
   "SHIRT": false,
   "SET": "noshirt"
+ },
+ "A1": {
+  "BANG_LIFT": true
  }
 }

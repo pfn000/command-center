@@ -1,5 +1,6 @@
 
-# v3.7 ASSEMBLY, run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
+# v3.7 ASSEMBLY, run 7 (RUN6B-FINDINGS fixes: shirt seam/shell weld + smoothed pushes + corrective body weights + posed clearance; front locks <=8 deg;
+#   halter loop rides the Neck offset rigidly (no vertex pushes); Tummy hem clearance; variants A0 bang 1:1 / A1 bang curled <=15 deg). Based on run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
 # her Blowout haircards (B&W.png) [alt: Umeko + her black->white jpg], Outfitriggedpanda shirt (Tshirt-BasicGrey.png) + bra (plain black, her 10:30 ask),
 # Booty Shorts (Textures/Colors/Black.png). ONE armature (Panda's). Clothes weights = Data Transfer from the body. Zero Meshy.
@@ -239,6 +240,86 @@ for o in list(bpy.data.objects):
     if o.type in ('ARMATURE','EMPTY') and o not in (B,FA,HA): bpy.data.objects.remove(o)
 if not P['SHIRT'] and SHIRT is not None: bpy.data.objects.remove(SHIRT); SHIRT=None; CLOTH=[x for x in (BRA,SH)]
 
+# ---------- run 7 (RUN6B-FINDINGS fix 1): record her shirt's/bra's coincident seam vertices and double-layer shell twins BEFORE any retarget or push,
+#            so that afterwards each group is snapped back together (shared midpoint, same displacement for both shell layers). No reshaping: the
+#            groups keep exactly the relative offsets they had in her original mesh.
+WELD={}
+def weld_record(o,r_co=0.0001,r_shell=0.0025):
+    me=o.data; n=len(me.vertices); X=wco(o); NRM=np.array([tuple(o.matrix_world.to_3x3()@v.normal) for v in me.vertices])
+    kd=KDTree(n)
+    for i,p in enumerate(X): kd.insert(Vector(tuple(p)),i)
+    kd.balance(); par=list(range(n))
+    def f(a):
+        while par[a]!=a: par[a]=par[par[a]]; a=par[a]
+        return a
+    def un(a,b):
+        a,b=f(a),f(b)
+        if a!=b: par[a]=b
+    nco=0
+    for i,p in enumerate(X):
+        for _,j,_ in kd.find_range(Vector(tuple(p)),max(r_co,0.0006)):
+            if j>i: un(i,j); nco+=1
+    pick=-np.ones(n,dtype=np.int64)
+    for i,p in enumerate(X):
+        best=None
+        for _,j,d in kd.find_n(Vector(tuple(p)),8):
+            if j==i or d<0.0006 or d>r_shell: continue
+            dv=(X[j]-X[i])/max(d,1e-9)
+            if abs(float(dv@NRM[i]))>0.7 and abs(float(NRM[i]@NRM[j]))>0.5: best=j; break
+        if best is not None: pick[i]=best
+    nsh=0
+    for i in range(n):
+        j=pick[i]
+        if j>=0 and pick[j]==i and j>i: un(i,j); nsh+=1
+    G={}
+    for i in range(n): G.setdefault(f(i),[]).append(i)
+    groups=[np.array(g) for g in G.values() if len(g)>1]
+    big=max((len(g) for g in groups),default=0)
+    WELD[o.name]={'X0':X.copy(),'groups':groups}
+    E=np.array([tuple(e.vertices) for e in me.edges],dtype=np.int64)
+    WELD[o.name]['E']=E
+    r={'verts':n,'coincident_pairs':nco,'shell_pairs':nsh,'groups':len(groups),'verts_in_groups':int(sum(len(g) for g in groups)),'largest_group':big}
+    rep.setdefault('weld',{})[o.name]={'recorded':r}; log('WELD record',o.name,r); return r
+def weld_gap(o):
+    if o.name not in WELD: return None
+    X=wco(o); g=WELD[o.name]['groups']; X0=WELD[o.name]['X0']; mx=0.0; bad=0
+    for gg in g:
+        rel=X[gg]-X0[gg]; s=float(np.linalg.norm(rel-rel.mean(0),axis=1).max())
+        mx=max(mx,s); bad+=int(s>0.0005)
+    return {'max_group_split_mm':round(mx*1000,2),'groups_split_gt_0p5mm':bad}
+def set_world(o,Xn):
+    """write new world positions; the same per-vertex delta goes onto every shape key (her keys keep their deltas)"""
+    X=wco(o); Dl=(np.asarray(Xn)-X)@np.array(o.matrix_world.inverted().to_3x3()).T; n=len(X)
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            a=np.empty(n*3); kb.data.foreach_get('co',a); kb.data.foreach_set('co',(a.reshape(-1,3)+Dl).ravel())
+    a=np.empty(n*3); o.data.vertices.foreach_get('co',a); o.data.vertices.foreach_set('co',(a.reshape(-1,3)+Dl).ravel())
+    o.data.update(); bpy.context.view_layer.update()
+def weld_snap(o,tag=''):
+    if o.name not in WELD or not P.get('WELD',True): return None
+    before=weld_gap(o); X=wco(o); X0=WELD[o.name]['X0']; Xn=X.copy()
+    for gg in WELD[o.name]['groups']:
+        d=(X[gg]-X0[gg]).mean(0); Xn[gg]=X0[gg]+d
+    set_world(o,Xn); after=weld_gap(o)
+    r={'before':before,'after':after,'max_vertex_move_mm':round(float(np.linalg.norm(Xn-X,axis=1).max())*1000,2)}
+    rep['weld'][o.name]['snap'+tag]=r; log('WELD snap',o.name,tag,r); return r
+def smooth_field(o,D,iters=25,cap=None):
+    """Laplacian falloff of a push field: every required push is kept (projection), its neighbours ease in, so no edge is torn by a step change"""
+    E=WELD[o.name]['E'] if o.name in WELD else np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64); n=len(D)
+    deg=np.zeros(n); np.add.at(deg,E[:,0],1); np.add.at(deg,E[:,1],1); deg[deg==0]=1
+    need=np.linalg.norm(D,axis=1)
+    if cap is not None: need=np.minimum(need,cap)
+    U=np.zeros_like(D); m=need>1e-7; U[m]=D[m]/np.linalg.norm(D[m],axis=1)[:,None]; D=U*need[:,None]
+    for _ in range(iters):
+        A=np.zeros_like(D); np.add.at(A,E[:,0],D[E[:,1]]); np.add.at(A,E[:,1],D[E[:,0]]); A/=deg[:,None]
+        D=0.5*D+0.5*A
+        pr=(D*U).sum(1); df=need-pr; k=m&(df>0); D[k]+=df[k][:,None]*U[k]
+    return D
+try:
+    for o_ in (SHIRT,BRA):
+        if o_ is not None: weld_record(o_)
+except Exception as e: traceback.print_exc(); log('WELDRECERR',e)
+
 # ---------- run 6 measure: SOLO snapshots (each asset as imported, with only the transform it was given) for the measure system
 def tri_arr(o,evaluated=True):
     dg=bpy.context.evaluated_depsgraph_get(); e=o.evaluated_get(dg) if evaluated else o; me=e.to_mesh(); me.calc_loop_triangles(); mw=o.matrix_world
@@ -308,6 +389,7 @@ def map_groups(o):
         o.vertex_groups.remove(g)
     return log_
 ORIG_W=set()
+NECKR=None
 if P.get('SHIRT_RETARGET',True) and OHEAD:
     try:
         DEL,ang=outfit_deltas(); RET['bone_angles_deg']=ang; RET['bones']=sorted(DEL)
@@ -319,13 +401,30 @@ if P.get('SHIRT_RETARGET',True) and OHEAD:
             # So the bra also gets the Neck bone's head offset (translation only) - the same 'pose the outfit armature onto Panda' step.
             OHn={nmap(k):v for k,v in OHEAD.items()}; PHn=B.matrix_world@B.data.bones['Neck'].head_local if 'Neck' in B.data.bones else None
             DELB=dict(DEL)
-            if 'Neck' in OHn and PHn is not None: DELB['Neck']=Matrix.Translation(PHn-OHn['Neck']); RET['bra_neck_offset_m']=[round(x,4) for x in (PHn-OHn['Neck'])]
+            NECKR=None
+            if 'Neck' in OHn and PHn is not None:
+                RET['bra_neck_offset_m']=[round(x,4) for x in (PHn-OHn['Neck'])]
+                if P.get('BRA_NECK')=='rigid' and BRA is not None:
+                    # run 7 (fix 4): the whole halter loop rides the outfit Neck -> Panda Neck offset as ONE rigid translation (full above the cups,
+                    # smooth 4 cm blend into the cups), instead of a partial per-weight move + vertex pushes (the run-6b zig-zag). Her loop keeps its shape/width.
+                    Xb_=wco(BRA); zc_=max(float(np.percentile(Xb_[:,2],60)),float(OHn['Neck'].z)-0.10); t_=np.clip((Xb_[:,2]-zc_)/0.04,0,1)
+                    NECKR={'off':np.array(tuple(PHn-OHn['Neck'])),'f':t_*t_*(3-2*t_),'zc':zc_,'X0':Xb_}
+                else: DELB['Neck']=Matrix.Translation(PHn-OHn['Neck'])
             for o,DD in ((SHIRT,DEL),(BRA,DELB)):
                 if o is None or not o.vertex_groups: continue
                 RET[o.name]=retarget_mesh(o,DD); RET[o.name+'_group_map']=map_groups(o); ORIG_W.add(o.name)
+            if NECKR is not None:
+                try:
+                    f_=NECKR['f']; Xr_=wco(BRA); Xn_=Xr_*(1-f_)[:,None]+(NECKR['X0']+NECKR['off'])*f_[:,None]; set_world(BRA,Xn_)
+                    RET['bra_neck_rigid']={'zc':round(NECKR['zc'],4),'verts_full_rigid':int((f_>0.999).sum()),'verts_blend':int(((f_>0.001)&(f_<=0.999)).sum()),'offset_m':[round(float(x),4) for x in NECKR['off']]}
+                except Exception as e: traceback.print_exc(); log('NECKRIGIDERR',e); RET['bra_neck_rigid_error']=str(e)
         log('outfit retarget',RET)
     except Exception as e: traceback.print_exc(); log('RETARGETERR',e); RET['error']=str(e)
 rep['outfit_retarget']=RET
+try:
+    for o_ in (SHIRT,BRA):
+        if o_ is not None and o_.name in WELD: WELD[o_.name]['XR']=wco(o_)
+except Exception as e: traceback.print_exc(); log('XRERR',e)
 # clothes FIT (brief: "fit clothes"): where her Panda body pokes through a garment, that garment's vertices are pushed out to sit just over the skin
 # (smoothed; nothing else moves; her UVs/textures/cut untouched). Layered: bra + shorts over the body, shirt over body + bra + shorts. Max push reported.
 from mathutils.bvhtree import BVHTree
@@ -335,7 +434,7 @@ def world_bvh(objs):
         e=t.evaluated_get(dg); me=e.to_mesh(); off=len(V)
         V+=[tuple(t.matrix_world@v.co) for v in me.vertices]; F+=[tuple(off+i for i in p.vertices) for p in me.polygons]; e.to_mesh_clear()
     return BVHTree.FromPolygons(V,F)
-def fit_out(o,targets,off,deep=0.05,iters=5,only=None):
+def fit_out(o,targets,off,deep=0.05,iters=5,only=None,damp=None):
     T=world_bvh(targets); mw=o.matrix_world; n=len(o.data.vertices)
     dg=bpy.context.evaluated_depsgraph_get(); ev=o.evaluated_get(dg)
     X=np.array([tuple(mw@v.co) for v in ev.data.vertices]) if len(ev.data.vertices)==n else np.array([tuple(mw@v.co) for v in o.data.vertices])
@@ -355,8 +454,10 @@ def fit_out(o,targets,off,deep=0.05,iters=5,only=None):
     for _ in range(iters):
         A=np.array([D[nb[i]].mean(0) if nb[i] else D[i] for i in range(n)]); D=0.5*D+0.5*A
         big=np.linalg.norm(N,axis=1)>np.linalg.norm(D,axis=1); D[big]=N[big]
+    if damp is not None: D=D*damp[:,None]
     X2=X+D; N2=need(X2)
     if only is not None: N2[~only(X2)]=0
+    if damp is not None: N2=N2*damp[:,None]
     X2+=N2
     tot=layer_coherent(o,X2-X); mm=np.linalg.norm(tot,axis=1)*1000
     mwi=mw.inverted()
@@ -627,12 +728,58 @@ def strap_push(o,off):
         r['passes']=hist
     except Exception as e: traceback.print_exc(); r['error']=str(e)
     rep['strap_push']=r; log('strap push',r)
+
+def strap_rigid(o,off):
+    """run 7: halter clearance by a RIGID move of the whole loop (same smooth mask as the neck offset): translation back/up <= 10/5 mm and a uniform
+       scale <= 8 % about Panda's Neck bone. No per-vertex pushes, so the loop keeps her smooth shape and width. Picks the smallest move that clears."""
+    r={}
+    try:
+        f_=NECKR['f']; X=wco(o); ring=np.where(f_>0.5)[0]; r['ring_verts']=int(len(ring))
+        TF_,VF_,FF_,_,_=_eval_tris_w(FH,lambda mi:mi in FH_SOLID0); TBd=world_bvh([BODY])
+        rs=set(ring.tolist()); faces=[tuple(p.vertices) for p in o.data.polygons if all(i in rs for i in p.vertices)]
+        piv=np.array(tuple(B.matrix_world@B.data.bones['Neck'].head_local))
+        def sd(q):
+            best=None
+            for T in (TBd,TF_):
+                loc,nr,idx,d=T.find_nearest(Vector(tuple(q)),0.03)
+                if loc is None: continue
+                if best is None or d<best[0]: best=(d,(Vector(tuple(q))-loc).dot(nr))
+            return None if best is None else best[1]
+        def Xof(dy,dz,s):
+            T=piv+(X-piv)*s+np.array((0,dy,dz)); return X+(T-X)*f_[:,None]
+        def minclr(Xc):
+            m=1.0
+            for i in ring:
+                v=sd(Xc[i]); m=min(m,v) if v is not None else m
+            for fc in faces:
+                q=Xc[list(fc)].mean(0); v=sd(q); m=min(m,v) if v is not None else m
+            return m
+        base=minclr(X); r['before_min_clearance_mm']=round(base*1000,2); cand=[]
+        if base<off:
+            for s in (1.0,1.02,1.04,1.06,1.08):
+                for dy in (0.0,0.0025,0.005,0.0075,0.01):
+                    for dz in (0.0,0.0025,0.005):
+                        if s==1.0 and dy==0 and dz==0: continue
+                        m=minclr(Xof(dy,dz,s)); cost=dy+dz+0.25*(s-1.0); cand.append((m>=off,-cost if m>=off else m,dy,dz,s,m))
+            ok=[c for c in cand if c[0]]
+            pick=max(ok,key=lambda c:c[1]) if ok else max(cand,key=lambda c:c[1])
+            _,_,dy,dz,s,m=pick; set_world(o,Xof(dy,dz,s)); r.update({'move_back_mm':dy*1000,'move_up_mm':dz*1000,'uniform_scale':s,'after_min_clearance_mm':round(m*1000,2),'cleared':bool(ok),'evals':len(cand)})
+        else: r['after_min_clearance_mm']=r['before_min_clearance_mm']; r['cleared']=True
+        # shape check: pairwise distances inside the fully-rigid part change only by the uniform scale
+        Xa=wco(o); rg=np.where(f_>0.999)[0]
+        if len(rg)>3:
+            idx=np.random.default_rng(7).choice(len(rg),min(400,len(rg)),replace=False); a=rg[idx]; b=np.roll(a,1)
+            d0=np.linalg.norm(NECKR['X0'][a]-NECKR['X0'][b],axis=1); d1=np.linalg.norm(Xa[a]-Xa[b],axis=1)
+            r['ring_shape_max_dev_mm_after_uniform_scale']=round(float(np.abs(d1-d0*r.get('uniform_scale',1.0)).max())*1000,3)
+    except Exception as e: traceback.print_exc(); r['error']=str(e)
+    rep['strap_rigid']=r; log('strap rigid',r)
 BRA_HIDDEN=SHIRT is not None and P.get('BRA_UNDER_SHIRT','hide')=='hide'
 if P.get('FIT',True):
     for o,tg,off in ((BRA,[BODY],P.get('FIT_BRA',0.002)),(SH,[BODY],P.get('FIT_SHORTS',0.0015 if SF=='hug' else 0.0025))):
-        try: fit_out(o,tg,off)
+        try: fit_out(o,tg,off,damp=(1.0-NECKR['f']) if (o is BRA and NECKR is not None and P.get('BRA_NECK')=='rigid') else None)
         except Exception as e: traceback.print_exc(); log('FITERR',o.name,e)
-    if P.get('STRAP_PUSH'): strap_push(BRA,P['STRAP_PUSH'])
+    if NECKR is not None and P.get('BRA_NECK')=='rigid': strap_rigid(BRA,P.get('STRAP_RIGID',0.0015))
+    elif P.get('STRAP_PUSH'): strap_push(BRA,P['STRAP_PUSH'])
     if P.get('FIT_HAIR',False):   # run 4: OFF (it flattened her hair cards onto the face in runs 2-3)
         try: fit_out(HR,[FH],P.get('FIT_HAIR_OFF',0.0015),deep=0.03,only=lambda X:X[:,1]<float(hmn[1]+hmx[1])/2)
         except Exception as e: traceback.print_exc(); log('FITERR','Hair',e)
@@ -642,6 +789,78 @@ if P.get('FIT',True):
             else:
                 for tg_ in ((BODY,SH) if BRA_HIDDEN else (BODY,BRA,SH)): fit_out(SHIRT,[tg_],P.get('FIT_SHIRT',0.006)); rep['cloth_fit']['Shirt over '+tg_.name]=rep['cloth_fit'].pop('Shirt')
         except Exception as e: traceback.print_exc(); log('FITERR','Shirt',e)
+
+# ---------- run 7 shirt post-pass (RUN6B fixes 1 + 5): (a) Tummy key: with her shorts' Tummy=1 the hem is pushed out locally over the shorts' outer layer;
+#            (b) the whole push field (retargeted -> fitted) is re-smoothed with a Laplacian falloff so no single step tears an edge (each step <= 25 mm);
+#            (c) weld: every seam group / shell pair snapped back together (shared midpoint, same displacement on both layers);
+#            (d) group-coherent clearance pass over the body (a whole group moves by its largest need), then a final weld check.
+def shirt_need_body(o,off,T=None):
+    T=T or world_bvh([BODY]); X=wco(o); N=np.zeros_like(X); S=np.ones(len(X))
+    for i,p in enumerate(X):
+        loc,nr,idx,d=T.find_nearest(Vector(tuple(p)),0.08)
+        if loc is None: continue
+        s=(Vector(tuple(p))-loc).dot(nr); S[i]=s
+        if -0.08<s<off: N[i]=np.array(tuple(nr))*(off-s)
+    return N,S
+def group_max(o,D):
+    if o.name not in WELD: return D
+    nrm=np.linalg.norm(D,axis=1); out=D.copy()
+    for gg in WELD[o.name]['groups']:
+        j=gg[int(np.argmax(nrm[gg]))]; out[gg]=D[j]
+    return out
+def tummy_clear(o,off=0.0015,cap=0.025):
+    r={}
+    kb=SH.data.shape_keys.key_blocks.get('Tummy') if SH.data.shape_keys else None
+    if kb is None: rep['tummy_clear']={'skipped':'no Tummy key'}; return
+    v0=kb.value; kb.value=1.0; bpy.context.view_layer.update()
+    try:
+        Tsh,VS=_bvh_tris(SH); TB=world_bvh([BODY]); X=wco(o); D=np.zeros_like(X)
+        zlo,zhi=float(VS[:,2].min())-0.01,float(VS[:,2].max())+0.03; hit=0
+        for i,p in enumerate(X):
+            if not (zlo<p[2]<zhi): continue
+            loc,nr,idx,d=TB.find_nearest(Vector(tuple(p)),0.10)
+            if loc is None: continue
+            far=_far_hits(Tsh,loc+nr*0.0003,nr,0.08)
+            if far is None: continue
+            s=(Vector(tuple(p))-loc).dot(nr); need=far+off-s
+            if need>0: D[i]=np.array(tuple(nr))*min(need,cap); hit+=1
+        D=group_max(o,D); D=smooth_field(o,D,iters=20,cap=cap); set_world(o,wco(o)+D)
+        mm=np.linalg.norm(D,axis=1)*1000; r={'hem_verts_needing_push':hit,'moved_gt_0p1mm':int((mm>0.1).sum()),'max_mm':round(float(mm.max()),1)}
+    except Exception as e: traceback.print_exc(); r['error']=str(e)
+    kb.value=v0; bpy.context.view_layer.update(); rep['tummy_clear']=r; log('tummy clear',r)
+def shirt_post(o):
+    r={}
+    if o.name not in WELD: rep['shirt_post']={'skipped':'no weld record'}; return
+    XR=WELD[o.name].get('XR',WELD[o.name]['X0'])
+    if P.get('TUMMY_CLEAR',True): tummy_clear(o)
+    X=wco(o); D=X-XR; nm=np.linalg.norm(D,axis=1)
+    r['push_field_before']={'max_mm':round(float(nm.max())*1000,1),'verts_gt_25mm':int((nm>0.025).sum())}
+    cap=float(P.get('PUSH_CAP',0.025))
+    # steps of <= cap each; the projection keeps every required push, so a > cap need is reached in more than one smoothed step
+    Ds=np.zeros_like(D); rem=D.copy(); steps=0
+    while steps<4:
+        steps+=1; st=rem.copy(); sn=np.linalg.norm(st,axis=1); k=sn>cap; st[k]*= (cap/sn[k])[:,None]
+        st=smooth_field(o,st,iters=25); Ds+=st
+        Un=np.zeros_like(D); mk=nm>1e-7; Un[mk]=D[mk]/nm[mk][:,None]; left=np.clip(nm-(Ds*Un).sum(1),0,None); rem=Un*left[:,None]
+        if np.linalg.norm(rem,axis=1).max()<0.0005: break
+    set_world(o,XR+Ds); r['smooth_steps']=steps
+    nm2=np.linalg.norm(Ds,axis=1); r['push_field_after_smooth']={'max_mm':round(float(nm2.max())*1000,1),'mean_moved_mm':round(float(nm2[nm2>1e-4].mean())*1000,1) if (nm2>1e-4).any() else 0}
+    r['weld1']=weld_snap(o,'1')
+    TB=world_bvh([BODY]); hist=[]
+    for it in range(3):
+        N,S=shirt_need_body(o,float(P.get('FIT_SHIRT',0.003)),TB); m=(S>-0.08)
+        hist.append({'iter':it,'min_mm':round(float(S[m].min())*1000,2),'under_skin':int(((S<0)&m).sum()),'need_verts':int((np.linalg.norm(N,axis=1)>1e-6).sum())})
+        if (np.linalg.norm(N,axis=1)>1e-6).sum()==0: break
+        N=group_max(o,N); N=smooth_field(o,N,iters=15,cap=cap); set_world(o,wco(o)+N)
+    N,S=shirt_need_body(o,0.0,TB); m=(S>-0.08); hist.append({'final_min_mm':round(float(S[m].min())*1000,2),'under_skin':int(((S<0)&m).sum())})
+    r['clearance']=hist; r['weld2']=weld_snap(o,'2')
+    rep['shirt_post']=r; log('SHIRT post',json.dumps(r,default=str)[:1500])
+if SHIRT is not None and P.get('WELD',True):
+    try: shirt_post(SHIRT)
+    except Exception as e: traceback.print_exc(); log('SHIRTPOSTERR',e)
+if BRA is not None and P.get('WELD',True):
+    try: weld_snap(BRA,'bra')
+    except Exception as e: traceback.print_exc(); log('BRAWELDERR',e)
 # clothes weights: Data Transfer from the Panda body (Vertex Data > Vertex Groups, nearest face interpolated), applied, cleaned, normalized, max 4 influences
 def transfer_weights(o):
     old=[g.name for g in o.vertex_groups]; o.vertex_groups.clear()
@@ -686,6 +905,71 @@ for o in CLOTH:
         except Exception as e: traceback.print_exc(); log('OWNWEIGHTS failed -> transfer',o.name,e)
     try: transfer_weights(o)
     except Exception as e: traceback.print_exc(); log('WTERR',o.name,e)
+# ---------- run 7 (RUN6B fix 2): the shirt sank up to 25.6 mm into the body in the posed idle/squat because her outfit weights (authored on a different
+#            body) and Panda's body weights disagree near the armpits/sides/hips. Corrective weights: shirt verts close to the skin take the body's own
+#            weights at the nearest skin point (barycentric), blended by distance (<= 10 mm: body, >= 30 mm: hers). Seam groups / shell twins share weights.
+def _vw(o):
+    gi={g.index:g.name for g in o.vertex_groups}; return [{gi[ge.group]:ge.weight for ge in v.groups if ge.weight>0} for v in o.data.vertices]
+def _write_w(o,Wl):
+    for nm_ in set(k for w in Wl for k in w):
+        if o.vertex_groups.get(nm_) is None: o.vertex_groups.new(name=nm_)
+    gidx={g.name:g for g in o.vertex_groups}; cur=_vw(o)
+    for i,(w0,w1) in enumerate(zip(cur,Wl)):
+        for k in w0:
+            if k not in w1 or w1[k]<=0.0005: gidx[k].remove([i])
+        for k,w in w1.items():
+            if w>0.0005 and abs(w0.get(k,-1)-w)>1e-6: gidx[k].add([i],float(w),'REPLACE')
+def _norm4(w):
+    it=sorted(w.items(),key=lambda kv:-kv[1])[:4]; s=sum(x for _,x in it)
+    return {k:x/s for k,x in it} if s>0 else w
+def weights_equalize(o):
+    if o.name not in WELD: return 0
+    Wl=_vw(o); n=0
+    for gg in WELD[o.name]['groups']:
+        acc={}
+        for i in gg:
+            for k,w in Wl[i].items(): acc[k]=acc.get(k,0)+w/len(gg)
+        acc=_norm4(acc)
+        for i in gg:
+            if Wl[i]!=acc: Wl[i]=dict(acc); n+=1
+    _write_w(o,Wl); return n
+def body_weight_blend(o,d_full=0.010,d_zero=0.030):
+    dg=bpy.context.evaluated_depsgraph_get(); eb=BODY.evaluated_get(dg); me=eb.to_mesh(); me.calc_loop_triangles(); mw=BODY.matrix_world
+    use_ev=len(me.vertices)==len(BODY.data.vertices)
+    if use_ev: V=np.array([tuple(mw@v.co) for v in me.vertices]); F=np.array([tuple(t.vertices) for t in me.loop_triangles],dtype=np.int64)
+    eb.to_mesh_clear()
+    if not use_ev:
+        me2=BODY.data; me2.calc_loop_triangles(); V=wco(BODY); F=np.array([tuple(t.vertices) for t in me2.loop_triangles],dtype=np.int64)
+    T=BVHTree.FromPolygons(V.tolist(),F.tolist())
+    bones=set(b.name for b in B.data.bones); WB=_vw(BODY); WB=[{k:w for k,w in d.items() if k in bones} for d in WB]
+    X=wco(o); Wl=_vw(o); nb=0; full=0
+    from mathutils.geometry import barycentric_transform as _bt
+    for i,p in enumerate(X):
+        loc,nr,fi,d=T.find_nearest(Vector(tuple(p)),d_zero)
+        if loc is None: continue
+        a=float(np.clip((d_zero-d)/(d_zero-d_full),0,1))
+        if a<=0: continue
+        tri=F[fi]; bc=_bt(loc,Vector(tuple(V[tri[0]])),Vector(tuple(V[tri[1]])),Vector(tuple(V[tri[2]])),Vector((1,0,0)),Vector((0,1,0)),Vector((0,0,1)))
+        wb={}
+        for k_,c_ in zip(tri,bc):
+            for g,w in WB[k_].items(): wb[g]=wb.get(g,0)+max(c_,0)*w
+        if not wb: continue
+        s=sum(wb.values()); wb={k:w/s for k,w in wb.items()}
+        new={}
+        for k,w in Wl[i].items(): new[k]=new.get(k,0)+(1-a)*w
+        for k,w in wb.items(): new[k]=new.get(k,0)+a*w
+        Wl[i]=_norm4(new); nb+=1; full+=int(a>=0.999)
+    _write_w(o,Wl)
+    r={'verts_blended':nb,'verts_full_body_weights':full,'of':len(X),'d_full_mm':d_full*1000,'d_zero_mm':d_zero*1000,'body_eval_mesh':use_ev}
+    rep['shirt_body_weights']=r; log('shirt body-weight blend',r)
+try:
+    if SHIRT is not None and P.get('SHIRT_BODYW',True): body_weight_blend(SHIRT)
+    for o_ in (SHIRT,BRA):
+        if o_ is not None and P.get('WELD',True):
+            n_=weights_equalize(o_); rep.setdefault('weld',{}).setdefault(o_.name,{})['weights_equalized_verts']=n_; log('weights equalized',o_.name,n_)
+    for o_ in (SHIRT,BRA):
+        if o_ is not None: clean_weights(o_)
+except Exception as e: traceback.print_exc(); log('WBLENDERR',e); rep['wblend_error']=str(e)
 # ---------- 6. ONE armature: merge the head's and the hair's bones into Panda's (same-name bones -> Panda's; their extra bones parented under Panda Head)
 bodyn=set(b_.name for b_ in B.data.bones); DUP={}
 arms=[a for a in (FA,HA) if a]
@@ -817,7 +1101,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r6','A2':'jena-v37r6-noshirt'}.get(VAR)
+SAVE_NAME={'A0':'jena-v37r7-A0','A1':'jena-v37r7-A1','A2':'jena-v37r7-noshirt'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -1192,6 +1476,132 @@ try:
            'grid_dy_dz_scale_eye_cheek_cross_bodypen_score':sorted(grid_,key=lambda g:g[-1])[:12],'hair_bones_moved':len(hb_names)}
     log('hair placement',tried)
     rep['hair_placement_search']=tried; rep['eye_evals']=evals
+    # ---------- run 7 (RUN6B fixes 3 + 7). Reference = the hair exactly as 6b placed it. Stick-out = how far a moved vertex ends up OUTSIDE every 6b surface
+    #            (body, head, cranium, hair, clothes): a lock that only moves within/along the 6b silhouette scores ~0, a wing scores its distance.
+    try:
+        H7={}
+        _ref_objs=[o_ for o_ in (BODY,FH,CR,HR,SHIRT,BRA,SH) if o_ is not None]
+        T6b=world_bvh(_ref_objs); TBb=world_bvh([BODY])
+        gi_h={g.index:g.name for g in HR.vertex_groups}
+        def chain_bones(root):
+            out=[root]; b=B.pose.bones[root]
+            while b.children: b=max(b.children,key=lambda c:len(c.children_recursive)); out.append(b.name)
+            return out
+        def chain_verts(root):
+            names=set(n_.name for n_ in [B.pose.bones[root]]+list(B.pose.bones[root].children_recursive))
+            return np.array([v.index for v in HR.data.vertices if any(gi_h[ge.group] in names and ge.weight>0.05 for ge in v.groups)],dtype=np.int64)
+        def hair_world_eval():
+            dg=bpy.context.evaluated_depsgraph_get(); e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world
+            Xe=np.array([tuple(mw_@v.co) for v in me_.vertices]); e_.to_mesh_clear(); return Xe
+        def stick_out(idx,Xe):
+            mx=0.0
+            for i in idx:
+                p=Vector(tuple(Xe[i]))
+                lb,nb_,_,_=TBb.find_nearest(p,0.05)
+                if lb is not None and (p-lb).dot(nb_)<0: continue
+                loc,_,_,d=T6b.find_nearest(p,0.08)
+                mx=max(mx,d if loc is not None else 0.08)
+            return mx
+        def curl(root,deg,axis_w):
+            bn=chain_bones(root); k=len(bn)
+            for n_ in bn: B.pose.bones[n_].matrix_basis=Matrix()
+            bpy.context.view_layer.update()
+            for n_ in bn:
+                pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg/k),4,AXW(axis_w))@Matrix.Translation(-h)@pb.matrix
+                bpy.context.view_layer.update()
+        def uncurl(root):
+            for n_ in chain_bones(root): B.pose.bones[n_].matrix_basis=Matrix()
+            bpy.context.view_layer.update()
+        def pen_of(root):
+            return int(hair_body_pen().get(root,0))
+        def signs(root,side):
+            s_sw,s_lf=chain_signs(root,side); return s_sw,s_lf
+        DONE=[]
+        # fix 3: the two long front locks only, forward (tip away from the chest), smallest angle <= 8 deg that gets each to <= 5 verts inside the body
+        if P.get('FRONT_LOCKS',True):
+            for root,side in (('Blw_Front_L','L'),('Blw_Front_R','R')):
+                if root not in B.pose.bones: H7[root]={'missing':True}; continue
+                s_sw,s_lf=signs(root,side); idx=chain_verts(root); p0=pen_of(root); rec={'pen_before':p0,'lift_sign':s_lf,'tried':[]}
+                pick=0
+                if p0>5:
+                    for a in range(1,9):
+                        curl(root,s_lf*a,(1,0,0)); pa=pen_of(root); so=stick_out(idx,hair_world_eval()); rec['tried'].append((a,pa,round(so*1000,1)))
+                        if pa<=5 and so<=0.010: pick=a; break
+                    if not pick:
+                        ok=[t for t in rec['tried'] if t[2]<=10.0]; pick=min(ok,key=lambda t:(t[1],t[0]))[0] if ok else 0
+                if pick: curl(root,s_lf*pick,(1,0,0)); DONE.append(root)
+                else: uncurl(root)
+                rec['angle_deg']=pick; rec['pen_after']=pen_of(root); rec['stick_out_mm']=round(stick_out(idx,hair_world_eval())*1000,1); H7[root]=rec
+        # fix 7 / variant A1: curl ONLY the chain that covers each eye (right: Blw_Bangs_R), smallest angle <= 15 deg (lift, sweep, or both) that gets
+        # that eye under 15 % in every proof view, with the wing check (stick-out <= 10 mm vs 6b). A0 keeps the bang 1:1.
+        if P.get('BANG_LIFT'):
+            m_=metrics(); H7['eyes_before_lift']={'eye_max_pct':m_['eye_max_pct'],'eye_chains':m_['eye_chains']}
+            ec,_,TVH_=cover(EYEP,CAMS,EYE_VIEWS)
+            def eye_pct(e,sd): return max(e[vw][sd]['pct'] for vw in e)
+            for sd in ('R','L'):
+                e0,h0,TV0=cover({sd:EYEP[sd]},CAMS,EYE_VIEWS); p_=max(e0[vw][sd]['pct'] for vw in e0)
+                rec={'eye':sd,'pct_before':p_}
+                if p_<15: rec['note']='already under 15 %'; H7['bang_'+sd]=rec; continue
+                ch=chain_of_tris(h0,TV0); cands=[c for c,_ in ch.most_common() if c in B.pose.bones and c not in DONE]
+                if sd=='R' and 'Blw_Bangs_R' in cands: cands=['Blw_Bangs_R']
+                if not cands: rec['note']='no posable chain'; H7['bang_'+sd]=rec; continue
+                root=cands[0]; rec['chain']=root; s_sw,s_lf=signs(root,sd); idx=chain_verts(root); tried=[]; pick=None
+                for a in (3,6,9,12,15):
+                    for mode in ('lift','sweep','both'):
+                        uncurl(root)
+                        if mode=='lift': curl(root,s_lf*a,(1,0,0))
+                        elif mode=='sweep': curl(root,s_sw*a,(0,1,0))
+                        else:
+                            curl(root,s_lf*a*0.7071,(1,0,0))
+                            bn=chain_bones(root)
+                            for n_ in bn:
+                                pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(s_sw*a*0.7071/len(bn)),4,AXW((0,1,0)))@Matrix.Translation(-h)@pb.matrix
+                                bpy.context.view_layer.update()
+                        e1,_,_=cover({sd:EYEP[sd]},CAMS,EYE_VIEWS); p1=max(e1[vw][sd]['pct'] for vw in e1); so=stick_out(idx,hair_world_eval())
+                        fc=face_cross()['hair_tris_crossing_face_below_brow']
+                        tried.append((a,mode,p1,round(so*1000,1),fc))
+                    good=[t for t in tried if t[0]==a and t[2]<15 and t[3]<=10.0 and t[4]<=CROSS_MAX]
+                    if good: pick=min(good,key=lambda t:(t[2],t[3])); break
+                if pick is None:
+                    ok=[t for t in tried if t[3]<=10.0 and t[4]<=CROSS_MAX]
+                    pick=min(ok,key=lambda t:(t[2],t[0])) if ok else None
+                uncurl(root)
+                if pick:
+                    a,mode=pick[0],pick[1]
+                    if mode=='lift': curl(root,s_lf*a,(1,0,0))
+                    elif mode=='sweep': curl(root,s_sw*a,(0,1,0))
+                    else:
+                        curl(root,s_lf*a*0.7071,(1,0,0)); bn=chain_bones(root)
+                        for n_ in bn:
+                            pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(s_sw*a*0.7071/len(bn)),4,AXW((0,1,0)))@Matrix.Translation(-h)@pb.matrix
+                            bpy.context.view_layer.update()
+                    DONE.append(root); rec.update({'angle_deg':a,'mode':mode,'pct_after':pick[2],'stick_out_mm':pick[3],'face_cross':pick[4]})
+                rec['tried']=tried; H7['bang_'+sd]=rec; log('A1 bang',sd,{k:v for k,v in rec.items() if k!='tried'})
+        # bake the chosen chain poses into her rig's rest (pose applied to those hair bones + the hair mesh written in that pose) so the .blend/.fbx carry it
+        if DONE:
+            bake=[n_ for r_ in DONE for n_ in [r_]+[c.name for c in B.pose.bones[r_].children_recursive]]
+            Xe=hair_world_eval(); mwi_=np.linalg.inv(np.array(HR.matrix_world)); XL=Xe@mwi_[:3,:3].T+mwi_[:3,3]
+            n_h2=len(HR.data.vertices)
+            if len(XL)==n_h2:
+                bpy.context.view_layer.objects.active=B; bpy.ops.object.mode_set(mode='POSE')
+                for pb in B.pose.bones: pb.bone.select=pb.name in bake
+                bpy.ops.pose.armature_apply(selected=True)
+                for pb in B.pose.bones: pb.bone.select=False
+                bpy.ops.object.mode_set(mode='OBJECT')
+                if HR.data.shape_keys:
+                    a=np.empty(n_h2*3); HR.data.vertices.foreach_get('co',a); dl=XL-a.reshape(-1,3)
+                    for kb in HR.data.shape_keys.key_blocks:
+                        b_=np.empty(n_h2*3); kb.data.foreach_get('co',b_); kb.data.foreach_set('co',(b_.reshape(-1,3)+dl).ravel())
+                HR.data.vertices.foreach_set('co',XL.ravel()); HR.data.update(); bpy.context.view_layer.update()
+                for n_ in bake: B.pose.bones[n_].matrix_basis=Matrix()
+                bpy.context.view_layer.update()
+                drift=float(np.linalg.norm(hair_world_eval()-Xe,axis=1).max())
+                H7['baked']={'bones':len(bake),'roots':DONE,'max_drift_mm_after_bake':round(drift*1000,3)}
+            else: H7['baked']={'error':'evaluated vertex count differs; kept as pose','roots':DONE}
+            for r_ in DONE: BANG.pop(r_,None)
+        H7['body_pen_after']=dict(hair_body_pen())
+        rep['hair_run7']=H7; log('HAIR run7',json.dumps(H7,default=str)[:2500])
+    except Exception as e: traceback.print_exc(); log('HAIR7ERR',e); rep['hair_run7_error']=str(e)
     mf=metrics(); rep['eyes_after']=mf; log('EYES after',json.dumps(mf,default=str)[:1500],'BANG',list(BANG))
 except Exception as e: traceback.print_exc(); log('EYECHECKERR',e); rep['eyecheck_error']=str(e)
 
@@ -1477,6 +1887,50 @@ def body_schema():
         gi=Counter(); [gi.update([o.vertex_groups[ge.group].name]) for v in o.data.vertices for ge in v.groups if ge.weight>0.3]
         out['meshes'][o.name]={'verts':len(o.data.vertices),'shape_keys':[k.name for k in o.data.shape_keys.key_blocks] if o.data.shape_keys else [],'main_bones':dict(gi.most_common(12))}
     json.dump(out,open(OUT+'/training/body-schema.json','w'),indent=1)
+# ---------- run 7 (RUN6B fix 2, second half): clearance pass in the POSED idle (frame 0) and squat (frame 258) of the rig motion test. Shirt verts that sink
+#            into the posed body are pushed out there; the push is carried back to the rest mesh through each vertex's own skinning matrix (inverse LBS),
+#            group-coherent (seams/shells move together) and Laplacian-smoothed. Rest pose only gets pushed OUT, never in.
+def _skin_mats(o):
+    names=[g.name for g in o.vertex_groups]; mw=np.array(B.matrix_world); mwi=np.linalg.inv(mw); S=[]
+    for nm_ in names:
+        if nm_ in B.pose.bones:
+            pb=B.pose.bones[nm_]; S.append(mw@np.array(pb.matrix)@np.linalg.inv(np.array(pb.bone.matrix_local))@mwi)
+        else: S.append(np.eye(4))
+    S=np.array(S); n=len(o.data.vertices); Wm=np.zeros((n,len(names)))
+    for v in o.data.vertices:
+        for ge in v.groups: Wm[v.index,ge.group]=ge.weight
+    s=Wm.sum(1); s[s==0]=1; Wm/=s[:,None]
+    return np.einsum('ng,gab->nab',Wm,S)
+def _posed_signed(o):
+    TB=world_bvh([BODY]); V,_,_=tri_arr(o); S=np.ones(len(V)); N=np.zeros_like(V)
+    for i,p in enumerate(V):
+        loc,nr,idx,d=TB.find_nearest(Vector(tuple(p)),0.06)
+        if loc is None: continue
+        S[i]=(Vector(tuple(p))-loc).dot(nr); N[i]=tuple(nr)
+    return S,N
+def posed_clear(o,frames=(0,258),off=0.002):
+    r={'frames':list(frames),'passes':[]}
+    for it in range(2):
+        Drest=np.zeros((len(o.data.vertices),3)); st={}
+        for f in frames:
+            anim_pose(f); S,N=_posed_signed(o); m=(S>-0.06)&(S<off)
+            st[f]={'lt_minus3mm':int((S<-0.003).sum()),'min_mm':round(float(S[S>-0.06].min())*1000,1)}
+            if m.any():
+                M=_skin_mats(o); dp=N*(off-S)[:,None]; dp[~m]=0
+                R=np.linalg.inv(M[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+                k=np.linalg.norm(dr,axis=1)>np.linalg.norm(Drest,axis=1); Drest[k]=dr[k]
+        rest()
+        r['passes'].append({'iter':it,'per_frame_before':st,'verts_pushed':int((np.linalg.norm(Drest,axis=1)>1e-5).sum()),'max_mm':round(float(np.linalg.norm(Drest,axis=1).max())*1000,1)})
+        if (np.linalg.norm(Drest,axis=1)>1e-5).sum()==0: break
+        Drest=group_max(o,Drest); Drest=smooth_field(o,Drest,iters=15,cap=float(P.get('PUSH_CAP',0.025))); set_world(o,wco(o)+Drest)
+    fin={}
+    for f in frames:
+        anim_pose(f); S,_=_posed_signed(o); fin[f]={'lt_minus3mm':int((S<-0.003).sum()),'min_mm':round(float(S[S>-0.06].min())*1000,1)}
+    rest(); r['after']=fin; r['weld']=weld_snap(o,'posed')
+    rep['posed_clear']=r; log('POSED clear',json.dumps(r,default=str)[:1500])
+if SHIRT is not None and P.get('POSED_CLEAR',True):
+    try: posed_clear(SHIRT)
+    except Exception as e: traceback.print_exc(); log('POSEDCLEARERR',e); rep['posed_clear_error']=str(e); rest()
 QA=os.environ.get('QA')
 if QA:
     try:
@@ -1489,6 +1943,9 @@ if QA:
                 except Exception as e: traceback.print_exc(); log('SCHEMAERR',e)
             qa_bones()
         elif QA=='shapes': qa_shapes()
+        elif QA=='schema':
+            os.makedirs(OUT+'/training',exist_ok=True); body_schema()
+            json.dump({k:rep.get(k) for k in ('weld','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','outfit_retarget','eyes_after')},open(OUT+'/training/run7-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):

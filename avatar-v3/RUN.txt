@@ -1,3 +1,2 @@
-assemble A0
-
-#6b retry: 6c hair pivot fix
+assemble A1
+#run7
