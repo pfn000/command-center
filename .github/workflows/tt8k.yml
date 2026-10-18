@@ -10,34 +10,8 @@ env:
   RUNID: "39172605668"
   NF: "300"
   SHARDS: "20"
-  SAMPLES: "10"
+  SAMPLES: "4"
 jobs:
-  probe:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup
-        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
-        run: |
-          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
-          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
-          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
-          pip install -q huggingface_hub > /dev/null
-          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
-      - name: Probe frames (720x1280 + one 8K timing frame)
-        run: |
-          mkdir -p /tmp/out
-          TT_W=720 TT_H=1280 TT_NF=$NF TT_SAMPLES=12 TT_ONLY=0,75,150,225 timeout -k 10 1200 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/out/small 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
-          TT_NF=$NF TT_SAMPLES=$SAMPLES TT_ONLY=40 TT_Q=88 timeout -k 10 1200 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/out/big 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600 | tee /tmp/out/big-log.txt
-          ls -la /tmp/out/*
-      - name: Upload probe
-        if: always()
-        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
-        run: |
-          python3 -c "
-          import os; from huggingface_hub import HfApi
-          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/$RUNID/turntable-8k/probe',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
   render:
     runs-on: ubuntu-latest
     timeout-minutes: 120
