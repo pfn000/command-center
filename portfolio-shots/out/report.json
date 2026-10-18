@@ -4,7 +4,9 @@
    "name": "d-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -19,7 +21,9 @@
    "name": "d-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -34,7 +38,9 @@
    "name": "d-dark-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -49,7 +55,9 @@
    "name": "d-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -64,7 +72,26 @@
    "name": "d-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-smalls",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -79,7 +106,9 @@
    "name": "d-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -94,7 +123,9 @@
    "name": "d-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -109,7 +140,9 @@
    "name": "d-dark-04b-talks",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -124,7 +157,9 @@
    "name": "d-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -139,7 +174,9 @@
    "name": "d-dark-05b-ncom-demos",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -154,7 +191,9 @@
    "name": "d-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -169,7 +208,9 @@
    "name": "d-dark-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -184,7 +225,9 @@
    "name": "d-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -199,7 +242,9 @@
    "name": "d-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -214,7 +259,9 @@
    "name": "d-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -229,7 +276,9 @@
    "name": "d-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -244,7 +293,9 @@
    "name": "d-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -259,7 +310,9 @@
    "name": "d-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -274,7 +327,9 @@
    "name": "d-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -289,7 +344,9 @@
    "name": "d-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -436,7 +493,9 @@
    "name": "p-dark-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -451,7 +510,9 @@
    "name": "p-dark-00-home-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -466,7 +527,9 @@
    "name": "p-dark-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -481,7 +544,9 @@
    "name": "p-dark-02-emmi-official",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -496,7 +561,26 @@
    "name": "p-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-smalls",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -511,7 +595,9 @@
    "name": "p-dark-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -526,7 +612,9 @@
    "name": "p-dark-04-worlds",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -541,7 +629,9 @@
    "name": "p-dark-04b-talks",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -556,7 +646,9 @@
    "name": "p-dark-05-ncom",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -571,7 +663,9 @@
    "name": "p-dark-05b-ncom-demos",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -586,7 +680,9 @@
    "name": "p-dark-06-jena",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -601,7 +697,9 @@
    "name": "p-dark-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -616,7 +714,9 @@
    "name": "p-dark-06c-moments",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -631,7 +731,9 @@
    "name": "p-dark-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -646,7 +748,9 @@
    "name": "p-dark-07b-resume-preview-2",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -661,7 +765,9 @@
    "name": "p-dark-08-projects",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -676,7 +782,9 @@
    "name": "p-dark-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -691,7 +799,9 @@
    "name": "p-dark-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -706,7 +816,9 @@
    "name": "p-dark-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -721,7 +833,9 @@
    "name": "p-dark-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -868,7 +982,9 @@
    "name": "d-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -883,7 +999,9 @@
    "name": "d-light-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -898,7 +1016,9 @@
    "name": "d-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -913,7 +1033,9 @@
    "name": "d-light-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -928,7 +1050,9 @@
    "name": "d-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -943,7 +1067,9 @@
    "name": "d-light-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -958,7 +1084,9 @@
    "name": "d-light-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -973,7 +1101,9 @@
    "name": "d-light-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -988,7 +1118,9 @@
    "name": "d-light-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1025,7 +1157,9 @@
    "name": "p-light-01-home",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1040,7 +1174,9 @@
    "name": "p-light-01b-about",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1055,7 +1191,9 @@
    "name": "p-light-03-emmico",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1070,7 +1208,9 @@
    "name": "p-light-06b-focals",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1085,7 +1225,9 @@
    "name": "p-light-07-resume-preview",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1100,7 +1242,9 @@
    "name": "p-light-09-companies",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1115,7 +1259,9 @@
    "name": "p-light-09b-writing",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1130,7 +1276,9 @@
    "name": "p-light-10-panel-open",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
@@ -1145,7 +1293,9 @@
    "name": "p-light-11-footer-badge",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [],
+   "badLinks": [
+    "/images/emmi-youtube-thumb.jpg"
+   ],
    "oldNos": [],
    "peter": false,
    "oldEmail": false,
