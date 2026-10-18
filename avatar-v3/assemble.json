@@ -6,6 +6,12 @@
  },
  "A2": {
   "SHIRT": false,
-  "SET": "noshirt"
+  "SET": "noshirt",
+  "HAIR_ALIGN": "bbox"
+ },
+ "A3": {
+  "SET": "face",
+  "HEAD_TEX": "auto",
+  "FIT": true
  }
 }

@@ -12,7 +12,7 @@ import time as _t; _T0=_t.time()
 def log(*a): print('[v3]',f'{_t.time()-_T0:.0f}s',*a,flush=True)
 VAR=os.environ.get('VARIANT','A0')
 P=dict(SHORTS_TEX='Black.png', HAIR='blowout', SHIRT=True, HAIR_W_RATIO=1.40, HAIR_TOP_GAP=0.010, HAIR_DZ=0.006, HAIR_DY=0.0, HAIR_DEPTH_K=1.1,
-       NECK_R_K=0.97, NECK_SINK=0.015, SEAM_BAND=0.035, BRA_COL=(0.012,0.012,0.013), BRA_ROUGH=0.55,
+       NECK_R_K=0.97, NECK_SINK=0.015, SEAM_BAND=0.035, BRA_COL=(0.012,0.012,0.013), BRA_ROUGH=0.7,
        ARM_DOWN=74, SHOULDER_DOWN=10, ELBOW_BEND=-12, WRIST_BEND=8, RELAX=True, SAMPLES=32, ASM_SAMPLES=16, CRANIUM=True, HEAD_TEX='1.png',
        SET='full', TT=False, TT_FRAMES=96, TT_SAMPLES=12, TT_W=720, TT_H=1280)
 try:
@@ -85,25 +85,84 @@ new=imp_fbx(HD+'Female head + hair.fbx'); FH=[o for o in new if o.type=='MESH' a
 for o in new:
     if o.type=='MESH' and o is not FH: bpy.data.objects.remove(o)
 rep['head_fbx_bones']=[b.name for b in FA.data.bones]; log('head fbx bones',rep['head_fbx_bones'])
+HT=P['HEAD_TEX']
+if HT=='auto':
+    def med(path,stride=37):
+        im=bpy.data.images.load(path,check_existing=True); a=np.empty(im.size[0]*im.size[1]*4,dtype=np.float32); im.pixels.foreach_get(a); a=a.reshape(-1,4)[::stride]
+        m=(a[:,3]>0.9)&(a[:,:3].mean(1)>0.35)&(a[:,:3].mean(1)<0.97); return np.median(a[m,:3],0) if m.sum()>100 else None
+    bm0=med(BF+'BODY.png'); best=None
+    for i in range(1,6):
+        m_=med(HD+f'female head textures/{i}.png')
+        if m_ is None or bm0 is None: continue
+        d_=float(np.abs(m_-bm0).sum()); rep.setdefault('head_tex_dist',{})[f'{i}.png']=round(d_,4)
+        if best is None or d_<best[0]: best=(d_,f'{i}.png')
+    HT=best[1] if best else '1.png'
+rep['head_tex']=HT; log('head texture',HT,rep.get('head_tex_dist'))
 for s in FH.material_slots:
     m=s.material
     if not m: continue
     n=m.name.lower()
-    if n.startswith('face'): set_tex(m,HD+'female head textures/'+P['HEAD_TEX'],alpha=True); m.blend_method='HASHED'
+    if n.startswith('face'): set_tex(m,HD+'female head textures/'+HT,alpha=True); m.blend_method='HASHED'
     elif n.startswith('eyes'): set_tex(m,ZP+'doe 5.png')
     elif n.startswith('effects'):
         m.use_nodes=True; bb_=[x for x in m.node_tree.nodes if x.type=='BSDF_PRINCIPLED']
         if bb_: bb_[0].inputs['Alpha'].default_value=0.0
 rep['head_missing_images']=fix_images(); rep['head_materials']=mats_report(FH)
-# ---------- 3. attach: head neck ring -> body neck ring. ONE uniform scale from the two ring radii (reported), sink 1.5 cm into the body's neck
-BV=wco(BODY); zt=float(BV[:,2].max()); top=BV[BV[:,2]>zt-0.008]; bc=top[:,:2].mean(0); br=float(np.median(np.hypot(top[:,0]-bc[0],top[:,1]-bc[1])))
-HV=wco(FH); h_before=float(HV[:,2].max()-HV[:,2].min()); zb=float(HV[:,2].min()); bot=HV[HV[:,2]<zb+0.006]; hc=bot[:,:2].mean(0); hr=float(np.median(np.hypot(bot[:,0]-hc[0],bot[:,1]-hc[1])))
-s_=br/hr*P['NECK_R_K']
-M=Matrix.Translation(Vector((bc[0],bc[1],zt-P['NECK_SINK'])))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc[0],-hc[1],-zb)))
+# ---------- 3. attach: her head's neck ring -> the body's open neck ring. ONE uniform scale from the two ring radii (reported), then the bottom ring
+#            of her head is snapped onto the body's ring (seamless neck; only the neck's last ~2 cm move, every shape key moved the same so visemes/blinks keep working)
+from collections import Counter
+def boundary(o):
+    cnt=Counter(ek for p in o.data.polygons for ek in p.edge_keys)
+    return sorted(set(v for ek,c in cnt.items() if c==1 for v in ek))
+def shift_keys(o,Dw):
+    mwi3=o.matrix_world.inverted().to_3x3(); n=len(o.data.vertices); dl=[mwi3@Vector(d) for d in Dw]
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            for i in range(n):
+                if dl[i].length_squared>0: kb.data[i].co+=dl[i]
+    for i in range(n):
+        if dl[i].length_squared>0: o.data.vertices[i].co+=dl[i]
+    o.data.update()
+BV=wco(BODY); zt=float(BV[:,2].max())
+top=BV[BV[:,2]>zt-0.008]; bc0=top[:,:2].mean(0)
+br0=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1])))
+rb=[i for i in boundary(BODY) if BV[i,2]>zt-0.05 and math.hypot(BV[i,0]-bc0[0],BV[i,1]-bc0[1])<1.5*br0]
+HV=wco(FH); h_before=float(HV[:,2].max()-HV[:,2].min()); zb=float(HV[:,2].min())
+bot=HV[HV[:,2]<zb+0.006]; hc0=bot[:,:2].mean(0)
+hr0=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1])))
+rh=[i for i in boundary(FH) if HV[i,2]<zb+0.03 and math.hypot(HV[i,0]-hc0[0],HV[i,1]-hc0[1])<1.5*hr0]
+rep['neck_rings']={'body_ring_verts':len(rb),'head_ring_verts':len(rh),'body_ring_zspan':float(np.ptp(BV[rb,2])) if rb else None,'head_ring_zspan':float(np.ptp(HV[rh,2])) if rh else None}; log('neck rings',rep['neck_rings'])
+SNAP=len(rb)>=8 and len(rh)>=8 and P.get('NECK_SNAP',True)
+if SNAP:
+    R_=BV[rb]; bc=R_[:,:2].mean(0); br=float(np.hypot(R_[:,0]-bc[0],R_[:,1]-bc[1]).mean()); bz=float(R_[:,2].mean())
+    H_=HV[rh]; hc=H_[:,:2].mean(0); hr=float(np.hypot(H_[:,0]-hc[0],H_[:,1]-hc[1]).mean()); hz=float(H_[:,2].mean())
+    s_=br/hr*P.get('NECK_R_K_SNAP',1.0)
+    M=Matrix.Translation(Vector((bc[0],bc[1],bz)))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc[0],-hc[1],-hz)))
+else:
+    br=float(np.median(np.hypot(top[:,0]-bc0[0],top[:,1]-bc0[1]))); hr=float(np.median(np.hypot(bot[:,0]-hc0[0],bot[:,1]-hc0[1]))); bc=bc0
+    s_=br/hr*P['NECK_R_K']
+    M=Matrix.Translation(Vector((bc0[0],bc0[1],zt-P['NECK_SINK'])))@Matrix.Scale(s_,4)@Matrix.Translation(Vector((-hc0[0],-hc0[1],-zb)))
 apply_tf([FA,FH],M)
+if SNAP:
+    HV=wco(FH); R_=BV[rb]
+    def ang(x,y): return np.arctan2(y-bc[1],x-bc[0])
+    ab=ang(R_[:,0],R_[:,1]); ob=np.argsort(ab); ab=ab[ob]; rbv=np.hypot(R_[:,0]-bc[0],R_[:,1]-bc[1])[ob]; zbv=R_[:,2][ob]
+    def interp(a,xs,ys): return np.interp(a,np.r_[xs-2*np.pi,xs,xs+2*np.pi],np.r_[ys,ys,ys])
+    H_=HV[rh]; ah=ang(H_[:,0],H_[:,1])
+    tgt=np.stack([bc[0]+interp(ah,ab,rbv)*np.cos(ah),bc[1]+interp(ah,ab,rbv)*np.sin(ah),interp(ah,ab,zbv)],1)
+    dR=tgt-H_; oh=np.argsort(ah); ahs=ah[oh]; dRs=dR[oh]; zhs=H_[:,2][oh]
+    FALL=P.get('NECK_FALL',0.02); Dw=np.zeros_like(HV)
+    av=ang(HV[:,0],HV[:,1]); zr=interp(av,ahs,zhs); t=np.clip((HV[:,2]-zr)/FALL,0,1); wgt=1-t*t*(3-2*t)
+    wgt[HV[:,2]>zr+FALL]=0
+    for k in range(3): Dw[:,k]=interp(av,ahs,dRs[:,k])*wgt
+    Dw[rh]=dR
+    if float(np.linalg.norm(dR,axis=1).max())<=P.get('SNAP_MAX',0.015): shift_keys(FH,[tuple(d) for d in Dw])
+    else: log('SNAP SKIPPED (would move > limit)',float(np.linalg.norm(dR,axis=1).max())); rep['neck_snap_skipped']=True
+    rep['neck_snap']={'max_move_mm':float(np.linalg.norm(dR,axis=1).max()*1000),'mean_move_mm':float(np.linalg.norm(dR,axis=1).mean()*1000),'verts_moved':int((wgt>0).sum())}
+    log('neck snap',rep['neck_snap'])
 HV=wco(FH); hmn=HV.min(0); hmx=HV.max(0)
 fz=float(BV[:,2].min())
-rep['attach']={'body_neck_top_z':zt,'body_neck_ring_r':br,'head_neck_ring_r':hr,'head_scale_factor':s_,'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),
+rep['attach']={'mode':'ring snap' if SNAP else 'sink','body_neck_top_z':zt,'body_neck_ring_r':br,'head_neck_ring_r':hr,'head_scale_factor':s_,'head_h_before':h_before,'head_h_after':float(hmx[2]-hmn[2]),
                'head_w_after':float(hmx[0]-hmn[0]),'total_height':float(hmx[2]-fz),'head_to_height':float((hmx[2]-hmn[2])/(hmx[2]-fz))}
 log('ATTACH',rep['attach'])
 # ---------- 4. her hair (as authored, its own texture; only uniformly scaled + placed onto the head), with its own bone chains
@@ -127,7 +186,18 @@ log('hair',P['HAIR'],tris(HR),'bones',len(rep['hair_bones']),'groups',len(HR.ver
 UV_=wco(HR); umn=UV_.min(0); umx=UV_.max(0)
 s=(hmx[0]-hmn[0])*P['HAIR_W_RATIO']/(umx[0]-umn[0])
 pivot=Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); target=Vector(((hmn[0]+hmx[0])/2,hmn[1]+P['HAIR_DEPTH_K']*(hmx[0]-hmn[0])/2+P['HAIR_DY'],hmx[2]+P['HAIR_TOP_GAP']+P['HAIR_DZ']))
-Mh=Matrix.Translation(target)@Matrix.Scale(s,4)@Matrix.Translation(-pivot)
+Mh=Matrix.Translation(target)@Matrix.Scale(s,4)@Matrix.Translation(-pivot); how='bbox'
+# preferred: the hair's own Head bone onto her head's own Head bone (how the hair was authored to sit on a head), same uniform scale
+try:
+    if P.get('HAIR_ALIGN','bone')=='bone' and HA and 'Head' in HA.data.bones and 'Head' in FA.data.bones:
+        hb=HA.matrix_world@HA.data.bones['Head'].head_local; tb=FA.matrix_world@FA.data.bones['Head'].head_local
+        Mb=Matrix.Translation(tb+Vector((0,P['HAIR_DY'],P['HAIR_DZ_BONE'] if 'HAIR_DZ_BONE' in P else 0.0)))@Matrix.Scale(s,4)@Matrix.Translation(-hb)
+        topb=(Mb@Vector((0,0,umx[2]))).z; ctr_b=Mb@Vector(((umn[0]+umx[0])/2,(umn[1]+umx[1])/2,umx[2])); ctr_x=Mh@pivot
+        rep['hair_align_compare']={'bone_top_minus_head_top':topb-float(hmx[2]),'bone_vs_bbox_offset':list(ctr_b-ctr_x),'hair_head_bone':list(hb),'head_head_bone':list(tb)}
+        log('hair align compare',rep['hair_align_compare'])
+        if -0.01 < topb-float(hmx[2]) < 0.05 and (ctr_b-ctr_x).length<0.05: Mh=Mb; how='bone'
+except Exception as e: traceback.print_exc(); log('HAIRALIGNERR',e)
+rep['hair_align']=how; log('hair align',how)
 apply_tf([x for x in (HA,HR) if x],Mh)
 for e_ in HE: bpy.data.objects.remove(e_)
 rep['hair_fit']={'hair':P['HAIR'],'scale':s}; log('hair fit',s)
@@ -167,6 +237,67 @@ for o in CLOTH:
 for o in list(bpy.data.objects):
     if o.type in ('ARMATURE','EMPTY') and o not in (B,FA,HA): bpy.data.objects.remove(o)
 if not P['SHIRT'] and SHIRT is not None: bpy.data.objects.remove(SHIRT); SHIRT=None; CLOTH=[x for x in (BRA,SH)]
+# clothes FIT (brief: "fit clothes"): where her Panda body pokes through a garment, that garment's vertices are pushed out to sit just over the skin
+# (smoothed; nothing else moves; her UVs/textures/cut untouched). Layered: bra + shorts over the body, shirt over body + bra + shorts. Max push reported.
+from mathutils.bvhtree import BVHTree
+def world_bvh(objs):
+    dg=bpy.context.evaluated_depsgraph_get(); V=[]; F=[]
+    for t in objs:
+        e=t.evaluated_get(dg); me=e.to_mesh(); off=len(V)
+        V+=[tuple(t.matrix_world@v.co) for v in me.vertices]; F+=[tuple(off+i for i in p.vertices) for p in me.polygons]; e.to_mesh_clear()
+    return BVHTree.FromPolygons(V,F)
+def fit_out(o,targets,off,deep=0.05,iters=5,only=None):
+    T=world_bvh(targets); mw=o.matrix_world; n=len(o.data.vertices)
+    dg=bpy.context.evaluated_depsgraph_get(); ev=o.evaluated_get(dg)
+    X=np.array([tuple(mw@v.co) for v in ev.data.vertices]) if len(ev.data.vertices)==n else np.array([tuple(mw@v.co) for v in o.data.vertices])
+    nb=[[] for _ in range(n)]
+    for e in o.data.edges: a,b=e.vertices; nb[a].append(b); nb[b].append(a)
+    def need(X):
+        N=np.zeros_like(X)
+        for i in range(n):
+            loc,nr,idx,d=T.find_nearest(Vector(X[i]),deep)
+            if loc is None: continue
+            s=(Vector(X[i])-loc).dot(nr)
+            if -deep<s<off: N[i]=np.array(nr)*(off-s)
+        return N
+    N=need(X)
+    if only is not None: N[~only(X)]=0
+    D=N.copy()
+    for _ in range(iters):
+        A=np.array([D[nb[i]].mean(0) if nb[i] else D[i] for i in range(n)]); D=0.5*D+0.5*A
+        big=np.linalg.norm(N,axis=1)>np.linalg.norm(D,axis=1); D[big]=N[big]
+    X2=X+D; N2=need(X2)
+    if only is not None: N2[~only(X2)]=0
+    X2+=N2
+    tot=X2-X; mm=np.linalg.norm(tot,axis=1)*1000
+    mwi=mw.inverted()
+    Dl=[tuple(mwi.to_3x3()@Vector(d)) for d in tot]
+    if o.data.shape_keys:
+        for kb in o.data.shape_keys.key_blocks:
+            for i in range(n): kb.data[i].co+=Vector(Dl[i])
+    for i in range(n): o.data.vertices[i].co+=Vector(Dl[i])
+    o.data.update()
+    r={'poking_verts':int((np.linalg.norm(N,axis=1)>1e-6).sum()),'moved_verts':int((mm>0.1).sum()),'max_push_mm':round(float(mm.max()),1),'mean_push_mm_moved':round(float(mm[mm>0.1].mean()) if (mm>0.1).any() else 0.0,1),'of_verts':n}
+    rep.setdefault('cloth_fit',{})[o.name]=r; log('fit',o.name,r)
+BK_={k.name:k.value for k in BODY.data.shape_keys.key_blocks} if BODY.data.shape_keys else {}
+rep['body_active_keys']={k:round(v,3) for k,v in BK_.items() if v>0.001}; log('body active shape keys',rep['body_active_keys'],'of',len(BK_))
+for o in CLOTH:
+    ks=[k.name for k in o.data.shape_keys.key_blocks] if o.data.shape_keys else []
+    matched={}
+    for kb in (o.data.shape_keys.key_blocks if o.data.shape_keys else []):
+        if kb.name in BK_ and BK_[kb.name]>0.001 and kb!=o.data.shape_keys.reference_key: kb.value=BK_[kb.name]; matched[kb.name]=kb.value
+    rep.setdefault('cloth_keys',{})[o.name]={'keys':ks[:60],'matched_to_body':matched}; log('cloth keys',o.name,ks[:60],'matched',matched)
+bpy.context.view_layer.update()
+if P.get('FIT',True):
+    for o,tg,off in ((BRA,[BODY],P.get('FIT_BRA',0.002)),(SH,[BODY],P.get('FIT_SHORTS',0.0025))):
+        try: fit_out(o,tg,off)
+        except Exception as e: traceback.print_exc(); log('FITERR',o.name,e)
+    if P.get('FIT_HAIR',True):
+        try: fit_out(HR,[FH],P.get('FIT_HAIR_OFF',0.0015),deep=0.03,only=lambda X:X[:,1]<float(hmn[1]+hmx[1])/2)
+        except Exception as e: traceback.print_exc(); log('FITERR','Hair',e)
+    if SHIRT is not None:
+        try: fit_out(SHIRT,[BODY,BRA,SH],P.get('FIT_SHIRT',0.004))
+        except Exception as e: traceback.print_exc(); log('FITERR','Shirt',e)
 # clothes weights: Data Transfer from the Panda body (Vertex Data > Vertex Groups, nearest face interpolated), applied, cleaned, normalized, max 4 influences
 def transfer_weights(o):
     old=[g.name for g in o.vertex_groups]; o.vertex_groups.clear()
@@ -174,15 +305,20 @@ def transfer_weights(o):
     md.layers_vgroup_select_src='ALL'; md.layers_vgroup_select_dst='NAME'
     bpy.ops.object.datalayout_transfer(modifier=md.name)
     while o.modifiers[0].name!=md.name: bpy.ops.object.modifier_move_up(modifier=md.name)
-    bpy.ops.object.modifier_apply(modifier=md.name)
+    try: bpy.ops.object.modifier_apply(modifier=md.name); how='Data Transfer modifier, applied'
+    except Exception as e:
+        log('modifier apply refused',o.name,e); o.modifiers.remove(o.modifiers[md.name])
+        sel([o,BODY],BODY); bpy.ops.object.data_transfer(data_type='VGROUP_WEIGHTS',use_create=True,vert_mapping='POLYINTERP_NEAREST',layers_select_src='ALL',layers_select_dst='NAME')
+        sel([o]); how='Data Transfer operator (same transfer; mesh has shape keys)'
+    rep.setdefault('cloth_weight_method',{})[o.name]=how
     try:
         bpy.ops.object.vertex_group_clean(group_select_mode='ALL',limit=0.001)
         bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL',limit=4)
         bpy.ops.object.vertex_group_normalize_all(group_select_mode='ALL',lock_active=False)
     except Exception as e: log('WTCLEAN',o.name,e)
-    used=set(ge.group for v in o.data.vertices for ge in v.groups)
-    for g in list(o.vertex_groups):
-        if g.index not in used: o.vertex_groups.remove(g)
+    used=set(ge.group for v in o.data.vertices for ge in v.groups if ge.weight>0)
+    drop=[g.name for g in o.vertex_groups if g.index not in used]
+    for nm_ in drop: o.vertex_groups.remove(o.vertex_groups[nm_])
     mx=max((len(v.groups) for v in o.data.vertices),default=0); nz=sum(1 for v in o.data.vertices if not v.groups)
     rep.setdefault('cloth_weights',{})[o.name]={'old_groups':len(old),'new_groups':len(o.vertex_groups),'max_influences':mx,'unweighted_verts':nz,'groups':[g.name for g in o.vertex_groups]}
     log('weights',o.name,rep['cloth_weights'][o.name])
@@ -338,7 +474,7 @@ def unsolo(st):
 HAIRNAME='umeko-hair' if P['HAIR']=='umeko' else 'blowout-haircards'
 ASSETS={'panda-body':[BODY]+BX,'female-head':[FH],HAIRNAME:[HR],'booty-shorts':[SH],'outfit-bra':[BRA]}
 if SHIRT is not None: ASSETS['outfit-shirt-grey']=[SHIRT]
-SETS={'full':['panda-body','female-head',HAIRNAME,'booty-shorts','outfit-shirt-grey'],'umeko':[HAIRNAME],'noshirt':['outfit-bra','booty-shorts']}
+SETS={'face':[],'full':['panda-body','female-head',HAIRNAME,'booty-shorts','outfit-shirt-grey'],'umeko':[HAIRNAME],'noshirt':['outfit-bra','booty-shorts']}
 def wrot(name,deg,axis):
     if not deg or name not in B.pose.bones: return
     pb=B.pose.bones[name]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,axis)@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
@@ -388,6 +524,8 @@ if not P['TT']:
         for k in bk: KB[k].value=0.0
         for vk in ('vrc.v_aa','vrc.v_oh'):
             if vk in KB: KB[vk].value=1.0; bpy.context.view_layer.update(); shot('viseme-'+vk.split('_')[-1],[FH],'front',res=(768,768),pad=0.75,zoff=-0.1*(hx.z-hm.z)); KB[vk].value=0.0
+    elif P['SET']=='face':
+        shot('face',[FH],'front',res=(1024,1024),pad=1.25); shot('face34',[FH],'q34',res=(1024,1024),pad=1.25); shot('neckside',[FH],'side',res=(1024,1024),pad=1.9,zoff=-0.35*(hx.z-hm.z))
     elif P['SET']=='umeko':
         shot('pose-front',ALL,'front',res=(768,1376),pad=1.06); shot('face34',[FH,HR],'q34',res=(1024,1024),pad=1.15); shot('pose-back',ALL,'back',res=(768,1376),pad=1.06)
     else:
