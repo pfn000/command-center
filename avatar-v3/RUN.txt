@@ -1,2 +1,2 @@
 assemble A0
-#run8b
+#run8c

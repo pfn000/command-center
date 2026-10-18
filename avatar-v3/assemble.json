@@ -34,8 +34,15 @@
   ],
   "HAIR": "head",
   "SHIRT_TEX": "Tshirt-LewdFaceBlack.png",
-  "SHELL_FLUSH": true,
-  "SHIRT_BACKFACE_CULL": true
+  "SHELL_FLUSH": false,
+  "SHIRT_BACKFACE_CULL": false,
+  "SEAM_RELAX": true,
+  "SEAM_RELAX_ITERS": 30,
+  "POSED_WELD_EACH": true,
+  "PRE_HARMONIZE": true,
+  "WELD_SMOOTH": true,
+  "WELD_SMOOTH_ITERS": 12,
+  "SEAM_RELAX_DILATE": 8
  },
  "A2": {
   "SHIRT": false,

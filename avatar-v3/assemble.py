@@ -1,5 +1,6 @@
 
 # v3.7 ASSEMBLY, run 7 (RUN6B-FINDINGS fixes: shirt seam/shell weld + smoothed pushes + corrective body weights + posed clearance; front locks <=8 deg;
+#   RUN 8c: culling+flush off; her weights harmonized per weld group + seam zone BEFORE the retarget; smoothed weld snaps; seam-zone displacement relax; weld snap in each posed-clearance iteration.
 #   RUN 8b (Saidie 3:38-3:41 PM): head asset's OWN hair (no Blowout), shirt Tshirt-LewdFaceBlack.png, inner-shell flush + backface cull at the band/sleeve seam, seam close-ups.
 #   RUN 8 (on 7b): band+sleeve-top seam weights spatially averaged; posed clearance adds arms-forward frames 166-172; front locks per bone vs body+bra+shirt, stick-out cap 2 cm; final lock gate; Tummy close-ups.
 #   halter loop rides the Neck offset rigidly (no vertex pushes); Tummy hem clearance; variants A0 bang 1:1 / A1 bang curled <=15 deg). Based on run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
@@ -335,6 +336,14 @@ def weld_snap(o,tag=''):
     before=weld_gap(o); X=wco(o); X0=WELD[o.name]['X0']; Xn=X.copy()
     for gg in WELD[o.name]['groups']:
         d=(X[gg]-X0[gg]).mean(0); Xn[gg]=X0[gg]+d
+    if P.get('WELD_SMOOTH',False):
+        Dd=Xn-X; ing=np.zeros(len(X),bool)
+        for gg in WELD[o.name]['groups']: ing[gg]=True
+        E_=WELD[o.name]['E']; Ds=Dd.copy(); deg_=np.zeros(len(X)); np.add.at(deg_,E_[:,0],1); np.add.at(deg_,E_[:,1],1); deg_=np.maximum(deg_,1)
+        for _ in range(int(P.get('WELD_SMOOTH_ITERS',12))):
+            A_=np.zeros_like(Ds); np.add.at(A_,E_[:,0],Ds[E_[:,1]]); np.add.at(A_,E_[:,1],Ds[E_[:,0]]); A_/=deg_[:,None]
+            Ds=np.where(ing[:,None],Dd,0.5*Ds+0.5*A_)
+        Xn=X+Ds
     set_world(o,Xn); after=weld_gap(o)
     r={'before':before,'after':after,'max_vertex_move_mm':round(float(np.linalg.norm(Xn-X,axis=1).max())*1000,2)}
     rep['weld'][o.name]['snap'+tag]=r; log('WELD snap',o.name,tag,r); return r
@@ -429,6 +438,40 @@ def map_groups(o):
                 if ge.group==g.index and ge.weight>0: tg.add([v.index],ge.weight,'ADD')
         o.vertex_groups.remove(g)
     return log_
+# ---------- run 8c: tears at the armholes start in the retarget: coincident seam verts / shell twins of her shirt carry DIFFERENT weights (322 groups tore by up
+#            to 48 mm, then the weld snapped single verts back = folds). Before the retarget, her own weights are harmonized: every weld group shares one
+#            (mean) weight set, and the band + sleeve-top seam zone (verts near shoulder/arm weights) gets one spatially averaged set (20 mm, Gaussian 8 mm).
+def pre_harmonize(o):
+    if o.name not in WELD: return
+    gl=[g for g in o.vertex_groups]; names=[g.name for g in gl]; G=len(gl); n=len(o.data.vertices); Wm=np.zeros((n,G))
+    for v in o.data.vertices:
+        for ge in v.groups: Wm[v.index,ge.group]=ge.weight
+    s=Wm.sum(1); s[s==0]=1; Wm/=s[:,None]; W0=Wm.copy()
+    for gg in WELD[o.name]['groups']: Wm[gg]=Wm[gg].mean(0)
+    armg=[k for k,nm_ in enumerate(names) if any(t in nmap(nm_).lower() for t in ('shoulder','arm','elbow'))]
+    X=wco(o); kd=KDTree(n)
+    for i,p in enumerate(X): kd.insert(Vector(tuple(p)),i)
+    kd.balance(); R=float(P.get('SEAM_R',0.02)); sig=float(P.get('SEAM_SIG',0.008))
+    core=np.where(Wm[:,armg].sum(1)>0.02)[0] if armg else np.zeros(0,dtype=np.int64); zone=np.zeros(n,bool)
+    for i in core:
+        if zone[i]: continue
+        for _,j,_ in kd.find_range(Vector(tuple(X[i])),R): zone[j]=True
+    zi=np.where(zone)[0]
+    for it in range(2):
+        Wn=Wm.copy()
+        for i in zi:
+            hits=kd.find_range(Vector(tuple(X[i])),R); j=np.array([h[1] for h in hits],dtype=np.int64); w=np.exp(-np.array([h[2] for h in hits])**2/(2*sig*sig))
+            Wn[i]=(Wm[j]*w[:,None]).sum(0)/w.sum()
+        Wm=Wn
+        for gg in WELD[o.name]['groups']: Wm[gg]=Wm[gg].mean(0)
+    allidx=list(range(n))
+    for k,g in enumerate(gl):
+        g.remove(allidx)
+        col=Wm[:,k]; nz=np.where(col>0.0005)[0]
+        for i in nz: g.add([int(i)],float(col[i]),'REPLACE')
+    o.data.update()
+    r={'groups':len(WELD[o.name]['groups']),'arm_groups':[names[k] for k in armg],'zone_verts':int(len(zi)),'max_L1_change':round(float(np.abs(Wm-W0).sum(1).max()),3),'verts_changed_gt_0p05':int((np.abs(Wm-W0).sum(1)>0.05).sum())}
+    rep.setdefault('pre_harmonize',{})[o.name]=r; log('PRE harmonize',o.name,r)
 ORIG_W=set()
 NECKR=None
 if P.get('SHIRT_RETARGET',True) and OHEAD:
@@ -453,6 +496,9 @@ if P.get('SHIRT_RETARGET',True) and OHEAD:
                 else: DELB['Neck']=Matrix.Translation(PHn-OHn['Neck'])
             for o,DD in ((SHIRT,DEL),(BRA,DELB)):
                 if o is None or not o.vertex_groups: continue
+                if P.get('PRE_HARMONIZE',False) and o is SHIRT:
+                    try: pre_harmonize(o)
+                    except Exception as e: traceback.print_exc(); log('PREHARMERR',e); rep['pre_harmonize_error']=str(e)
                 RET[o.name]=retarget_mesh(o,DD); RET[o.name+'_group_map']=map_groups(o); ORIG_W.add(o.name)
             if NECKR is not None:
                 try:
@@ -893,6 +939,31 @@ def tummy_clear(o,off=0.0015,cap=0.025):
         mm=np.linalg.norm(D,axis=1)*1000; r={'hem_verts_needing_push':hit,'moved_gt_0p1mm':int((mm>0.1).sum()),'max_mm':round(float(mm.max()),1)}
     except Exception as e: traceback.print_exc(); r['error']=str(e)
     kb.value=v0; bpy.context.view_layer.update(); rep['tummy_clear']=r; log('tummy clear',r)
+
+# ---------- run 8c: the armholes / band-sleeve seam carried folded (inverted) faces from the arm retarget, seen as dark slits (7b) or holes (8 with culling).
+#            Relax ONLY that seam zone: the shirt's total displacement from her original mesh is Laplacian-smoothed there (topology + coincident/shell groups
+#            move as one), so the folds unfold while the rest of her shirt keeps its exact fit; the outward-only clearance below runs after it.
+def shirt_seam_relax(o,iters=None):
+    iters=int(iters or P.get('SEAM_RELAX_ITERS',30))
+    X0=WELD[o.name]['X0']; E=WELD[o.name]['E']; G=WELD[o.name]['groups']; X=wco(o); D=X-X0; n=len(X)
+    names={g.index:g.name.lower() for g in o.vertex_groups}
+    a=np.zeros(n)
+    for v in o.data.vertices:
+        tot=sum(ge.weight for ge in v.groups) or 1.0
+        a[v.index]=sum(ge.weight for ge in v.groups if any(s in names.get(ge.group,'') for s in ('arm','shoulder','elbow')))/tot
+    z=np.clip(8*a*(1-a),0,1)
+    for _ in range(int(P.get('SEAM_RELAX_DILATE',12))):
+        S_=np.zeros(n); C_=np.zeros(n); np.add.at(S_,E[:,0],z[E[:,1]]); np.add.at(S_,E[:,1],z[E[:,0]]); np.add.at(C_,E[:,0],1); np.add.at(C_,E[:,1],1)
+        z=np.maximum(z,0.85*S_/np.maximum(C_,1))
+        for gg in G: z[gg]=z[gg].max()
+    D0=D.copy()
+    for _ in range(iters):
+        S_=np.zeros_like(D); C_=np.zeros(n); np.add.at(S_,E[:,0],D[E[:,1]]); np.add.at(S_,E[:,1],D[E[:,0]]); np.add.at(C_,E[:,0],1); np.add.at(C_,E[:,1],1)
+        M=S_/np.maximum(C_,1)[:,None]; D=D+(0.5*z)[:,None]*(M-D)
+        for gg in G: D[gg]=D[gg].mean(0)
+    set_world(o,X0+D); mv=np.linalg.norm(D-D0,axis=1)
+    r={'zone_verts_gt0p5':int((z>0.5).sum()),'zone_verts_any':int((z>0.01).sum()),'iters':iters,'max_move_mm':round(float(mv.max())*1000,1),'p95_move_mm':round(float(np.percentile(mv[z>0.01],95))*1000,1) if (z>0.01).any() else 0}
+    rep['shirt_seam_relax']=r; log('SEAM relax',r)
 def shirt_post(o):
     r={}
     if o.name not in WELD: rep['shirt_post']={'skipped':'no weld record'}; return
@@ -911,6 +982,9 @@ def shirt_post(o):
     set_world(o,XR+Ds); r['smooth_steps']=steps
     nm2=np.linalg.norm(Ds,axis=1); r['push_field_after_smooth']={'max_mm':round(float(nm2.max())*1000,1),'mean_moved_mm':round(float(nm2[nm2>1e-4].mean())*1000,1) if (nm2>1e-4).any() else 0}
     r['weld1']=weld_snap(o,'1')
+    if P.get('SEAM_RELAX',False):
+        try: shirt_seam_relax(o)
+        except Exception as e: traceback.print_exc(); log('SEAMRELAXERR',e); rep['shirt_seam_relax_error']=str(e)
     TB=world_bvh([BODY]); hist=[]
     for it in range(3):
         N,S=shirt_need_body(o,float(P.get('FIT_SHIRT',0.003)),TB); m=(S>-0.08)
@@ -2086,6 +2160,7 @@ def posed_clear(o,frames=(0,258),off=0.002):
         r['passes'].append({'iter':it,'per_frame_before':st,'verts_pushed':int((np.linalg.norm(Drest,axis=1)>1e-5).sum()),'max_mm':round(float(np.linalg.norm(Drest,axis=1).max())*1000,1)})
         if (np.linalg.norm(Drest,axis=1)>1e-5).sum()==0: break
         Drest=group_max(o,Drest); Drest=smooth_field(o,Drest,iters=15,cap=float(P.get('PUSH_CAP',0.025))); set_world(o,wco(o)+Drest)
+        if P.get('POSED_WELD_EACH',False): weld_snap(o,f'posed{it}')
     fin={}
     for f in frames:
         anim_pose(f); S,_=_posed_signed(o); fin[f]={'lt_minus3mm':int((S<-0.003).sum()),'min_mm':round(float(S[S>-0.06].min())*1000,1)}
@@ -2186,7 +2261,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','head_hair_meshes','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
