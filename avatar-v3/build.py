@@ -860,7 +860,7 @@ if P.get('BRA_GEN',True):
     crease-=P.get('CUP_UNDER',0.006)
     an=math.atan2(xn,-(yn-tcy_)); asd=an+P.get('STRAP_DA',0.55)
     GH=P.get('GORE_H',0.028); TN=P.get('TOP_N',0.006); TS=P.get('TOP_S',0.035); WG=P.get('WING_H',0.028); BK=P.get('BACK_H',0.018)
-    def ztop(a):
+    def cup_top(a):
         a=abs(a); ag=P.get('GORE_A',0.07)
         if a<ag: return crease+GH
         if a<an: return crease+GH+(zn+TN-crease-GH)*sstep((a-ag)/(an-ag))
@@ -875,7 +875,7 @@ if P.get('BRA_GEN',True):
         return (h[0]+h[1].normalized()*off) if h[0] is not None else None
     bmB=bmesh.new(); uvB=bmB.loops.layers.uv.new('UVMap'); grid=[]
     for k in range(NRb):
-        a=-math.pi+2*math.pi*k/NRb; lo,hi=zbot(a),ztop(a); col=[]
+        a=-math.pi+2*math.pi*k/NRb; lo,hi=zbot(a),cup_top(a); col=[]
         for j in range(NVb+1):
             p_=cast_(a,lo+(hi-lo)*j/NVb,offb); col.append(bmB.verts.new(p_) if p_ is not None else None)
         grid.append(col)
@@ -889,7 +889,7 @@ if P.get('BRA_GEN',True):
     # lace trim along the top edge (darker grey, see-through lace like her sheet)
     bmL=bmesh.new(); uvL=bmL.loops.layers.uv.new('UVMap'); prevL=None; LH=P.get('LACE_H',0.007)
     for k in range(NRb+1):
-        a=-math.pi+2*math.pi*k/NRb; hi=ztop(a)
+        a=-math.pi+2*math.pi*k/NRb; hi=cup_top(a)
         if abs(a)>math.pi/2+0.3: prevL=None; continue
         p0=cast_(a,hi-0.002,offb+0.0006); p1=cast_(a,hi+LH,offb*0.7)
         if p0 is None or p1 is None: prevL=None; continue
@@ -899,7 +899,7 @@ if P.get('BRA_GEN',True):
             for li,(uu,vv) in zip(f_.loops,((k-1,0),(k,0),(k,1),(k-1,1))): li[uvL].uv=(uu/NRb*6,vv)
         prevL=cur
     for s in (1,-1):
-        pa=cast_(s*asd,ztop(asd)-0.002,offb); pb_=cast_(s*(math.pi-0.5),crease+BK-0.003,offb)
+        pa=cast_(s*asd,cup_top(asd)-0.002,offb); pb_=cast_(s*(math.pi-0.5),crease+BK-0.003,offb)
         BRA_ATT[s]=(pa,pb_)
     old=BRA; bpy.data.objects.remove(old)
     me=bpy.data.meshes.new('Bra'); bmB.to_mesh(me); bmB.free(); BRA=bpy.data.objects.new('Bra',me); sc.collection.objects.link(BRA)
