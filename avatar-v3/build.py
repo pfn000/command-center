@@ -916,9 +916,20 @@ if P.get('BRA_GEN',True):
     def strap_path(s):
         # v3.4: straight strap. Front: casts at a FIXED x from the outer cup top straight up to mid-shoulder (no angle -> no halter read);
         # top: vertical casts over the trapezius at that x; back: straight down at the same x to the back band.
-        z0=cup_top(asd)-0.003; pa_=cast_(s*asd,z0,0.0025)
-        if pa_ is None: return []
-        xa=abs(pa_.x); xt=max(xa+P.get('STRAP_XOUT',0.0),P.get('STRAP_XMIN',0.0)); xb=xt
+        XS0=P.get('STRAP_X0',0)
+        if XS0:
+            # the strap foot is the point on the cup top edge whose x is XS0 (search the angle between apex and strap point)
+            best_=None
+            for k_ in range(41):
+                a_=an*0.5+(asd-an*0.5)*k_/40; q_=cast_(s*a_,cup_top(a_)-0.003,0.0025)
+                if q_ is not None and (best_ is None or abs(abs(q_.x)-XS0)<abs(abs(best_[1].x)-XS0)): best_=(a_,q_)
+            if best_ is None: return []
+            z0=cup_top(best_[0])-0.003; pa_=best_[1]; xa=XS0; xt=XS0+P.get('STRAP_XOUT',0.0)
+        else:
+            z0=cup_top(asd)-0.003; pa_=cast_(s*asd,z0,0.0025)
+            if pa_ is None: return []
+            xa=abs(pa_.x); xt=max(xa+P.get('STRAP_XOUT',0.0),P.get('STRAP_XMIN',0.0))
+        xb=xt
         hf=bvh.ray_cast(Vector((s*xt,tcy_,2.5)),Vector((0,0,-1)),3.0); zsh=float(hf[0].z) if hf[0] is not None else z0+0.2
         def fcast(x,z,sgn_y):
             h_=bvh.ray_cast(Vector((x,tcy_-sgn_y*0.6,z)),Vector((0,sgn_y,0)),0.6)
@@ -1111,6 +1122,15 @@ if P.get('BRA_GEN',True):
             for g_ in list(o_.vertex_groups): o_.vertex_groups.remove(g_)
         weights_from_body(o_)
         if not has_arm: md=o_.modifiers.new('Armature','ARMATURE'); md.object=B
+    if P.get('STRAP_CHEST_W',True) and globals().get('STR') is not None and rep.get('straps'):
+        # v3.4: strap below the shoulder top rides the Chest only (arm/shoulder weights dragged the front strap into the body when the arms come down)
+        zsh_=min(v_['z_sh'] for v_ in rep['straps'].values()); gch=STR.vertex_groups.get('Chest') or STR.vertex_groups.new(name='Chest'); mwS=STR.matrix_world; nch=0
+        for v in STR.data.vertices:
+            z_=(mwS@v.co).z; ws=float(sstep((z_-(zsh_-P.get('STRAP_W_LO',0.06)))/P.get('STRAP_W_H',0.05)))
+            for gg in v.groups:
+                if gg.group!=gch.index: gg.weight*=ws
+            gch.add([v.index],1-ws,'ADD'); nch+=1
+        log('strap chest weights',nch,'shoulder z',zsh_)
     log('generated bra weighted from body')
 # ---------- keep clothes outside the (curvier) skin
 for o,off in ((SH,0.0016),(BRA,P.get('BRA_OFF',0.0035))):
@@ -1269,45 +1289,51 @@ if VARIANT in ('B','C'):
             w=poly_3d_calc(vs,hp); u=sum(_uvd[l].uv[0]*w_ for l,w_ in zip(li,w)); v=sum(_uvd[l].uv[1]*w_ for l,w_ in zip(li,w)); return u,v
         ctr=_Vb[(np.abs(_Vb[:,0]-cx0)<0.006)&(_Vb[:,2]>zc_+0.02)&(_Vb[:,2]<zc_+0.6*Ht_)&skinv[:len(_Vb)]] if len(skinv)==len(_Vb) else _Vb[:0]
         zn_=float(ctr[np.argmin(ctr[:,1]),2]) if len(ctr) else zc_+0.30*Ht_
-        STEP=0.001; xs=np.arange(cx0-0.07,cx0+0.07+1e-9,STEP); zs=np.arange(zn_-0.01,zn_+0.075,STEP)
-        G=np.zeros((len(zs),len(xs),3),np.float32); Y=np.full((len(zs),len(xs)),np.nan,np.float32)
+        STEP=0.001; xs=np.arange(cx0-0.09,cx0+0.10+1e-9,STEP); zs=np.arange(zc_+P.get('EYE_PZ0',0.03),zc_+P.get('EYE_PZ1',0.16),STEP)
+        G=np.zeros((len(zs),len(xs),3),np.float32)
         Wt,Hh_=img_.size
         for iz,z in enumerate(zs):
             for ix,x in enumerate(xs):
                 h=_bv.ray_cast(Vector((x,cy0,z)),Vector((0,-1,0)),0.25)
                 if h[0] is None or _uvd is None: continue
-                u,v=uv_at(h[2],h[0]); G[iz,ix]=px[min(Hh_-1,int((v%1)*Hh_)),min(Wt-1,int((u%1)*Wt)),:3]; Y[iz,ix]=h[0].y
-        lum=G.mean(2); warm=G[:,:,0]-G[:,:,2]
-        try:
-            from PIL import Image as _PI
-        except Exception: _PI=None
-        dbg=(np.clip(G[::-1],0,1)**(1/2.2)*255).astype(np.uint8)
-        np.save(OUT+'/proof/eyemap.npy',G[::-1]); log('eye probe grid',G.shape,'nose z',zn_)
-        cand={}
-        for side,msk in (('L',xs<cx0-0.008),('R',xs>cx0+0.008)):
-            band=(zs>zn_+P.get('EYE_ZLO',0.008))&(zs<zn_+P.get('EYE_ZHI',0.05))
-            sub=lum[np.ix_(band,msk)]; wsub=warm[np.ix_(band,msk)]
-            ok=(sub>0)&(wsub<P.get('EYE_WARM',0.05))
-            if ok.sum()<10: continue
-            thr=np.percentile(sub[ok],P.get('EYE_PCT',8)); m_=ok&(sub<=thr)
-            zi,xi=np.nonzero(m_); zz_=zs[band][zi]; xx_=xs[msk][xi]
-            # sclera = bright, low-saturation pixels near the dark cluster
-            br=(sub>P.get('SCLERA_LUM',0.62))&(np.abs(wsub)<0.06); zb_,xb_=np.nonzero(br)
-            cand[side]={'x':float(np.median(xx_)),'z':float(np.median(zz_)),'n':int(m_.sum()),'thr':float(thr),
-                        'sclera_n':int(br.sum()),'sclera_x':[float(xs[msk][xb_].min()),float(xs[msk][xb_].max())] if len(xb_) else None}
-        log('eye candidates',cand)
-        dflt_ipd=0.060*Ht_/0.25
-        if 'L' in cand and 'R' in cand and 0.035*Ht_/0.25<cand['R']['x']-cand['L']['x']<0.09*Ht_/0.25 and abs(cand['R']['z']-cand['L']['z'])<0.012:
-            ez=(cand['L']['z']+cand['R']['z'])/2; ipd=cand['R']['x']-cand['L']['x']; ex=(cand['L']['x']+cand['R']['x'])/2; src_='texture'
+                u,v=uv_at(h[2],h[0]); G[iz,ix]=px[min(Hh_-1,int((v%1)*Hh_)),min(Wt-1,int((u%1)*Wt)),:3]
+        np.save(OUT+'/proof/eyemap.npy',G[::-1]); log('eye probe grid',G.shape,'x0',float(xs[0]),'z top',float(zs[-1]))
+        Gt=G[::-1]; lum=Gt.mean(2); warm=Gt[:,:,0]-Gt[:,:,2]; Hg,Wg=lum.shape
+        dark=(lum>0.005)&(lum<P.get('LASH_LUM',0.14))&(warm<0.06); lab=np.zeros((Hg,Wg),np.int32); comps=[]; kk=0
+        for i in range(Hg):
+            for j in range(Wg):
+                if dark[i,j] and not lab[i,j]:
+                    kk+=1; st=[(i,j)]; lab[i,j]=kk; pp=[]
+                    while st:
+                        a_,b_=st.pop(); pp.append((a_,b_))
+                        for da,db in ((1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,-1),(1,-1),(-1,1)):
+                            aa,bb=a_+da,b_+db
+                            if 0<=aa<Hg and 0<=bb<Wg and dark[aa,bb] and not lab[aa,bb]: lab[aa,bb]=kk; st.append((aa,bb))
+                    if len(pp)>=20:
+                        pp=np.array(pp); r0,r1=pp[:,0].min(),pp[:,0].max(); c0,c1=pp[:,1].min(),pp[:,1].max()
+                        comps.append({'n':int(len(pp)),'x':float(xs[0]+(c0+c1)/2*STEP),'w':float((c1-c0+1)*STEP),'ztop':float(zs[-1]-r0*STEP),'zbot':float(zs[-1]-r1*STEP),'h':float((r1-r0+1)*STEP)})
+        cs_=[c for c in comps if 0.012<c['w']<0.055 and c['h']<0.022]
+        best=None
+        for a_ in cs_:
+            for b_ in cs_:
+                dx_=b_['x']-a_['x']
+                if 0.045<dx_<0.10 and abs(b_['ztop']-a_['ztop'])<0.02:
+                    sc_=a_['n']+b_['n']-2000*abs(a_['w']-b_['w'])
+                    if best is None or sc_>best[0]: best=(sc_,a_,b_)
+        log('eye comps',sorted(cs_,key=lambda c:-c['n'])[:8])
+        cand={'pair':best[1:] if best else None}
+        if best:
+            eL_,eR_=best[1],best[2]; src_='texture'
+            WK=P.get('EYE_WK',1.0); ew_=WK*(eL_['w']+eR_['w'])/2
+            eyes_=[]
+            for c,od in ((eL_,-1),(eR_,1)):
+                xc=c['x']-od*0.06*c['w']; zc=c['ztop']-P.get('EYE_TOPK',0.55)*ew_/2; eyes_.append((xc,zc))
+            roll=math.atan2(eyes_[1][1]-eyes_[0][1],eyes_[1][0]-eyes_[0][0])
         else:
-            ez=zn_+P.get('EYE_DZ',0.03); ipd=dflt_ipd; ex=cx0; src_='fallback'
-        if P.get('EYE_DEC'): ex,ez,ipd=P['EYE_DEC'][0]+cx0,zn_+P['EYE_DEC'][1],P['EYE_DEC'][2]; src_='param'
-        MEYE={'cx':ex,'z':ez,'ipd':ipd,'nose_z':zn_,'src':src_,'cand':cand,'grid':[float(xs[0]),float(zs[0]),STEP,len(xs),len(zs)]}
-        if _PI is not None:
-            im_=_PI.fromarray(dbg).resize((dbg.shape[1]*6,dbg.shape[0]*6),_PI.NEAREST); from PIL import ImageDraw as _ID; d_=_ID.Draw(im_)
-            for sx_ in (-1,1):
-                px_=(ex+sx_*ipd/2-xs[0])/STEP*6; pz_=(zs[-1]-ez)/STEP*6; d_.ellipse((px_-8,pz_-8,px_+8,pz_+8),outline=(0,255,0))
-            im_.save(OUT+'/proof/eyemap.png')
+            src_='fallback'; ew_=0.03; eyes_=[(cx0-0.033,zc_+0.08),(cx0+0.033,zc_+0.08)]; roll=0.0
+        if P.get('EYE_DEC'): eyes_=[tuple(P['EYE_DEC'][0]),tuple(P['EYE_DEC'][1])]; ew_=P['EYE_DEC'][2]; roll=P['EYE_DEC'][3] if len(P['EYE_DEC'])>3 else 0.0; src_='param'
+        ex=(eyes_[0][0]+eyes_[1][0])/2; ez=(eyes_[0][1]+eyes_[1][1])/2; ipd=eyes_[1][0]-eyes_[0][0]
+        MEYE={'cx':ex,'z':ez,'ipd':ipd,'eyes':eyes_,'ew':ew_,'roll':roll,'nose_z':zn_,'src':src_,'cand':cand}
         log('MEYE',MEYE); HF['B_eyes']=MEYE
     except Exception as e:
         import traceback; log('EYEPROBE ERR',repr(e),traceback.format_exc()[-600:])
@@ -1470,14 +1496,16 @@ if VARIANT in ('B','C'):
             try:
                 os.makedirs(OUT+'/tex',exist_ok=True); dimg.filepath_raw=OUT+'/tex/eye_decal.png'; dimg.file_format='PNG'; dimg.save(); dimg.pack()
             except Exception as e3: log('decal save',e3)
-            _bv3,_V3=mh_bvh(); ipd=MEYE['ipd']; ew=ipd*P.get('EYE_W',0.56); eh=ew*0.5*MARG
+            _bv3,_V3=mh_bvh(); ipd=MEYE['ipd']; ew=MEYE.get('ew') or ipd*P.get('EYE_W',0.56); eh=ew*0.5*MARG; rl=MEYE.get('roll',0.0)*P.get('ROLL_K',1.0)
             bmD=bmesh.new(); uvD=bmD.loops.layers.uv.new('UVMap'); NXd,NZd=26,12
             for half,sx_ in ((0,-1),(1,1)):
-                exx=MEYE['cx']+sx_*ipd/2; x0=exx-ew/2*MARG; x1=exx+ew/2*MARG; z0=MEYE['z']-eh/2+P.get('EYE_ZOFF',0.0); z1=z0+eh
+                exx,ezz=MEYE['eyes'][half] if MEYE.get('eyes') else (MEYE['cx']+sx_*ipd/2,MEYE['z'])
+                ezz+=P.get('EYE_ZOFF',0.0)
                 g=[[None]*(NXd+1) for _ in range(NZd+1)]
                 for iz in range(NZd+1):
                     for ix in range(NXd+1):
-                        x=x0+(x1-x0)*ix/NXd; z=z0+(z1-z0)*iz/NZd
+                        lu=(ix/NXd-0.5)*ew*MARG; lv=(iz/NZd-0.5)*eh
+                        x=exx+lu*math.cos(rl)-lv*math.sin(rl); z=ezz+lu*math.sin(rl)+lv*math.cos(rl)
                         h=_bv3.ray_cast(Vector((x,float(b_n['cy']),z)),Vector((0,-1,0)),0.25)
                         if h[0] is None: continue
                         g[iz][ix]=bmD.verts.new(h[0]+Vector((0,-P.get('DECAL_OFF',0.0006),0)))
@@ -1559,6 +1587,16 @@ if VARIANT in ('B','C'):
             s_=lk_[0].from_socket; nt_.links.remove(lk_[0]); mx_=nt_.nodes.new('ShaderNodeMix'); mx_.data_type='RGBA'; mx_.blend_type='MULTIPLY'; mx_.inputs['Factor'].default_value=1.0; mx_.inputs['B'].default_value=(*mt,1)
             nt_.links.new(s_,mx_.inputs['A']); nt_.links.new(mx_.outputs['Result'],bb_.inputs['Base Color'])
         skin_detail(mmat); HF['B_tone']={'meshy_skin':None if sk_m is None else sk_m.tolist(),'tint':mt}; log('meshy tone',HF['B_tone'])
+        if P.get('MB_GLOSS_MASK',True):
+            # v3.4: the dewy coat only on SKIN texels (warm), the Meshy hair stays matte-satin
+            tn_=[n for n in nt_.nodes if n.type=='TEX_IMAGE' and n.image is img_]
+            if tn_:
+                spc=nt_.nodes.new('ShaderNodeSeparateColor'); nt_.links.new(tn_[0].outputs[0],spc.inputs[0])
+                sb_=nt_.nodes.new('ShaderNodeMath'); sb_.operation='SUBTRACT'; nt_.links.new(spc.outputs[0],sb_.inputs[0]); nt_.links.new(spc.outputs[2],sb_.inputs[1])
+                mr_=nt_.nodes.new('ShaderNodeMapRange'); mr_.inputs[1].default_value=0.015; mr_.inputs[2].default_value=0.07; nt_.links.new(sb_.outputs[0],mr_.inputs[0])
+                cw_=nt_.nodes.new('ShaderNodeMath'); cw_.operation='MULTIPLY'; cw_.inputs[1].default_value=bb_.inputs['Coat Weight'].default_value; nt_.links.new(mr_.outputs[0],cw_.inputs[0]); nt_.links.new(cw_.outputs[0],bb_.inputs['Coat Weight'])
+                rg_=nt_.nodes.new('ShaderNodeMapRange'); rg_.inputs[3].default_value=P.get('MB_HAIR_ROUGH',0.55); rg_.inputs[4].default_value=bb_.inputs['Roughness'].default_value; nt_.links.new(mr_.outputs[0],rg_.inputs[0]); nt_.links.new(rg_.outputs[0],bb_.inputs['Roughness'])
+                log('meshy gloss masked to skin')
     except Exception as e: log('MBTONEERR',e)
     if KEEP_HAIR:
         # our shoulder-length cards over the Meshy head: keep them just outside its surface, fringe squashed above its brows
