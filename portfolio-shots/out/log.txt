@@ -1,53 +1,53 @@
-shot d-dark-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-00-home-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-02-emmi-official {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-04-worlds {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-05-ncom {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-06-jena {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-07b-resume-preview-2 {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-08-projects {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-12b-resume-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-14-plex {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-dark-15-plex-docs {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-00-home-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-02-emmi-official {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-04-worlds {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-05-ncom {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-06-jena {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-07b-resume-preview-2 {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-08-projects {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-12b-resume-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-14-plex {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-dark-15-plex-docs {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot d-light-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
-shot p-light-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false}
+shot d-dark-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-00-home-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-02-emmi-official {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-04-worlds {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-05-ncom {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-06-jena {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-07b-resume-preview-2 {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-08-projects {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot d-dark-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-dark-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-dark-12b-resume-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-dark-14-plex {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-dark-15-plex-docs {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-dark-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-00-home-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-02-emmi-official {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-04-worlds {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-05-ncom {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-06-jena {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-07b-resume-preview-2 {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-08-projects {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["none","none","none"]}
+shot p-dark-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-dark-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-dark-12b-resume-full {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-dark-14-plex {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-dark-15-plex-docs {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-light-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot d-light-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot d-light-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-light-01-home {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-03-emmico {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-07-resume-preview {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-09-companies {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-10-panel-open {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-11-footer-badge {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":["brightness(0) opacity(0.82)","brightness(0) opacity(0.82)","brightness(0) opacity(0.82)"]}
+shot p-light-12-resume {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
+shot p-light-13-resume-logos {"overflowX":0,"broken":[],"badLinks":[],"oldNos":[],"peter":false,"oldEmail":false,"mailto":[],"monoLogos":[]}
 DONE 52 shots 0 errors
