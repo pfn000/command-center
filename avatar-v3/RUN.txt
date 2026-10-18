@@ -1,1 +1,1 @@
-build B v3.2 run F (final): A hair length 1.0 + hair kept outside the skin; B unchanged (head x1.077); turntable of B
+build B v3.2 run G (uncanny pass): shared skin shader (AO, pores, matte, tone-matched head), relaxed arms + curled fingers, softer darker light + contact shadow, narrower/lower shoulders, slimmer bra band; B with our hair cards + sharpened Meshy texture; turntable of B
