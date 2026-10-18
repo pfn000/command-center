@@ -1850,7 +1850,8 @@ def qa_sweep():
     ez=float(EYE_TOP_Z)-0.01; kz=bz('Right knee') or (mn.z+0.37); hz=bz('Hips'); 
     RINGS=[('top-down',mx.z-0.03,72,0.95),('crown',mx.z-0.07,38,0.9),('face',ez,8,0.85),('neck',bz('Neck') or ez-0.12,8,0.85),('chest',(bz('Chest') or hz+0.17)+0.04,6,0.95),
            ('waist',bz('Spine') or hz+0.08,5,0.95),('hips',hz-0.03,4,0.95),('thighs',(hz+kz)/2,3,0.95),('knees',kz,3,0.9),('shins',kz*0.5+0.04,5,0.9),('feet',mn.z+0.06,14,0.85),('ground-up',mn.z+0.03,-22,0.9)]
-    jobs=[(k,a) for k in range(len(RINGS)) for a in range(0,360,15)]; per=(len(jobs)+n-1)//n; mine=jobs[sh*per:(sh+1)*per]
+    _rs=[int(x) for x in os.environ.get('QA_RINGS','').split(',') if x.strip()]
+    jobs=[(k,a) for k in range(len(RINGS)) for a in range(0,360,15) if (not _rs or k in _rs)]; per=(len(jobs)+n-1)//n; mine=jobs[sh*per:(sh+1)*per]
     sc.render.resolution_x=sc.render.resolution_y=640; sc.render.resolution_percentage=100; sc.cycles.samples=int(P.get('SWEEP_SAMPLES',10)); sc.render.use_persistent_data=True
     sc.render.image_settings.file_format='JPEG'; sc.render.image_settings.quality=88
     out={'variant':VAR,'rings':[(r[0],round(r[1],3),r[2]) for r in RINGS],'stills':{}}
@@ -1860,6 +1861,16 @@ def qa_sweep():
         try: bpy.ops.render.render(write_still=True); out['stills'][os.path.basename(pth)]={'magenta_pct':_img_magenta(pth)}
         except Exception as e: out['stills'][os.path.basename(pth)]={'error':str(e)}
         log('still',k,a)
+    if os.environ.get('QA_CLOSE') and sh==0:
+        # run 9b: 360 seam close-up sweep around each shoulder (her slit crop), arms-down proof pose
+        for sd_,bn_ in (('R','Right arm'),('L','Left arm')):
+            if bn_ not in B.pose.bones: continue
+            c_=B.matrix_world@B.pose.bones[bn_].head+Vector((0,0,0.01))
+            for a_ in range(0,360,20):
+                _setcam(c_,a_,8,float(P.get('CLOSE_DIST',0.42))); pth=OUT+f'/sweep/close_{sd_}_angle_{a_:03d}.jpg'; sc.render.filepath=pth
+                try: bpy.ops.render.render(write_still=True)
+                except Exception as e: log('CLOSEERR',e)
+        out['close']=True
     if sh==0:
         # geometric clipping per ring band, relaxed pose: clothing verts inside the body (body shows through) and hair inside the face
         TBq=world_bvh([BODY]); band={}
@@ -1871,6 +1882,8 @@ def qa_sweep():
                     Sm=_signed_to_q(TBq,V_[m],0.06)
                     band.setdefault(nmr,{})[o.name]={'verts':int(m.sum()),'inside_body_gt_1mm':int((Sm<-0.001).sum()),'min_mm':round(float(Sm.min())*1000,2)}
         out['clipping_by_ring_relaxed_pose']=band; out['hair_through_face_below_brow']=face_cross()
+        out['params_pose']={k_:P.get(k_) for k_ in ('ARM_DOWN','SHOULDER_DOWN','ELBOW_BEND')}
+        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear')}
         if SHIRT is not None and not SHIRT.hide_render:
             try: pose_relaxed(); out['shirt_selfx_relaxed']=shirt_selfx(SHIRT)
             except Exception as e: out['shirt_selfx_error']=str(e)
@@ -2379,22 +2392,42 @@ def back_hair_curl():
             for n_ in chain_bones[r_]:
                 pb=B.pose.bones[n_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(a),4,AX[r_])@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
             for n_ in chain_bones[r_]: BANG[n_]=B.pose.bones[n_].matrix_basis.copy()
-    pend=[r_ for r_ in roots if r_ in AX and (c0.get(r_,0)+c0r.get(r_,0))>0]; best={r_:(c0.get(r_,0)+c0r.get(r_,0),0) for r_ in pend}; done={}
+    pend=[r_ for r_ in roots if r_ in AX and (c0.get(r_,0)+c0r.get(r_,0))>0]; best={r_:(c0.get(r_,0)+c0r.get(r_,0),0,0) for r_ in pend}; done={}
+    # run 9b: candidate curl planes per chain: k=0 the body-normal plane; then that plane tilted about the chain's own direction by +-30/+-60 deg,
+    # then pure backward pitch (world X, both senses). Same angle on every bone, 1..15 deg; first plane+angle that reaches 0 wins, else the best seen.
+    BASE=dict(AX); CDIR={}
+    for r_ in roots:
+        if r_ in AX:
+            hb=B.matrix_world@B.pose.bones[r_].head; tb=B.matrix_world@B.pose.bones[chain_bones[r_][-1]].tail; CDIR[r_]=(mwi3@(tb-hb)).normalized()
+    def cand(r_,k):
+        if k==0: return BASE[r_]
+        if k<=4: return (Matrix.Rotation(math.radians((30,-30,60,-60)[k-1]),3,CDIR[r_])@BASE[r_]).normalized()
+        return (mwi3@Vector(((1,0,0),(-1,0,0))[k-5])).normalized()
+    NC=7 if P.get('BACK_HAIR_AXIS_SEARCH',False) else 1
     steps=[]
-    for a in range(1,int(P.get('BACK_HAIR_MAX_DEG',15))+1):
+    for k in range(NC):
         if not pend: break
-        for r_ in pend: set_chain(r_,a)
-        cr,_,_,_,_=count('rest'); cx,_,_,_,_=count('relaxed'); rest()
-        steps.append({'deg':a,'rest':{r_:cr.get(r_,0) for r_ in pend},'relaxed':{r_:cx.get(r_,0) for r_ in pend}})
+        for r_ in pend: AX[r_]=cand(r_,k)
+        hit={}
+        for a in range(1,int(P.get('BACK_HAIR_MAX_DEG',15))+1):
+            live=[r_ for r_ in pend if r_ not in hit]
+            if not live: break
+            for r_ in live: set_chain(r_,a)
+            cr,_,_,_,_=count('rest'); cx,_,_,_,_=count('relaxed'); rest()
+            steps.append({'plane':k,'deg':a,'rest':{r_:cr.get(r_,0) for r_ in live},'relaxed':{r_:cx.get(r_,0) for r_ in live}})
+            for r_ in live:
+                tot=cr.get(r_,0)+cx.get(r_,0)
+                if tot<best[r_][0]: best[r_]=(tot,a,k)
+                if tot==0: hit[r_]=a
         for r_ in list(pend):
-            tot=cr.get(r_,0)+cx.get(r_,0)
-            if tot<best[r_][0]: best[r_]=(tot,a)
-            if tot==0: done[r_]=a; pend.remove(r_)
-    for r_ in pend: set_chain(r_,best[r_][1])   # not reachable in 15 deg: keep the best angle seen
+            if r_ in hit: done[r_]=(hit[r_],k); pend.remove(r_); AX[r_]=cand(r_,k); set_chain(r_,hit[r_])
+            else: set_chain(r_,0)
+    for r_ in pend: AX[r_]=cand(r_,best[r_][2]); set_chain(r_,best[r_][1])   # not reachable in 15 deg: keep the best plane+angle seen
+    done={r_:v[0] for r_,v in done.items()}; out['planes']={r_:(best[r_][2] if r_ in best else 0) for r_ in roots}
     rest(); Xa=hair_X()
     for r_ in roots:
         idx=[i for i,k_ in enumerate(ROOTV) if k_==r_]
-        out['chains'][r_]={'bones':len(chain_bones.get(r_,[])),'deg_per_bone':done.get(r_,best.get(r_,(0,0))[1]),'reached_zero':r_ in done or (c0.get(r_,0)+c0r.get(r_,0))==0,
+        out['chains'][r_]={'bones':len(chain_bones.get(r_,[])),'deg_per_bone':done.get(r_,best.get(r_,(0,0,0))[1]),'reached_zero':r_ in done or (c0.get(r_,0)+c0r.get(r_,0))==0,
                            'tris_before':{'rest':c0.get(r_,0),'relaxed':c0r.get(r_,0)},'tip_move_mm':round(float(np.linalg.norm(Xa[idx]-X0[idx],axis=1).max())*1000,1) if idx else 0}
     out['steps']=steps
     c1,all1,_,_,_=count('rest'); c1r,all1r,_,_,_=count('relaxed'); rest()

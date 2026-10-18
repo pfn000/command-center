@@ -51,7 +51,7 @@
   "CONVERGE_MAX_S": 540,
   "CONVERGE_FRAMES": 12,
   "CONVERGE_ITERS": 2,
-  "SELF_CLEAR": true,
+  "SELF_CLEAR": false,
   "SELF_ITERS": 5,
   "SELF_CAP": 0.008,
   "SELFX_ZONE_R": 0.11,
@@ -65,10 +65,28 @@
   ],
   "BACK_HAIR_MAX_DEG": 15,
   "BACK_HAIR_BAKE": true,
-  "HAIR_TEX_PROBE": true
+  "HAIR_TEX_PROBE": true,
+  "BACK_HAIR_AXIS_SEARCH": true
  },
  "A2": {
   "SHIRT": false,
   "SET": "noshirt"
+ },
+ "P55": {
+  "ARM_DOWN": 55
+ },
+ "P55s3": {
+  "ARM_DOWN": 55,
+  "SHOULDER_DOWN": 3
+ },
+ "P50": {
+  "ARM_DOWN": 50
+ },
+ "P45": {
+  "ARM_DOWN": 45
+ },
+ "P45s3": {
+  "ARM_DOWN": 45,
+  "SHOULDER_DOWN": 3
  }
 }
