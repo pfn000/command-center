@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [A0, A1, A2] }
+      matrix: { variant: [A0, A2] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -120,10 +120,17 @@ jobs:
           - { qa: sweep, variant: A0, shard: 2, shards: 3 }
           - { qa: sweep, variant: A2, shard: 0, shards: 2 }
           - { qa: sweep, variant: A2, shard: 1, shards: 2 }
-          - { qa: rigqa, variant: A1, shard: 0, shards: 3 }
-          - { qa: rigqa, variant: A1, shard: 1, shards: 3 }
-          - { qa: rigqa, variant: A1, shard: 2, shards: 3 }
-          - { qa: schema, variant: A1, shard: 0, shards: 1 }
+          - { qa: rigqa, variant: A0, shard: 0, shards: 3 }
+          - { qa: rigqa, variant: A0, shard: 1, shards: 3 }
+          - { qa: rigqa, variant: A0, shard: 2, shards: 3 }
+          - { qa: schema, variant: A0, shard: 0, shards: 1 }
+          - { qa: bones, variant: A0, shard: 0, shards: 6 }
+          - { qa: bones, variant: A0, shard: 1, shards: 6 }
+          - { qa: bones, variant: A0, shard: 2, shards: 6 }
+          - { qa: bones, variant: A0, shard: 3, shards: 6 }
+          - { qa: bones, variant: A0, shard: 4, shards: 6 }
+          - { qa: bones, variant: A0, shard: 5, shards: 6 }
+          - { qa: shapes, variant: A0, shard: 0, shards: 1 }
     env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}" }
     steps:
       - uses: actions/checkout@v4
@@ -153,4 +160,4 @@ jobs:
           python3 -c "
           import os; from huggingface_hub import HfApi
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID']+'/qa-'+os.environ['QA']+'-'+os.environ['VARIANT']+'-'+os.environ['QA_SHARD'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
-# rev v3.7-assemble-6b (QA run)
+# rev v3.7-assemble-run8

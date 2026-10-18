@@ -1,2 +1,2 @@
-assemble A1
-#run7b
+assemble A0
+#run8

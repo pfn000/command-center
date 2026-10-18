@@ -1,5 +1,6 @@
 
 # v3.7 ASSEMBLY, run 7 (RUN6B-FINDINGS fixes: shirt seam/shell weld + smoothed pushes + corrective body weights + posed clearance; front locks <=8 deg;
+#   RUN 8 (on 7b): band+sleeve-top seam weights spatially averaged; posed clearance adds arms-forward frames 166-172; front locks per bone vs body+bra+shirt, stick-out cap 2 cm; final lock gate; Tummy close-ups.
 #   halter loop rides the Neck offset rigidly (no vertex pushes); Tummy hem clearance; variants A0 bang 1:1 / A1 bang curled <=15 deg). Based on run 6c (hair: NO chain lifts, rest pose 1:1, only a rigid whole-hair offset <=10 mm up/back + uniform scale <=3 % - root 17:27Z). Run 6b (fixes from run 6 QA: layer-coherent pushes on her double-shell shirt/bra, bra halter moved with the outfit Neck bone, hair chains CURLED with a stick-out penalty instead of a 45-deg swing, hair-through-body in the chain search). Run 6 (shirt: her own outfit weights, arm chain retargeted from the outfit's A-pose onto Panda's rest so sleeves sit ON the arms, then local clearance only; bra halter pushed off the neck; dense multi-camera eye/cheek check with per-chain pose search; measure system; Umeko dropped). Run 5: (hair: its own Head bone on her Head bone at the head's scale, bang chains posed off the eyes if needed; shirt: rigid re-seat + offset along BODY normals, no cover_fix). Run 4 notes: (head on Panda's Head bone at proportional scale, no hair push, shorts re-seated + hugged, bra hidden under the shirt). Saidie 10:11 AM Oct 18: "if the body face and the final render does not look 1 to 1 to the assets I fed you, then you have done it wrong"
 # Attach + fit + rig ONLY. Her Panda body (authored material), her Female Head (face 1.png + ZinPia doe 5, no shape-key bakes, no reshape),
 # her Blowout haircards (B&W.png) [alt: Umeko + her black->white jpg], Outfitriggedpanda shirt (Tshirt-BasicGrey.png) + bra (plain black, her 10:30 ask),
@@ -992,8 +993,49 @@ def body_weight_blend(o,d_full=0.010,d_zero=0.030):
     _write_w(o,Wl)
     r={'verts_blended':nb,'verts_full_body_weights':full,'of':len(X),'d_full_mm':d_full*1000,'d_zero_mm':d_zero*1000,'body_eval_mesh':use_ev}
     rep['shirt_body_weights']=r; log('shirt body-weight blend',r)
+
+# ---------- run 8 (RUN7 1b): the top of the right sleeve (where the off-shoulder band meets the sleeve) opened into a slit/notch once the arm is lowered,
+#            plus a ~3 mm notch under the left arm, because the band and the sleeve-top carried different weights. Fix: ONE shared, spatially averaged
+#            weight set over the band + sleeve-top seam zone (every shirt vert within SEAM_R of a vert that carries shoulder/arm weight), Gaussian over
+#            3D rest-space neighbours ACROSS pieces/islands, so surfaces that touch in rest deform together. Mesh shape untouched (weights only).
+def seam_weight_average(o,R=None,sig=None,iters=2):
+    R=float(R or P.get('SEAM_R',0.02)); sig=float(sig or P.get('SEAM_SIG',0.008))
+    names=[g.name for g in o.vertex_groups]; G=len(names); n=len(o.data.vertices)
+    Wm=np.zeros((n,G))
+    for v in o.data.vertices:
+        for ge in v.groups: Wm[v.index,ge.group]=ge.weight
+    s=Wm.sum(1); s[s==0]=1; Wm/=s[:,None]
+    armg=[k for k,nm_ in enumerate(names) if ('shoulder' in nm_.lower() or nm_.lower().endswith(' arm') or 'upperarm' in nm_.lower() or nm_.lower().endswith(' elbow'))]
+    X=wco(o); kd=KDTree(n)
+    for i,p in enumerate(X): kd.insert(Vector(tuple(p)),i)
+    kd.balance()
+    core=np.where(Wm[:,armg].sum(1)>0.02)[0] if armg else np.zeros(0,dtype=np.int64)
+    zone=np.zeros(n,bool)
+    for i in core:
+        if zone[i]: continue
+        for _,j,_ in kd.find_range(Vector(tuple(X[i])),R): zone[j]=True
+    zi=np.where(zone)[0]; NB={}
+    for i in zi:
+        hits=kd.find_range(Vector(tuple(X[i])),R); NB[i]=(np.array([h[1] for h in hits],dtype=np.int64),np.exp(-np.array([h[2] for h in hits])**2/(2*sig*sig)))
+    W0=Wm.copy()
+    for it in range(iters):
+        Wn=Wm.copy()
+        for i in zi:
+            j,w=NB[i]; Wn[i]=(Wm[j]*w[:,None]).sum(0)/w.sum()
+        Wm=Wn
+    gi=names; Wl=_vw(o); ch=0; mxd=0.0
+    for i in zi:
+        d={gi[k]:float(Wm[i,k]) for k in range(G) if Wm[i,k]>0.002}
+        d=_norm4(d); Wl[i]=d; ch+=1
+    mxd=float(np.abs(Wm[zi]-W0[zi]).sum(1).max()) if len(zi) else 0.0
+    _write_w(o,Wl)
+    r={'arm_groups':[names[k] for k in armg],'core_verts':int(len(core)),'zone_verts':int(len(zi)),'radius_mm':R*1000,'sigma_mm':sig*1000,'iters':iters,'max_weight_change_L1':round(mxd,3)}
+    rep['seam_weight_avg']=r; log('SEAM weight avg',r)
 try:
     if SHIRT is not None and P.get('SHIRT_BODYW',True): body_weight_blend(SHIRT)
+    if SHIRT is not None and P.get('SEAM_AVG',True):
+        try: seam_weight_average(SHIRT)
+        except Exception as e: traceback.print_exc(); log('SEAMAVGERR',e); rep['seam_weight_avg_error']=str(e)
     for o_ in (SHIRT,BRA):
         if o_ is not None and P.get('WELD',True):
             n_=weights_equalize(o_); rep.setdefault('weld',{}).setdefault(o_.name,{})['weights_equalized_verts']=n_; log('weights equalized',o_.name,n_)
@@ -1131,7 +1173,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r7-A0','A1':'jena-v37r7-A1','A2':'jena-v37r7-noshirt'}.get(VAR)
+SAVE_NAME={'A0':'jena-v37r8-final','A1':'jena-v37r8-A1','A2':'jena-v37r8-noshirt'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -1551,7 +1593,12 @@ try:
         if P.get('FRONT_LOCKS',True):
             # run 7b: each bone of the lock, root -> tip, gets the smallest forward angle (<= LOCK_MAX_DEG per bone) that lifts ITS OWN segment off the
             # skin (<= 1 vert > 2 mm inside), so the lock follows her chest instead of swinging out stiffly; stick-out vs 6b <= 10 mm for the whole lock.
-            bmax=float(P.get('LOCK_MAX_DEG',15))
+            # run 8: penetration counted against body + bra + shirt (white tips through the cups / collarbones), root -> tip, each bone curls OUTWARD
+            # (forward, along her chest) by the smallest angle <= LOCK_MAX_DEG that clears its own segment; whole-lock stick-out cap LOCK_STICK (2 cm) so the
+            # lock rests ON the shirt; a later bone may curl back in (<= what its parents added) only while its own segment stays clear, so the lock
+            # hugs the shirt instead of floating. Gate (checked again after posed clearance): <= 10 lock tris inside body/bra/shirt.
+            bmax=float(P.get('LOCK_MAX_DEG',15)); SCAP=float(P.get('LOCK_STICK',0.020))
+            TBc=world_bvh([o_ for o_ in (BODY,BRA,SHIRT) if o_ is not None])
             gidx_h={g.name:g.index for g in HR.vertex_groups}
             def seg_verts(bname):
                 gi_=gidx_h.get(bname)
@@ -1561,33 +1608,46 @@ try:
                     ws=[(ge.weight,ge.group) for ge in v.groups if ge.weight>0]
                     if ws and max(ws)[1]==gi_: out.append(v.index)
                 return np.array(out,dtype=np.int64)
-            def pen_idx(idx,Xe):
-                c=0
-                for i in idx:
-                    p=Vector(tuple(Xe[i])); lb,nb_,_,_=TBb.find_nearest(p,0.06)
-                    if lb is not None and (p-lb).dot(nb_)<-0.002: c+=1
-                return c
+            def sd_c(idx,Xe):
+                S_=np.full(len(idx),0.06)
+                for k_,i in enumerate(idx):
+                    p=Vector(tuple(Xe[i])); lb,nb_,_,_=TBc.find_nearest(p,0.06)
+                    if lb is not None: S_[k_]=(p-lb).dot(nb_)
+                return S_
+            def pen_idx(idx,Xe): return int((sd_c(idx,Xe)<-0.001).sum())
             def rot_bone(bn_,deg):
                 pb=B.pose.bones[bn_]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,AXW((1,0,0)))@Matrix.Translation(-h)@pb.matrix
                 bpy.context.view_layer.update()
             for root,side in (('Blw_Front_L','L'),('Blw_Front_R','R')):
                 if root not in B.pose.bones: H7[root]={'missing':True}; continue
-                s_sw,s_lf=signs(root,side); idx=chain_verts(root); uncurl(root); p0=pen_of(root); rec={'pen_before':p0,'lift_sign':s_lf,'per_bone':[]}
+                s_sw,s_lf=signs(root,side); idx=chain_verts(root); uncurl(root); Xe=hair_world_eval()
+                rec={'pen_before_body':pen_of(root),'pen_before_body_bra_shirt':pen_idx(idx,Xe),'lift_sign':s_lf,'stick_cap_mm':SCAP*1000,'per_bone':[]}
+                acc=0
                 for bn_ in chain_bones(root):
-                    sv=seg_verts(bn_); Xe=hair_world_eval(); pb0=pen_idx(sv,Xe); best=(0,pb0,0.0)
+                    sv=seg_verts(bn_); Xe=hair_world_eval(); pb0=pen_idx(sv,Xe); best=(0,pb0,0.0); mb0=B.pose.bones[bn_].matrix_basis.copy()
                     if pb0>1:
-                        mb0=B.pose.bones[bn_].matrix_basis.copy()
+                        cand=None
                         for a in range(1,int(bmax)+1):
                             B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update(); rot_bone(bn_,s_lf*a)
                             Xe=hair_world_eval(); pa=pen_idx(sv,Xe); so=stick_out(idx,Xe)
-                            if so>0.010: break
-                            best=(a,pa,so)
+                            if so>SCAP: break
+                            if cand is None or pa<cand[1]: cand=(a,pa,so)
                             if pa<=1: break
-                        B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update()
-                        if best[0]: rot_bone(bn_,s_lf*best[0])
+                        if cand is not None and cand[1]<pb0: best=cand
+                    elif acc>0 and len(sv):
+                        # hug: curl back in toward the shirt while this segment stays clear (>= 1 mm outside) - never past what the parents added
+                        for a in range(1,int(min(acc,bmax))+1):
+                            B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update(); rot_bone(bn_,-s_lf*a)
+                            Xe=hair_world_eval(); S_=sd_c(sv,Xe)
+                            if (S_<0.001).sum()>1: break
+                            best=(-a,int((S_<-0.001).sum()),stick_out(idx,Xe))
+                    B.pose.bones[bn_].matrix_basis=mb0.copy(); bpy.context.view_layer.update()
+                    if best[0]: rot_bone(bn_,s_lf*best[0])
+                    acc+=best[0]
                     rec['per_bone'].append((bn_,int(len(sv)),pb0,best[0],best[1],round(best[2]*1000,1)))
-                rec['pen_after']=pen_of(root); rec['stick_out_mm']=round(stick_out(idx,hair_world_eval())*1000,1)
-                rec['angle_deg']=max([t[3] for t in rec['per_bone']]+[0])
+                Xe=hair_world_eval()
+                rec['pen_after_body']=pen_of(root); rec['pen_after_body_bra_shirt']=pen_idx(idx,Xe); rec['stick_out_mm']=round(stick_out(idx,Xe)*1000,1)
+                rec['angle_deg']=max([abs(t[3]) for t in rec['per_bone']]+[0])
                 if rec['angle_deg']>0: DONE.append(root)
                 H7[root]=rec
         # fix 7 / variant A1: curl ONLY the chain that covers each eye (right: Blw_Bangs_R), smallest angle <= 15 deg (lift, sweep, or both) that gets
@@ -1925,6 +1985,21 @@ def qa_shapes():
             k.value=1.0; bpy.context.view_layer.update(); sc.render.filepath=OUT+f'/allshapes/{o.name.replace(" ","_")}__{safe}.jpg'
             try: bpy.ops.render.render(write_still=True)
             except Exception as e: log('SHERR',e)
+            if 'tummy' in k.name.lower():
+                # run 8: does the shirt hem hold over the shorts at Tummy=1? torso close-ups front / side / 3-4 at 0 and 1, plus the hem clearance number
+                try:
+                    tz=Vector((float((mn_[0]+mx_[0])/2),float((mn_[1]+mx_[1])/2),float(mx_[2])+0.03)); sc.render.resolution_x=sc.render.resolution_y=640
+                    TBs=world_bvh([o]) ; tumr={}
+                    for val in (0.0,1.0):
+                        k.value=val; bpy.context.view_layer.update()
+                        if SHIRT is not None:
+                            Ts=world_bvh([o]); Vs=tri_arr(SHIRT)[0]; Ss=_signed_to_q(Ts,Vs,0.03); tumr[f'shirt_vs_shorts_min_mm_at_{val:g}']=round(float(Ss.min())*1000,2); tumr[f'shirt_verts_inside_shorts_gt1mm_at_{val:g}']=int((Ss<-0.001).sum())
+                        for vn,az in (('front',0),('side',90),('q34',35)):
+                            _setcam(tz,az,4,0.62/(24/50),50); sc.render.filepath=OUT+f'/allshapes/TUMMY_{vn}_{int(val)}.jpg'
+                            try: bpy.ops.render.render(write_still=True)
+                            except Exception as e: log('SHERR',e)
+                    k.value=0.0; bpy.context.view_layer.update(); sc.render.resolution_x=sc.render.resolution_y=420; r_['tummy_hem']=tumr; log('TUMMY',tumr)
+                except Exception as e: traceback.print_exc(); log('TUMMYERR',e); k.value=0.0
             k.value=0.0; r_['image']=f'allshapes/{o.name.replace(" ","_")}__{safe}.jpg'; res[f'{o.name}|{k.name}']=r_; log('shape',o.name,k.name,r_['verdict'])
         for k in KB: k.value=keep[k.name]
         bpy.context.view_layer.update()
@@ -1982,8 +2057,44 @@ def posed_clear(o,frames=(0,258),off=0.002):
     rest(); r['after']=fin; r['weld']=weld_snap(o,'posed')
     rep['posed_clear']=r; log('POSED clear',json.dumps(r,default=str)[:1500])
 if SHIRT is not None and P.get('POSED_CLEAR',True):
-    try: posed_clear(SHIRT)
+    try: posed_clear(SHIRT,frames=tuple(int(x) for x in P.get('POSED_FRAMES',(0,258))))
     except Exception as e: traceback.print_exc(); log('POSEDCLEARERR',e); rep['posed_clear_error']=str(e); rest()
+
+# ---------- run 8: front-lock gate measured on the FINAL meshes (after the shirt's posed clearance): lock tris with a vert > 1 mm inside body/bra/shirt
+def front_locks_final():
+    out={}
+    try:
+        gi_h={g.index:g.name for g in HR.vertex_groups}
+        for pose_nm in ('rest','relaxed'):
+            if pose_nm=='rest': rest()
+            else: pose_relaxed()
+            dg=bpy.context.evaluated_depsgraph_get()
+            objs=[o_ for o_ in (BODY,BRA,SHIRT) if o_ is not None and not o_.hide_render]
+            V_=[];F_=[];off_=0
+            for o_ in objs:
+                e_=o_.evaluated_get(dg); me_=e_.to_mesh(); me_.calc_loop_triangles(); mw_=o_.matrix_world
+                V_+= [tuple(mw_@v.co) for v in me_.vertices]; F_+=[tuple(off_+x for x in t.vertices) for t in me_.loop_triangles]; off_+=len(me_.vertices); e_.to_mesh_clear()
+            T=BVHTree.FromPolygons(V_,F_)
+            e_=HR.evaluated_get(dg); me_=e_.to_mesh(); mw_=HR.matrix_world; Xh=[mw_@v.co for v in me_.vertices]
+            polys=[tuple(p.vertices) for p in me_.polygons]; e_.to_mesh_clear()
+            for root in ('Blw_Front_L','Blw_Front_R'):
+                if root not in B.pose.bones: continue
+                names=set(n_.name for n_ in [B.pose.bones[root]]+list(B.pose.bones[root].children_recursive))
+                idx=set(v.index for v in HR.data.vertices if any(gi_h[ge.group] in names and ge.weight>0.05 for ge in v.groups))
+                bad=set(); mn=1.0
+                for i in idx:
+                    loc,nr,_,_=T.find_nearest(Xh[i],0.06)
+                    if loc is None: continue
+                    s_=(Xh[i]-loc).dot(nr); mn=min(mn,s_)
+                    if s_<-0.001: bad.add(i)
+                tr=sum(len(p)-2 for p in polys if all(x in idx for x in p) and any(x in bad for x in p))
+                out.setdefault(pose_nm,{})[root]={'verts_inside_gt1mm':len(bad),'tris_inside':int(tr),'min_mm':round(mn*1000,1),'lock_verts':len(idx)}
+            out[pose_nm]['total_tris_inside']=sum(v['tris_inside'] for k,v in out[pose_nm].items() if isinstance(v,dict))
+        rest()
+    except Exception as e: traceback.print_exc(); out['error']=str(e); rest()
+    rep['front_locks_final']=out; log('FRONT LOCKS final',json.dumps(out,default=str)[:800])
+try: front_locks_final()
+except Exception as e: log('FLFERR',e)
 QA=os.environ.get('QA')
 if QA:
     try:
@@ -1998,7 +2109,7 @@ if QA:
         elif QA=='shapes': qa_shapes()
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','outfit_retarget','eyes_after')},open(OUT+'/training/run7-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','front_locks_final','outfit_retarget','eyes_after')},open(OUT+'/training/run8-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):

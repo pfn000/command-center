@@ -18,16 +18,25 @@
   "POSED_CLEAR": true,
   "TUMMY_CLEAR": true,
   "FRONT_LOCKS": true,
-  "POSED_ITERS": 4,
+  "POSED_ITERS": 6,
   "LOCK_MAX_DEG": 15,
   "STRAP_SMOOTH_PUSH": true,
-  "STRAP_SCALE_MAX": 1.04
+  "STRAP_SCALE_MAX": 1.04,
+  "SEAM_AVG": true,
+  "SEAM_R": 0.02,
+  "SEAM_SIG": 0.008,
+  "POSED_FRAMES": [
+   0,
+   258,
+   166,
+   168,
+   170,
+   172
+  ],
+  "LOCK_STICK": 0.02
  },
  "A2": {
   "SHIRT": false,
   "SET": "noshirt"
- },
- "A1": {
-  "BANG_LIFT": true
  }
 }
