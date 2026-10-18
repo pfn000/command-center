@@ -1,1 +1,1 @@
-build B v3.2 run G (uncanny pass): shared skin shader (AO, pores, matte, tone-matched head), relaxed arms + curled fingers, softer darker light + contact shadow, narrower/lower shoulders, slimmer bra band; B with our hair cards + sharpened Meshy texture; turntable of B
+build B v3.2 run H2: lighting with real falloff (world 0.15, fill 12, key 170/1.8, AO 0.8), skin sheen back (rough 0.38 coat 0.25), bra hem up 3 cm; B = Meshy head with its own hair; C = Meshy face + our hair cards + cranium; turntable of B

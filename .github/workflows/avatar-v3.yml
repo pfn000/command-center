@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 50
     strategy:
       fail-fast: false
-      matrix: { variant: [A, B] }
+      matrix: { variant: [A, B, C] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "$VARIANT" = "B" ]; then python3 -c "
+          if [ "$VARIANT" = "B" ] || [ "$VARIANT" = "C" ]; then python3 -c "
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi
@@ -84,7 +84,7 @@ jobs:
           p=snapshot_download('Saidie000/jena-avatar-assets',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in',ignore_patterns=['avatar-v3/*','*Normal_OpenGL.png','*Normal.png','*Height.png'])
           print(p)"
           cd /tmp/in && for z in *.zip; do unzip -o -q "$z" || true; done; ls -la /tmp/in /tmp/in/assets; mkdir -p /tmp/out/proof
-          if [ "$VARIANT" = "B" ]; then python3 -c "
+          if [ "$VARIANT" = "B" ] || [ "$VARIANT" = "C" ]; then python3 -c "
           import os,shutil; from huggingface_hub import hf_hub_download
           p=hf_hub_download('Saidie000/tab-render-out','avatar-v2/in/meshy-jena.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/mdl')
           os.makedirs('/tmp/in/meshy',exist_ok=True); shutil.move(p,'/tmp/in/meshy/meshy-jena.blend'); print('meshy ok',os.path.getsize('/tmp/in/meshy/meshy-jena.blend'))"; fi

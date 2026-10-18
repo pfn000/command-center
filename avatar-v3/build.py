@@ -762,6 +762,13 @@ NECK=add_mesh('CrossNecklace',bm,silver,'Chest')
 # ---------- bra straps (thin black, over the shoulders) + small center bow, as on her sheet
 blk=bpy.data.materials.new('StrapBlack'); blk.use_nodes=True; kb=blk.node_tree.nodes['Principled BSDF']; kb.inputs['Base Color'].default_value=(0.012,0.012,0.013,1); kb.inputs['Roughness'].default_value=0.5
 dg0=bpy.context.evaluated_depsgraph_get(); bvh=BVHTree.FromObject(BODY,dg0)
+# v3.2: bra hem up to just under the cups (it read as a crop top)
+if P.get('BRA_HEM_UP',0.0):
+    _mn,_mx=wbb([BRA]); zt_=_mn.z+P['BRA_HEM_UP']; mw=BRA.matrix_world; mwi=mw.inverted(); hm_=0
+    for v in BRA.data.vertices:
+        p=mw@v.co
+        if p.z<zt_: v.co=mwi@Vector((p.x,p.y,zt_-(zt_-p.z)*P.get('BRA_HEM_SQ',0.25))); hm_+=1
+    BRA.data.update(); log('bra hem raised',P['BRA_HEM_UP'],hm_)
 bmn,bmx=wbb([BRA])
 def snap(p,off):
     h=bvh.find_nearest(p)
@@ -964,7 +971,7 @@ if P.get('CRANIUM',True):
     CRAN=add_mesh('Cranium',bm,cm,'Head')
     HF['cranium']={'centre':list(cc),'radii':list(rad),'pushed_behind_face':pushed,'neck_top_z':ztop+LIFT,'cranium_z':[cc.z-rad.z,cc.z+rad.z]}; log('cranium',HF['cranium'])
 # ---------- v3.2 VARIANT B: her Meshy model's head + hair grafted onto this rigged body at the same measured size (comparison only)
-if VARIANT=='B':
+if VARIANT in ('B','C'):
     MB=None
     for cand in (IN+'/meshy/meshy-jena.blend',IN+'/meshy-jena.blend'):
         if os.path.exists(cand): MB=cand; break
@@ -1052,6 +1059,10 @@ if VARIANT=='B':
     # cut: everything above chin-NECK_KEEP; hair-coloured strands kept further down beside/behind the neck
     r_=np.hypot(V[:,0]-b_n['cx'],V[:,1]-b_n['cy'])
     keep=(V[:,2]>=zc_-P.get('MB_NECK_KEEP',0.03))|((~skinv)&(V[:,2]>=zc_-P.get('MB_HAIR_KEEP',0.11))&(r_>max(b_n['rx'],b_n['ry'])*1.05))
+    if VARIANT=='C':
+        # C: strip the Meshy hair shell (keep the face: eyes/brows/lips sit in the protected front box) -> our hair cards + cranium go on instead
+        Ht_=HF['target_head_total']; _c=V[(np.abs(V[:,0]-b_n['cx'])<0.012)&(V[:,2]>zc_)&(V[:,2]<zc_+0.6*Ht_)]; ny2=float(_c[:,1].min()) if len(_c) else float(V[:,1].min()); prot=(V[:,1]<ny2+P.get('MC_FACE_DEPTH',0.04))&(np.abs(V[:,0]-b_n['cx'])<P.get('MC_FACE_HW',0.055))&(V[:,2]<zc_+P.get('MC_FACE_TOP',0.72)*Ht_)
+        strip_=(~skinv)&(~prot); keep=keep&~strip_; log('C: meshy hair verts stripped',int(strip_.sum()),'face front y',ny2)
     bm=bmesh.new(); bm.from_mesh(MH.data); bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm,geom=[bm.verts[i] for i in np.where(~keep)[0]],context='VERTS')
     # drop tiny floating islands left by the cut
@@ -1085,8 +1096,8 @@ if VARIANT=='B':
         rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02)*(rr<NRAD*1.45)
         Dn=np.zeros_like(BVn); Dn[:,0]=(bq['cx']+(BVn[:,0]-bq['cx'])*f_-BVn[:,0])*w_; Dn[:,1]=(mcy+(BVn[:,1]-bq['cy'])*f_-BVn[:,1])*w_; wdelta(BODY,Dn)
         HF['B_neck_tuck']={'factor':f_,'meshy_neck':[mrx,mry,mcy],'body_neck':bq}
-    KEEP_HAIR=P.get('MB_OUR_HAIR',True)
-    for o in ((FH,CRAN,globals().get('SCALP')) if KEEP_HAIR else (FH,UM,BUN,CLIP,CRAN,globals().get('SCALP'))):
+    KEEP_HAIR=(VARIANT=='C')
+    for o in ((FH,globals().get('SCALP')) if KEEP_HAIR else (FH,UM,BUN,CLIP,CRAN,globals().get('SCALP'))):
         if o is not None and o.name in bpy.data.objects: bpy.data.objects.remove(o)
     FH=MH
     # Meshy skin tone -> our body's, same skin shader; sharpen its soft texture (unsharp mask)
