@@ -445,14 +445,21 @@ def skin_detail(mat,ao=None):
     mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=P.get('AO_STR',0.55) if ao is None else ao
     if lk: src_=lk[0].from_socket; nt.links.remove(lk[0]); nt.links.new(src_,mx.inputs['A'])
     else: mx.inputs['A'].default_value=b.inputs['Base Color'].default_value
-    nt.links.new(aon.outputs['AO'],mx.inputs['B']); nt.links.new(mx.outputs['Result'],b.inputs['Base Color'])
+    if P.get('AO_COOL'):
+        # v3.4: crevices/shadow side go to a cool neutral (not salmon): AO drives a ramp from a cool grey-mauve to white
+        _cr=nt.nodes.new('ShaderNodeValToRGB'); _e=_cr.color_ramp.elements; _e[0].position=0.0; _e[0].color=(*P['AO_COOL'],1); _e[1].position=1.0; _e[1].color=(1,1,1,1)
+        nt.links.new(aon.outputs['AO'],_cr.inputs[0]); nt.links.new(_cr.outputs[0],mx.inputs['B'])
+    else: nt.links.new(aon.outputs['AO'],mx.inputs['B'])
+    nt.links.new(mx.outputs['Result'],b.inputs['Base Color'])
     nz=nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value=P.get('PORE_SCALE',900.0); nz.inputs['Detail'].default_value=2.0
     bp=nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=P.get('PORE_BUMP',0.06); bp.inputs['Distance'].default_value=0.0005
     nl=[l for l in nt.links if l.to_socket==b.inputs['Normal']]
     if nl: nt.links.new(nl[0].from_socket,bp.inputs['Normal']); nt.links.remove(nl[0])
     nt.links.new(nz.outputs['Fac'],bp.inputs['Height']); nt.links.new(bp.outputs['Normal'],b.inputs['Normal'])
     b.inputs['Roughness'].default_value=P.get('SKIN_ROUGH_ALL',0.5); b.inputs['Coat Weight'].default_value=P.get('SKIN_COAT_ALL',0.05); b.inputs['Specular IOR Level'].default_value=0.45
-    b.inputs['Subsurface Weight'].default_value=P.get('SSS_W',0.15); b.inputs['Subsurface Radius'].default_value=(1.0,0.4,0.25); b.inputs['Subsurface Scale'].default_value=P.get('SSS_SCALE',0.012)
+    b.inputs['Subsurface Weight'].default_value=P.get('SSS_W',0.15); b.inputs['Subsurface Radius'].default_value=tuple(P.get('SSS_RAD',(1.0,0.4,0.25))); b.inputs['Subsurface Scale'].default_value=P.get('SSS_SCALE',0.012)
+    if P.get('COAT_R') is not None: b.inputs['Coat Roughness'].default_value=P['COAT_R']
+    if P.get('SKIN_SPEC') is not None: b.inputs['Specular IOR Level'].default_value=P['SKIN_SPEC']
 def img_skin_median(im):
     if im is None or im.size[0]==0: return None
     n=im.size[0]*im.size[1]; a=np.empty(n*4,dtype=np.float32); im.pixels.foreach_get(a); a=a.reshape(-1,4)[::53,:3]
@@ -646,8 +653,13 @@ def solidmat(name,col,rough=0.4,metal=0.0):
     m,nt,b=newmat(name); b.inputs['Base Color'].default_value=(*col,1); b.inputs['Roughness'].default_value=rough; b.inputs['Metallic'].default_value=metal; return m,nt,b
 # bra: grey ribbed knit
 m,nt,b=solidmat('BraKnit',(0.30,0.29,0.30),0.7)
-wv=nt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value=180; wv.wave_type='BANDS'; wv.bands_direction='X'
-bp=nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=0.25; nt.links.new(wv.outputs['Fac'],bp.inputs['Height']); nt.links.new(bp.outputs[0],b.inputs['Normal'])
+wv=nt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value=P.get('RIB_SCALE',180); wv.wave_type='BANDS'; wv.bands_direction='X'
+if P.get('RIB_UV',False):
+    _tc=nt.nodes.new('ShaderNodeTexCoord'); nt.links.new(_tc.outputs['UV'],wv.inputs['Vector']); wv.wave_profile='SIN'
+    _rr=nt.nodes.new('ShaderNodeMapRange'); _rr.inputs[3].default_value=P.get('RIB_DARK',0.72); _rr.inputs[4].default_value=1.0; nt.links.new(wv.outputs['Fac'],_rr.inputs[0])
+    _mm=nt.nodes.new('ShaderNodeMix'); _mm.data_type='RGBA'; _mm.blend_type='MULTIPLY'; _mm.inputs['Factor'].default_value=1.0; _mm.inputs['A'].default_value=b.inputs['Base Color'].default_value[:]
+    nt.links.new(_rr.outputs[0],_mm.inputs['B']); nt.links.new(_mm.outputs['Result'],b.inputs['Base Color'])
+bp=nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value=P.get('RIB_BUMP',0.25); nt.links.new(wv.outputs['Fac'],bp.inputs['Height']); nt.links.new(bp.outputs[0],b.inputs['Normal'])
 BRA.data.materials.clear(); BRA.data.materials.append(m)
 # shorts: her black base color (52f8), AO (41d6), roughness (f14f)
 m,nt,b=newmat('ShortsBlack')
@@ -902,23 +914,29 @@ if P.get('BRA_GEN',True):
         pa=cast_(s*asd,cup_top(asd)-0.002,offb); pb_=cast_(s*(math.pi-0.5),crease+BK-0.003,offb)
         BRA_ATT[s]=(pa,pb_)
     def strap_path(s):
-        # front: straight up from the outer cup top at a fixed angle (horizontal casts); top: vertical casts over the trapezius; back: down to the back band
-        a_f=s*asd; z0=cup_top(asd)-0.003; xs_=None
-        hf=bvh.ray_cast(Vector((s*P.get('STRAP_XS',0.07),tcy_,2.5)),Vector((0,0,-1)),3.0); zsh=float(hf[0].z) if hf[0] is not None else z0+0.2
-        pts_=[]; NF=14
-        for i in range(NF+1):
-            z_=z0+(zsh-0.02-z0)*i/NF; q=cast_(a_f,z_,0.0025)
+        # v3.4: straight strap. Front: casts at a FIXED x from the outer cup top straight up to mid-shoulder (no angle -> no halter read);
+        # top: vertical casts over the trapezius at that x; back: straight down at the same x to the back band.
+        z0=cup_top(asd)-0.003; pa_=cast_(s*asd,z0,0.0025)
+        if pa_ is None: return []
+        xa=abs(pa_.x); xt=max(xa+P.get('STRAP_XOUT',0.0),P.get('STRAP_XMIN',0.0)); xb=xt
+        hf=bvh.ray_cast(Vector((s*xt,tcy_,2.5)),Vector((0,0,-1)),3.0); zsh=float(hf[0].z) if hf[0] is not None else z0+0.2
+        def fcast(x,z,sgn_y):
+            h_=bvh.ray_cast(Vector((x,tcy_-sgn_y*0.6,z)),Vector((0,sgn_y,0)),0.6)
+            return (h_[0]+h_[1].normalized()*0.0025) if h_[0] is not None else None
+        pts_=[pa_]; NF=16
+        for i in range(1,NF+1):
+            t_=i/NF; z_=z0+(zsh-0.015-z0)*t_; q=fcast(s*(xa+(xt-xa)*t_),z_,1)
             if q is not None: pts_.append(q)
-        if not pts_: return []
-        xs_=pts_[-1].x; yf=pts_[-1].y
-        a_b=s*(math.pi-P.get('STRAP_BACK_A',0.62)); zbk=crease+BK-0.003
-        qb=cast_(a_b,zsh-0.02,0.0025); yb=qb.y if qb is not None else tcy_+0.08
+        yf=pts_[-1].y
+        qb=fcast(s*xb,zsh-0.015,-1); yb=qb.y if qb is not None else tcy_+0.08
         for i in range(1,8):
-            y_=yf+(yb-yf)*i/8; h_=bvh.ray_cast(Vector((xs_,y_,zsh+0.3)),Vector((0,0,-1)),0.6)
+            y_=yf+(yb-yf)*i/8; h_=bvh.ray_cast(Vector((s*xt,y_,zsh+0.3)),Vector((0,0,-1)),0.6)
             if h_[0] is not None: pts_.append(h_[0]+h_[1].normalized()*0.0025)
+        zbk=crease+BK-0.003; xbk=abs(BRA_ATT[s][1].x) if BRA_ATT.get(s) and BRA_ATT[s][1] is not None else xb
         for i in range(NF+1):
-            z_=zsh-0.02+(zbk-(zsh-0.02))*i/NF; q=cast_(a_b,z_,0.0025)
+            t_=i/NF; z_=zsh-0.015+(zbk-(zsh-0.015))*t_; q=fcast(s*(xb+(xbk-xb)*t_**2),z_,-1)
             if q is not None: pts_.append(q)
+        rep.setdefault('straps',{})[s]={'x_cup':xa,'x_top':xt,'z_cup':z0,'z_sh':zsh,'n':len(pts_)}
         return pts_
     old=BRA; bpy.data.objects.remove(old)
     me=bpy.data.meshes.new('Bra'); bmB.to_mesh(me); bmB.free(); BRA=bpy.data.objects.new('Bra',me); sc.collection.objects.link(BRA)
@@ -969,8 +987,8 @@ if gv and P.get('BOW',True):
     g=min(gv,key=lambda p:p.y); gc=Vector((0,g.y-0.004,(max(p.z for p in gv)+min(p.z for p in gv))/2+0.01))
     for sx in (-1,1):
         r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=1.0)
-        for v in r['verts']: v.co=Vector((v.co.x*0.0038,v.co.y*0.0014,v.co.z*0.0024))+gc+Vector((sx*0.0038,0,0))
-    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0016)
+        for v in r['verts']: _bs=P.get('BOW_S',1.0); v.co=Vector((v.co.x*0.0038*_bs,v.co.y*0.0016*_bs,v.co.z*0.0026*_bs))+gc+Vector((sx*0.0038*_bs,0,0))
+    r=bmesh.ops.create_uvsphere(bm,u_segments=8,v_segments=6,radius=0.0016*P.get('BOW_S',1.0))
     for v in r['verts']: v.co+=gc+Vector((0,-0.001,0))
 uvl=bm.loops.layers.uv.new('UVMap')
 STR=add_mesh('BraStraps',bm,blk,'Chest')
@@ -1029,7 +1047,7 @@ if P.get('BOTTOM','thong')=='thong':
     smn,smx=wbb([SH]); hx=(smx.x-smn.x)/2
     cy=(B.matrix_world@B.data.bones['Hips'].head_local).y if 'Hips' in B.data.bones else (smn.y+smx.y)/2
     hc=bvh.ray_cast(Vector((0,cy,smn.z-0.5)),Vector((0,0,1)),1.0); crz=hc[0].z if hc[0] is not None else smn.z+0.05
-    zO=crz+0.11; zpt=crz+P.get('PANEL_H',0.085); zbt=zpt+P.get('BACK_UP',0.045)
+    zpt=crz+P.get('PANEL_H',0.085); zO=crz+max(0.11,P.get('PANEL_H',0.085)+0.035); zbt=zpt+P.get('BACK_UP',0.045)
     FW0,FW1,BW0,BW1=[hx*v for v in P.get('THONG_W',(0.40,0.09,0.07,0.11))]
     off=0.0022; rows=[]
     def cast(x,th):
@@ -1236,13 +1254,95 @@ if VARIANT in ('B','C'):
     zc_=HF['target_chin']
     if P.get('MB_HEAD_SCALE',1.0)!=1.0:
         pv=Vector((b_n['cx'],b_n['cy'],zc_)); MH.data.transform(Matrix.Translation(pv)@Matrix.Scale(P['MB_HEAD_SCALE'],4)@Matrix.Translation(-pv)); V=wco(MH)
+
+    # ---------- v3.4: probe the Meshy face from INSIDE the head (rays from the head centre out through the face hit the skin, never the strands in front)
+    from mathutils.bvhtree import BVHTree as _BVHm
+    def mh_bvh():
+        Vb=wco(MH); return _BVHm.FromPolygons([tuple(p) for p in Vb],[tuple(p.vertices) for p in MH.data.polygons]),Vb
+    MEYE=None
+    try:
+        _bv,_Vb=mh_bvh(); Ht_=HF['target_head_total']; cy0=float(b_n['cy']); cx0=float(b_n['cx'])
+        _uvd=MH.data.uv_layers.active.data if MH.data.uv_layers else None
+        def uv_at(fi,hp):
+            poly=MH.data.polygons[fi]; vs=[Vector(_Vb[v]) for v in poly.vertices]; li=list(poly.loop_indices)
+            from mathutils.interpolate import poly_3d_calc
+            w=poly_3d_calc(vs,hp); u=sum(_uvd[l].uv[0]*w_ for l,w_ in zip(li,w)); v=sum(_uvd[l].uv[1]*w_ for l,w_ in zip(li,w)); return u,v
+        ctr=_Vb[(np.abs(_Vb[:,0]-cx0)<0.006)&(_Vb[:,2]>zc_+0.02)&(_Vb[:,2]<zc_+0.6*Ht_)&skinv[:len(_Vb)]] if len(skinv)==len(_Vb) else _Vb[:0]
+        zn_=float(ctr[np.argmin(ctr[:,1]),2]) if len(ctr) else zc_+0.30*Ht_
+        STEP=0.001; xs=np.arange(cx0-0.07,cx0+0.07+1e-9,STEP); zs=np.arange(zn_-0.01,zn_+0.075,STEP)
+        G=np.zeros((len(zs),len(xs),3),np.float32); Y=np.full((len(zs),len(xs)),np.nan,np.float32)
+        Wt,Hh_=img_.size
+        for iz,z in enumerate(zs):
+            for ix,x in enumerate(xs):
+                h=_bv.ray_cast(Vector((x,cy0,z)),Vector((0,-1,0)),0.25)
+                if h[0] is None or _uvd is None: continue
+                u,v=uv_at(h[2],h[0]); G[iz,ix]=px[min(Hh_-1,int((v%1)*Hh_)),min(Wt-1,int((u%1)*Wt)),:3]; Y[iz,ix]=h[0].y
+        lum=G.mean(2); warm=G[:,:,0]-G[:,:,2]
+        try:
+            from PIL import Image as _PI
+        except Exception: _PI=None
+        dbg=(np.clip(G[::-1],0,1)**(1/2.2)*255).astype(np.uint8)
+        np.save(OUT+'/proof/eyemap.npy',G[::-1]); log('eye probe grid',G.shape,'nose z',zn_)
+        cand={}
+        for side,msk in (('L',xs<cx0-0.008),('R',xs>cx0+0.008)):
+            band=(zs>zn_+P.get('EYE_ZLO',0.008))&(zs<zn_+P.get('EYE_ZHI',0.05))
+            sub=lum[np.ix_(band,msk)]; wsub=warm[np.ix_(band,msk)]
+            ok=(sub>0)&(wsub<P.get('EYE_WARM',0.05))
+            if ok.sum()<10: continue
+            thr=np.percentile(sub[ok],P.get('EYE_PCT',8)); m_=ok&(sub<=thr)
+            zi,xi=np.nonzero(m_); zz_=zs[band][zi]; xx_=xs[msk][xi]
+            # sclera = bright, low-saturation pixels near the dark cluster
+            br=(sub>P.get('SCLERA_LUM',0.62))&(np.abs(wsub)<0.06); zb_,xb_=np.nonzero(br)
+            cand[side]={'x':float(np.median(xx_)),'z':float(np.median(zz_)),'n':int(m_.sum()),'thr':float(thr),
+                        'sclera_n':int(br.sum()),'sclera_x':[float(xs[msk][xb_].min()),float(xs[msk][xb_].max())] if len(xb_) else None}
+        log('eye candidates',cand)
+        dflt_ipd=0.060*Ht_/0.25
+        if 'L' in cand and 'R' in cand and 0.035*Ht_/0.25<cand['R']['x']-cand['L']['x']<0.09*Ht_/0.25 and abs(cand['R']['z']-cand['L']['z'])<0.012:
+            ez=(cand['L']['z']+cand['R']['z'])/2; ipd=cand['R']['x']-cand['L']['x']; ex=(cand['L']['x']+cand['R']['x'])/2; src_='texture'
+        else:
+            ez=zn_+P.get('EYE_DZ',0.03); ipd=dflt_ipd; ex=cx0; src_='fallback'
+        if P.get('EYE_DEC'): ex,ez,ipd=P['EYE_DEC'][0]+cx0,zn_+P['EYE_DEC'][1],P['EYE_DEC'][2]; src_='param'
+        MEYE={'cx':ex,'z':ez,'ipd':ipd,'nose_z':zn_,'src':src_,'cand':cand,'grid':[float(xs[0]),float(zs[0]),STEP,len(xs),len(zs)]}
+        if _PI is not None:
+            im_=_PI.fromarray(dbg).resize((dbg.shape[1]*6,dbg.shape[0]*6),_PI.NEAREST); from PIL import ImageDraw as _ID; d_=_ID.Draw(im_)
+            for sx_ in (-1,1):
+                px_=(ex+sx_*ipd/2-xs[0])/STEP*6; pz_=(zs[-1]-ez)/STEP*6; d_.ellipse((px_-8,pz_-8,px_+8,pz_+8),outline=(0,255,0))
+            im_.save(OUT+'/proof/eyemap.png')
+        log('MEYE',MEYE); HF['B_eyes']=MEYE
+    except Exception as e:
+        import traceback; log('EYEPROBE ERR',repr(e),traceback.format_exc()[-600:])
     # cut: everything above chin-NECK_KEEP; hair-coloured strands kept further down beside/behind the neck
     r_=np.hypot(V[:,0]-b_n['cx'],V[:,1]-b_n['cy'])
     keep=(V[:,2]>=zc_-P.get('MB_NECK_KEEP',0.03))|((~skinv)&(V[:,2]>=zc_-P.get('MB_HAIR_KEEP',0.11))&(r_>max(b_n['rx'],b_n['ry'])*1.05))
     if VARIANT=='C':
-        # C: strip the Meshy hair shell (keep the face: eyes/brows/lips sit in the protected front box) -> our hair cards + cranium go on instead
-        Ht_=HF['target_head_total']; _c=V[(np.abs(V[:,0]-b_n['cx'])<0.012)&(V[:,2]>zc_)&(V[:,2]<zc_+0.6*Ht_)]; ny2=float(_c[:,1].min()) if len(_c) else float(V[:,1].min()); prot=(V[:,1]<ny2+P.get('MC_FACE_DEPTH',0.04))&(np.abs(V[:,0]-b_n['cx'])<P.get('MC_FACE_HW',0.055))&(V[:,2]<zc_+P.get('MC_FACE_TOP',0.72)*Ht_)
-        strip_=(~skinv)&(~prot); keep=keep&~strip_; log('C: meshy hair verts stripped',int(strip_.sum()),'face front y',ny2)
+        # v3.4 C: strip the Meshy hair shell; keep non-skin paint that lies ON the face (eyes/brows/lashes). A non-skin vertex is a floating
+        # strand when a ray from it into the head (+y) hits the face surface within MC_FLOAT; above the brow line everything non-skin is shell.
+        _bv2,_V2=mh_bvh(); Ht_=HF['target_head_total']
+        ezb=(MEYE['z'] if MEYE else zc_+0.42*Ht_)+P.get('MC_BROW_DZ',0.028)
+        fl=np.zeros(len(V),bool)
+        cand_=np.where((~skinv)&(V[:,2]<ezb)&(V[:,2]>zc_-0.005)&(np.abs(V[:,0]-b_n['cx'])<P.get('MC_FACE_HW',0.06))&(V[:,1]<b_n['cy']))[0]
+        for i in cand_:
+            h=_bv2.ray_cast(Vector(V[i])+Vector((0,0.0015,0)),Vector((0,1,0)),P.get('MC_FLOAT',0.03))
+            if h[0] is not None and (h[0].y-V[i][1])>0.0025: fl[i]=True
+        onface=np.zeros(len(V),bool); onface[cand_]=True; onface&=~fl
+        strip_=(~skinv)&(~onface); keep=keep&~strip_; log('C v3.4: hair verts stripped',int(strip_.sum()),'floating strands',int(fl.sum()),'face paint kept',int(onface.sum()),'brow z',ezb)
+    if VARIANT=='B' and P.get('MB_LOOP_CUT',True):
+        # v3.4 B: remove the thin 'wire loop' strand sticking up over the crown: anything far above the local hair-dome height
+        Ht_=HF['target_head_total']; top=V[:,2]>zc_+0.45*Ht_; CS=0.006
+        if top.sum()>50:
+            ix_=np.floor((V[:,0]-V[:,0].min())/CS).astype(int); iy_=np.floor((V[:,1]-V[:,1].min())/CS).astype(int)
+            nx_,ny_=ix_.max()+1,iy_.max()+1; zmx=np.full((nx_,ny_),np.nan)
+            for i in np.where(top&keep)[0]:
+                a_,b2_=ix_[i],iy_[i]; zmx[a_,b2_]=V[i,2] if np.isnan(zmx[a_,b2_]) else max(zmx[a_,b2_],V[i,2])
+            R_=int(P.get('LOOP_R',0.024)/CS); med=np.full_like(zmx,np.nan)
+            for a_ in range(nx_):
+                for b2_ in range(ny_):
+                    if np.isnan(zmx[a_,b2_]): continue
+                    blk_=zmx[max(0,a_-R_):a_+R_+1,max(0,b2_-R_):b2_+R_+1]; med[a_,b2_]=np.nanpercentile(blk_,P.get('LOOP_PCT',60))
+            mv=med[ix_,iy_]; lp=top&keep&(~np.isnan(mv))&(V[:,2]>mv+P.get('LOOP_TOL',0.010))
+            # also the thin arc of the loop above the crown: everything over the dome's 97th-percentile top + tol
+            ztop_=np.nanpercentile(zmx,97); lp|=top&keep&(V[:,2]>ztop_+P.get('LOOP_TOL',0.010))
+            keep=keep&~lp; HF['B_loop_cut']={'verts':int(lp.sum()),'dome_top':float(ztop_)}; log('B wire loop cut',HF['B_loop_cut'])
     bm=bmesh.new(); bm.from_mesh(MH.data); bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm,geom=[bm.verts[i] for i in np.where(~keep)[0]],context='VERTS')
     # drop tiny floating islands left by the cut
@@ -1311,6 +1411,92 @@ if VARIANT in ('B','C'):
         rr=np.hypot(BVn[:,0]-bq['cx'],BVn[:,1]-bq['cy']); w_=(sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)+0.002))/0.018) if P.get('MB_SEAM',True) else sstep((BVn[:,2]-(zc_-P.get('MB_NECK_KEEP',0.03)-0.01))/0.02))*(rr<NRAD*1.45)
         Dn=np.zeros_like(BVn); Dn[:,0]=(bq['cx']+(BVn[:,0]-bq['cx'])*f_-BVn[:,0])*w_; Dn[:,1]=(mcy+(BVn[:,1]-bq['cy'])*f_-BVn[:,1])*w_; wdelta(BODY,Dn)
         HF['B_neck_tuck']={'factor':f_,'meshy_neck':[mrx,mry,mcy],'body_neck':bq}
+
+    # ---------- v3.4 crisp hand-painted eyes for the Meshy face: a thin decal that follows the face skin, painted here (sclera, her Doe gray iris,
+    # pupil, limbal ring, sharp winged upper lash line, lower lash line, catchlight); the Meshy texture's soft eyes sit underneath
+    if MEYE and P.get('EYE_DECAL',True):
+        try:
+            TW,TH_=1024,256; ET=IN+'/ZinPia_Doe Eyes (Sunny Head)/'+P.get('EYE_TEX','doe 1.png'); iris_img=None
+            if os.path.exists(ET):
+                _ii=bpy.data.images.load(ET); iw,ih=_ii.size; ia=np.empty(iw*ih*4,np.float32); _ii.pixels.foreach_get(ia); iris_img=ia.reshape(ih,iw,4)
+                al=iris_img[:,:,3]>0.5; ys_,xs_=np.nonzero(al)
+                if len(xs_): icx,icy,irr=xs_.mean(),ys_.mean(),max(xs_.max()-xs_.min(),ys_.max()-ys_.min())/2
+                else: icx,icy,irr=iw/2,ih/2,iw/2
+            tex=np.zeros((TH_,TW,4),np.float32)
+            yy,xx=np.mgrid[0:TH_,0:TW].astype(np.float32)
+            EH=P.get('EYE_OPEN',0.42); TILT=P.get('EYE_TILT',0.10); IR=P.get('IRIS_R',0.40); MARG=P.get('EYE_MARG',1.30)
+            for half,outer in ((0,-1),(1,1)):
+                u=((xx-(half*512+256))/256.0)*MARG*outer   # u: -1 inner corner .. +1 outer corner
+                v=((yy-128)/128.0)*MARG*0.5/1.0            # v up = positive (image row 0 = v<0? rows go top->bottom in Blender pixels: row 0 = bottom)
+                v=-v if False else v
+                c=np.clip(1-u*u,0,1)
+                up=EH*np.power(c,0.62)+TILT*(u+1)/2*0.25; lo=-EH*0.55*np.power(c,1.05)+TILT*(u+1)/2*0.12
+                inside=(v<up)&(v>lo)&(np.abs(u)<1)
+                # sclera with a soft shadow under the upper lid and toward the corners
+                sh=np.clip((up-v)/0.18,0,1); cs=np.clip(1-np.abs(u)**4,0,1)
+                scl=np.stack([0.88-0.30*(1-sh),0.86-0.30*(1-sh),0.87-0.26*(1-sh)],-1)*(0.85+0.15*cs)[...,None]
+                col=scl.copy()
+                # iris centred slightly above mid, clipped by the lids
+                icv=EH*0.12; du=u-P.get('IRIS_DX',-0.05); dv=v-icv; rr=np.sqrt(du*du+dv*dv)/IR
+                if iris_img is not None:
+                    sx=np.clip(icx+du/IR*irr,0,iw-1).astype(int); sy=np.clip(icy+dv/IR*irr,0,ih-1).astype(int)
+                    ic=iris_img[sy,sx,:3]
+                else:
+                    ic=np.stack([0.42+0*rr,0.47+0*rr,0.52+0*rr],-1)
+                ic=ic*np.clip(1.15-0.35*rr,0.6,1.1)[...,None]
+                ring=np.clip((rr-0.86)/0.14,0,1); ic=ic*(1-0.75*ring[...,None])
+                pup=rr<P.get('PUPIL',0.36); ic[pup]=(0.015,0.015,0.018)
+                isin=(rr<1.0)&inside
+                # anti-aliased iris edge
+                ae=np.clip((1.0-rr)*IR*256/MARG/1.5,0,1)[...,None]
+                col=np.where(isin[...,None],ic*ae+scl*(1-ae),col)
+                # lid shadow on the iris top
+                col=col*(1-0.45*np.clip(1-(up-v)/0.10,0,1)*inside)[...,None]
+                # catchlight (key light comes from image-left in both eyes)
+                cl=((u*outer- P.get('IRIS_DX',-0.05)*outer+0.16*outer*outer*0 -(-0.17))**2+(v-icv-0.13)**2)<(0.075**2)
+                cl=(((xx-(half*512+256))/256.0*MARG - (P.get('IRIS_DX',-0.05)*outer) + 0.16)**2+(v-icv-0.12)**2)<(0.07**2)
+                col=np.where((cl&inside)[...,None],np.array([0.97,0.97,0.98]),col)
+                # sharp upper lash line: thick at the outer half, with a wing past the outer corner
+                LT=P.get('LASH_T',0.06); th=LT*(0.55+0.9*np.clip((u+0.2)/1.2,0,1))
+                ul=(v>=up-0.012)&(v<up+th)&(u>-1.02)&(u<1.0)
+                wing=(u>=0.92)&(u<1.0+P.get('WING',0.22))&(np.abs(v-(EH*0.05+TILT*0.25+(u-0.92)*P.get('WING_UP',0.55)))<th*np.clip(1-(u-0.92)/(P.get('WING',0.22)+0.08),0,1)*0.9)
+                ll=(v<=lo+0.006)&(v>lo-P.get('LOWLASH_T',0.022))&(np.abs(u)<0.95)
+                lash=ul|wing; col=np.where(lash[...,None],np.array([0.018,0.016,0.02]),col); col=np.where((ll&~lash)[...,None],np.array([0.20,0.17,0.17]),col)
+                a=(inside|lash|ll).astype(np.float32)
+                sl=slice(half*512,half*512+512); tex[:,sl,:3]=col[:,sl]; tex[:,sl,3]=a[:,sl]
+            # soften the alpha edge by 1 px
+            a=tex[:,:,3]; a2=(a+np.roll(a,1,0)+np.roll(a,-1,0)+np.roll(a,1,1)+np.roll(a,-1,1))/5; tex[:,:,3]=np.maximum(a*0.6,a2)
+            dimg=bpy.data.images.new('eye_decal',TW,TH_,alpha=True); dimg.pixels.foreach_set(tex.ravel()); dimg.update(); dimg.pack()
+            try:
+                os.makedirs(OUT+'/tex',exist_ok=True); dimg.filepath_raw=OUT+'/tex/eye_decal.png'; dimg.file_format='PNG'; dimg.save(); dimg.pack()
+            except Exception as e3: log('decal save',e3)
+            _bv3,_V3=mh_bvh(); ipd=MEYE['ipd']; ew=ipd*P.get('EYE_W',0.56); eh=ew*0.5*MARG
+            bmD=bmesh.new(); uvD=bmD.loops.layers.uv.new('UVMap'); NXd,NZd=26,12
+            for half,sx_ in ((0,-1),(1,1)):
+                exx=MEYE['cx']+sx_*ipd/2; x0=exx-ew/2*MARG; x1=exx+ew/2*MARG; z0=MEYE['z']-eh/2+P.get('EYE_ZOFF',0.0); z1=z0+eh
+                g=[[None]*(NXd+1) for _ in range(NZd+1)]
+                for iz in range(NZd+1):
+                    for ix in range(NXd+1):
+                        x=x0+(x1-x0)*ix/NXd; z=z0+(z1-z0)*iz/NZd
+                        h=_bv3.ray_cast(Vector((x,float(b_n['cy']),z)),Vector((0,-1,0)),0.25)
+                        if h[0] is None: continue
+                        g[iz][ix]=bmD.verts.new(h[0]+Vector((0,-P.get('DECAL_OFF',0.0006),0)))
+                for iz in range(NZd):
+                    for ix in range(NXd):
+                        q=(g[iz][ix],g[iz][ix+1],g[iz+1][ix+1],g[iz+1][ix])
+                        if any(v_ is None for v_ in q): continue
+                        f_=bmD.faces.new(q)
+                        for li,(a_,b_) in zip(f_.loops,((ix,iz),(ix+1,iz),(ix+1,iz+1),(ix,iz+1))):
+                            li[uvD].uv=(half*0.5+0.5*a_/NXd,b_/NZd)
+            dm,dnt,db=newmat('EyeDecal'); dt_=dnt.nodes.new('ShaderNodeTexImage'); dt_.image=dimg; dt_.interpolation='Cubic'
+            dnt.links.new(dt_.outputs[0],db.inputs['Base Color']); dnt.links.new(dt_.outputs[1],db.inputs['Alpha'])
+            db.inputs['Roughness'].default_value=0.12; db.inputs['Coat Weight'].default_value=0.8; db.inputs['Coat Roughness'].default_value=0.03
+            try: dm.blend_method='HASHED'
+            except Exception: pass
+            DEC=add_mesh('EyeDecal',bmD,dm,'Head')
+            HF['B_eye_decal']={'tris':tris(DEC),'eye_w':ew,'ipd':ipd,'z':MEYE['z']}; log('eye decal',HF['B_eye_decal'])
+        except Exception as e:
+            import traceback; log('DECAL ERR',repr(e),traceback.format_exc()[-800:])
     KEEP_HAIR=(VARIANT=='C')
     for o in ((FH,globals().get('SCALP')) if KEEP_HAIR else (FH,UM,BUN,CLIP,CRAN,globals().get('SCALP'))):
         if o is not None and o.name in bpy.data.objects: bpy.data.objects.remove(o)
@@ -1449,7 +1635,7 @@ if P['RENDER']:
     def area(name,loc,energy,size,col=(1,1,1)):
         L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
         o.rotation_euler=(Vector((0,0,0.75))-Vector(loc)).to_track_quat('-Z','Y').to_euler(); return o
-    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),P.get('KEY_SIZE',1.6),(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,(0.95,0.93,1)); area('rim',(0.4,2.4,2.0),P.get('RIM_E',220),1.4); area('rim2',(-1.2,2.0,1.4),P.get('RIM2_E',120),1.2)
+    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),P.get('KEY_SIZE',1.6),(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,tuple(P.get('FILL_COL',(0.95,0.93,1)))); area('rim',(0.4,2.4,2.0),P.get('RIM_E',220),1.4,tuple(P.get('RIM_COL',(1,1,1)))); area('rim2',(-1.2,2.0,1.4),P.get('RIM2_E',120),1.2,tuple(P.get('RIM_COL',(1,1,1))))
     if P.get('SPEC_E',90): area('spec',(2.2,-1.0,1.6),P.get('SPEC_E',90),0.5,(1,0.96,0.95))
     cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam
     mn,mx=wbb([o for o in meshes if o.visible_get()])
@@ -1491,7 +1677,7 @@ if P.get('TT'):
     def area(name,loc,energy,size,col=(1,1,1)):
         L=bpy.data.lights.new(name,'AREA'); L.energy=energy; L.size=size; L.color=col; o=bpy.data.objects.new(name,L); sc.collection.objects.link(o); o.location=loc
         o.rotation_euler=(Vector((0,0,0.75))-Vector(loc)).to_track_quat('-Z','Y').to_euler(); o.parent=rig; return o
-    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),P.get('KEY_SIZE',1.6),(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,(0.95,0.93,1)); area('rim',(0.4,2.4,2.0),P.get('RIM_E',220),1.4); area('rim2',(-1.2,2.0,1.4),P.get('RIM2_E',120),1.2)
+    area('key',(-1.6,-2.2,2.0),P.get('KEY_E',190),P.get('KEY_SIZE',1.6),(1,0.93,0.90)); area('fill',(1.8,-1.8,1.2),P.get('FILL_E',70),2.0,tuple(P.get('FILL_COL',(0.95,0.93,1)))); area('rim',(0.4,2.4,2.0),P.get('RIM_E',220),1.4,tuple(P.get('RIM_COL',(1,1,1)))); area('rim2',(-1.2,2.0,1.4),P.get('RIM2_E',120),1.2,tuple(P.get('RIM_COL',(1,1,1))))
     if P.get('SPEC_E',90): area('spec',(2.2,-1.0,1.6),P.get('SPEC_E',90),0.5,(1,0.96,0.95))
     cam=bpy.data.objects.new('cam',bpy.data.cameras.new('cam')); sc.collection.objects.link(cam); sc.camera=cam
     cam.data.lens=85; cam.data.sensor_fit='VERTICAL'; cam.data.sensor_height=24; d=Hh/(24/85)

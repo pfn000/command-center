@@ -3,7 +3,7 @@
  "HAIR_DEC": 1.0,
  "SHORTS_DEC": 1.0,
  "SHORTS_DROP": 0.02,
- "EXPOSURE": -0.28,
+ "EXPOSURE": -0.24,
  "EYE_TEX": "doe 1.png",
  "EYE_ZOOM": 1.3,
  "CURVY": {
@@ -160,17 +160,17 @@
  "MB_HEAD_SCALE": 1.077,
  "ARM_DOWN": 79,
  "ELBOW_BEND": -12,
- "SKIN_ROUGH_ALL": 0.32,
- "SKIN_COAT_ALL": 0.25,
+ "SKIN_ROUGH_ALL": 0.36,
+ "SKIN_COAT_ALL": 0.6,
  "AO_STR": 0.8,
  "AO_DIST": 0.05,
  "WORLD_E": 0.15,
  "KEY_E": 170,
  "KEY_SIZE": 1.8,
- "FILL_E": 12,
+ "FILL_E": 35,
  "RIM_E": 140,
  "RIM2_E": 50,
- "SPEC_E": 0,
+ "SPEC_E": 45,
  "GROUND": true,
  "MB_OUR_HAIR": false,
  "MB_SHARPEN": 0.8,
@@ -210,5 +210,45 @@
   1.04,
   0.97,
   0.92
- ]
+ ],
+ "PANEL_H": 0.13,
+ "THONG_W": [
+  0.62,
+  0.09,
+  0.07,
+  0.11
+ ],
+ "STRING_RISE": 0.06,
+ "BACK_UP": 0.03,
+ "STRAP_XMIN": 0.09,
+ "BOW_S": 1.8,
+ "RIB_UV": true,
+ "RIB_SCALE": 80,
+ "RIB_BUMP": 0.5,
+ "RIB_DARK": 0.75,
+ "AO_COOL": [
+  0.5,
+  0.52,
+  0.6
+ ],
+ "FILL_COL": [
+  0.78,
+  0.86,
+  1.0
+ ],
+ "RIM_COL": [
+  0.92,
+  0.95,
+  1.0
+ ],
+ "SSS_RAD": [
+  0.9,
+  0.65,
+  0.55
+ ],
+ "COAT_R": 0.06,
+ "SKIN_SPEC": 0.5,
+ "IRIS_R": 0.46,
+ "PUPIL": 0.33,
+ "EYE_OPEN": 0.47
 }

@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 50
     strategy:
       fail-fast: false
-      matrix: { variant: [A, B] }
+      matrix: { variant: [A, B, C] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
       - name: SR deps (B face texture)
         run: |
           V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "$V" = "B" ]; then
+          if [ "$V" = "B" ] || [ "$V" = "C" ]; then
             pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
             mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
             curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
@@ -100,7 +100,7 @@ jobs:
       - name: SR deps (B face texture)
         run: |
           V=${VARIANT:-$(head -1 avatar-v3/RUN.txt | cut -d' ' -f2)}
-          if [ "$V" = "B" ]; then
+          if [ "$V" = "B" ] || [ "$V" = "C" ]; then
             pip install -q torch torchvision --index-url https://download.pytorch.org/whl/cpu > /dev/null && pip install -q spandrel > /dev/null
             mkdir -p /tmp/sr && curl -sL -o /tmp/sr/realesr-general-x4v3.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesr-general-x4v3.pth
             curl -sL -o /tmp/sr/RealESRGAN_x4plus.pth https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
