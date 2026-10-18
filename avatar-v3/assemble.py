@@ -2388,9 +2388,11 @@ def hair_blowout_tex():
     if ul is None: r['error']='hair has no UV layer'; rep['hair_texture']=r; return
     nl=len(me.loops); UV=np.empty(nl*2); ul.data.foreach_get('uv',UV); UV=UV.reshape(-1,2); UV0=UV.copy()
     LV=np.empty(nl,dtype=np.int64); me.loops.foreach_get('vertex_index',LV)
-    if 'UV_her_original' not in me.uv_layers:
-        ko=me.uv_layers.new(name='UV_her_original'); ko.data.foreach_set('uv',UV0.ravel())
-    me.uv_layers.active=ul
+    nm_uv=ul.name
+    if 'UV_her_original' not in me.uv_layers: me.uv_layers.new(name='UV_her_original')   # adding a layer invalidates old layer refs: re-fetch by name
+    ul=me.uv_layers[nm_uv]; ko=me.uv_layers['UV_her_original']; ko.data.foreach_set('uv',UV0.ravel()); me.uv_layers.active=ul
+    try: ul.active_render=True
+    except Exception: pass
     # UV islands: loops sharing a vertex at the same UV, plus every loop of a polygon
     key={}; kid=np.empty(nl,dtype=np.int64)
     for i in range(nl):
@@ -2438,7 +2440,7 @@ def hair_blowout_tex():
             UV[L,1]=(V0+V1)-UV[L,1]; flipped+=1
         else: kept+=1
     out_of_card=int(((UV[:,0]<U0)|(UV[:,0]>U1)|(UV[:,1]<V0)|(UV[:,1]>V1)).sum())
-    ul.data.foreach_set('uv',UV.ravel()); me.update()
+    ul=me.uv_layers[nm_uv]; ul.data.foreach_set('uv',UV.ravel()); me.update()
     for s_l in HR.material_slots:
         m=s_l.material
         if not m: continue
