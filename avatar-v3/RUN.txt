@@ -1,1 +1,1 @@
-build B v3.5 run 2: per-texel eye inpaint, face strands cut at the brow, full-width rear panel under one band, neutral form AO; B3 = B with higher-contrast light + dewier coat
+build B v3.5 run 3 (final): decal alpha-mix + head AO local (no veil), bridge inpaint, curtain bang cut, band overlaps the rear panel, B3 light; B4 = no strand cut; B turntable

@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 50
     strategy:
       fail-fast: false
-      matrix: { variant: [A, B, B3] }
+      matrix: { variant: [A, B, B4] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -132,4 +132,4 @@ jobs:
           HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/o',path_in_repo='avatar-v3/runs/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
 # rev 1792298442227465512
 # rev 1792299656280823012
-# rev v3.5-2
+# rev v3.5-3

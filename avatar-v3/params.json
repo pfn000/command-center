@@ -3,7 +3,7 @@
  "HAIR_DEC": 1.0,
  "SHORTS_DEC": 1.0,
  "SHORTS_DROP": 0.02,
- "EXPOSURE": -0.2,
+ "EXPOSURE": -0.08,
  "EYE_TEX": "doe 1.png",
  "EYE_ZOOM": 1.3,
  "CURVY": {
@@ -161,16 +161,16 @@
  "ARM_DOWN": 79,
  "ELBOW_BEND": -12,
  "SKIN_ROUGH_ALL": 0.42,
- "SKIN_COAT_ALL": 0.25,
+ "SKIN_COAT_ALL": 0.35,
  "AO_STR": 0.8,
  "AO_DIST": 0.05,
- "WORLD_E": 0.15,
+ "WORLD_E": 0.1,
  "KEY_E": 170,
- "KEY_SIZE": 1.4,
- "FILL_E": 20,
- "RIM_E": 140,
+ "KEY_SIZE": 0.9,
+ "FILL_E": 12,
+ "RIM_E": 160,
  "RIM2_E": 50,
- "SPEC_E": 8,
+ "SPEC_E": 14,
  "GROUND": true,
  "MB_OUR_HAIR": false,
  "MB_SHARPEN": 0.8,
@@ -216,7 +216,7 @@
   0.62,
   0.09,
   0.07,
-  0.85
+  0.72
  ],
  "STRING_RISE": 0.06,
  "BACK_UP": 0.05,
@@ -245,7 +245,7 @@
   0.65,
   0.55
  ],
- "COAT_R": 0.16,
+ "COAT_R": 0.12,
  "SKIN_SPEC": 0.5,
  "IRIS_R": 0.44,
  "PUPIL": 0.0,
@@ -281,7 +281,7 @@
  "CURL2": 30,
  "CURL3": 20,
  "THUMB_CURL": 16,
- "AO2_STR": 0.5,
+ "AO2_STR": 0.65,
  "AO2_DIST": 0.18,
  "AO2_LO": 0.3,
  "AO2_COL": [
@@ -327,22 +327,28 @@
  "EYE_TILT": 0.1,
  "MB_CROWN_FILL": true,
  "VARIANTS": {
-  "B3": {
+  "B4": {
    "VARIANT_AS": "B",
-   "KEY_SIZE": 0.9,
-   "FILL_E": 12,
-   "WORLD_E": 0.1,
-   "RIM_E": 160,
-   "EXPOSURE": -0.08,
-   "SKIN_COAT_ALL": 0.35,
-   "COAT_R": 0.12,
-   "SPEC_E": 14,
-   "AO2_STR": 0.65
+   "MB_STRAND_CUT": false,
+   "INP_BRIDGE": null
   }
  },
  "STRAP_BACK_XK": 0.86,
- "INP_PCT": 60,
+ "INP_PCT": 50,
  "MB_STRAND_CUT": true,
- "MB_SC_HW": 0.05,
- "MB_SC_ZUP": 0.022
+ "MB_SC_HW": 0.052,
+ "MB_SC_ZUP": 0.01,
+ "DEC_MIX": true,
+ "DEC_COAT": 0.4,
+ "DEC_ROUGH": 0.2,
+ "AO_LOCAL_HEAD": true,
+ "INP_STRAND_TEST": false,
+ "INP_BRIDGE": [
+  0.012,
+  0.026,
+  -0.006
+ ],
+ "MB_SC_CURVE": 0.018,
+ "BAND_BACK_DZ": -0.01,
+ "PANEL_TOP_DZ": 0.006
 }

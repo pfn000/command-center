@@ -521,6 +521,8 @@ def skin_detail(mat,ao=None):
     nt=mat.node_tree; b=[n for n in nt.nodes if n.type=='BSDF_PRINCIPLED'][0]
     lk=[l for l in nt.links if l.to_socket==b.inputs['Base Color']]
     aon=nt.nodes.new('ShaderNodeAmbientOcclusion'); aon.inputs['Distance'].default_value=P.get('AO_DIST',0.05); aon.samples=8
+    _loc=P.get('AO_LOCAL_HEAD',False) and not mat.name.startswith('Skin')
+    if _loc: aon.only_local=True
     mx=nt.nodes.new('ShaderNodeMix'); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs['Factor'].default_value=P.get('AO_STR',0.55) if ao is None else ao
     if lk: src_=lk[0].from_socket; nt.links.remove(lk[0]); nt.links.new(src_,mx.inputs['A'])
     else: mx.inputs['A'].default_value=b.inputs['Base Color'].default_value
@@ -533,6 +535,7 @@ def skin_detail(mat,ao=None):
     if P.get('AO2_STR',0):
         # v3.5 form shading: a second, broad occlusion (abs groove, under-bust, lower back, hip crease, between thighs, knees, jaw) in a soft warm-neutral
         ao2=nt.nodes.new('ShaderNodeAmbientOcclusion'); ao2.inputs['Distance'].default_value=P.get('AO2_DIST',0.2); ao2.samples=8
+        if _loc: ao2.only_local=True
         c2=nt.nodes.new('ShaderNodeValToRGB'); e2=c2.color_ramp.elements; e2[0].position=P.get('AO2_LO',0.35); e2[0].color=(*P.get('AO2_COL',(0.62,0.52,0.52)),1); e2[1].position=1.0; e2[1].color=(1,1,1,1)
         nt.links.new(ao2.outputs['AO'],c2.inputs[0])
         m2=nt.nodes.new('ShaderNodeMix'); m2.data_type='RGBA'; m2.blend_type='MULTIPLY'; m2.inputs['Factor'].default_value=P['AO2_STR']*(1.0 if mat.name.startswith('Skin') else P.get('AO2_HEAD_K',0.5))
@@ -1187,7 +1190,7 @@ if P.get('BOTTOM','thong')=='thong':
         if c is None: continue
         front=th<math.radians(90)
         if front and c.z>zpt: continue
-        if (not front) and c.z>zbt: continue
+        if (not front) and c.z>zbt+P.get('PANEL_TOP_DZ',0.0): continue
         if front: t=max(0,min(1,(zpt-c.z)/max(1e-4,zpt-crz))); hw=FW0+(FW1-FW0)*t**0.75
         else: t=max(0,min(1,(c.z-crz)/max(1e-4,zbt-crz))); hw=BW0+(BW1-BW0)*t**P.get('BACK_POW',1.0)
         row=[cast(hw*(j/3.0-1),th) for j in range(7)]
@@ -1208,7 +1211,7 @@ if P.get('BOTTOM','thong')=='thong':
             if P.get('BAND_V35'):
                 # v3.5: ONE continuous curved band: up over the hip bone, then a gentle curve down to the back panel top (no V / X at the back)
                 tp=P.get('PEAK_T',0.35); R_=P.get('STRING_RISE',0.035)
-                z=zpt+R_*math.sin(min(1,t/tp)*math.pi/2) if t<tp else zpt+R_-(R_-(zbt-zpt))*float(sstep((t-tp)/(1-tp)))
+                zbe=zbt+P.get('BAND_BACK_DZ',0.0); z=zpt+R_*math.sin(min(1,t/tp)*math.pi/2) if t<tp else zpt+R_-(R_-(zbe-zpt))*float(sstep((t-tp)/(1-tp)))
                 sh_=SHt*(1+(P.get('BAND_K',1.0)-1)*float(sstep((t-0.3)/0.5)))
             else:
                 z=zpt+P.get('STRING_RISE',0.035)*math.sin(min(1,t*2)*math.pi/2) - (P.get('STRING_RISE',0.035)-(zbt-zpt))*max(0,t*2-1); sh_=SHt
@@ -1551,7 +1554,8 @@ if VARIANT in ('B','C'):
     if VARIANT=='B' and P.get('MB_STRAND_CUT',False) and MEYE:
         # v3.5: hair strands hanging IN FRONT of the face (over the eyes / nose) are cut at the brow line -> bangs that end above the eyes
         _bvs,_Vs=mh_bvh(); ezS=MEYE['z']; cxS=MEYE['cx']
-        cand=np.where(keep&(V[:,1]<b_n['cy']-0.03)&(np.abs(V[:,0]-cxS)<P.get('MB_SC_HW',0.05))&(V[:,2]>zc_+0.005)&(V[:,2]<ezS+P.get('MB_SC_ZUP',0.022))&((warm_v<0.07)|(lum_v<0.4)))[0]
+        _dx=np.abs(V[:,0]-cxS)/P.get('MB_SC_HW',0.05); zcut=ezS+P.get('MB_SC_ZUP',0.022)+P.get('MB_SC_CURVE',0.0)*np.clip(1-_dx*_dx,0,1)   # curtain bangs: shorter at the centre part
+        cand=np.where(keep&(V[:,1]<b_n['cy']-0.03)&(_dx<1)&(V[:,2]>zc_+0.005)&(V[:,2]<zcut)&((warm_v<0.07)|(lum_v<0.4)))[0]
         cut=np.zeros(len(V),bool)
         for i in cand:
             h=_bvs.ray_cast(Vector(V[i])+Vector((0,0.0015,0)),Vector((0,1,0)),P.get('MB_SC_D',0.04))
@@ -1670,8 +1674,12 @@ if VARIANT in ('B','C'):
                 outer=1 if ex>cxm else -1
                 for (x0_,z0_) in ((ex,ez),ev): ells.append((x0_,z0_,outer))
             AO_,AI_,BZ_=ewm*P.get('INP_AOUT',1.0),ewm*P.get('INP_AIN',0.72),ewm*P.get('INP_B',0.5)
+            BR_=P.get('INP_BRIDGE')   # [ax, bz, dz]: painted hair streaks over the nose bridge / between the eyes
+            cxB=0.5*(MEYE['eyes'][0][0]+MEYE['eyes'][1][0]); ezB=0.5*(MEYE['eyes'][0][1]+MEYE['eyes'][1][1])
             def emask(X,Z):
                 m=np.zeros(X.shape,np.float32)
+                if BR_:
+                    d=np.sqrt(((X-cxB)/BR_[0])**2+((Z-(ezB+BR_[2]))/BR_[1])**2); m=np.maximum(m,1-sstep((d-0.7)/0.4))
                 for (x0_,z0_,outer) in ells:
                     ax=np.where((X-x0_)*outer>0,AO_,AI_); d=np.sqrt(((X-x0_)/ax)**2+((Z-z0_)/BZ_)**2); m=np.maximum(m,1-sstep((d-0.72)/0.38))
                 return m
@@ -1799,10 +1807,19 @@ if VARIANT in ('B','C'):
                             li[uvD].uv=(half*0.5+0.5*a_/NXd,b_/NZd)
             dm,dnt,db=newmat('EyeDecal'); dt_=dnt.nodes.new('ShaderNodeTexImage'); dt_.image=dimg; dt_.interpolation='Cubic'
             dnt.links.new(dt_.outputs[0],db.inputs['Base Color']); dnt.links.new(dt_.outputs[1],db.inputs['Alpha'])
-            db.inputs['Roughness'].default_value=0.12; db.inputs['Coat Weight'].default_value=0.8; db.inputs['Coat Roughness'].default_value=0.03
+            db.inputs['Roughness'].default_value=P.get('DEC_ROUGH',0.12); db.inputs['Coat Weight'].default_value=P.get('DEC_COAT',0.8); db.inputs['Coat Roughness'].default_value=0.03
+            if P.get('DEC_MIX',False):
+                # v3.5 r3: explicit alpha mix (transparent where alpha=0, so no coat sheen/AO veil over the skin around the eyes)
+                _out=[n for n in dnt.nodes if n.type=='OUTPUT_MATERIAL'][0]; _tr=dnt.nodes.new('ShaderNodeBsdfTransparent'); _mx=dnt.nodes.new('ShaderNodeMixShader')
+                for l_ in list(dnt.links):
+                    if l_.to_node==_out: dnt.links.remove(l_)
+                dnt.links.new(dt_.outputs[1],_mx.inputs[0]); dnt.links.new(_tr.outputs[0],_mx.inputs[1]); dnt.links.new(db.outputs[0],_mx.inputs[2]); dnt.links.new(_mx.outputs[0],_out.inputs[0])
             try: dm.blend_method='HASHED'
             except Exception: pass
             DEC=add_mesh('EyeDecal',bmD,dm,'Head')
+            if P.get('DEC_MIX',False):
+                try: DEC.visible_shadow=False; DEC.visible_diffuse=False; DEC.visible_glossy=False; DEC.visible_transmission=False; DEC.visible_volume_scatter=False
+                except Exception as e: log('decal vis',e)
             HF['B_eye_decal']={'tris':tris(DEC),'eye_w':ew,'ipd':ipd,'z':MEYE['z']}; log('eye decal',HF['B_eye_decal'])
         except Exception as e:
             import traceback; log('DECAL ERR',repr(e),traceback.format_exc()[-800:])
