@@ -1,1 +1,1 @@
-v6 proof run r11 (thumb 404, phone caption full row, 3 tool logos out, Liberapay out) 2026-10-18T22:37Z
+v6 r12 proof run (forks / not-her repos removed: AuraVT, LiteVtuber, LocalLLM-iOS, MS-Outlook-MCP, linux + GitHub forks) 2026-10-18T23:37Z

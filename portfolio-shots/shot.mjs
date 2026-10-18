@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 const T0 = Date.now()
-// v6 r11 proof (emmi-thumb 404 fixed, phone caption spans full row, Unity/VRChat/VS Code logos out, Liberapay out of /plex): headline work (Emmi_Official, EmmiCO, worlds), tap-to-explain glass panels, résumé logos, companies, /plex docs page, big legal badge bottom-right; 1600x900 + 390x844, dark + light
+// v6 r12 proof: forks / not-her repos removed (AuraVT, LiteVtuber, LocalLLM-iOS, MS-Outlook-MCP, linux + GitHub forks). Only pages that list repos: home #projects, /projects, /vault; 1600x900 + 390x844, dark + light
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {} }
@@ -15,6 +15,8 @@ async function audit(page) {
     badLinks: [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => /tiktok|twitch|youtube|emmiofficial|vr_emmi|notion\.site|instagram|beacons|linkedin|liberapay|\/arch$|\/nos$/i.test(h)).slice(0, 8),
     oldNos: [...document.images].map((i) => i.getAttribute('src') || '').filter((s) => /nos-|arch-demo|explore-terminal|dev-mama|takeover/.test(s)).slice(0, 8),
     peter: /peter/i.test(document.body.innerText || ''),
+    notMine: [...new Set(((document.body.innerText || '') + ' ' + [...document.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).join(' ')).match(/auravt|lite ?vtuber|localllm|local llm|outlook mcp|ms-outlook|torvalds|pfn000\/(linux|openclaw|claude-code|airi|vitrine)\b|\bvitrine\b/gi) || [])],
+    counts: ((document.body.innerText || '').match(/[0-9]+\s+(public\s+)?(repos|repositories|projects)/gi) || []).slice(0, 6),
     oldEmail: /official_emmi|emmi@outlook/i.test(document.documentElement.outerHTML),
     mailto: [...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')).slice(0, 4),
     cutLogos: [...document.images].map((i) => i.getAttribute('src') || '').filter((x) => /\/logos\/(unity|vrchat|vscode)\.svg/.test(x)).length,
@@ -51,63 +53,43 @@ async function lazyAll(p) {
   await p.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)) } window.scrollTo(0, 0) })
   await p.waitForTimeout(1500)
 }
+
+async function walk(p, k, sel, prefix, maxShots) {
+  const box = await p.evaluate((s) => { const el = document.querySelector(s); if (!el) return null; const r = el.getBoundingClientRect(); return { top: r.top + window.scrollY, h: r.height, vh: window.innerHeight } }, sel)
+  report.checks[`${k}-${prefix}-box`] = box
+  if (!box) { await snap(p, `${k}-${prefix}-missing`); return }
+  let i = 0
+  for (let y = box.top - 10; y < box.top + box.h && i < maxShots; y += box.vh - 80) {
+    await p.evaluate((v) => window.scrollTo(0, v), y); await p.waitForTimeout(700)
+    i++
+    await snap(p, `${k}-${prefix}-${String(i).padStart(2, '0')}`)
+  }
+}
 for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p', 'light']]) {
-  const full = theme === 'dark'
   const { c, p } = await ctx(kind, theme)
   const k = `${kind}-${theme}`
-  await go(p, '/', theme)
-  await snap(p, `${k}-01-home`)
+  await go(p, '/', theme, 3000)
   await lazyAll(p)
-  if (full) await snap(p, `${k}-00-home-full`, { fullPage: true, quality: 55 })
-  for (const [n, sel] of [['01b-about', '#about'], ['02-emmi-official', '#emmi-official'], ['02b-growth', '#growth'], ['02c-smalls', '.pf-smalls'], ['03-emmico', '#emmico'], ['04-worlds', '#worlds'], ['04b-talks', '#talks'], ['05-ncom', '#ncom'], ['05b-ncom-demos', '#nos'], ['06-jena', '#jena'], ['06b-focals', '#focals'], ['06c-moments', '#moments'], ['06d-ouija', '#ouija'], ['07-resume-preview', '#resume'], ['07b-resume-preview-2', '.pf-cv-grid'], ['08-projects', '#projects'], ['09-companies', '#companies'], ['09b-writing', '#writing']]) {
-    if (!full && !['01b-about', '03-emmico', '06b-focals', '07-resume-preview', '09-companies', '09b-writing'].includes(n)) continue
-    await to(p, sel, 10)
-    await snap(p, `${k}-${n}`)
-  }
-  // tap-to-explain: open the first EmmiCO shot's panel
-  await to(p, '#emmico .pf-shot', 30)
-  const btn = await p.$('#emmico .pf-shot .pf-shot-img')
-  if (btn) { await btn.click(); await p.waitForTimeout(900) }
-  const panel = await p.evaluate(() => { const el = document.querySelector('#emmico .pf-shot.open .pf-shot-panel > div'); if (!el) return null; const r = el.getBoundingClientRect(); return { h: Math.round(r.height), w: Math.round(r.width), vw: window.innerWidth, text: el.innerText.slice(0, 120) } })
-  report.checks[`${k}-panel`] = panel
-  await to(p, '#emmico .pf-shot', 30)
-  await snap(p, `${k}-10-panel-open`)
-  // footer badge at the bottom-right
-  await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(1000)
-  report.checks[`${k}-badge`] = await p.evaluate(() => { const i = document.querySelector('.pf-badge'); if (!i) return null; const r = i.getBoundingClientRect(); return { w: Math.round(r.width), right_gap: Math.round(window.innerWidth - r.right), bottom: Math.round(r.bottom), vh: window.innerHeight, docBottomGap: Math.round(document.documentElement.scrollHeight - (r.bottom + window.scrollY)) } })
-  await snap(p, `${k}-11-footer-badge`)
-  // résumé page
-  await go(p, '/resume', theme)
-  await snap(p, `${k}-12-resume`)
-  await to(p, '.pf-job:nth-of-type(2)', 10)
-  await snap(p, `${k}-13-resume-logos`)
-  if (full) { await lazyAll(p); await snap(p, `${k}-12b-resume-full`, { fullPage: true, quality: 55 }) }
-  report.checks[`${k}-resume-logos`] = await p.evaluate(() => [...document.querySelectorAll('.pf-job-logos img')].map((i) => [i.getAttribute('src'), i.naturalWidth]))
-  // plex page
-  if (full) {
-    await go(p, '/plex', theme, 4000)
-    await snap(p, `${k}-14-plex`)
-    await to(p, '#docs', 10)
-    await snap(p, `${k}-15-plex-docs`)
-    // redirects
-    await to(p, '.pf-plex-note', 80)
-    await snap(p, `${k}-14b-plex-note`)
-    for (const slug of ['ai-being-used-wrong', 'future-of-ads']) {
-      await go(p, `/writing/${slug}`, theme, 2500)
-      await snap(p, `${k}-16-article-${slug}`)
-      await p.evaluate(() => window.scrollTo(0, 1400)); await p.waitForTimeout(800)
-      await snap(p, `${k}-16b-article-${slug}`)
-    }
-    await go(p, '/writing', theme, 2000)
-    await snap(p, `${k}-17-writing`)
-    await go(p, '/this-page-does-not-exist', theme, 1500)
-    await snap(p, `${k}-18-404`)
-    await go(p, '/arch', theme, 800)
-    report.checks[`${k}-arch-redirect`] = p.url()
+  report.checks[`${k}-home-repos`] = await p.evaluate(() => ({ cards: [...document.querySelectorAll('#projects article h3, #projects article h2')].map((h) => h.innerText.trim()).slice(0, 40), rest: [...document.querySelectorAll('#projects .pf-rest li b')].map((b) => b.innerText.trim()), kick: (document.querySelector('#projects .pf-kick') || {}).innerText }))
+  await walk(p, k, '#projects', '08-projects', kind === 'p' ? 14 : 8)
+  if (theme === 'dark') { await snap(p, `${k}-00-home-full`, { fullPage: true, quality: 45 }) }
+  await go(p, '/projects', theme, 3000)
+  await lazyAll(p)
+  await p.evaluate(() => { const h = [...document.querySelectorAll('h2,h3')].find((x) => /More on GitHub/.test(x.innerText)); if (h) h.closest('section').id = 'more-gh' })
+  report.checks[`${k}-projects-more`] = await p.evaluate(() => [...document.querySelectorAll('#more-gh li a')].map((a) => a.innerText.trim()).filter(Boolean))
+  await walk(p, k, '#more-gh', '20-projects-more-on-github', 4)
+  await go(p, '/vault', theme, 4000)
+  report.checks[`${k}-vault`] = await p.evaluate(() => ({ head: (document.querySelector('main') || document.body).innerText.slice(0, 400), links: [...document.querySelectorAll('a[href^="/vault/"]')].map((a) => a.getAttribute('href')) }))
+  await snap(p, `${k}-30-vault`)
+  await lazyAll(p)
+  await snap(p, `${k}-30b-vault-full`, { fullPage: true, quality: 45 })
+  for (const r of ['AuraVT', 'LiteVtuber', 'LocalLLM-iOS', 'MS-Outlook-MCP', 'linux']) {
+    if (kind !== 'd' || theme !== 'dark') break
+    const resp = await p.goto(`${B}/vault/${r}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null)
+    report.checks[`vault-${r}`] = resp ? resp.status() : 'noresp'
   }
   await c.close()
 }
-
 // MP4s for Saidie: home scroll-throughs (desktop 1600, phone 390) + a tap-to-explain demo. H.264, faststart, each kept under 1.9 MB.
 function enc(raw, mp4, ss, to, vf, crf) {
   execSync(`ffmpeg -y -loglevel error -ss ${Math.max(0, ss).toFixed(2)} -to ${to.toFixed(2)} -i ${raw} -vf "${vf},fps=24" -c:v libx264 -preset slow -crf ${crf} -pix_fmt yuv420p -movflags +faststart -an ${mp4}`, { timeout: 240000 })
@@ -176,7 +158,7 @@ async function tapVideo() {
 }
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 try { execSync('command -v ffmpeg') } catch { try { execSync('sudo apt-get install -y -q ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)', { stdio: 'inherit', timeout: 240000, shell: '/bin/bash' }) } catch (e) { report.errors.push('ffmpeg install ' + String(e).slice(0, 200)) } }
-for (const job of [() => scrollVideo('d'), () => scrollVideo('p'), () => tapVideo()]) {
+for (const job of [() => scrollVideo('d'), () => scrollVideo('p')]) {
   if (Date.now() - T0 > 470000) { report.errors.push('video skipped: time'); continue }
   await job()
 }
