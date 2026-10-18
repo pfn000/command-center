@@ -1233,6 +1233,24 @@ if P.get('BOTTOM','thong')=='thong':
                 if p.z>lim:
                     q=ring_pt(math.copysign(aa,a) if a!=0 else aa,lim,off)
                     if q is not None: v_.co=q; ncl+=1
+        if P.get('PANEL_EXTEND'):
+            # run 2: the back rows top out below the band at the hip corners -> extra rows from the top back row up to under the band, per column
+            top=[rw for rw,isb in zip(vr,rows_back) if isb]
+            if top:
+                prevr=top[-1]; cols=[]
+                for v_ in prevr:
+                    p=v_.co.copy(); a=math.atan2(p.x,-(p.y-cy)); aa=abs(a); t=max(0.0,min(1.0,(aa-ac)/max(1e-4,math.pi-ac)))
+                    z=zpt+R_*math.sin(min(1,t/tp)*math.pi/2) if t<tp else zpt+R_-(R_-(zbe-zpt))*float(sstep((t-tp)/(1-tp)))
+                    sh_=SHt*(1+(P.get('BAND_K',1.0)-1)*float(sstep((t-0.3)/0.5)))
+                    cols.append((math.copysign(aa,a) if a!=0 else aa,p.z,max(p.z,z-sh_/2+P.get('PANEL_UNDER',0.004))))
+                NX=P.get('PANEL_EXT_N',6); nadd=0
+                for k in range(1,NX+1):
+                    pts=[ring_pt(a_,z0+(z1-z0)*k/NX,off) for a_,z0,z1 in cols]
+                    if any(q is None for q in pts): break
+                    cur=[bmT.verts.new(q) for q in pts]
+                    for j in range(len(cur)-1): bmT.faces.new((prevr[j],prevr[j+1],cur[j+1],cur[j]))
+                    prevr=cur; nadd+=1
+                log('panel extended to band',{'rows':nadd,'dz':[round(c[2]-c[1],4) for c in cols]})
         log('panel clamped to band',ncl)
     bmT.loops.layers.uv.new('UVMap')
     me=bpy.data.meshes.new('Thong'); bmT.to_mesh(me); bmT.free(); TH=bpy.data.objects.new('Thong',me); sc.collection.objects.link(TH)
@@ -1602,6 +1620,23 @@ if VARIANT in ('B','C'):
             for a_,b_ in ev_[ok_[ev_[:,0]]&ok_[ev_[:,1]]]:
                 adj.setdefault(int(a_),[]).append(int(b_)); adj.setdefault(int(b_),[]).append(int(a_))
             lock=np.zeros(len(V_),bool); st=[int(i) for i in np.where(seed)[0]]; lock[st]=True
+            if P.get('MB_LC_MODE','band')=='comp':
+                # run 2: connected pieces of floating strand inside the slab (below brow+ZUP); only those reaching DROP below the eye line
+                # near the face centre are the lock -> the fringe/bang sheet above and beside it is never touched (no holes)
+                st=[]; lock[:]=False; seen_=np.zeros(len(V_),bool); ncomp=0
+                for s0 in np.where(fl)[0]:
+                    if seen_[s0]: continue
+                    comp=[int(s0)]; seen_[s0]=True; q_=[int(s0)]
+                    while q_:
+                        a_=q_.pop()
+                        for b_ in adj.get(a_,()):
+                            if not seen_[b_]: seen_[b_]=True; q_.append(b_); comp.append(b_)
+                    ci=np.array(comp)
+                    if V_[ci,2].min()<ezS-P.get('MB_LC_DROP',0.01) and np.abs(V_[ci,0]-cxS).min()<P.get('MB_LC_SEEDX',0.035):
+                        lo_=ci[V_[ci,2]<ezS-0.004]; xl_,xh_=float(V_[lo_,0].min()),float(V_[lo_,0].max())
+                        w_=P.get('MB_LC_XMARG',0.006)+P.get('MB_LC_XSLOPE',0.4)*np.clip(V_[ci,2]-(ezS-0.004),0,None)
+                        ci=ci[(V_[ci,0]>=xl_-w_)&(V_[ci,0]<=xh_+w_)]; lock[ci]=True; ncomp+=1
+                HF['B_lock_comps']=ncomp
             # x band: seeds' x range (+ margin) widened linearly with height (the lock runs diagonally up to the part)
             if len(st):
                 sx0,sx1=float(V_[seed,0].min()),float(V_[seed,0].max()); mg=P.get('MB_LC_XMARG',0.008); slope=P.get('MB_LC_XSLOPE',0.6)
@@ -1682,7 +1717,7 @@ if VARIANT in ('B','C'):
                 Db=np.zeros_like(BVs); Db[:,0]=(bx-BVs[:,0])*wb; Db[:,1]=(by-BVs[:,1])*wb; wdelta(BODY,Db)
             tt=1-sstep((V[:,2]-zb_)/SH_)
             nr=np.hypot(dx/max(ms['rx'],1e-4),dy_/max(ms['ry'],1e-4))
-            sk=(nr<1.6)&(V[:,2]>zb_-0.004)&(V[:,2]<zb_+SH_)&skin2
+            sk=(nr<1.6)&(V[:,2]>zb_-P.get('MB_SEAM_ZLO',0.004))&(V[:,2]<zb_+SH_)&(skin2|((nr<P.get('MB_SEAM_NR',0.0))&(dy_<0.3*ms['ry'])))
             # scale each point about the neck centre by (target ellipse / Meshy ellipse) along its angle -> keeps the jaw/neck shape, no snapping
             fx=T_['rx']*k_/max(ms['rx'],1e-4); fy=T_['ry']*k_/max(ms['ry'],1e-4)
             nx_=T_['cx']+dx*fx; ny_=T_['cy']+dy_*fy

@@ -161,7 +161,7 @@
  "ARM_DOWN": 79,
  "ELBOW_BEND": -12,
  "SKIN_ROUGH_ALL": 0.42,
- "SKIN_COAT_ALL": 0.22,
+ "SKIN_COAT_ALL": 0.18,
  "AO_STR": 0.8,
  "AO_DIST": 0.05,
  "WORLD_E": 0.1,
@@ -197,7 +197,7 @@
  "STRAP_DA": 0.28,
  "STRAP_XS": 0.1,
  "MB_SEAM": true,
- "MB_SEAM_OUT": 1.005,
+ "MB_SEAM_OUT": 1.0,
  "MB_SEAM_H": 0.02,
  "MB_SR": true,
  "MB_SR_F": 2,
@@ -245,7 +245,7 @@
   0.65,
   0.55
  ],
- "COAT_R": 0.2,
+ "COAT_R": 0.23,
  "SKIN_SPEC": 0.5,
  "IRIS_R": 0.44,
  "PUPIL": 0.0,
@@ -260,7 +260,7 @@
  ],
  "SIDE_SAT": 0.85,
  "FACE_COAT_K": 0.4,
- "MB_COAT_K": 0.3,
+ "MB_COAT_K": 0.28,
  "BOW_V2": true,
  "EYE_WK": 1.2,
  "EYE_TOPK": 0.5,
@@ -327,13 +327,10 @@
  "EYE_TILT": 0.1,
  "MB_CROWN_FILL": true,
  "VARIANTS": {
-  "B5": {
+  "B6": {
    "VARIANT_AS": "B",
-   "MB_LC_ZUP": 0.045,
-   "SKIN_COAT_ALL": 0.15,
-   "COAT_R": 0.26,
-   "MB_COAT_K": 0.25,
-   "SKIN_ROUGH_ALL": 0.46,
+   "MB_LC_ZUP": 0.006,
+   "MB_LC_DROP": 0.005,
    "MB_SEAM_H": 0.035,
    "MB_FLARE_H": 0.06
   }
@@ -358,7 +355,7 @@
  "PANEL_TOP_DZ": 0.03,
  "MB_LOCK_CUT": true,
  "MB_LC_HW": 0.045,
- "MB_LC_ZUP": 0.03,
+ "MB_LC_ZUP": 0.012,
  "MB_LC_ZDN": 0.03,
  "MB_LC_GAP": 0.0025,
  "INP_FRONT_DY": 0.005,
@@ -369,5 +366,13 @@
  "MB_TUCK_PRE": 0.0,
  "MB_TUCK_RAMP": 0.008,
  "PANEL_CLAMP_BAND": true,
- "PANEL_UNDER": 0.004
+ "PANEL_UNDER": 0.004,
+ "MB_LC_MODE": "comp",
+ "MB_LC_DROP": 0.01,
+ "MB_LC_XMARG": 0.006,
+ "MB_LC_XSLOPE": 0.4,
+ "MB_SEAM_ZLO": 0.03,
+ "MB_SEAM_NR": 1.3,
+ "PANEL_EXTEND": true,
+ "PANEL_EXT_N": 6
 }

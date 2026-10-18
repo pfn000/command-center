@@ -1,1 +1,1 @@
-build B v3.6 run 1: lock-only hair cut (normal-aware float test), face-front inpaint by normal + lock footprint, less gloss, seam tuck, panel clamped to band; B5 = higher lock cut + less gloss + longer seam blend; B turntable
+build B v3.6 run 2 (final): lock = floating pieces reaching 1 cm below the eye line, cut at brow+1.2 cm in a narrow x band (no fringe holes); seam tucks the ragged neck tongue + pale front skin; back panel extended up to the band; gloss middle; B6 = cut at brow+0.6 cm, longer seam blend; B turntable
