@@ -31,7 +31,37 @@
    ]
   },
   {
+   "name": "d-dark-01b-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "d-dark-02-emmi-official",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -392,6 +422,17 @@
    "monoLogos": []
   },
   {
+   "name": "d-dark-18-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
    "name": "p-dark-01-home",
    "overflowX": 0,
    "broken": [],
@@ -422,7 +463,37 @@
    ]
   },
   {
+   "name": "p-dark-01b-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
    "name": "p-dark-02-emmi-official",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-growth",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -783,7 +854,33 @@
    "monoLogos": []
   },
   {
+   "name": "p-dark-18-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": []
+  },
+  {
    "name": "d-light-01-home",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-01b-about",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
@@ -940,6 +1037,21 @@
    ]
   },
   {
+   "name": "p-light-01b-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "oldNos": [],
+   "peter": false,
+   "oldEmail": false,
+   "mailto": [],
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
    "name": "p-light-03-emmico",
    "overflowX": 0,
    "broken": [],
@@ -1067,7 +1179,10 @@
    "monoLogos": []
   }
  ],
- "errors": [],
+ "errors": [
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "p-dark: Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
  "checks": {
   "d-dark-panel": {
    "h": 223,
