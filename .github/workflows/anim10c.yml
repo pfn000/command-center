@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 - <<'EOF' >> $GITHUB_OUTPUT
           import json; g=json.load(open('avatar-v3/anim10c/GO.json'))
-          m1=[{'anim':r['anim'],'shard':i,'shards':r['shards'],'samples':r['samples'],'res':r['res'],'data':r['data']} for r in g.get('render',[]) for i in range(r['shards'])]
+          m1=[{'anim':r['anim'],'shard':i,'shards':r['shards'],'samples':r['samples'],'res':r['res'],'data':r['data'],'poses':r.get('poses','')} for r in g.get('render',[]) for i in range(r['shards'])]
           d=g.get('dance'); m2=[{'anim':'dance','shard':i,'shards':d['shards'],'samples':d['samples'],'res':d['res']} for i in range(d['shards'])] if d else []
           print('m1='+json.dumps({'include':m1 or [{'anim':'none'}]})); print('m2='+json.dumps({'include':m2 or [{'anim':'none'}]})); print('dance='+('1' if d else '0')); print('r1='+('1' if m1 else '0'))
           EOF
@@ -72,7 +72,7 @@ jobs:
           pip install -q huggingface_hub > /dev/null
           python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in')); print(d('Saidie000/jena-avatar-assets','${{ matrix.data }}',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
       - name: Frames
-        env: { ANIM: "${{ matrix.anim }}", SHARD: "${{ matrix.shard }}", SHARDS: "${{ matrix.shards }}", SAMPLES: "${{ matrix.samples }}", RES: "${{ matrix.res }}" }
+        env: { ANIM: "${{ matrix.anim }}", SHARD: "${{ matrix.shard }}", SHARDS: "${{ matrix.shards }}", SAMPLES: "${{ matrix.samples }}", RES: "${{ matrix.res }}", POSES: "${{ matrix.poses }}" }
         run: |
           mkdir -p /tmp/out/$ANIM
           timeout -k 10 9600 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/anim10c/anim.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/out/$ANIM /tmp/in/${{ matrix.data }} > /tmp/log.txt 2>&1 || echo "BLENDER EXIT $?"

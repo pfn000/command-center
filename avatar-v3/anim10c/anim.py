@@ -345,16 +345,17 @@ if MODE=='poses2':
             thigh=PB['Left leg'].length; shin=PB['Left knee'].length
             if name.endswith('knee over knee'):
                 la=Vector((LH.x+0.01,LH.y-thigh-0.02,ANK)); ik2('Left leg','Left knee',L_(Vector((LH.x,LH.y-0.01,ANK)),la),LH+Vector((0,-1,0.3)))
-                lk=PB['Left knee'].head.copy(); up=tw.get('cross_up',0.10)
-                rk=Vector((lk.x-0.03,lk.y-0.03,lk.z+up)); rkt=L_(Vector((RH.x,RH.y-0.01,ANK+shin)),rk)
-                ik2('Right leg','Right knee',L_(Vector((RH.x,RH.y-0.01,ANK)),rk+Vector((0.10,-0.05,-shin*0.92))),RH+(rkt-RH)*2+Vector((0,0,0.2)))
-                align('Right ankle',Vector((0.1,-1,-0.6)),cap=40)
+                lk=PB['Left knee'].head.copy(); up=tw.get('cross_up',0.12); fw=tw.get('cross_fw',0.0)
+                rk=Vector((lk.x+0.01,lk.y-0.03-fw,lk.z+up)); ra=rk+Vector((0.08,-0.15-fw,-0.27))
+                ank=L_(Vector((RH.x,RH.y-0.01,ANK)),ra); kn=L_(Vector((RH.x,RH.y-0.3,ANK+shin)),rk)
+                ik2('Right leg','Right knee',ank,kn+(kn-(RH+ank)/2)*1.0)
+                align('Right ankle',Vector((0.15,-0.7,-0.75)),cap=50)
                 lap_hands(lk,PB['Right knee'].head.copy(),tw.get('hand_up',0.0)+0.03)
             elif name.endswith('ankles crossed'):
-                dx=tw.get('spread',0.0)
-                ik2('Left leg','Left knee',L_(Vector((LH.x,LH.y-0.01,ANK)),Vector((0.035+dx,LH.y-thigh-0.10,ANK))),LH+Vector((0.02,-1,0.3)))
-                ik2('Right leg','Right knee',L_(Vector((RH.x,RH.y-0.01,ANK)),Vector((-0.005-dx,LH.y-thigh-0.15,ANK+0.035))),RH+Vector((-0.02,-1,0.3)))
-                align('Right ankle',Vector((0.15,-1,-0.55)),cap=40)
+                sp=tw.get('spread',0.0)
+                ik2('Left leg','Left knee',L_(Vector((LH.x,LH.y-0.01,ANK)),Vector((-0.025,LH.y-thigh-0.08,ANK))),LH+Vector((-0.02,-1,0.3)))
+                ik2('Right leg','Right knee',L_(Vector((RH.x,RH.y-0.01,ANK)),Vector((0.035,LH.y-thigh-0.13-2*sp,ANK+0.045+sp))),RH+Vector((0.02,-1,0.3)))
+                align('Right ankle',Vector((0.1,-0.8,-0.6)),cap=40)
                 lap_hands(PB['Left knee'].head.copy(),PB['Right knee'].head.copy(),tw.get('hand_up',0.0))
             else:
                 dx=tw.get('spread',0.0)
@@ -382,7 +383,7 @@ if MODE=='poses2':
         upd(); return e
     meshes_eval(True); relaxed(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z; ctr=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,mn.z+0.5*Hh))
     cams={'front':(ctr,0,3,(Hh+0.14)/(24/50),50),'q34':(ctr,-35,3,(Hh+0.14)/(24/50),50)}
-    seq=[0.0,0.3,0.6,0.85,1.0]; mine=[i for i in range(len(NAMES)) if i%SHN==SH]
+    seq=[0.0,0.3,0.6,0.85,1.0]; ONLYP=[int(x) for x in (E.get('POSES') or '0,1,2,3,4,5').split(',')]; mine=[i for i in ONLYP if ONLYP.index(i)%SHN==SH]
     for pi in mine:
         nm=NAMES[pi]; tw={}; best=None
         # tune: raise the crossing leg / spread / lift hands until no intersection (her own mesh vs itself)
@@ -393,8 +394,8 @@ if MODE=='poses2':
             if best is None or bad+armb<best[0]: best=(bad+armb,dict(tw),fl)
             if bad==0 and armb==0: break
             if bad: 
-                if 'knee over' in nm: tw['cross_up']=tw.get('cross_up',0.10)+0.02
-                else: tw['spread']=tw.get('spread',0.0)+0.015
+                if 'knee over' in nm: tw['cross_up']=tw.get('cross_up',0.12)+0.02; tw['cross_fw']=tw.get('cross_fw',0.0)+0.015
+                else: tw['spread']=tw.get('spread',0.0)+0.012
             if armb: tw['hand_up']=tw.get('hand_up',0.0)+0.015; tw['out']=tw.get('out',0.0)+0.01; tw['back']=tw.get('back',0.0)+0.01
         tw=best[1]; info['frames'][f'p{pi}']={'pose':nm,'tune':tw,'flags':best[2],'tune_iters':it+1}
         for k,a_ in enumerate(seq):
