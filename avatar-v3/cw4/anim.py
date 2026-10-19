@@ -896,6 +896,28 @@ elif MODE=='dance2':
     PMIN=float(E.get('HEAD_PITCH_MIN','3.0'))   # chin never below level+3 deg, so her bangs don't hide her face
     rest(); HEAD0=PB['Head'].matrix.to_3x3().copy(); _tf=(PB['Left toe'].tail-PB['Left ankle'].head); _tf.z=0; HEADF0=_tf.normalized()
     log('head fwd0 (arm space, from the feet)',[round(x,3) for x in HEADF0])
+    SEG_GAIN={'chest':float(E.get('CHEST_GAIN','1.0'))}
+    def clavicles():
+        # loose shoulders: each clavicle lifts with its arm (0.3 x elevation past 40 deg, <=18 deg)
+        for sd in ('Left','Right'):
+            n=sd+' shoulder'
+            if n not in PB: continue
+            ad=(PB[sd+' elbow'].head-PB[sd+' arm'].head).normalized(); el=math.degrees(math.asin(max(-1,min(1,ad.z))))+90.0
+            lift=max(0.0,min(18.0,0.3*(el-40.0)))
+            if lift<0.5: continue
+            ax=(PB[n].tail-PB[n].head).normalized().cross(Vector((0,0,1)))
+            if ax.length<1e-5: continue
+            ax.normalize(); z0=PB[sd+' arm'].head.z; wrot_v(n,lift,ax)
+            if PB[sd+' arm'].head.z<z0: wrot_v(n,-2*lift,ax)
+    def seg_rec(f,w_=None):
+        # segment angles (deg) for the STIFF detector: hips yaw/roll, chest yaw/roll, shoulders (L/R elevation vs chest), neck pitch/roll, head
+        def yr(v): return (math.degrees(math.atan2(v.y,v.x)),math.degrees(math.asin(max(-1,min(1,v.z/max(v.length,1e-6))))))
+        hl=PB['Left leg'].head-PB['Right leg'].head; sl=PB['Left arm'].head-PB['Right arm'].head; ms_=(PB['Left arm'].head+PB['Right arm'].head)/2
+        nk=PB['Head'].head-ms_; sh_=(PB['Left arm'].head.z-ms_.z,PB['Right arm'].head.z-ms_.z)
+        J={'hips':yr(hl),'chest':yr(sl),'shoulders':(sh_[0]*100,sh_[1]*100),'neck':yr(Vector((nk.y,nk.x,nk.z)))}
+        w_=FR[f]; LH_,RH_,LS_,RS_=L(w_,23),L(w_,24),L(w_,11),L(w_,12); ms2=(LS_+RS_)/2; em=(L(w_,7)+L(w_,8))/2; nk2=em-ms2
+        S={'hips':yr(LH_-RH_),'chest':yr(LS_-RS_),'shoulders':((LS_.z-ms2.z)*100,(RS_.z-ms2.z)*100),'neck':yr(Vector((nk2.y,nk2.x,nk2.z)))}
+        return {k:[round(x,2) for x in v] for k,v in J.items()},{k:[round(x,2) for x in v] for k,v in S.items()}
     def pelvis_rec(f):
         # her pelvis: yaw/roll of the hip line (deg) + hips position (cm) ; the source's hip line yaw/roll + mid-hip relative to the mid-ankle (cm)
         hl=PB['Left leg'].head-PB['Right leg'].head; hp=(PB['Left leg'].head+PB['Right leg'].head)/2; an=(PB['Left ankle'].head+PB['Right ankle'].head)/2
@@ -949,7 +971,7 @@ elif MODE=='dance2':
         return SRCH[0]
     def head_follow(f):
         # pitch = a lifted base (PMIN+5) plus the source's own nod about its median; never below PMIN. roll/yaw stay as the ears drove them.
-        sh_=src_head(); nod=max(-25.0,min(25.0,float(sh_['pitch'][f])-sh_['pmed'])); tgt=max(PMIN,PMIN+6.0+nod)
+        sh_=src_head(); nod=max(-40.0,min(40.0,float(sh_['pitch'][f])-sh_['pmed'])); tgt=max(-8.0,PMIN+6.0+nod)   # 1.0x the source nod; floor -8 deg = only where bangs would hide her face
         for _ in range(3):
             p_,f_=head_pitch(); need=tgt-p_
             if abs(need)<0.1: break
@@ -1014,13 +1036,18 @@ elif MODE=='dance2':
         rest(); fingers_relaxed()
         w=FR[f]; G=lambda i: L(w,i)
         LS,RS,LH,RH=G(11),G(12),G(23),G(24); mh=(LH+RH)/2; ms=(LS+RS)/2; upt=(ms-mh)
-        Rh=frame_rot(LH-RH,Vector((0,0,1)).lerp(upt.normalized(),0.6)); set_world_rot('Hips',Rh)   # dance3: pelvis follows the source hip line fully, no per-frame cap
-        d0=(PB['Spine'].tail-PB['Spine'].head).normalized(); q=d0.rotation_difference(upt.normalized())
-        qrot('Spine',q,0.5,60); qrot('Chest',q,0.5,60)
-        sl=(LS-RS); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
-        tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-50,min(50,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
-        _sh=src_head(); e7=Vector(tuple(_sh['e7'][f])); e8=Vector(tuple(_sh['e8'][f])); ear=(e7+e8)/2; Rhd=frame_rot(e7-e8,n_.lerp((ear-ms).normalized(),0.6))   # 5-frame smoothed ears (no jitter overshoot)
-        set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_follow(f)
+        # dance3 #10 (Saidie 11:17 "hips and head still stiff"): pelvis 1.15x the source roll, spine chain pelvis->lumbar->thoracic->neck->head with 2-4 frame overlap
+        hlx=(LH-RH); hlx.z*=1.15
+        Rh=frame_rot(hlx,Vector((0,0,1)).lerp(upt.normalized(),0.6)); set_world_rot('Hips',Rh)
+        wl=FR[max(0,f-2)]; LSl,RSl=L(wl,11),L(wl,12); msl=(LSl+RSl)/2; uptl=(msl-(L(wl,23)+L(wl,24))/2)   # chest/shoulders lag the hips by 2 frames (overlap / follow-through)
+        d0=(PB['Spine'].tail-PB['Spine'].head).normalized(); q=d0.rotation_difference(upt.normalized()); ql=d0.rotation_difference(uptl.normalized())
+        qrot('Spine',q,0.40,60); qrot('Chest',ql,0.60,60)
+        sl=(LSl-RSl); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
+        tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-55,min(55,tw*SEG_GAIN['chest'])); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
+        _sh=src_head(); fh_=max(0,f-3); e7=Vector(tuple(_sh['e7'][fh_])); e8=Vector(tuple(_sh['e8'][fh_]));   # head lags 3 frames
+        ear=(e7+e8)/2; Rhd=frame_rot(e7-e8,n_.lerp((ear-ms).normalized(),0.6))   # 5-frame smoothed ears (no jitter overshoot)
+        set_world_rot('Neck',Rhd,0.4,25); set_world_rot('Head',Rhd,1.0,40); head_follow(max(0,f-3))
+        clavicles()
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
             if ABD is not None:
@@ -1045,6 +1072,11 @@ elif MODE=='dance2':
                 S0=PB[sd+' leg'].head; reach=(PB[sd+' leg'].length+PB[sd+' knee'].length)*0.985
                 need=max(need,(lk[0]-S0).length-reach)
             if need>0: hip_drop(-min(need*1.2,0.15))
+            lk_=[sd for sd in ('Left','Right') if locks[sd][f] is not None and locks[sd][f][1]>0.99]
+            if len(lk_)==1:   # weight shift: the free side's hip drops ~4 deg (loaded leg takes the weight)
+                fr_=('Right' if lk_[0]=='Left' else 'Left'); fwd_=(PB['Left leg'].head-PB['Right leg'].head).cross(Vector((0,0,1))).normalized()
+                z0=PB[fr_+' leg'].head.z; wrot_v('Hips',4.0,fwd_)
+                if PB[fr_+' leg'].head.z>z0: wrot_v('Hips',-8.0,fwd_)
             for sd in ('Left','Right'):
                 lk=locks[sd][f]
                 if lk is None: continue
@@ -1082,6 +1114,10 @@ elif MODE=='dance2':
         offs.append([off.x,off.y,dz]); prev=(s,Vector((ball.x+off.x,ball.y+off.y,0))); stance.append(s)
     zz=np.array([o[2] for o in offs]); zs=np.convolve(np.pad(zz,2,mode='edge'),np.ones(5)/5,mode='valid'); zs=np.maximum(zs,zz)
     for i in range(NF): offs[i][2]=float(zs[i])
+    # hips 1.15x the source sway: horizontal root offsets scaled about their 1 s moving mean (no extra smoothing on the pelvis)
+    _ox=np.array([o[0] for o in offs]); _oy=np.array([o[1] for o in offs]); _k=np.ones(31)/31
+    _mx=np.convolve(np.pad(_ox,15,mode='edge'),_k,mode='valid'); _my=np.convolve(np.pad(_oy,15,mode='edge'),_k,mode='valid')
+    for i in range(NF): offs[i][0]=float(_mx[i]+1.15*(_ox[i]-_mx[i])); offs[i][1]=float(_my[i]+1.15*(_oy[i]-_my[i]))
     # 3) planted-foot spans: foot on the floor (<=12 mm) and slow (<0.35 m/s) for >=3 frames, or V4 says contact -> ankle IK-locked
     H_={sd:[] for sd in FOOT}; P_={sd:[] for sd in FOOT}; Y_={sd:[] for sd in FOOT}
     for f in range(NF):
@@ -1346,7 +1382,7 @@ elif MODE=='dance2':
                     e.setdefault('foot_tilt_steps',{})[sd]=k
                 a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
                 e.setdefault('feet',{})[sd]=fs
-            e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); e['pelvis']=pelvis_rec(f); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
+            e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); e['pelvis']=pelvis_rec(f); e['seg'],e['src_seg']=seg_rec(f); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
             meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]

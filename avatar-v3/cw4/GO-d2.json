@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance3 #9: planted foot rolls onto its edge (no pivot) + re-grounded; body self-model per frame (qc flags + 9-view QC on close-up frames) (15:16:01)"
+ "note": "dance3 #10: spine chain with 2-3 frame overlap (chest/head lag), loose clavicles, hips 1.15x roll+sway, free-side hip drop, nod 1.0x (floor -8), planted ankle edge roll, self-model per frame + segment STIFF data (15:22:33)"
 }
