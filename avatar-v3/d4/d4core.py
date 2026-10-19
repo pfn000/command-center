@@ -32,17 +32,28 @@ def hpyr(Dm):
     return (math.degrees(math.asin(max(-1,min(1,y_.z)))), math.degrees(math.atan2(-y_.x,y_.y)), math.degrees(math.asin(max(-1,min(1,x_.z)))))
 DV=DV_LM; HEAD_SRC='landmarks (ears, nose) from the 33-point body track'
 if FACE is not None:
-    Mmp=Matrix(((1,0,0),(0,0,1),(0,-1,0))); best=None
-    for nm,S_ in (('flipYZ',Matrix(((1,0,0),(0,-1,0),(0,0,-1)))),('flipXY',Matrix(((-1,0,0),(0,-1,0),(0,0,1)))),('flipXZ',Matrix(((-1,0,0),(0,1,0),(0,0,-1)))),('none',Matrix.Identity(3))):
-        A_=Mc@Mmp@S_; HF=[A_@Quaternion(FACE['q'][k].tolist()).to_matrix() for k in range(NF)]
-        dv=_dev([CS[k].transposed()@HF[k] for k in range(NF)])
-        err=float(np.mean([math.degrees((dv[k]@DV_LM[k].transposed()).to_quaternion().angle) for k in range(NF) if FACE['ok'][k]]))
-        cor=[np.corrcoef([hpyr(dv[k])[j] for k in range(NF)],[hpyr(DV_LM[k])[j] for k in range(NF)])[0,1] for j in range(3)]
-        log('D4 face-matrix axes',nm,'mean angle vs landmark head (deg)',round(err,1),'corr p/y/r',[round(float(c),2) for c in cor])
-        if best is None or err<best[0]: best=(err,nm,dv,cor)
-    if best[0]<35.0:
-        DV=[best[2][k] if FACE['ok'][k] else DV_LM[k] for k in range(NF)]; HEAD_SRC=f'MediaPipe face transform matrix ({best[1]}), landmark head where no face'
-    info['d4_face_axes']={'chosen':best[1],'mean_deg_vs_landmarks':round(best[0],1),'corr_pyr':[round(float(c),2) for c in best[3]],'used':HEAD_SRC}
+    # camera metric space (x right, y up, z toward camera) -> pose world (x right, y down, z away) = flip Y,Z; then mp2b and the level correction.
+    # Checked on this clip (Oct 19): the face matrix's left axis tilts with the ear line in the image (corr 0.94, same mean). The 3D body-marker
+    # head is the weak one (its ear depth is noisy: roll range 17 deg vs 55 deg in the image), so the face matrix leads.
+    A_=Mc@Matrix(((1,0,0),(0,0,1),(0,-1,0)))@Matrix(((1,0,0),(0,-1,0),(0,0,-1)))
+    HF=[A_@Quaternion(FACE['q'][k].tolist()).to_matrix() for k in range(NF)]
+    DVF=_dev([CS[k].transposed()@HF[k] for k in range(NF)])
+    okf=[bool(x) for x in FACE['ok']]; DV=list(DVF); gaps=[]; s_=None
+    for k in range(NF):
+        if not okf[k] and s_ is None: s_=k
+        if okf[k] and s_ is not None: gaps.append((s_,k-1)); s_=None
+    if s_ is not None: gaps.append((s_,NF-1))
+    for a_,b_ in gaps:
+        # where no face was found: the face rotation slerped across the gap, plus the body-marker head's own motion inside the gap
+        L0=a_-1 if a_>0 else None; L1=b_+1 if b_<NF-1 else None
+        for k in range(a_,b_+1):
+            if L0 is not None and L1 is not None:
+                t_=(k-L0)/(L1-L0); base=DV_LM[L0].to_quaternion().slerp(DV_LM[L1].to_quaternion(),t_).to_matrix()
+            else: base=DV_LM[L1 if L0 is None else L0]
+            DV[k]=(DV_LM[k]@base.transposed())@DVF[k]
+    ag=[float(np.corrcoef([hpyr(DVF[k])[j] for k in range(NF) if okf[k]],[hpyr(DV_LM[k])[j] for k in range(NF) if okf[k]])[0,1]) for j in range(3)]
+    HEAD_SRC=f'MediaPipe face transform matrix on {sum(okf)}/{NF} frames; {NF-sum(okf)} frames in {len(gaps)} gaps bridged (slerp + body-marker head detail)'
+    info['d4_face_axes']={'mapping':'flipYZ (camera -> pose world)','gaps':gaps,'corr_vs_bodymarker_head_pyr':[round(a,2) for a in ag],'used':HEAD_SRC}
 SRC_HPYR=np.array([hpyr(d) for d in DV]); log('D4 HEAD source',HEAD_SRC,'ranges p/y/r',[round(float(np.ptp(SRC_HPYR[:,j])),1) for j in range(3)])
 HEAD_SPLIT=(0.30,0.30,0.40)
 def head_drive(f):
