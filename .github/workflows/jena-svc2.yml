@@ -1,0 +1,46 @@
+name: jena-svc2
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go2.txt']
+jobs:
+  svc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [m3a,m3b,m5a,m5b,m7a,m7b]
+    env:
+      HF: ${{ secrets.AV2_HF_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone --depth 1 https://github.com/Plachtaa/seed-vc.git sv
+          pip install -q torch==2.4.0 torchaudio==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cpu
+          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url|gradio|FreeSimpleGUI|sounddevice)' sv/requirements.txt > req.txt
+          pip install -q -r req.txt huggingface_hub
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          for f in ['voice-lab/svc/in/${{ matrix.chunk }}.flac','voice-lab/svc/in/ref.mp3']:
+              hf_hub_download('Saidie000/jena-avatar-assets',f,repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/svc/in/${{ matrix.chunk }}.flac -ar 44100 -ac 1 src.wav
+      - name: convert
+        run: |
+          cd sv
+          python inference.py --source ../src.wav --target ../voice-lab/svc/in/ref.mp3 --output ../out --diffusion-steps 30 --length-adjust 1.0 --inference-cfg-rate 0.7 --f0-condition True --auto-f0-adjust False --semi-tone-shift 0 --fp16 False 2>&1 | grep -v -i warn | tail -25
+          ls ../out
+      - name: upload
+        run: |
+          f=$(ls out/*.wav | head -1); ffmpeg -nostdin -v error -i "$f" -c:a flac ${{ matrix.chunk }}-svc.flac
+          python - <<'EOF'
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_file(path_or_fileobj='${{ matrix.chunk }}-svc.flac',path_in_repo='voice-lab/svc/out/${{ matrix.chunk }}-svc.flac',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='svc out ${{ matrix.chunk }}')
+          EOF
