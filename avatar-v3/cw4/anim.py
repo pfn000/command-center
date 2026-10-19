@@ -905,6 +905,36 @@ elif MODE=='dance2':
             ax=f_.cross(Vector((0,0,1)))
             if ax.length<1e-5: return
             ax.normalize(); need=PMIN-p_; wrot_v('Neck',need*0.4,ax); wrot_v('Head',need*0.6,ax)
+    SRCH=[None]
+    def src_head():
+        # source dancer's head per frame, from her ears and nose: roll (ear line tilt), yaw (ear line heading), pitch (ears->nose), 5-frame smoothed
+        if SRCH[0] is None:
+            R_=[];Y_=[];P__=[]
+            for w_ in FR:
+                e7=L(w_,7); e8=L(w_,8); nz=L(w_,0); lat=e7-e8; em=(e7+e8)/2; fw=nz-em
+                R_.append(math.degrees(math.asin(max(-1,min(1,lat.z/max(lat.length,1e-6))))))
+                Y_.append(math.degrees(math.atan2(lat.y,lat.x)))
+                P__.append(math.degrees(math.atan2(fw.z,math.hypot(fw.x,fw.y))))
+            def sm(a):
+                a=np.array(a,dtype=float); a=np.unwrap(np.radians(a)); a=np.degrees(a); k_=np.ones(5)/5; pad=np.pad(a,2,mode='edge'); return np.convolve(pad,k_,mode='valid')
+            R_,Y_,P__=sm(R_),sm(Y_),sm(P__)
+            SRCH[0]=dict(roll=R_,yaw=Y_-float(np.median(Y_)),pitch=P__,pmed=float(np.median(P__)))
+            log('source head ranges roll',round(float(R_.min()),1),round(float(R_.max()),1),'yaw',round(float(SRCH[0]['yaw'].min()),1),round(float(SRCH[0]['yaw'].max()),1),'pitch',round(float(P__.min()),1),round(float(P__.max()),1),'median pitch',round(SRCH[0]['pmed'],1))
+        return SRCH[0]
+    def head_follow(f):
+        # pitch = a lifted base (PMIN+5) plus the source's own nod about its median; never below PMIN. roll/yaw stay as the ears drove them.
+        sh_=src_head(); nod=max(-15.0,min(15.0,float(sh_['pitch'][f])-sh_['pmed'])); tgt=max(PMIN,PMIN+5.0+nod)
+        for _ in range(3):
+            p_,f_=head_pitch(); need=tgt-p_
+            if abs(need)<0.1: break
+            ax=f_.cross(Vector((0,0,1)))
+            if ax.length<1e-5: break
+            ax.normalize(); wrot_v('Neck',need*0.4,ax); wrot_v('Head',need*0.6,ax)
+        return tgt
+    def head_rpy():
+        Rd=PB['Head'].matrix.to_3x3()@HEAD0.inverted(); f_=Rd@HEADF0; lat0=Vector((0,0,1)).cross(HEADF0).normalized(); l_=Rd@lat0
+        yaw=math.degrees(math.atan2(f_.y,f_.x)-math.atan2(HEADF0.y,HEADF0.x)); yaw=(yaw+180)%360-180
+        return round(math.degrees(math.asin(max(-1,min(1,l_.z)))),1),round(yaw,1),round(math.degrees(math.asin(max(-1,min(1,f_.z)))),1)
     def set_rot(n,R):
         if n not in PB: return
         q=(R@PB[n].matrix.to_3x3().inverted()).to_quaternion(); qrot(n,q)
@@ -964,7 +994,7 @@ elif MODE=='dance2':
         sl=(LS-RS); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
         tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-35,min(35,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
         ear=(G(7)+G(8))/2; Rhd=frame_rot(G(7)-G(8),n_.lerp((ear-ms).normalized(),0.6))
-        set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_up()
+        set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_follow(f)
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
             if ABD is not None:
@@ -1238,7 +1268,7 @@ elif MODE=='dance2':
                     e.setdefault('foot_tilt_steps',{})[sd]=k
                 a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
                 e.setdefault('feet',{})[sd]=fs
-            e['head_pitch_deg']=round(head_pitch()[0],1)
+            e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
             meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
