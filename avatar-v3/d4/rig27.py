@@ -23,6 +23,21 @@ def _rig27():
                 p=M_@v.co; u=(p-h).dot(d)/L2; x=min(1.0,max(0.0,(u-0.25)/0.5)); s=x*x*(3-2*x)
                 g.add([v.index],w*(1-s),'REPLACE'); gh.add([v.index],w*s,'REPLACE'); n+=1
             wlog[f'{o.name}:{lo}->{hi}']=n
+    # 1b) upper-arm twist bones (deforming): the shoulder end of each upper arm follows a bone that takes the arm's swing but only half its twist
+    for o in [o for o in bpy.data.objects if o.type=='MESH' and any(m.type=='ARMATURE' and m.object==arm for m in o.modifiers)]:
+        M_=AWi@o.matrix_world; vgs=o.vertex_groups
+        for sd,s_ in (('Left','L'),('Right','R')):
+            g=vgs.get(sd+' arm')
+            if g is None: continue
+            gt=vgs.get('UpperArm_Twist.'+s_) or vgs.new(name='UpperArm_Twist.'+s_); h,t=bl[sd+' arm']; d=t-h; L2=max(d.length_squared,1e-9); n=0; gi=g.index
+            for v in o.data.vertices:
+                w=None
+                for ge in v.groups:
+                    if ge.group==gi: w=ge.weight; break
+                if not w: continue
+                p=M_@v.co; u=(p-h).dot(d)/L2; x=min(1.0,max(0.0,(u-0.05)/0.5)); s=1.0-x*x*(3-2*x)
+                g.add([v.index],w*(1-s),'REPLACE'); gt.add([v.index],w*s,'REPLACE'); n+=1
+            wlog[f'{o.name}:{sd} arm->UpperArm_Twist.{s_}']=n
     log('RIG27 weight split (verts per mesh/bone)',wlog)
     # 2) mesh landmarks for the feet: heel, ball, toe tip from her real foot verts (dominant group ankle/toe)
     FEETP={}
@@ -50,6 +65,8 @@ def _rig27():
         n=eb.new(hi); n.head=m; n.tail=t; n.roll=b.roll; n.use_deform=True; n.parent=b; n.use_connect=False
         for c in kids: c.use_connect=False; c.parent=n
         b.tail=m
+    for sd,s_ in (('Left','L'),('Right','R')):
+        a=eb[sd+' arm']; n=eb.new('UpperArm_Twist.'+s_); n.head=a.head.copy(); n.tail=(a.head+a.tail)/2; n.roll=a.roll; n.use_deform=True; n.parent=a.parent; n.use_connect=False
     hp=eb['Hips']; LL=eb['Left leg'].head.copy(); RL=eb['Right leg'].head.copy(); mid=(LL+RL)/2
     for nm,tl,leg in (('Hip_L',LL,'Left leg'),('Hip_R',RL,'Right leg')):
         n=eb.new(nm); n.head=mid.copy(); n.tail=tl.copy(); n.use_deform=False; n.parent=hp; eb[leg].use_connect=False; eb[leg].parent=n
@@ -72,8 +89,9 @@ def _rig27():
 FEETP=_rig27(); PB=B.pose.bones
 RIG27_DRIVEN={
  'mocap':['Hips','Spine','Spine2','Chest','UpperChest','Neck','Neck2','Head']+[f'{sd} {n}' for sd in ('Left','Right') for n in ('shoulder','arm','elbow','wrist','leg','knee','ankle')],
- 'derived':['Wrist_Twist.L','Wrist_Twist.R','Left toe','Right toe','Hip_L','Hip_R','Sacrum','Sternum','Heel_L','Heel_R','Ball_L','Ball_R']}
+ 'derived':['Wrist_Twist.L','Wrist_Twist.R','UpperArm_Twist.L','UpperArm_Twist.R','Left toe','Right toe'],
+ 'markers':['Hip_L','Hip_R','Sacrum','Sternum','Heel_L','Heel_R','Ball_L','Ball_R']}
 RIG27_DRIVEN['derived']=[n for n in RIG27_DRIVEN['derived'] if n in PB]; RIG27_DRIVEN['mocap']=[n for n in RIG27_DRIVEN['mocap'] if n in PB]
 RIG27_BODY=RIG27_DRIVEN['mocap']+RIG27_DRIVEN['derived']
-log('RIG27 BODY BONES',len(RIG27_BODY),'mocap-driven',len(RIG27_DRIVEN['mocap']),RIG27_DRIVEN['mocap'],'derived',len(RIG27_DRIVEN['derived']),RIG27_DRIVEN['derived'],
+log('RIG27 BODY BONES',len(RIG27_BODY),'mocap-driven',len(RIG27_DRIVEN['mocap']),RIG27_DRIVEN['mocap'],'derived',len(RIG27_DRIVEN['derived']),RIG27_DRIVEN['derived'],'non-deforming markers (not counted)',RIG27_DRIVEN['markers'],
     'fingers',len([b.name for b in PB if any(b.name.startswith(x) for x in ('Thumb','Index','Middle','Ring','Little'))]),'all bones',len(PB))

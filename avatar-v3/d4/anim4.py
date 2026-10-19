@@ -943,6 +943,20 @@ elif MODE=='dance2':
                 elif m_.any(): a_[m_]=np.interp(np.flatnonzero(m_),np.flatnonzero(~m_),a_[~m_])
                 A[j]=np.clip(a_ if D4 else _sm5(a_),3.0,95.0)
             FCURL[(_sd,_fn)]=A
+    if D4:
+        # D5 hands: a relaxed hand moves its fingers together (each long finger 50% toward the four-finger mean: no spider splay),
+        # never flatter than a resting hand (MCP>=15, PIP>=20, DIP>=10; thumb >=8), and a light zero-phase smoothing (sigma 1 frame) against flicker
+        _K5=np.array([0.054,0.244,0.404,0.244,0.054])
+        def _gf5(a,s,mode=None): return np.convolve(np.pad(np.asarray(a,float),2,mode='edge'),_K5,'valid')
+        LONG5=('IndexFinger','MiddleFinger','RingFinger','LittleFinger'); FLOOR5=(15.0,20.0,10.0)
+        for _sd in ('Left','Right'):
+            if not all((_sd,f_) in FCURL for f_ in LONG5): continue
+            for j in range(3):
+                Mn=np.mean([np.asarray(FCURL[(_sd,f_)][j],float) for f_ in LONG5],axis=0)
+                for f_ in LONG5:
+                    a_=0.5*np.asarray(FCURL[(_sd,f_)][j],float)+0.5*Mn; FCURL[(_sd,f_)][j]=np.maximum(_gf5(a_,1.0,mode='nearest'),FLOOR5[j])
+            if (_sd,'Thumb') in FCURL:
+                for j in range(3): FCURL[(_sd,'Thumb')][j]=np.maximum(_gf5(np.asarray(FCURL[(_sd,'Thumb')][j],float),1.0,mode='nearest'),8.0)
     log('tracking: finger curl means (deg)',{f'{k[0][0]}{k[1][:3]}':[round(float(np.mean(x)),1) for x in v] for k,v in FCURL.items()})
     _ms3=(_W3[:,11]+_W3[:,12])/2; _hm3=(_W3[:,23]+_W3[:,24])/2; _up3=_ms3-_hm3; _up3=_up3/np.linalg.norm(_up3,axis=1)[:,None]
     SHRUG={}
@@ -999,6 +1013,36 @@ elif MODE=='dance2':
     for _sd in ('Left','Right'):
         _fs=foot_stats(_sd,0.0); HH[_sd]=float(_fs['heel_mm']-_fs['ball_mm'])
     meshes_eval(False); log('high-heel foot: bind-pose heel lift above the ball (mm)',HH)
+    if D4:
+        HH={k:max(v,30.0) for k,v in HH.items()}; log('D5 high-heel: bind lift ~5 mm is flat-looking, planted feet hold a 30 mm heel lift (ball + toes down)',HH)
+        _vgn5={g.index:g.name for g in BODY.vertex_groups}
+        def _dom5(bn):
+            out=[]
+            for v in BODY.data.vertices:
+                best=None; w=0.0
+                for ge in v.groups:
+                    if ge.weight>w: w=ge.weight; best=_vgn5.get(ge.group)
+                if best==bn: out.append(v.index)
+            return np.array(out,dtype=int)
+        TOEV5={sd:_dom5(sd+' toe') for sd in ('Left','Right')}
+        def toe_settle5(sd,lo=0.0003,hi=0.0022):
+            n=sd+' toe'
+            if n not in PB or len(TOEV5[sd])==0: return None
+            d=(PB[n].tail-PB[n].head); fl=Vector((d.x,d.y,0.0))
+            if fl.length>1e-6: align(n,fl.normalized(),cap=60)
+            lat=fl.normalized().cross(Vector((0,0,1))) if fl.length>1e-6 else Vector((1,0,0)); hist=[]
+            for k in range(12):
+                meshes_eval(True); z=float(body_co()[TOEV5[sd]][:,2].min())-FLOOR; meshes_eval(False); hist.append(round(z*1000,1))
+                if lo<=z<=hi: break
+                st=1.5 if z<lo else -1.5; z0=PB[n].tail.z; wrot_v(n,st,lat)
+                if (PB[n].tail.z-z0)*(1 if z<lo else -1)<0: wrot_v(n,-2*st,lat)
+            return hist
+        def toe_free5(sd,lim=10.0):
+            n=sd+' toe'
+            if n not in PB: return None
+            q=PB[n].matrix_basis.to_quaternion(); ang=math.degrees(2*math.acos(min(1.0,abs(q.w))))
+            if ang<=lim: return round(ang,1)
+            PB[n].matrix_basis=Quaternion().slerp(q,lim/ang).to_matrix().to_4x4(); upd(); return (round(ang,1),lim)
     def ankle_angles(sd):
         # twist: foot direction vs the knee's facing, about the shin; inv: shin leaning across the sole (+ = toward her outside = inversion); flex: ankle bend vs rest
         a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
@@ -1138,7 +1182,7 @@ elif MODE=='dance2':
                 tgt_=PB[sd+' wrist'].head.copy(); tgt_.x=hc_.x+sg_*1.15*hw_
                 ik2(sd+' arm',sd+' elbow',tgt_,PB[sd+' arm'].head+Vector((sg_*0.5,0.25,-0.2)))
                 align(sd+' wrist',Vector((0,-0.2,-1)),cap=40); CROTCH[0]+=1
-        if D4: wrist_twist()
+        if D4: wrist_twist(); upper_twist()
         for sd,(h_,k_,an,he,ft) in (('Left',(23,25,27,29,31)),('Right',(24,26,28,30,32))):
             align(sd+' leg',G(k_)-G(h_)); align(sd+' knee',G(an)-G(k_))
             fd=G(ft)-G(an); fd.z=min(fd.z,0.35*fd.length); align(sd+' ankle',fd,cap=55)
@@ -1479,6 +1523,19 @@ elif MODE=='dance2':
                 a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
                 e.setdefault('feet',{})[sd]=fs
             e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); e['pelvis']=pelvis_rec(f); e['seg'],e['src_seg']=seg_rec(f); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
+            if D4:
+                # D5 toes: planted toes lie on the floor (no claw), the foot re-seated 0.6 mm above it; free toes in line with the foot (<=10 deg)
+                for sd in ('Left','Right'):
+                    if sd in e['locked']:
+                        e.setdefault('toe_settle',{})[sd]=toe_settle5(sd)
+                        pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                        for k_ in range(3):
+                            meshes_eval(True); fs_=foot_stats(sd,FLOOR); meshes_eval(False); dz=(0.6-fs_['min_mm'])/1000.0
+                            if abs(dz)<0.0004: break
+                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                            ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
+                            for n_,R_ in Ra.items(): set_rot(n_,R_)
+                    else: e.setdefault('toe_free',{})[sd]=toe_free5(sd)
             if D4: e['leg_cap_pass2_mm']=round(leg_capsules(locks,f)*1000,1); upd()
             if D4: e['head_rel']=[round(x,2) for x in head_rel_jena()]; e['src_head_rel']=[round(float(x),2) for x in SRC_HPYR[f]]; e['leg_cap_pen_mm']=round(leg_pen()[0]*1000,1)
             meshes_eval(True); cf=clip_flags()
@@ -1491,7 +1548,7 @@ elif MODE=='dance2':
             e['qc_flags']=Fq; e['qc']={k:Mq.get(k) for k in ('balance_margin_cm','com','front_knee_minus_ankle_gap_cm','side_spine_bends','side_knee_bend_L','side_knee_bend_R','ankle_twist_L','ankle_inv_L','ankle_twist_R','ankle_inv_R')}
             if f in CLOSE: json.dump({'frame':f,'measures':Mq,'flags':Fq},open(OUT+f'/q{f:03d}_selfcheck.json','w'),default=str)
         except Exception as ex: e['qc_error']=repr(ex)[:200]
-        if D4: SNAP[f]=snap()
+        if D4: upper_twist(); SNAP[f]=snap()
         else: render(OUT+f'/f{f:03d}.jpg')
         if f in CLOSE and (not D4 or f in CLOSE_SH):
             try:

@@ -87,6 +87,16 @@ def wrist_twist():
         if qd.w<0: qd.negate()
         v=Vector((qd.x,qd.y,qd.z)); tw=2*math.degrees(math.atan2(v.dot(a),qd.w))
         tw=max(-90,min(90,tw)); wrot_v(tn,0.5*tw,a)
+R0UA={s:rest_rot(sd+' arm') for sd,s in (('Left','L'),('Right','R'))}
+def upper_twist():
+    # UpperArm_Twist: the arm's swing (bone axis moved from rest) plus half of its twist about that axis
+    for sd,s in (('Left','L'),('Right','R')):
+        tn='UpperArm_Twist.'+s
+        if tn not in PB: continue
+        Ra=PB[sd+' arm'].matrix.to_3x3(); y0=R0UA[s].col[1].normalized(); y1=Ra.col[1].normalized()
+        Rsw=y0.rotation_difference(y1).to_matrix()@R0UA[s]
+        Rt=Rsw.to_quaternion().slerp(Ra.to_quaternion(),0.5).to_matrix()
+        _set_orient(tn,Rt)
 # ---- leg capsules (radii fitted to her mesh at rest): thigh, shin, foot per leg; L vs R never closer than r1+r2+4 mm
 def _seg_dist(p1,q1,p2,q2):
     d1=q1-p1; d2=q2-p2; r=p1-p2; a=d1.dot(d1); e=d2.dot(d2); f_=d2.dot(r)

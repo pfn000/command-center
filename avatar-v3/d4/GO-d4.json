@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nout": 1200
  },
- "note": "dance4 #3 (17:19:53Z): face.json committed (crop face track 227/300; run #2's render jobs could not find it), leg capsule 2nd pass, libEGL for compose re-track"
+ "note": "dance5 #1 (17:59:13Z): 30 mm high-heel + toes flat on floor / free toes in line, relaxed grouped finger curl (no splay/paddle), upper-arm twist bones (28 moving deform body bones; 8 helpers now listed as non-deforming markers), arms+root lower zero-phase cutoff"
 }

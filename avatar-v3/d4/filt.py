@@ -44,6 +44,9 @@ for k in range(len(_W)):
 OE=dict(body=(3.0,2.0),hands=(3.0,2.0),pelvis=(3.0,1.0),face_rot=(3.0,1.0),blend=(4.0,6.0))
 _tpx=float(np.linalg.norm((_B2[:,11]+_B2[:,12])/2-(_B2[:,23]+_B2[:,24])/2,axis=1).mean()); _tm=float(np.linalg.norm((_W[:,11]+_W[:,12])/2-(_W[:,23]+_W[:,24])/2,axis=1).mean()); _pxm=_tpx/max(_tm,1e-6)
 _Wf=one_euro(_W,LM['fps'],*OE['body']); _B2f=one_euro(_B2,LM['fps'],*OE['body'],scale=_pxm)
+# D5: arms (elbows, wrists, hand markers 13-22) and the 2D hip root get a lower cutoff (still zero-phase, so no lag): Jena's wrists ran ~30% over the filtered source, the hip root wobbled ~11 mm
+OE['arms']=(2.5,1.5); OE['root2d']=(1.5,0.5)
+_Wf[:,13:23]=one_euro(_W[:,13:23],LM['fps'],*OE['arms']); _B2f[:,23:25]=one_euro(_B2[:,23:25],LM['fps'],*OE['root2d'],scale=_pxm)
 _HPr=LM.get('hands_px') or [{}]*len(_W)
 for _s in ('L','R'):
     A_=np.full((len(_W),21,2),np.nan)
