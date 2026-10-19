@@ -21,17 +21,26 @@ cap = cv2.VideoCapture(VID); vf = cap.get(cv2.CAP_PROP_FPS) or 30.0; print('vide
 want = [int(round((t0 + k / FPS) * vf)) for k in range(N)]; frames = []; fi = -1; k = 0; ts = 0
 def ear(P, a): # eye openness: lid gap / eye width
     return float(np.linalg.norm(P[a[12]] - P[a[4]]) / max(1e-6, np.linalg.norm(P[a[0]] - P[a[8]])))
+# the dancer's face is ~100 px in a 720x1280 frame, too small for the face detector: crop a box around her head from the body track
+# (nose + ears, 5-frame mean so the crop doesn't jitter), upscale it to 512 px, and map the landmarks back to full-frame coordinates.
+B2 = np.array(S['body2d_px'], float); HC = (B2[:, 0] + B2[:, 7] + B2[:, 8]) / 3; EW = np.linalg.norm(B2[:, 7] - B2[:, 8], axis=1)
+k5 = np.ones(5) / 5; sm = lambda a: np.convolve(np.pad(a, 2, mode='edge'), k5, 'valid')
+HC = np.stack([sm(HC[:, 0]), sm(HC[:, 1])], 1); SIDE = np.clip(sm(EW) * 3.4, 140, 600)
 while k < N:
     ok, img = cap.read(); fi += 1
     if not ok: break
     if fi < want[k]: continue
     while k < N and want[k] <= fi:
-        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB); ts += 33
+        Hh, Ww = img.shape[:2]; sx_ = Ww / float(S.get('res_w', Ww)); s = float(SIDE[k]); cx, cy = HC[k]
+        x0 = int(round(cx - s / 2)); y0 = int(round(cy - s * 0.55)); s_ = int(round(s))
+        pad = cv2.copyMakeBorder(img, s_, s_, s_, s_, cv2.BORDER_CONSTANT, value=0); crop = pad[y0 + s_:y0 + 2 * s_, x0 + s_:x0 + 2 * s_]
+        crop = cv2.resize(crop, (512, 512), interpolation=cv2.INTER_CUBIC)
+        rgb = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB); ts += 33
         r = det.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb), ts)
-        e = {'M': None, 'bs': None, 'lm': None}
+        e = {'M': None, 'bs': None, 'lm': None, 'crop': [x0, y0, s_]}
         if r.face_landmarks:
-            P = np.array([[p.x, p.y, p.z] for p in r.face_landmarks[0]])
-            e['lm'] = {n: [[round(float(P[i, 0]), 5), round(float(P[i, 1]), 5)] for i in v] for n, v in CONT.items()}
+            P = np.array([[p.x, p.y, p.z] for p in r.face_landmarks[0]]); Pf = P.copy(); Pf[:, 0] = (x0 + P[:, 0] * s_) / Ww; Pf[:, 1] = (y0 + P[:, 1] * s_) / Hh
+            e['lm'] = {n: [[round(float(Pf[i, 0]), 5), round(float(Pf[i, 1]), 5)] for i in v] for n, v in CONT.items()}
             e['ear'] = [ear(P, EYE_L), ear(P, EYE_R)]
             if r.face_blendshapes: e['bs'] = {c.category_name: round(float(c.score), 4) for c in r.face_blendshapes[0]}
             if r.facial_transformation_matrixes: e['M'] = np.array(r.facial_transformation_matrixes[0]).round(5).tolist()
