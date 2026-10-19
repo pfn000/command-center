@@ -2,12 +2,11 @@
  "render": [
   {
    "anim": "poses4",
-   "shards": 1,
+   "shards": 6,
    "samples": 10,
    "res": "900x1200",
-   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json",
-   "poses": "hand_behind_head"
+   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses4 #13: hand_behind_head only (head collider hull fix) (14:39:49)"
+ "note": "anim10c poses4 #14: all poses, high-heel feet, head collider (hull fix), QC hand-vs-head-shell + hand-vs-hand (14:40:14)"
 }
