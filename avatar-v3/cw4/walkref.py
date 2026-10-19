@@ -32,8 +32,8 @@ def model(name):
     f=f'/tmp/pl_{name}.task'
     if not os.path.exists(f): urllib.request.urlretrieve(f'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_{name}/float16/latest/pose_landmarker_{name}.task',f)
     return f
-def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9):
-    det=vision.PoseLandmarker.create_from_options(vision.PoseLandmarkerOptions(base_options=BaseOptions(model_asset_path=model(name)),running_mode=vision.RunningMode.VIDEO,num_poses=1,min_pose_detection_confidence=0.5,min_pose_presence_confidence=0.5,min_tracking_confidence=0.5))
+def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9,np_=1):
+    det=vision.PoseLandmarker.create_from_options(vision.PoseLandmarkerOptions(base_options=BaseOptions(model_asset_path=model(name)),running_mode=vision.RunningMode.VIDEO,num_poses=np_,min_pose_detection_confidence=0.5,min_pose_presence_confidence=0.5,min_tracking_confidence=0.5))
     cap=cv2.VideoCapture(path); fps=cap.get(cv2.CAP_PROP_FPS) or 30; W=int(cap.get(3)); H=int(cap.get(4)); R=[]; i=0; prev=None
     cap.set(cv2.CAP_PROP_POS_MSEC,t0*1000); i=int(round(t0*fps))
     while True:
@@ -43,11 +43,16 @@ def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9):
             sm=cv2.resize(fr,(64,36)); g=cv2.cvtColor(sm,cv2.COLOR_BGR2GRAY).astype(np.float32); cut=prev is not None and float(np.abs(g-prev).mean())>28; prev=g
             if fr.shape[1]>maxw: fr=cv2.resize(fr,(maxw,int(fr.shape[0]*maxw/fr.shape[1])))
             r=det.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB,data=cv2.cvtColor(fr,cv2.COLOR_BGR2RGB)),int(i*1000/fps))
-            if r.pose_world_landmarks: R.append((i,cut,[[l.x,l.y,l.z] for l in r.pose_world_landmarks[0]],[[l.x,l.y,l.visibility] for l in r.pose_landmarks[0]]))
-            else: R.append((i,cut,None,None))
+            if r.pose_world_landmarks:
+                k=0
+                if len(r.pose_landmarks)>1:   # the biggest person is the model; remember that someone else is in frame
+                    hs=[max(l.y for l in p_)-min(l.y for l in p_) for p_ in r.pose_landmarks]; k=int(np.argmax(hs)); others=sum(1 for h in hs if h>0.35*max(hs))-1
+                else: others=0
+                R.append((i,cut,[[l.x,l.y,l.z] for l in r.pose_world_landmarks[k]],[[l.x,l.y,l.visibility] for l in r.pose_landmarks[k]],others))
+            else: R.append((i,cut,None,None,0))
         i+=1
     det.close(); return R,fps,W,H
-REJ={}
+REJ={}; SRCBONUS=0.0
 def windows(R,fps,step,win_s):
     REJ.clear()
     # score every window that sits inside one shot: single model, whole body in frame, feet visible, front-on, legs alternating
@@ -69,7 +74,9 @@ def windows(R,fps,step,win_s):
         st_=dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),zc=zc,amp=round(amp,3))
         if REJ.get('n',0)<3 and (vis<0.5 or inb<0.85 or front<0.35 or amp<0.03): REJ['n']=REJ.get('n',0)+1; REJ.setdefault('ex',[]).append(st_)
         if vis<0.5 or inb<0.97 or front<0.35 or amp<0.03 or armout>0.9 or grow<0.0: continue
-        sc=vis*2+inb+min(height,0.9)+min(zc,8)*0.15+min(amp,0.3)
+        solo=1.0-np.mean([r[4]>0 for r in seg])
+        if solo<0.8: continue
+        sc=vis*2+inb+min(height,0.9)+min(zc,8)*0.15+min(amp,0.3)+float(SRCBONUS)
         best.append((round(float(sc),3),s,dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),height=round(float(height),3),zc=zc,amp=round(amp,3),armout=round(armout,2),grow=round(grow,3))))
     best.sort(key=lambda b:-b[0]); return best[:5]
 cands=[]
@@ -79,8 +86,8 @@ for s in G['sources']:
         if not p: continue
         cap=cv2.VideoCapture(p); fps=cap.get(cv2.CAP_PROP_FPS) or 30; nfr=int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
         step=2 if nfr/fps>40 else 1
-        R,fps,W,H=track(p,'lite',step=step,maxw=640)
-        ws=windows(R,fps,step,G.get('win_s',3.0))
+        R,fps,W,H=track(p,'lite',step=step,maxw=640,np_=2)
+        global_dummy=0; SRCBONUS=s.get('bonus',0.0); ws=windows(R,fps,step,G.get('win_s',3.0))
         log('scan',s['id'],'frames',len(R),'det',sum(1 for r in R if r[3]),'cuts',sum(1 for r in R if r[1]),'fps',round(fps,2),'size',W,H,'best',ws[:2],'rejected eg',REJ.get('ex'))
         for sc,st,info in ws[:2]: cands.append((sc,s,p,R[st][0]/fps,info,fps,W,H))
     except Exception as e: log('source error',s['id'],repr(e)[:300])
@@ -88,7 +95,7 @@ if not cands: log('NO usable walk found'); json.dump({'ok':False,'log':LOG},open
 cands.sort(key=lambda c:-c[0]); sc,S,P,t0,info,fps,W,H=cands[0]
 WIN=G.get('win_s',3.0); t0=max(0,t0); t1=t0+WIN
 log('PICK',S['id'],'t0',round(t0,2),'score',sc,info,'others',[(c[1]['id'],round(c[3],1),c[0]) for c in cands[1:6]])
-R,fps,W,H=track(P,'heavy',1,1280,t0,t1)
+R,fps,W,H=track(P,'heavy',1,1280,t0,t1,np_=2)
 N=np.array([r[3] if r[3] else [[np.nan]*3]*33 for r in R],float); Wd=np.array([r[2] if r[2] else [[np.nan]*3]*33 for r in R],float)
 for A in (N,Wd):
     for j in range(33):

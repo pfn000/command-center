@@ -746,7 +746,7 @@ elif MODE=='catwalk4':
         st={}
         for sd in ('Left','Right'):
             s_=foot_state(sd,t); hj=PB[sd+' leg'].head.copy(); sg=1 if sd=='Left' else -1
-            pole=hj+Vector((sg*0.03,-1.0,0.0))                          # knee points forward over the toes, a hair outward (no knock-knee)
+            pole=hj+Vector((sg*0.07,-1.0,0.0))                          # knee points forward over the toes, a hair outward (no knock-knee)
             ik2(sd+' leg',sd+' knee',s_['ankle'],pole)
             g=GEO[sd]; d0=g['adir'].copy(); d0.x=0.0; align(sd+' ankle',PR(s_['th'])@d0,cap=80)
             if sd+' toe' in PB:
@@ -767,8 +767,7 @@ elif MODE=='catwalk4':
         hq=(B.matrix_world.to_3x3()@PB['Head'].matrix.to_3x3()).to_quaternion()
         if REST_HEAD is not None:
             q=REST_HEAD@hq.inverted(); qrot('Neck',q,0.5); hq=(B.matrix_world.to_3x3()@PB['Head'].matrix.to_3x3()).to_quaternion(); q=REST_HEAD@hq.inverted(); qrot('Head',q,1.0)
-        if 'LeftEye' in PB and 'RightEye' in PB:
-            el=PB['LeftEye'].head; er=PB['RightEye'].head; wrot('Head',math.degrees(math.atan2(el.z-er.z,el.x-er.x)),'Y')
+
         return st
     relaxed(); REST_HEAD=(B.matrix_world.to_3x3()@PB['Head'].matrix.to_3x3()).to_quaternion()
     # framing: fixed runway camera at the end of the runway, she walks toward it
@@ -858,8 +857,8 @@ elif MODE=='catwalk4':
         hx=W('Hips').x*100; M['hip_sway_cm'].append(round(hx,2))
         HWc=(B.matrix_world.to_3x3()@PB['Head'].matrix.to_3x3()); upv=HWc@Vector((0,1,0)); fv=HWc@Vector((0,0,1))
         e['head_up']=[round(x,3) for x in upv]
-        el_=W('LeftEye') if 'LeftEye' in PB else upv; er_=W('RightEye') if 'RightEye' in PB else upv
-        M['head_roll_deg'].append(round(math.degrees(math.atan2(el_.z-er_.z,el_.x-er_.x)),2) if 'LeftEye' in PB else round(math.degrees(math.atan2(upv.x,upv.z)),2))
+        xv=HWc@Vector((1,0,0)); xv0=(B.matrix_world.to_3x3()@REST_HEAD.to_matrix())@Vector((1,0,0)) if False else None
+        M['head_roll_deg'].append(round(math.degrees(math.asin(max(-1,min(1,xv.normalized().z)))),2))
         la_=W('Left arm'); ra_=W('Right arm'); M.setdefault('shoulder_roll_deg',[]).append(round(math.degrees(math.atan2(la_.z-ra_.z,la_.x-ra_.x)),2)); M['head_pitch_deg'].append(round(math.degrees(math.atan2(upv.y,upv.z)),2))
         render(OUT+f'/f{f:03d}.jpg')
         e['max_back_hair_deg']=round(max([v_ for k_,v_ in ang.items() if k_.startswith('Back hair')] or [0]),1); e['s']=round(time.time()-t0_,1)
