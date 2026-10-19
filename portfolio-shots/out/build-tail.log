@@ -1,7 +1,8 @@
 
 > my-project@0.1.0 build /tmp/site
-> next build
+> node scripts/assets.mjs && next build
 
+[assets] 108 images, 11.5 MB originals -> 13.7 MB in all AVIF+WebP sizes; svg -0 B; 22.2 s
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -11,15 +12,15 @@ https://nextjs.org/telemetry
 ▲ Next.js 16.2.6 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.6s
+✓ Compiled successfully in 6.7s
   Skipping validation of types
-  Finished TypeScript config validation in 5ms ...
+  Finished TypeScript config validation in 16ms ...
   Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/26) ...
-  Generating static pages using 3 workers (6/26) 
-  Generating static pages using 3 workers (12/26) 
-  Generating static pages using 3 workers (19/26) 
-✓ Generating static pages using 3 workers (26/26) in 648ms
+  Generating static pages using 3 workers (0/30) ...
+  Generating static pages using 3 workers (7/30) 
+  Generating static pages using 3 workers (14/30) 
+  Generating static pages using 3 workers (22/30) 
+✓ Generating static pages using 3 workers (30/30) in 749ms
   Finalizing page optimization ...
 
 Route (app)                       Revalidate  Expire
@@ -34,8 +35,10 @@ Route (app)                       Revalidate  Expire
 ├ ƒ /api/contact
 ├ ƒ /api/vault/file
 ├ ○ /arch
+├ ○ /companies
 ├ ○ /contact
 ├ ○ /emmi
+├ ○ /emmico
 ├ ○ /icon.png
 ├ ○ /jena
 ├ ○ /ncom
@@ -51,6 +54,8 @@ Route (app)                       Revalidate  Expire
 ├ ○ /sitemap.xml
 ├ ○ /vault                                1h      1y
 ├ ƒ /vault/[repo]
+├ ○ /work
+├ ○ /worlds
 ├ ○ /writing
 └ ● /writing/[slug]
   ├ /writing/ai-being-used-wrong

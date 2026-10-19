@@ -1,195 +1,15 @@
 {
  "shots": [
   {
-   "name": "d-dark-08-projects-01",
+   "name": "d-dark-01-home",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
    "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-02",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-03",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-04",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-05",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-06",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-07",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-08-projects-08",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-00-home-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-20-projects-more-on-github-01",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
-   ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
-   ],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -200,328 +20,15 @@
    "monoLogos": []
   },
   {
-   "name": "d-dark-30-vault",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-30b-vault-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-08-projects-01",
+   "name": "d-dark-01d-home-nav-scrolled",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
    "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-02",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-03",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-04",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-05",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-06",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-07",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-08",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-09",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-10",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-11",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-12",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-08-projects-13",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-00-home-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-20-projects-more-on-github-01",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
-   ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
-   ],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -532,24 +39,15 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-20-projects-more-on-github-02",
+   "name": "d-dark-01e-home-nav",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
-   ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
-   ],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -560,214 +58,15 @@
    "monoLogos": []
   },
   {
-   "name": "p-dark-30-vault",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-30b-vault-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-08-projects-01",
+   "name": "d-dark-01f-home-footer",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
    "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-02",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-03",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-04",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-05",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-06",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-07",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-08-projects-08",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-20-projects-more-on-github-01",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
-   ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
-   ],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -778,309 +77,15 @@
    "monoLogos": []
   },
   {
-   "name": "d-light-30-vault",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-30b-vault-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos"
-   ],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "monoLogos": []
-  },
-  {
-   "name": "p-light-08-projects-01",
+   "name": "d-dark-01z-home-full",
    "overflowX": 0,
    "broken": [],
    "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
    "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-02",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-03",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-04",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-05",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-06",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-07",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-08",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-09",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-10",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-11",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-12",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-08-projects-13",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": true,
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)",
-    "none"
-   ]
-  },
-  {
-   "name": "p-light-20-projects-more-on-github-01",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
-   ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
-   ],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -1091,24 +96,942 @@
    "monoLogos": []
   },
   {
-   "name": "p-light-20-projects-more-on-github-02",
+   "name": "d-dark-02-work",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos",
-    "/nos"
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
    ],
-   "oldNos": [
-    "/work/nos-window-desktop.jpg",
-    "/work/nos-window-menu.jpg",
-    "/work/nos-pill-info-live.jpg",
-    "/work/nos-window-desktop.jpg"
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
    ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate1-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate2-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate3",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate3-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate4",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate4-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate5",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate5-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate6",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate6-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02b-work-slate7",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02c-work-slate7-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-02z-work-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03c-emmico-slate1-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03c-emmico-slate2-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-03z-emmico-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-04-worlds",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
    "peter": false,
    "notMine": [],
    "counts": [],
@@ -1119,18 +1042,21 @@
    "monoLogos": []
   },
   {
-   "name": "p-light-30-vault",
+   "name": "d-dark-04b-worlds-slate1",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/nos"
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
    ],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
    "oldNos": [],
    "peter": false,
    "notMine": [],
-   "counts": [
-    "17 repos"
-   ],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1138,18 +1064,2852 @@
    "monoLogos": []
   },
   {
-   "name": "p-light-30b-vault-full",
+   "name": "d-dark-04z-worlds-full",
    "overflowX": 0,
    "broken": [],
-   "badLinks": [
-    "/nos"
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-05z-writing-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-06-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": [
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-06z-resume-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": [
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-dark-07-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-07b-about-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-07b-about-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-07z-about-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-08-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-08b-companies-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-08z-companies-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-09-plex",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-09z-plex-full",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-11-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [
+    "/images/oops-chibi-t.png"
    ],
    "oldNos": [],
    "peter": false,
    "notMine": [],
-   "counts": [
-    "17 repos"
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-01-home",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-01d-home-nav-scrolled",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-01e-home-nav",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-01f-home-footer",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
    ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate1-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate2-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate3",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate3-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate4",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate4-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate5",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate5-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate6",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate6-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02b-work-slate7",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02c-work-slate7-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-03c-emmico-slate1-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-03c-emmico-slate2-mid",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-04-worlds",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-04b-worlds-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-06-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": [
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-07-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-07b-about-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-07b-about-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-08-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-08b-companies-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-09-plex",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-10-menu-open",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-dark-11-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [
+    "/images/oops-chibi-t.png"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-01-home",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate3",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate4",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate5",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate6",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02b-work-slate7",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-04-worlds",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-06-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "d-light-07-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-08-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-09-plex",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "d-light-11-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 60,
+   "whiteTiles": [
+    "/images/oops-chibi-t.png"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-01-home",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate3",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate4",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate5",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate6",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02b-work-slate7",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6",
+     2
+    ],
+    [
+     "https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/stage-lighting.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/lighting-before-after.jpg",
+     2
+    ],
+    [
+     "https://raw.githubusercontent.com/pfn000/jena-magic-screen/main/docs/screenshots/dual-tracking.jpg",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": true,
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     3
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-04-worlds",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [
+    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
+    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
+   ],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-06-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-07-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-08-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-09-plex",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-10-menu-open",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-11-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [
+    "/images/oops-chibi-t.png"
+   ],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "ref-prismify-d",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "https://www.linkedin.com/in/%F0%9F%8D%8C-joumana-elomar-a40609b8/overlay/about-this-profile/"
+   ],
+   "launch": [],
+   "dupImgs": [],
+   "navH": null,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "ref-prismify-d-nav",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "https://www.linkedin.com/in/%F0%9F%8D%8C-joumana-elomar-a40609b8/overlay/about-this-profile/"
+   ],
+   "launch": [],
+   "dupImgs": [],
+   "navH": null,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "ref-prismify-p",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "https://www.linkedin.com/in/%F0%9F%8D%8C-joumana-elomar-a40609b8/overlay/about-this-profile/"
+   ],
+   "launch": [],
+   "dupImgs": [],
+   "navH": null,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "monoLogos": []
+  },
+  {
+   "name": "ref-prismify-p-nav",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [
+    "https://www.linkedin.com/in/%F0%9F%8D%8C-joumana-elomar-a40609b8/overlay/about-this-profile/"
+   ],
+   "launch": [],
+   "dupImgs": [],
+   "navH": null,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
    "oldEmail": false,
    "mailto": [],
    "cutLogos": 0,
@@ -1158,391 +3918,213 @@
   }
  ],
  "errors": [
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
+  "d-dark: Failed to load resource: net::ERR_FAILED",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "p-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "d-light: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "p-light: Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "video skipped: time",
+  "video skipped: time",
+  "video skipped: time"
  ],
  "checks": {
-  "d-dark-home-repos": {
-   "cards": [
-    "NCOM AudeX",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "S-Pen Control Centre",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "JenaAI",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "NCOM AI",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "rest": [
-    "KhonXR"
-   ],
-   "kick": "PROJECTS · FROM MY GITHUB"
+  "d-dark-weight-home": {
+   "jsKB": 244,
+   "allKB": 1284,
+   "imgs": 5,
+   "imgOrigKB": 722,
+   "imgShippedKB": 232,
+   "opt": 4
   },
-  "d-dark-08-projects-box": {
-   "top": 13442.59375,
-   "h": 11661.21875,
-   "vh": 900
+  "d-dark-weight-work": {
+   "jsKB": 240,
+   "allKB": 5333,
+   "imgs": 46,
+   "imgOrigKB": 13344,
+   "imgShippedKB": 10409,
+   "opt": 25
   },
-  "d-dark-projects-more": [
-   "NCOM-AudeX",
-   "sexy-s-pen",
-   "live",
-   "JenaAI",
-   "jena-heavy",
-   "KhonXR",
-   "RADcam",
-   "backup-automation"
-  ],
-  "d-dark-20-projects-more-on-github-box": {
-   "top": 4855.96875,
-   "h": 610.5,
-   "vh": 900
+  "d-dark-weight-emmico": {
+   "jsKB": 230,
+   "allKB": 493,
+   "imgs": 13,
+   "imgOrigKB": 502,
+   "imgShippedKB": 236,
+   "opt": 4
   },
-  "d-dark-vault": {
-   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
-   "links": [
-    "/vault/jena-magic-screen",
-    "/vault/command-center",
-    "/vault/jena-heavy",
-    "/vault/NCOM-AudeX",
-    "/vault/sexy-s-pen",
-    "/vault/NCOM-AI",
-    "/vault/PleX",
-    "/vault/Portfolio-",
-    "/vault/NCOM",
-    "/vault/JenaAI",
-    "/vault/Jena",
-    "/vault/backup-automation",
-    "/vault/ClaudePleX",
-    "/vault/pfn000",
-    "/vault/RADcam",
-    "/vault/ncomsignin",
-    "/vault/KhonXR"
-   ]
+  "d-dark-weight-worlds": {
+   "jsKB": 240,
+   "allKB": 409,
+   "imgs": 3,
+   "imgOrigKB": 281,
+   "imgShippedKB": 164,
+   "opt": 2
   },
+  "d-dark-weight-writing": {
+   "jsKB": 240,
+   "allKB": 830,
+   "imgs": 3,
+   "imgOrigKB": 551,
+   "imgShippedKB": 551,
+   "opt": 0
+  },
+  "d-dark-weight-resume": {
+   "jsKB": 230,
+   "allKB": 790,
+   "imgs": 22,
+   "imgOrigKB": 577,
+   "imgShippedKB": 577,
+   "opt": 0
+  },
+  "d-dark-weight-about": {
+   "jsKB": 230,
+   "allKB": 531,
+   "imgs": 7,
+   "imgOrigKB": 780,
+   "imgShippedKB": 286,
+   "opt": 6
+  },
+  "d-dark-weight-companies": {
+   "jsKB": 240,
+   "allKB": 365,
+   "imgs": 4,
+   "imgOrigKB": 815,
+   "imgShippedKB": 815,
+   "opt": 0
+  },
+  "d-dark-weight-plex": {
+   "jsKB": 240,
+   "allKB": 1017,
+   "imgs": 6,
+   "imgOrigKB": 4325,
+   "imgShippedKB": 4325,
+   "opt": 0
+  },
+  "redirect-/projects": "/work?theme=dark",
+  "redirect-/arch": "/work?theme=dark#ncom",
+  "redirect-/emmi": "/emmico?theme=dark",
+  "redirect-/contact": "/?theme=dark#contact",
   "vault-AuraVT": 404,
   "vault-LiteVtuber": 404,
   "vault-LocalLLM-iOS": 404,
   "vault-MS-Outlook-MCP": 404,
   "vault-linux": 404,
-  "p-dark-home-repos": {
-   "cards": [
-    "NCOM AudeX",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "S-Pen Control Centre",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "JenaAI",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "NCOM AI",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "rest": [
-    "KhonXR"
-   ],
-   "kick": "PROJECTS · FROM MY GITHUB"
+  "p-dark-weight-home": {
+   "jsKB": 244,
+   "allKB": 1274,
+   "imgs": 5,
+   "imgOrigKB": 722,
+   "imgShippedKB": 232,
+   "opt": 4
   },
-  "p-dark-08-projects-box": {
-   "top": 15955.109375,
-   "h": 9608.8125,
-   "vh": 844
+  "p-dark-weight-work": {
+   "jsKB": 240,
+   "allKB": 5315,
+   "imgs": 33,
+   "imgOrigKB": 12733,
+   "imgShippedKB": 9798,
+   "opt": 25
   },
-  "p-dark-projects-more": [
-   "NCOM-AudeX",
-   "sexy-s-pen",
-   "live",
-   "JenaAI",
-   "jena-heavy",
-   "KhonXR",
-   "RADcam",
-   "backup-automation"
-  ],
-  "p-dark-20-projects-more-on-github-box": {
-   "top": 7932,
-   "h": 1053.25,
-   "vh": 844
+  "p-dark-weight-emmico": {
+   "jsKB": 240,
+   "allKB": 496,
+   "imgs": 13,
+   "imgOrigKB": 502,
+   "imgShippedKB": 236,
+   "opt": 4
   },
-  "p-dark-vault": {
-   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
-   "links": [
-    "/vault/jena-magic-screen",
-    "/vault/command-center",
-    "/vault/jena-heavy",
-    "/vault/NCOM-AudeX",
-    "/vault/sexy-s-pen",
-    "/vault/NCOM-AI",
-    "/vault/PleX",
-    "/vault/Portfolio-",
-    "/vault/NCOM",
-    "/vault/JenaAI",
-    "/vault/Jena",
-    "/vault/backup-automation",
-    "/vault/ClaudePleX",
-    "/vault/pfn000",
-    "/vault/RADcam",
-    "/vault/ncomsignin",
-    "/vault/KhonXR"
-   ]
+  "p-dark-weight-worlds": {
+   "jsKB": 240,
+   "allKB": 391,
+   "imgs": 3,
+   "imgOrigKB": 281,
+   "imgShippedKB": 164,
+   "opt": 2
   },
-  "d-light-home-repos": {
-   "cards": [
-    "NCOM AudeX",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "S-Pen Control Centre",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "JenaAI",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "NCOM AI",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "rest": [
-    "KhonXR"
-   ],
-   "kick": "PROJECTS · FROM MY GITHUB"
+  "p-dark-weight-writing": {
+   "jsKB": 230,
+   "allKB": 791,
+   "imgs": 3,
+   "imgOrigKB": 551,
+   "imgShippedKB": 551,
+   "opt": 0
   },
-  "d-light-08-projects-box": {
-   "top": 13442.59375,
-   "h": 11661.21875,
-   "vh": 900
+  "p-dark-weight-resume": {
+   "jsKB": 240,
+   "allKB": 792,
+   "imgs": 22,
+   "imgOrigKB": 577,
+   "imgShippedKB": 577,
+   "opt": 0
   },
-  "d-light-projects-more": [
-   "NCOM-AudeX",
-   "sexy-s-pen",
-   "live",
-   "JenaAI",
-   "jena-heavy",
-   "KhonXR",
-   "RADcam",
-   "backup-automation"
-  ],
-  "d-light-20-projects-more-on-github-box": {
-   "top": 4855.96875,
-   "h": 610.5,
-   "vh": 900
+  "p-dark-weight-about": {
+   "jsKB": 240,
+   "allKB": 533,
+   "imgs": 7,
+   "imgOrigKB": 780,
+   "imgShippedKB": 286,
+   "opt": 6
   },
-  "d-light-vault": {
-   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
-   "links": [
-    "/vault/jena-magic-screen",
-    "/vault/command-center",
-    "/vault/jena-heavy",
-    "/vault/NCOM-AudeX",
-    "/vault/sexy-s-pen",
-    "/vault/NCOM-AI",
-    "/vault/PleX",
-    "/vault/Portfolio-",
-    "/vault/NCOM",
-    "/vault/JenaAI",
-    "/vault/Jena",
-    "/vault/backup-automation",
-    "/vault/ClaudePleX",
-    "/vault/pfn000",
-    "/vault/RADcam",
-    "/vault/ncomsignin",
-    "/vault/KhonXR"
-   ]
+  "p-dark-weight-companies": {
+   "jsKB": 240,
+   "allKB": 347,
+   "imgs": 4,
+   "imgOrigKB": 815,
+   "imgShippedKB": 815,
+   "opt": 0
   },
-  "p-light-home-repos": {
-   "cards": [
-    "NCOM AudeX",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "S-Pen Control Centre",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "JenaAI",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "NCOM AI",
-    "",
-    "",
-    "",
-    ""
-   ],
-   "rest": [
-    "KhonXR"
-   ],
-   "kick": "PROJECTS · FROM MY GITHUB"
+  "p-dark-weight-plex": {
+   "jsKB": 240,
+   "allKB": 1008,
+   "imgs": 6,
+   "imgOrigKB": 4325,
+   "imgShippedKB": 4325,
+   "opt": 0
   },
-  "p-light-08-projects-box": {
-   "top": 15955.109375,
-   "h": 9608.8125,
-   "vh": 844
+  "d-light-weight-home": {
+   "jsKB": 244,
+   "allKB": 1284,
+   "imgs": 5,
+   "imgOrigKB": 722,
+   "imgShippedKB": 232,
+   "opt": 4
   },
-  "p-light-projects-more": [
-   "NCOM-AudeX",
-   "sexy-s-pen",
-   "live",
-   "JenaAI",
-   "jena-heavy",
-   "KhonXR",
-   "RADcam",
-   "backup-automation"
-  ],
-  "p-light-20-projects-more-on-github-box": {
-   "top": 7932,
-   "h": 1053.25,
-   "vh": 844
-  },
-  "p-light-vault": {
-   "head": "$ GIT CLONE --MIRROR PFN000\n\nCode Vault\n\nA live mirror and off-site backup of my public repositories. If GitHub ever goes down or a repo gets taken offline, the source and its file directory still live here. Browse any project's structure below.\n\n● no snapshot stored yet — the owner can run the first backup below\n\n> PROTECTED BY NCOM SYSTEMS\n\nThis code is the intellectual property of NCOM Systems ",
-   "links": [
-    "/vault/jena-magic-screen",
-    "/vault/command-center",
-    "/vault/jena-heavy",
-    "/vault/NCOM-AudeX",
-    "/vault/sexy-s-pen",
-    "/vault/NCOM-AI",
-    "/vault/PleX",
-    "/vault/Portfolio-",
-    "/vault/NCOM",
-    "/vault/JenaAI",
-    "/vault/Jena",
-    "/vault/backup-automation",
-    "/vault/ClaudePleX",
-    "/vault/pfn000",
-    "/vault/RADcam",
-    "/vault/ncomsignin",
-    "/vault/KhonXR"
-   ]
+  "p-light-weight-home": {
+   "jsKB": 244,
+   "allKB": 1274,
+   "imgs": 5,
+   "imgOrigKB": 722,
+   "imgShippedKB": 232,
+   "opt": 4
   }
  },
- "videos": [
-  {
-   "file": "video-d-dark-home-scroll.mp4",
-   "bytes": 1587429,
-   "duration": 22.75,
-   "crf": 39
-  },
-  {
-   "file": "video-p-dark-home-scroll.mp4",
-   "bytes": 1527069,
-   "duration": 22.583333,
-   "crf": 36
-  }
- ]
+ "lighthouse": "skipped: time"
 }
