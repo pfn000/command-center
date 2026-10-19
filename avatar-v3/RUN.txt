@@ -1,3 +1,3 @@
 assemble A0
 
-#run10t tests2
+#run10t2 hair+catwalk, back hair 15deg

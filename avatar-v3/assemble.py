@@ -3105,7 +3105,7 @@ def phys_bones(hair=True,body=True):
     if body: L+=[j for j in JIG if j[0] in B.pose.bones]
     if hair:
         for n in _hair_bones():
-            lim=14.0 if n.startswith('Bangs') else 30.0
+            lim=14.0 if n.startswith('Bangs') else (15.0 if n.startswith('Back hair') else 30.0)   # Saidie's back-hair cap 15 deg (root 9:27 PM)
             L.append((n,70.0,5.0,lim))
     return sorted(L,key=lambda j:_depth(j[0]))
 def spring_sim(base_fn,NF,fps,bones,wind=None,sub=4):
@@ -3277,10 +3277,10 @@ def qa_tests2(test):
             info['frames'][f//2]=e; tg,az,el,dist,lens=cams['q34']; _tv_shot(D_+f'/f{f//2:03d}_q34.jpg',tg,az,el,dist,lens); log('tphys',f,lab)
     elif test=='hair':
         NF=120; bones=phys_bones(body=False); SIM=spring_sim(lambda f: hair_base(f,30),NF,30,bones,wind=lambda f: hair_wind(f,30))
-        info['springs']={'hair_bones':len(bones),'stiffness_per_s2':70.0,'damping_per_s':5.0,'max_deg':'30 (bangs 14)','wind':'from her right, gusting, starts at 3.0 s'}
+        info['springs']={'hair_bones':len(bones),'stiffness_per_s2':70.0,'damping_per_s':5.0,'max_deg':'side/pigtail 30, back hair 15, bangs 14','wind':'from her right, gusting, starts at 3.0 s'}
         tgt=Vector((ctr.x,ctr.y,float(EYE_TOP_Z)-0.25))
         for f in range(NF):
-            lab=hair_base(f,30); ang=apply_springs(SIM,f); e={'label':lab,'max_hair_deg':round(max(ang.values() or [0]),1)}
+            lab=hair_base(f,30); ang=apply_springs(SIM,f); e={'label':lab,'max_hair_deg':round(max(ang.values() or [0]),1),'max_back_hair_deg':round(max([v for k_,v in ang.items() if k_.startswith('Back hair')] or [0]),1)}
             try: e['flags']=_flags2(vis,polys)
             except Exception as ex: e['flags_error']=str(ex)
             info['frames'][f]=e; _tv_shot(D_+f'/f{f:03d}_q34.jpg',tgt,-35,4,0.95/(24/50),50); log('thair',f,lab)

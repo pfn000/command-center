@@ -16,9 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { qa: tests2, variant: A0, shard: 0, shards: 1, test: physics }
           - { qa: tests2, variant: A0, shard: 0, shards: 1, test: hair }
-          - { qa: tests2, variant: A0, shard: 0, shards: 1, test: poses }
           - { qa: tests2, variant: A0, shard: 0, shards: 2, test: catwalk }
           - { qa: tests2, variant: A0, shard: 1, shards: 2, test: catwalk }
     env: { VARIANT: "${{ matrix.variant }}", QA: "${{ matrix.qa }}", QA_SHARD: "${{ matrix.shard }}", QA_SHARDS: "${{ matrix.shards }}", QA_CLOSE: "1", TEST: "${{ matrix.test }}" }
