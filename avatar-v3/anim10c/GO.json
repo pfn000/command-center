@@ -2,11 +2,12 @@
  "render": [
   {
    "anim": "poses4",
-   "shards": 6,
+   "shards": 1,
    "samples": 10,
    "res": "900x1200",
-   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
+   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json",
+   "poses": "side_saddle"
   }
  ],
- "note": "anim10c poses4 #8: hands on the waist above the hip bone (like the refs), fingers closed up (no fan) (14:03:32)"
+ "note": "anim10c poses4 #9: side-saddle only, seat hand palm down, fingers pointing out, elbow back (14:10:31)"
 }

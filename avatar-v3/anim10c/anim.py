@@ -928,8 +928,8 @@ elif MODE=='poses4':
         elif name=='side_saddle':
             q=PB['Left knee'].head+Vector((0,0.03,0.10))
             rep['Left']=place_hand('Left',q,['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),Vector((-SG*0.2,-0.7,-0.5)),incl=frozenset({'LLEG'}))
-            q=Vector((PB['Right leg'].head.x-SG*0.06,PB['Right leg'].head.y+0.02,inf['seat_top']+0.03))
-            rep['Right']=place_hand('Right',q,['TestSeat'],frozenset(),Vector((-SG*0.35,0.8,0.0)),Vector((-SG*0.15,-1.0,0.0)))
+            q=Vector((PB['Right leg'].head.x-SG*0.11,PB['Right leg'].head.y+0.04,inf['seat_top']+0.03))
+            rep['Right']=place_hand('Right',q,['TestSeat'],frozenset(),Vector((-SG*0.25,1.0,0.3)),Vector((-SG*1.0,0.15,0.0)))
         else:
             wrot('Head',4 if inf.get('weight')=='Left' else -4,'Y')
             def on_hip(sd):
