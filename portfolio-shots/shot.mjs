@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 const T0 = Date.now()
-// v7 r12 proof: multi-page restructure (home / work / emmico / worlds / writing / resume / about / companies / plex), glass nav, slates, aura shader, asset pipeline; 1600x900 + 390x844, dark + light
+// v7 r13 proof (solid slates/sheet, no donate links, transparent 404 chibi): multi-page restructure (home / work / emmico / worlds / writing / resume / about / companies / plex), glass nav, slates, aura shader, asset pipeline; 1600x900 + 390x844, dark + light
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {} }
@@ -24,7 +24,10 @@ async function audit(page) {
     oldEmail: /official_emmi|emmi@outlook/i.test(document.documentElement.outerHTML),
     mailto: [...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')).slice(0, 4),
     cutLogos: [...document.images].map((i) => i.getAttribute('src') || '').filter((x) => /\/logos\/(unity|vrchat|vscode)\.svg/.test(x)).length,
-    liberapay: /liberapay/i.test(document.body.innerText || '') || [...document.images].some((i) => /liberapay/i.test(i.src)),
+    liberapay: (() => { const D = /liberapay|ko-?fi\.com|\bko-fi\b|patreon|buymeacoffee|buy me a coffee|github\.com\/sponsors|opencollective|paypal\.me/i; return D.test(document.body.innerText || '') || [...document.images].some((i) => D.test(i.src)) || [...document.querySelectorAll('a[href]')].some((a) => D.test(a.getAttribute('href') || '')) })(),
+    sheetBg: (() => { const s = document.querySelector('.pf-sheet'); return s && !s.hidden ? getComputedStyle(s).backgroundColor + ' | ' + getComputedStyle(s).backdropFilter : null })(),
+    slateBg: [...document.querySelectorAll('.pf-main > .pf-slate')].slice(0, 2).map((e) => getComputedStyle(e).backgroundColor),
+    navBg: (() => { const b = document.querySelector('.pf-nav7-bar'); return b ? getComputedStyle(b).backgroundColor : null })(),
     monoLogos: [...document.querySelectorAll('img[src$=".svg"]')].filter((i) => /unity|blender|vrchat|github|git\.svg/.test(i.getAttribute('src'))).map((i) => getComputedStyle(i).filter).slice(0, 3),
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
@@ -91,7 +94,7 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
         j++
         await p.evaluate((v) => window.scrollTo(0, v - 70), y); await p.waitForTimeout(700)
         await snap(p, `${k}-${n}b-${slug(route)}-slate${j}`)
-        if (deep && route === '/work' && j <= 3) { await p.evaluate((v) => window.scrollTo(0, v + Math.round(window.innerHeight * 0.55)), y); await p.waitForTimeout(600); await snap(p, `${k}-${n}c-${slug(route)}-slate${j}-mid`) }
+        if (route === '/work' && j <= (deep ? 3 : 2)) { await p.evaluate((v) => window.scrollTo(0, v + Math.round(window.innerHeight * 0.55)), y); await p.waitForTimeout(600); await snap(p, `${k}-${n}c-${slug(route)}-slate${j}-mid`) }
       }
     }
     if (route === '/' && deep) {
