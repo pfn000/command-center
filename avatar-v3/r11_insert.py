@@ -1,4 +1,5 @@
 
+# ---------- run 11b: R11_TRANSFER false = no body transfer, only a wide strong smooth of her (10c) weights inside the same mask.
 # ---------- run 11 (Saidie 9:47 PM Oct 18 "fix that seem" = go-ahead for ONE spot): RIGHT shoulder band/sleeve junction WEIGHT TRANSFER.
 #            Runs 10b/10c: puckers + 2-3 dark slashes at the front-3/4 of her right shoulder where the sleeve folds under the off-shoulder band,
 #            because the band verts (farther than 30 mm from the skin) keep her outfit weights while the sleeve under them already follows the arm.
@@ -28,7 +29,7 @@ def r11_shoulder_weights(o):
     bones=set(b.name for b in B.data.bones); WB=_vw(BODY); WB=[{k:w for k,w in d_.items() if k in bones} for d_ in WB]
     from mathutils.geometry import barycentric_transform as _btf
     W0=_vw(o); Wl=[dict(w) for w in W0]; dist_mm=[]
-    for i in idx:
+    for i in (idx if P.get('R11_TRANSFER',True) else []):
         loc,nr,fi,dd=T.find_nearest(Vector(tuple(X[i])))
         if loc is None: continue
         tri=F[fi]; bc=_btf(loc,Vector(tuple(V[tri[0]])),Vector(tuple(V[tri[1]])),Vector(tuple(V[tri[2]])),Vector((1,0,0)),Vector((0,1,0)),Vector((0,0,1)))
@@ -77,7 +78,7 @@ def r11_shoulder_weights(o):
               'mask_verts':int(len(idx)),'mask_full_verts':int((m>=0.999).sum()),'of':int(n),'skin_dist_mm_med':round(float(np.median(dist_mm)) if dist_mm else 0,2),
               'skin_dist_mm_max':round(float(max(dist_mm)) if dist_mm else 0,2),'weight_change_L1_mean':round(float(l1.mean()),3),'weight_change_L1_max':round(float(l1.max()),3),
               'verts_changed_L1_gt_0.05':int((l1>0.05).sum()),'outside_mask_changed_verts':int(outside_changed),'smooth_iters':int(P.get('R11_SMOOTH',2)),
-              'smooth_k':K,'body_eval_mesh':use_ev,'secs':round(_t.time()-t0,1)})
+              'smooth_k':K,'transfer':bool(P.get('R11_TRANSFER',True)),'smooth_r_mm':Rs*1000,'smooth_sig_mm':sg*1000,'body_eval_mesh':use_ev,'secs':round(_t.time()-t0,1)})
     rep['r11_shoulder_weights']=r; log('R11 shoulder weights',json.dumps(r,default=str))
 if SHIRT is not None and P.get('R11_W',False):
     try: r11_shoulder_weights(SHIRT)
