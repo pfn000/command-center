@@ -1,1 +1,1 @@
-v7 r13e: genie playback proof in Google Chrome + desktop home->work scroll video 2026-10-19T02:07Z 1792375629615889394
+v7 r14 proof run (PleX slate dim fix, Emmi_Official logo once, Medium links on /writing, desktop scroll video as a frame sequence) 2026-10-19T03:27Z 1792380440981194173
