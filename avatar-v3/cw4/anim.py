@@ -1163,16 +1163,34 @@ elif MODE=='dance2':
                 T_=target_bvh(['Body','Shorts','Shirt','Bra'],frozenset({sd[0]+'ARM'}),near=hc,rad=0.25)
                 if T_ is None: continue
                 hs=hand_stats(sd,T_); hs0=dict(hs); k=0
-                while hs['pen_verts']>0 and k<14:
+                while hs['pen_verts']>0 and k<40:
                     hv=body_co()[HANDV[sd]]; d=sdist(T_,hv,0.08); j=int(np.argmin([x if x is not None else 9 for x in d])); p=Vector(tuple(hv[j]))
                     loc,nr,_,_=T_.find_nearest(p,0.08); meshes_eval(False)
                     if loc is None: break
-                    r=p-PB[sd+' arm'].head; disp=nr*((hs['pen_mm']+1.0)/1000.0); ax=r.cross(disp)
+                    r=p-PB[sd+' arm'].head; disp=nr*((hs['pen_mm']*1.6+1.0)/1000.0); ax=r.cross(disp)
                     if ax.length<1e-10: break
                     wrot_v(sd+' arm',math.degrees(disp.length/max(r.length,0.1)),ax.normalized())
                     k+=1; meshes_eval(True); hs=hand_stats(sd,T_)
                 if k: e.setdefault('hand_push',{})[sd]={'steps':k,'pen_before':hs0['pen_verts'],'pen_mm_before':hs0['pen_mm']}
                 e.setdefault('hand_body',{})[sd]=hs
+            # planted feet: sole level (heel and ball both on the floor) and resting ON it, the ankle's floor position (x,y) kept
+            for sd in e['locked']:
+                pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                for it_ in range(4):
+                    meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
+                    fw_=PB[sd+' toe'].tail-PB[sd+' ankle'].head; fw_.z=0; lat=fw_.normalized().cross(Vector((0,0,1)))
+                    dh=(fs['heel_mm']-fs['ball_mm'])/1000.0
+                    if abs(dh)>0.0012:
+                        a0=math.degrees(math.atan2(abs(dh),0.15)); wrot_v(sd+' ankle',a0,lat)
+                        meshes_eval(True); f2=foot_stats(sd,FLOOR); meshes_eval(False)
+                        if abs(f2['heel_mm']-f2['ball_mm'])>abs(fs['heel_mm']-fs['ball_mm']): wrot_v(sd+' ankle',-2*a0,lat)
+                        meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
+                    dz=(0.6-fs['min_mm'])/1000.0
+                    if abs(dz)<0.0004 and abs(fs['heel_mm']-fs['ball_mm'])<1.5: break
+                    Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                    ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
+                    for n_,R_ in Ra.items(): set_rot(n_,R_)
+                e.setdefault('plant_level_iters',{})[sd]=it_
             # feet: no skin through the floor; a free foot that dips is tilted (2 deg steps) until it clears
             for sd in ('Left','Right'):
                 meshes_eval(True); fs=foot_stats(sd,FLOOR); k=0
