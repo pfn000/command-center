@@ -69,7 +69,7 @@ def head_shell_bvh():
     bm=bmesh.new()
     for p in P: bm.verts.new(tuple(float(x) for x in p))
     res=bmesh.ops.convex_hull(bm,input=bm.verts[:])
-    kill=[g for g in res.get('geom_interior',[])+res.get('geom_unused',[]) if isinstance(g,bmesh.types.BMVert)]
+    kill=list({g for g in res.get('geom_interior',[])+res.get('geom_unused',[]) if isinstance(g,bmesh.types.BMVert) and g.is_valid})
     if kill: bmesh.ops.delete(bm,geom=kill,context='VERTS')
     bm.normal_update(); T=BVHTree.FromBMesh(bm)
     cen=Vector(tuple(P.mean(axis=0))); loc,nr,_,_=T.find_nearest(cen,1.0)

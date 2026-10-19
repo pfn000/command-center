@@ -2,11 +2,12 @@
  "render": [
   {
    "anim": "poses4",
-   "shards": 6,
+   "shards": 1,
    "samples": 10,
    "res": "900x1200",
-   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
+   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json",
+   "poses": "hand_behind_head"
   }
  ],
- "note": "anim10c poses4 #12: HIGH-HEEL feet (ball+toes on floor, heel at the bind-pose lift) + head collider + QC (14:34:13)"
+ "note": "anim10c poses4 #13: hand_behind_head only (head collider hull fix) (14:39:49)"
 }
