@@ -692,7 +692,7 @@ elif MODE=='poses3b':
             pc=(PB[f'MiddleFinger1_{sd[0]}'].head+wr.head)*0.5; meshes_eval(True); T_=bvh(classes); l2,n2,_,d2=T_.find_nearest(pc,0.4); meshes_eval(False)
             if l2 is None: break
             tgt=tgt+(l2+n2*off-pc)*0.9
-        fingers_relaxed(0.8)
+        PLACED.add(sd)
         return True
     def contact_mm(sd,classes):
         meshes_eval(True); T_=bvh(classes); wr=PB[sd+' wrist']; best=9e9
@@ -704,15 +704,16 @@ elif MODE=='poses3b':
         hz=PB['Left leg'].head.z; hip_drop((top+0.085)-hz,0,0.0)
     def toe_point(sd):   # foot pitch: + = toes pointed down
         a_=PB[sd+' ankle']; d=(a_.tail-a_.head).normalized(); return round(math.degrees(math.asin(max(-1,min(1,-d.z)))),1)
+    PLACED=set()
     def pose(name,it):
-        relaxed(); info_={}
+        relaxed(); info_={}; PLACED.clear()
         hipL=REST['Left leg']; hipR=REST['Right leg']; HX=REST['Hips'].x
         if name in ('knee_over_knee','ankles_crossed','side_saddle'):
             top=FLOOR+ANKH+Ls*0.93; seat_hips(top); posture(None)
             wrot('Hips',-4,'X')   # sit tall: tiny forward tilt of the pelvis
             hl=PB['Left leg'].head; hr=PB['Right leg'].head; fwd=Lt*0.95
             if name=='knee_over_knee':
-                lift=0.02*it
+                lift=0.025*it
                 leg_to('Left',Vector((hl.x+0.01,hl.y-fwd-0.04,FLOOR+ANKH+0.035)),Vector((0.05,-1,0.3)),Vector((0,-0.45,-0.89)))
                 leg_to('Right',Vector((hl.x+0.13,hl.y-fwd-0.16,FLOOR+ANKH+0.19+lift)),Vector((0.35,-1,0.9+lift*4)),Vector((0.15,-0.55,-0.82)))
                 q=PB['Right knee'].head+Vector((0.0,-0.02,0.06))
@@ -722,7 +723,7 @@ elif MODE=='poses3b':
                 sl=-0.13-0.01*it   # duchess slant: knees together, legs angled to her right, ankles crossed (left over right)
                 leg_to('Right',Vector((hr.x+sl,hr.y-fwd-0.02,FLOOR+ANKH+0.04)),Vector((sl*0.5-0.02*it,-1,0.25)),Vector((-0.1,-0.5,-0.86)))
                 ra=PB['Right ankle'].head
-                leg_to('Left',Vector((ra.x+0.03,ra.y-0.05,ra.z+0.05)),Vector((sl*0.5+0.02*it,-1,0.25)),Vector((-0.1,-0.5,-0.86)))
+                leg_to('Left',Vector((ra.x-0.07,ra.y-0.05,ra.z+0.045)),Vector((sl*0.5+0.02*it,-1,0.25)),Vector((-0.1,-0.5,-0.86)))
                 hand_on('Left',(PB['Left leg'].tail+PB['Right leg'].tail)*0.5+Vector((0.03,0.02,0.1)),['LL','RL'],Vector((0.5,0.2,-0.3)),Vector((-0.4,-0.6,-0.4)))
                 hand_on('Right',(PB['Left leg'].tail+PB['Right leg'].tail)*0.5+Vector((-0.03,0.07,0.11)),['LL','RL'],Vector((-0.5,0.2,-0.3)),Vector((0.4,-0.6,-0.4)))
             else:
@@ -743,17 +744,18 @@ elif MODE=='poses3b':
                 hand_on('Left',hipq,['T','LL'],Vector((0.55,0.35,-0.15)),Vector((-0.35,-0.55,-0.6)))
             if name=='hand_behind_head':
                 hd=PB['Head'].head; q=hd+Vector((-0.04,0.10,0.10))
-                ik2('Right arm','Right elbow',q,PB['Right arm'].head+Vector((-0.7,0.1,0.6))); align('Right wrist',Vector((0.4,0.3,0.8)),cap=120); fingers_relaxed(0.7)
+                ik2('Right arm','Right elbow',q,PB['Right arm'].head+Vector((-0.7,0.1,0.6))); align('Right wrist',Vector((0.4,0.3,0.8)),cap=120); PLACED.add('Right')
             if name=='contrapposto':
                 hand_on('Left',PB['Left leg'].head+Vector((0.07,-0.08,-0.16)),['LL'],Vector((0.4,0.2,-0.4)),Vector((0.0,-0.3,-0.95)),off=0.02)
             # head: level, a touch toward the camera
             wrot('Head',4 if w_=='Left' else -4,'Y')
             ch={sd:min(PB[sd+' ankle'].head.z,PB[sd+' toe'].tail.z if sd+' toe' in PB else 9) for sd in ('Left','Right')}
-        for sd in ('Left','Right'): arm_clear(sd) if name not in ('hand_behind_head',) else None
+        for sd in ('Left','Right'):
+            if sd not in PLACED and not (name=='hand_behind_head' and sd=='Right'): arm_clear(sd)
         return info_
     def gates(name):
         meshes_eval(True); fl=clip_flags(); meshes_eval(False); g={'flags':fl}
-        cls_={'knee_over_knee':['RL'],'ankles_crossed':['LL','RL'],'side_saddle':['LL','T','RL'],'hand_on_hip':['T','LL'],'contrapposto':['LL'],'hand_behind_head':['T','LL']}[name]
+        cls_={'knee_over_knee':['RL'],'ankles_crossed':['LL','RL'],'side_saddle':['LL','T','RL'],'hand_on_hip':['T','LL'],'contrapposto':['LL'],'hand_behind_head':['T','LL','X']}[name]
         g['hand_contact_mm']={sd:contact_mm(sd,cls_) for sd in ('Left','Right')}
         g['toe_point_deg']={sd:toe_point(sd) for sd in ('Left','Right')}
         g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,PB['Left leg'].head.x-PB['Right leg'].head.x)),1)
@@ -764,7 +766,7 @@ elif MODE=='poses3b':
     meshes_eval(True); relaxed(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z
     for nm in mine:
         best=None
-        for it in range(6):
+        for it in range(8):
             meshes_eval(False); inf=pose(nm,it); g=gates(nm)
             bad=(g['flags'].get('leg_vs_leg_tris') or 0)+(g['flags'].get('Larm_vs_torso_tris') or 0)+(g['flags'].get('Rarm_vs_torso_tris') or 0)+(g['flags'].get('Larm_vs_legs_tris') or 0)+(g['flags'].get('Rarm_vs_legs_tris') or 0)
             log('pose3b',nm,it,g,inf)

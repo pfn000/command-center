@@ -1,12 +1,12 @@
 {
  "render": [
   {
-   "anim": "hair2",
+   "anim": "poses3b",
    "shards": 3,
-   "samples": 8,
+   "samples": 10,
    "res": "720x1280",
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c hair2: hair swing test on the arms-down 10c body (head turn, nod/tilt, body turn; front-3/4 + back-3/4)"
+ "note": "anim10c poses3b #2: hands stay where placed (no arm push-out after contact), no extra finger curl, ankles truly crossed, higher top-knee search"
 }
