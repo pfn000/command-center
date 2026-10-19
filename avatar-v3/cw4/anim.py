@@ -1188,6 +1188,31 @@ elif MODE=='dance2':
                     ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
                     for n_,R_ in Ra.items(): set_rot(n_,R_)
                 e.setdefault('plant_level_iters',{})[sd]=it_
+            # feet never through each other: push the free foot sideways off the other leg (ankle moved, orientation kept)
+            meshes_eval(True)
+            A_={sd:PB[sd+' ankle'].head.copy() for sd in ('Left','Right')}
+            hz=(A_['Left']-A_['Right']); hz.z=0
+            if hz.length<0.22:
+                fr_=[sd for sd in ('Right','Left') if sd not in e['locked']]
+                if fr_:
+                    sd=fr_[0]; o_='Left' if sd=='Right' else 'Right'
+                    exl=frozenset({'LARM','RARM','CORE','HEAD',sd[0]+'LEG'})
+                    pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                    hist=[]
+                    for it_ in range(10):
+                        meshes_eval(True)
+                        T_=target_bvh(['Body'],exl,near=PB[o_+' ankle'].head,rad=0.25)
+                        if T_ is None: break
+                        dd=[x for x in sdist(T_,body_co()[FOOTV[sd]],0.05) if x is not None]
+                        pen=-min(dd) if dd else 0.0; hist.append(round(pen*1000,1))
+                        if pen<0.0008: break
+                        dv=PB[sd+' ankle'].head-PB[o_+' ankle'].head; dv.z=0
+                        if dv.length<1e-4: dv=(PB[sd+' leg'].head-PB[o_+' leg'].head); dv.z=0
+                        dv.normalize()
+                        meshes_eval(False); Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                        ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+dv*(pen+0.004),pole_)
+                        for n_,R_ in Ra.items(): set_rot(n_,R_)
+                    upd(); meshes_eval(True); e['foot_foot_pen_mm']={sd:hist}
             # feet: no skin through the floor; a free foot that dips is tilted (2 deg steps) until it clears
             for sd in ('Left','Right'):
                 meshes_eval(True); fs=foot_stats(sd,FLOOR); k=0
