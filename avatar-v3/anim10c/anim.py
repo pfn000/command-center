@@ -934,8 +934,8 @@ elif MODE=='poses4':
             wrot('Head',4 if inf.get('weight')=='Left' else -4,'Y')
             def on_hip(sd):
                 sx=SG if sd=='Left' else -SG
-                q=PB[sd+' leg'].head+Vector((sx*0.16,-0.03,0.11))
-                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.85,0.45,0.05)),Vector((-sx*0.10,-0.75,-0.65)),incl=frozenset({'CORE',sd[0]+'LEG'}))
+                q=PB[sd+' leg'].head+Vector((sx*0.16,-0.01,0.17))
+                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.9,0.45,0.15)),Vector((-sx*0.10,-0.85,-0.50)),incl=frozenset({'CORE',sd[0]+'LEG'}))
             def at_side(sd):
                 sx=SG if sd=='Left' else -SG
                 q=PB[sd+' leg'].head+Vector((sx*0.16,0.01,-0.13))

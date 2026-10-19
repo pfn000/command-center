@@ -105,18 +105,17 @@ def finger_curl(sd,f,deg):
     sgn=FSIGN[(sd[0],f)] if FSIGN else 1
     for n,w in zip(_fing_bones(sd,f),_CURLW[f]): wrot_v(n,sgn*deg*w,_lx(n))
 def finger_spread(sd,amt=1.0):
-    """natural splay: index toward the thumb side, ring/little away, checked by the tip gaps"""
+    """splay (amt>0) or close up (amt<0) the long fingers about their own side axis, direction checked by the tip gaps to the middle finger"""
     s=sd[0]
-    for f,a_ in (('IndexFinger',4.0),('RingFinger',-3.0),('LittleFinger',-7.0)):
+    for f,a_ in (('IndexFinger',4.0),('RingFinger',3.0),('LittleFinger',7.0)):
         n=f'{f}1_{s}'
         if n not in PB: continue
         mid=PB[f'MiddleFinger3_{s}'].tail.copy(); d0=(PB[f'{f}3_{s}'].tail-mid).length
         ax=PB[n].matrix.to_3x3().col[2].normalized()
         base={k:PB[k].matrix_basis.copy() for k in _fing_bones(sd,f)}
-        wrot_v(n,abs(a_)*amt,ax); d1=(PB[f'{f}3_{s}'].tail-mid).length
-        if d1<d0:
-            for k,m in base.items(): PB[k].matrix_basis=m
-            upd(); wrot_v(n,-abs(a_)*amt,ax)
+        wrot_v(n,2.0,ax); apart=1.0 if (PB[f'{f}3_{s}'].tail-mid).length>d0 else -1.0
+        for k,m in base.items(): PB[k].matrix_basis=m
+        upd(); wrot_v(n,apart*a_*amt,ax)
 def settle_fingers(sd,T,lo=-12.0,hi=26.0,goal=0.0012,rest_hover=12.0):
     """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
     rep={}
@@ -232,8 +231,9 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,
         ROLL.append(round(df*1000,1))
     rep={}
     meshes_eval(True); rep['palm']=hand_stats(sd,T,which=pv); meshes_eval(False)
+    if not settle and not unsigned: finger_spread(sd,-1.0)
     if settle and not unsigned:
-        finger_spread(sd,0.3); rep['fingers']=settle_fingers(sd,T)
+        finger_spread(sd,-1.0); rep['fingers']=settle_fingers(sd,T)
     meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False)
     # last guard: any hand skin still inside -> lift the whole hand off along the normal, 1 mm steps (finger poses kept)
     k=0
