@@ -1,1 +1,1 @@
-v7 r13b proof run (r13 fixes + PleX Code slate + genie video) 2026-10-19T01:16Z
+v7 r13b proof run, retry after a Google Fonts fetch flake (build retries x3) 2026-10-19T01:18Z

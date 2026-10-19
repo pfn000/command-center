@@ -40,7 +40,8 @@ jobs:
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:K -in <(cat portfolio-shots/src.tgz.enc.part*) | tar -xz -C /tmp/site
           cd /tmp/site && corepack enable && corepack prepare pnpm@9 --activate
           pnpm install --no-frozen-lockfile 2>&1 | tail -5
-          pnpm build 2>&1 | tee /tmp/build.log | tail -60
+          for i in 1 2 3; do pnpm build > /tmp/build.log 2>&1 && break; echo "build try $i failed"; tail -15 /tmp/build.log; sleep 8; done
+          tail -60 /tmp/build.log; [ -f .next/BUILD_ID ]
       - name: Serve + shoot
         if: steps.mode.outputs.live == ''
         run: |
