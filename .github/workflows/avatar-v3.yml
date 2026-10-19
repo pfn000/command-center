@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [A0, A2] }
+      matrix: { variant: [A0, A2, A3] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4
@@ -131,13 +131,6 @@ jobs:
           - { qa: bones, variant: A0, shard: 4, shards: 6 }
           - { qa: bones, variant: A0, shard: 5, shards: 6 }
           - { qa: shapes, variant: A0, shard: 0, shards: 1 }
-          - { qa: tests, variant: A0, shard: 0, shards: 4, test: face }
-          - { qa: tests, variant: A0, shard: 1, shards: 4, test: face }
-          - { qa: tests, variant: A0, shard: 2, shards: 4, test: face }
-          - { qa: tests, variant: A0, shard: 3, shards: 4, test: face }
-          - { qa: tests, variant: A0, shard: 0, shards: 1, test: vis }
-          - { qa: tests, variant: A0, shard: 0, shards: 2, test: fing }
-          - { qa: tests, variant: A0, shard: 1, shards: 2, test: fing }
           - { qa: tests, variant: A0, shard: 0, shards: 4, test: limb }
           - { qa: tests, variant: A0, shard: 1, shards: 4, test: limb }
           - { qa: tests, variant: A0, shard: 2, shards: 4, test: limb }

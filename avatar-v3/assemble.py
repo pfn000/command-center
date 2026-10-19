@@ -551,7 +551,10 @@ def shirt_thicken(o):
         if loc is None:
             v_=p-cen; v_[2]=0; dot[i]=float(N[i]@(v_/max(np.linalg.norm(v_),1e-9)))
         else: dot[i]=float(N[i]@np.array(tuple(nr)))
-    w=np.clip(dot/0.5,0,1); w[~(np.linalg.norm(N,axis=1)>0.5)]=0
+    dirn=P.get('SHIRT_THICK_DIR','out'); r['direction']=dirn
+    # 'out': the OUTER layer moves out along its own normal; 'in' (Solidify-style, offset -1): the visible outer layer stays where her shirt is and
+    # the INNER layer moves in along its own (inward) normal; the later clearance passes then lift the whole shell only where the skin needs room.
+    w=np.clip((dot if dirn=='out' else -dot)/0.5,0,1); w[~(np.linalg.norm(N,axis=1)>0.5)]=0
     outer=dot>0.5; inner=dot<-0.5
     r['outer_verts']=int(outer.sum()); r['inner_verts']=int(inner.sum()); r['rim_or_ambiguous_verts']=int(len(V)-outer.sum()-inner.sum())
     r['thickness_before']=_thick_meas(V,outer,inner)
@@ -1330,7 +1333,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r10-final','A1':'jena-v37r10-A1','A2':'jena-v37r10-noshirt'}.get(VAR)
+SAVE_NAME={'A0':'jena-v37r10-final','A1':'jena-v37r10-A1','A2':'jena-v37r10-noshirt','A3':'jena-v37r10-nofoldfix'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'

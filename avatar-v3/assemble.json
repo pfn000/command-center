@@ -90,7 +90,8 @@
   "FOLD_CAP": 0.003,
   "TEST_SAMPLES": 8,
   "CLOSE_RES": 1024,
-  "CLOSE_SAMPLES": 16
+  "CLOSE_SAMPLES": 16,
+  "SHIRT_THICK_DIR": "in"
  },
  "A2": {
   "SHIRT": false,
@@ -101,5 +102,8 @@
  },
  "P50": {
   "ARM_DOWN": 50
+ },
+ "A3": {
+  "SEAM_FOLD": false
  }
 }
