@@ -151,7 +151,7 @@ def frames(src, dur):
     sheet = Image.new('RGB', (cols * tw + (cols + 1) * 6, head + rows * (th + 26) + 6), (18, 18, 22)); d = ImageDraw.Draw(sheet)
     try: f1 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 15); f2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 13)
     except Exception: f1 = f2 = ImageFont.load_default()
-    pr = meta['probe']; title = (meta.get('title') or URL)[:90]
+    pr = meta['probe']; title = ''.join(c for c in (meta.get('title') or URL) if ord(c) < 0x2000)[:90]
     d.text((8, 6), title, fill=(255, 255, 255), font=f1)
     d.text((8, 26), f"{pr['width']}x{pr['height']} @ {pr['fps_avg']} fps · {ts(pr['duration'])} · {len(scenes)} scene picks (cut threshold {thr})", fill=(170, 170, 180), font=f2)
     for i, (s, im) in enumerate(zip(scenes, ims)):
@@ -213,7 +213,8 @@ def utterances(words):
     utts = []
     for w in words:
         u = utts[-1] if utts else None
-        if u and u['speaker'] == w['speaker'] and w['start'] - u['end'] < 1.5 and not (u['text'].endswith(('.', '?', '!')) and u['end'] - u['start'] > 12):
+        long_ = u and (u['end'] - u['start'] > 25 or (u['text'].endswith(('.', '?', '!', ',')) and u['end'] - u['start'] > 12))
+        if u and u['speaker'] == w['speaker'] and w['start'] - u['end'] < 1.5 and not long_:
             u['text'] += w['word']; u['end'] = w['end']; u['words'] += 1
         else: utts.append({'speaker': w['speaker'], 'start': w['start'], 'end': w['end'], 'text': w['word'].strip(), 'words': 1})
     for u in utts: u['text'] = u['text'].strip(); u['tc'] = ts(u['start'])
