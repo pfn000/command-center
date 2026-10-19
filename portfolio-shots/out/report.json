@@ -1,9 +1,401 @@
 {
- "shots": [],
- "errors": [
-  "video d: hard timeout 840s",
-  "video d: Error: page.evaluate: Target page, context or browser has been closed"
+ "shots": [
+  {
+   "name": "d-dark-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:0.000 focals:0.000 ouija:0.000 moments:0.000 jena:0.000 projects:0.000 plexcode:0.000 more:0"
+  },
+  {
+   "name": "d-dark-02p-work-plexcode",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.014 more:0"
+  },
+  {
+   "name": "d-dark-02q-work-plexcode-covered",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.381 more:0"
+  },
+  {
+   "name": "d-dark-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "d-dark-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "d-dark-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "d-dark-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "d-dark-05b-writing-article-ai",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "d-light-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:0.000 focals:0.000 ouija:0.000 moments:0.000 jena:0.000 projects:0.000 plexcode:0.000 more:0"
+  },
+  {
+   "name": "d-light-02p-work-plexcode",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.014 more:0"
+  },
+  {
+   "name": "d-light-02q-work-plexcode-covered",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.381 more:0"
+  },
+  {
+   "name": "d-light-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "d-light-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "d-light-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "d-light-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "p-dark-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:0.000 focals:0.000 ouija:0.000 moments:0.000 jena:0.000 projects:0.000 plexcode:0.000 more:0"
+  },
+  {
+   "name": "p-dark-02p-work-plexcode",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.056 more:0"
+  },
+  {
+   "name": "p-dark-02q-work-plexcode-covered",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.380 more:0"
+  },
+  {
+   "name": "p-dark-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "p-dark-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "p-dark-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "p-dark-03c-emmico-vtubing-logo",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "p-dark-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "p-dark-05c-writing-cards-end",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "p-dark-05b-writing-article-ai",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "p-light-02-work",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:0.000 focals:0.000 ouija:0.000 moments:0.000 jena:0.000 projects:0.000 plexcode:0.000 more:0"
+  },
+  {
+   "name": "p-light-02p-work-plexcode",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.056 more:0"
+  },
+  {
+   "name": "p-light-02q-work-plexcode-covered",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": "ncom:1.000 focals:1.000 ouija:1.000 moments:1.000 jena:1.000 projects:1.000 plexcode:0.380 more:0"
+  },
+  {
+   "name": "p-light-03-emmico",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "p-light-03b-emmico-slate1",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:0.000 emmico:0"
+  },
+  {
+   "name": "p-light-03b-emmico-slate2",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "p-light-03c-emmico-vtubing-logo",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 1,
+   "under": "emmi-official:1.000 emmico:0"
+  },
+  {
+   "name": "p-light-05-writing",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  },
+  {
+   "name": "p-light-05c-writing-cards-end",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "emmiLogos": 0,
+   "under": ""
+  }
  ],
- "checks": {},
- "lighthouse": "skipped: time"
+ "errors": [
+  "video: Error: Command failed: ffmpeg -y -loglevel error -framerate 24 -i /tmp/vf/f%05d.jpg -vf \"scale=1280:720:flags=lanczos,format=yuv420p\" -c:v libx264 -preset slow -profile:v high -crf 26 -movflags +faststart -an portfolio-shots/out/video-d-dark-home-work-scroll.mp4\n/bin/sh: 1: ffmpeg: not found\n"
+ ],
+ "checks": {
+  "d-dark-plexcode-r13-framing": {
+   "under": "0.014",
+   "filter": "brightness(0.99132)",
+   "slateBottom": 707,
+   "nextTop": 699
+  },
+  "d-dark-plexcode-covered": {
+   "under": "0.381",
+   "filter": "brightness(0.76378)"
+  },
+  "d-dark-emmico-logo-count": [
+   "emmico"
+  ],
+  "d-dark-writing-cards": [
+   {
+    "title": "AI Being Used Wrong?",
+    "internal": "/writing/ai-being-used-wrong",
+    "medium": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+    "mediumText": "Read it on Medium ↗"
+   },
+   {
+    "title": "The Future Of Ads Shouldn’t Interrupt Us — It Should Understand Us",
+    "internal": "/writing/future-of-ads",
+    "medium": "https://medium.com/@saidienewara/the-future-of-ads-shouldnt-interrupt-us-it-should-understand-us-8550547c2bb8",
+    "mediumText": "Read it on Medium ↗"
+   }
+  ],
+  "d-dark-article-medium-link": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+  "d-light-plexcode-r13-framing": {
+   "under": "0.014",
+   "filter": "brightness(0.99132)",
+   "slateBottom": 707,
+   "nextTop": 699
+  },
+  "d-light-plexcode-covered": {
+   "under": "0.381",
+   "filter": "brightness(0.76378)"
+  },
+  "d-light-emmico-logo-count": [
+   "emmico"
+  ],
+  "d-light-writing-cards": [
+   {
+    "title": "AI Being Used Wrong?",
+    "internal": "/writing/ai-being-used-wrong",
+    "medium": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+    "mediumText": "Read it on Medium ↗"
+   },
+   {
+    "title": "The Future Of Ads Shouldn’t Interrupt Us — It Should Understand Us",
+    "internal": "/writing/future-of-ads",
+    "medium": "https://medium.com/@saidienewara/the-future-of-ads-shouldnt-interrupt-us-it-should-understand-us-8550547c2bb8",
+    "mediumText": "Read it on Medium ↗"
+   }
+  ],
+  "p-dark-plexcode-r13-framing": {
+   "under": "0.056",
+   "filter": "brightness(0.96528)",
+   "slateBottom": 808,
+   "nextTop": 773
+  },
+  "p-dark-plexcode-covered": {
+   "under": "0.380",
+   "filter": "brightness(0.7644)"
+  },
+  "p-dark-emmico-logo-count": [
+   "emmico"
+  ],
+  "p-dark-writing-cards": [
+   {
+    "title": "AI Being Used Wrong?",
+    "internal": "/writing/ai-being-used-wrong",
+    "medium": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+    "mediumText": "Read it on Medium ↗"
+   },
+   {
+    "title": "The Future Of Ads Shouldn’t Interrupt Us — It Should Understand Us",
+    "internal": "/writing/future-of-ads",
+    "medium": "https://medium.com/@saidienewara/the-future-of-ads-shouldnt-interrupt-us-it-should-understand-us-8550547c2bb8",
+    "mediumText": "Read it on Medium ↗"
+   }
+  ],
+  "p-dark-article-medium-link": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+  "p-light-plexcode-r13-framing": {
+   "under": "0.056",
+   "filter": "brightness(0.96528)",
+   "slateBottom": 808,
+   "nextTop": 773
+  },
+  "p-light-plexcode-covered": {
+   "under": "0.380",
+   "filter": "brightness(0.7644)"
+  },
+  "p-light-emmico-logo-count": [
+   "emmico"
+  ],
+  "p-light-writing-cards": [
+   {
+    "title": "AI Being Used Wrong?",
+    "internal": "/writing/ai-being-used-wrong",
+    "medium": "https://medium.com/@saidienewara/ai-being-used-wrong-b79712678116",
+    "mediumText": "Read it on Medium ↗"
+   },
+   {
+    "title": "The Future Of Ads Shouldn’t Interrupt Us — It Should Understand Us",
+    "internal": "/writing/future-of-ads",
+    "medium": "https://medium.com/@saidienewara/the-future-of-ads-shouldnt-interrupt-us-it-should-understand-us-8550547c2bb8",
+    "mediumText": "Read it on Medium ↗"
+   }
+  ],
+  "videoBrowser": "chrome 155.0.8059.39",
+  "videoCapture": {
+   "frames": 424,
+   "seconds": 207,
+   "seg": {
+    "home": 82,
+    "work": 342
+   }
+  }
+ },
+ "videos": []
 }
