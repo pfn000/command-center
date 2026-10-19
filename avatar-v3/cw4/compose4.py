@@ -137,6 +137,8 @@ G={'foot_slide_mm_max':round(M.get('slide_mm',0),2) if MODE2!='dance2' else max(
    'dance3_frames_arm_vs_legs_tris':sum(1 for f in fr_ if ((f.get('clip_final') or {}).get('Larm_vs_legs_tris') or 0)+((f.get('clip_final') or {}).get('Rarm_vs_legs_tris') or 0)>0),
    'dance3_frames_foot_below_floor':sum(1 for f in fr_ if any((x or {}).get('below_verts',0)>0 for x in (f.get('feet') or {}).values())),
    'dance3_foot_below_floor_mm_min':min([(x or {}).get('min_mm',0) for f in fr_ for x in (f.get('feet') or {}).values()] or [0]),
+   'dance3_planted_ball_mm_max':max([abs((f['feet'][sd] or {}).get('ball_mm',0)) for f in fr_ for sd in (f.get('locked') or []) if f.get('feet')] or [0]),
+   'dance3_planted_heel_lift_mm_range':[min([(f['feet'][sd] or {}).get('heel_mm',0) for f in fr_ for sd in (f.get('locked') or []) if f.get('feet')] or [0]),max([(f['feet'][sd] or {}).get('heel_mm',0) for f in fr_ for sd in (f.get('locked') or []) if f.get('feet')] or [0])],
    'dance3_planted_heel_ball_mm_max':max([max(abs((f['feet'][sd] or {}).get('heel_mm',0)),abs((f['feet'][sd] or {}).get('ball_mm',0))) for f in fr_ for sd in (f.get('locked') or []) if f.get('feet')] or [0]),
    'dance3_toe_rel_deg_range':[min([v for f in fr_ for v in (f.get('toe_rel_deg') or {}).values()] or [0]),max([v for f in fr_ for v in (f.get('toe_rel_deg') or {}).values()] or [0])],
    'dance3_head_pitch_deg_range':[min([f.get('head_pitch_deg',0) for f in fr_] or [0]),max([f.get('head_pitch_deg',0) for f in fr_] or [0])],

@@ -905,6 +905,10 @@ elif MODE=='dance2':
     KF0={}; UP0={}
     for _sd in ('Left','Right'):
         KF0[_sd]=PB[_sd+' knee'].matrix.to_3x3().inverted()@HEADF0; UP0[_sd]=PB[_sd+' ankle'].matrix.to_3x3().inverted()@Vector((0,0,1))
+    meshes_eval(True); HH={}
+    for _sd in ('Left','Right'):
+        _fs=foot_stats(_sd,0.0); HH[_sd]=float(_fs['heel_mm']-_fs['ball_mm'])
+    meshes_eval(False); log('high-heel foot: bind-pose heel lift above the ball (mm)',HH)
     def ankle_angles(sd):
         # twist: foot direction vs the knee's facing, about the shin; inv: shin leaning across the sole (+ = toward her outside = inversion); flex: ankle bend vs rest
         a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
@@ -1225,14 +1229,14 @@ elif MODE=='dance2':
                 for it_ in range(4):
                     meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
                     fw_=PB[sd+' toe'].tail-PB[sd+' ankle'].head; fw_.z=0; lat=fw_.normalized().cross(Vector((0,0,1)))
-                    dh=(fs['heel_mm']-fs['ball_mm'])/1000.0
+                    dh=(fs['heel_mm']-fs['ball_mm']-HH[sd])/1000.0   # high-heel foot: hold the model's own heel lift, never force flat
                     if abs(dh)>0.0012:
                         a0=math.degrees(math.atan2(abs(dh),0.15)); wrot_v(sd+' ankle',a0,lat)
                         meshes_eval(True); f2=foot_stats(sd,FLOOR); meshes_eval(False)
-                        if abs(f2['heel_mm']-f2['ball_mm'])>abs(fs['heel_mm']-fs['ball_mm']): wrot_v(sd+' ankle',-2*a0,lat)
+                        if abs(f2['heel_mm']-f2['ball_mm']-HH[sd])>abs(fs['heel_mm']-fs['ball_mm']-HH[sd]): wrot_v(sd+' ankle',-2*a0,lat)
                         meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
                     dz=(0.6-fs['min_mm'])/1000.0
-                    if abs(dz)<0.0004 and abs(fs['heel_mm']-fs['ball_mm'])<1.5: break
+                    if abs(dz)<0.0004 and abs(fs['heel_mm']-fs['ball_mm']-HH[sd])<1.5: break
                     Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
                     ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
                     for n_,R_ in Ra.items(): set_rot(n_,R_)
