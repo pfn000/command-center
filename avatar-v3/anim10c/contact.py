@@ -1,0 +1,214 @@
+
+# contact.py: shared vertex-level contact tools for HANDS and FEET (Jena v3.7, worker 41c5b341, Oct 19 2026).
+# Everything here is in ARMATURE space (B.matrix_world is not identity on this build).
+import re as _re
+_MW=B.matrix_world.copy(); _MWI=_MW.inverted(); _A=np.array(_MWI); _A3=_A[:3,:3].T.copy(); _At=_A[:3,3].copy()
+log('MW',[[round(x,4) for x in r] for r in _MW])
+def arm_co(o):
+    return ev_co(o)@_A3+_At
+def to_world(p): return _MW@Vector(p)
+FING5=('Thumb','IndexFinger','MiddleFinger','RingFinger','LittleFinger')
+def _bone_part(n):
+    if not n: return None
+    m=_re.match(r'(Thumb|IndexFinger|MiddleFinger|RingFinger|LittleFinger)(\d)_([LR])$',n)
+    if m: return ('Left' if m.group(3)=='L' else 'Right','hand',m.group(1))
+    for sd in ('Left','Right'):
+        if n==sd+' wrist': return (sd,'hand','palm')
+        if n==sd+' ankle': return (sd,'foot','foot')
+        if n==sd+' toe': return (sd,'foot','toe')
+    return None
+_LIMBC={}
+def _limb(n):
+    if n in _LIMBC: return _LIMBC[n]
+    b=PB.get(n); r='CORE'
+    while b is not None:
+        hit=None
+        for sd in ('Left','Right'):
+            if b.name in (sd+' arm',sd+' shoulder'): hit=sd[0]+'ARM'
+            elif b.name==sd+' leg': hit=sd[0]+'LEG'
+        if hit: r=hit; break
+        if b.name in ('Neck','Head'): r='HEAD'; break
+        b=b.parent
+    _LIMBC[n]=r; return r
+def _labels(o):
+    vg={g.index:g.name for g in o.vertex_groups}; lim=[]; part=[]
+    for v in o.data.vertices:
+        best=None; w=0.0
+        for g in v.groups:
+            if g.weight>w and g.group in vg: w=g.weight; best=vg[g.group]
+        lim.append(_limb(best) if best else 'CORE'); part.append(_bone_part(best))
+    return lim,part
+MESHINFO={}
+for _o in MESHES:
+    if _o.name in ('Hair',): continue
+    try:
+        _l,_p=_labels(_o); _pl=[tuple(p.vertices) for p in _o.data.polygons]
+        _pls=[frozenset(_l[i] for i in p) for p in _pl]
+        MESHINFO[_o.name]=dict(lim=_l,part=_p,polys=_pl,plims=_pls)
+    except Exception as ex: log('meshinfo fail',_o.name,repr(ex)[:120])
+_BP=MESHINFO['Body']['part']
+HANDV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='hand'],dtype=np.int64) for sd in ('Left','Right')}
+PALMV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='palm'],dtype=np.int64) for sd in ('Left','Right')}
+FINGV={(sd,f):np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]==f],dtype=np.int64) for sd in ('Left','Right') for f in FING5}
+FOOTV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='foot'],dtype=np.int64) for sd in ('Left','Right')}
+TOEV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='toe'],dtype=np.int64) for sd in ('Left','Right')}
+log('contact verts',{k:len(v) for k,v in list(HANDV.items())+list(FOOTV.items())},{f'{k[0][0]}{k[1][:4]}':len(v) for k,v in FINGV.items()},'toe',{k:len(v) for k,v in TOEV.items()})
+def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None):
+    """BVH over the given meshes' polys (armature space), dropping polys that touch an excluded limb, kept within rad of `near`."""
+    V=[];P=[]
+    for nm in meshes:
+        o=bpy.data.objects.get(nm)
+        if o is None or (o.hide_render and nm!='TestSeat'): continue
+        co=arm_co(o)
+        mi=MESHINFO.get(nm)
+        if mi is None:
+            pl=[tuple(p.vertices) for p in o.data.polygons]; pls=[frozenset() for _ in pl]
+        else: pl,pls=mi['polys'],mi['plims']
+        if near is not None:
+            ok=np.linalg.norm(co-np.array(tuple(near)),axis=1)<rad
+        else: ok=None
+        idx={}
+        for p,ls in zip(pl,pls):
+            if ls & excl: continue
+            if ok is not None and not all(ok[i] for i in p): continue
+            q=[]
+            for i in p:
+                j=idx.get(i)
+                if j is None: j=len(V); idx[i]=j; V.append(Vector(tuple(co[i])))
+                q.append(j)
+            P.append(q)
+    if not P: return None
+    return BVHTree.FromPolygons(V,P)
+def sdist(T,pts,maxd=0.08):
+    """signed distance (m) of each point to the BVH surface: + outside, - inside; None if farther than maxd."""
+    out=[]
+    for p in pts:
+        loc,nr,i,d=T.find_nearest(Vector(tuple(p)),maxd)
+        if loc is None: out.append(None); continue
+        s=(Vector(tuple(p))-loc).dot(nr); out.append(d if s>=0 else -d)
+    return out
+def body_co(): return arm_co(BODY)
+def hand_stats(sd,T,co=None,which=None):
+    co=body_co() if co is None else co
+    vi=HANDV[sd] if which is None else which
+    if T is None or len(vi)==0: return dict(gap_mm=None,pen_verts=0,pen_mm=0.0)
+    d=[x for x in sdist(T,co[vi]) if x is not None]
+    if not d: return dict(gap_mm=None,pen_verts=0,pen_mm=0.0)
+    d=np.array(d); return dict(gap_mm=round(float(d.min())*1000,1),pen_verts=int((d<-0.0008).sum()),pen_mm=round(float(max(0.0,-d.min()))*1000,1),touch_verts=int(((d>-0.0008)&(d<0.003)).sum()))
+def _fing_bones(sd,f):
+    s=sd[0]
+    if f=='Thumb': return [n for n in (f'Thumb1_{s}',f'Thumb2_{s}') if n in PB]
+    return [n for n in (f'{f}1_{s}',f'{f}2_{s}',f'{f}3_{s}') if n in PB]
+_CURLW={'Thumb':(0.6,0.8),'IndexFinger':(0.55,1.0,0.7),'MiddleFinger':(0.55,1.0,0.7),'RingFinger':(0.55,1.0,0.7),'LittleFinger':(0.55,1.0,0.7)}
+def finger_curl(sd,f,deg):
+    sgn=FSIGN[(sd[0],f)] if FSIGN else 1
+    for n,w in zip(_fing_bones(sd,f),_CURLW[f]): wrot_v(n,sgn*deg*w,_lx(n))
+def finger_spread(sd,amt=1.0):
+    """natural splay: index toward the thumb side, ring/little away, checked by the tip gaps"""
+    s=sd[0]
+    for f,a_ in (('IndexFinger',4.0),('RingFinger',-3.0),('LittleFinger',-7.0)):
+        n=f'{f}1_{s}'
+        if n not in PB: continue
+        mid=PB[f'MiddleFinger3_{s}'].tail.copy(); d0=(PB[f'{f}3_{s}'].tail-mid).length
+        ax=PB[n].matrix.to_3x3().col[2].normalized()
+        base={k:PB[k].matrix_basis.copy() for k in _fing_bones(sd,f)}
+        wrot_v(n,abs(a_)*amt,ax); d1=(PB[f'{f}3_{s}'].tail-mid).length
+        if d1<d0:
+            for k,m in base.items(): PB[k].matrix_basis=m
+            upd(); wrot_v(n,-abs(a_)*amt,ax)
+def settle_fingers(sd,T,lo=-30.0,hi=45.0,goal=0.0015):
+    """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
+    rep={}
+    for f in FING5:
+        vi=FINGV[(sd,f)]
+        if len(vi)==0: continue
+        bones=_fing_bones(sd,f); base={k:PB[k].matrix_basis.copy() for k in bones}
+        def at(deg):
+            for k,m in base.items(): PB[k].matrix_basis=m
+            upd(); finger_curl(sd,f,deg); meshes_eval(True); d=[x for x in sdist(T,body_co()[vi],0.06) if x is not None]; meshes_eval(False)
+            return min(d) if d else 9.0
+        d0=at(0.0)
+        if d0<0.0:      # inside: uncurl (or curl, whichever clears) by bisection toward 0 penetration
+            a,b=0.0,lo; db=at(b)
+            if db<0.0: a,b=0.0,hi; db=at(b)
+            if db<0.0: at(0.0); rep[f]={'deg':0.0,'gap_mm':round(d0*1000,1),'stuck':True}; continue
+            for _ in range(9):
+                m=(a+b)/2; dm=at(m)
+                if dm<0.0: a=m
+                else: b=m
+            d=at(b); rep[f]={'deg':round(b,1),'gap_mm':round(d*1000,1)}
+        elif d0>0.003 and f!='Thumb':   # hovering: curl toward the surface until it touches (0-3 mm)
+            a,b=0.0,hi; db=at(b)
+            if db>0.003: rep[f]={'deg':round(hi,1),'gap_mm':round(db*1000,1),'hover':True}; continue
+            for _ in range(9):
+                m=(a+b)/2; dm=at(m)
+                if dm>goal: a=m
+                else: b=m
+            # b is the first angle at/inside goal; make sure it is not inside
+            d=at(b)
+            if d<0.0: d=at(a); b=a
+            rep[f]={'deg':round(b,1),'gap_mm':round(d*1000,1)}
+        else:
+            at(0.0); rep[f]={'deg':0.0,'gap_mm':round(d0*1000,1)}
+    return rep
+def _palm_roll(sd,want):
+    """signed angle (deg) about the hand axis that turns the palm normal onto `want`"""
+    s=sd[0]; w=PB[sd+' wrist'].head; ax=(PB[f'MiddleFinger1_{s}'].head-w).normalized()
+    p=(PB[f'MiddleFinger3_{s}'].tail-PB[f'MiddleFinger1_{s}'].head); p=p-ax*p.dot(ax)
+    q=want-ax*want.dot(ax)
+    if p.length<1e-6 or q.length<1e-6: return 0.0,ax
+    p.normalize(); q.normalize(); return math.degrees(math.atan2(p.cross(q).dot(ax),p.dot(q))),ax
+def ik_hand_to(sd,tgt,elbow_pole,fingers_dir,palm_want=None):
+    ik2(sd+' arm',sd+' elbow',tgt,PB[sd+' arm'].head+elbow_pole); align(sd+' wrist',fingers_dir,cap=180)
+    if palm_want is not None:
+        a,_=_palm_roll(sd,palm_want)
+        el=PB[sd+' elbow']; fa=(el.tail-el.head).normalized()
+        wrot_v(sd+' elbow',max(-80.0,min(80.0,a*0.7)),fa); align(sd+' wrist',fingers_dir,cap=180)
+        a2,ax=_palm_roll(sd,palm_want); wrot_v(sd+' wrist',max(-45.0,min(45.0,a2)),ax)
+def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,palm_only=True,unsigned=False,palm_toward=None):
+    """IK the hand so its PALM (palm facing the surface) rests on the nearest surface to `query`: closest palm skin 0-3 mm off, 0 inside; then drape the fingers."""
+    meshes_eval(True); T=target_bvh(meshes,excl,near=query,rad=0.35); meshes_eval(False)
+    if T is None: return None
+    loc,nr,_,_=T.find_nearest(Vector(tuple(query)),maxd)
+    if loc is None: return None
+    wr=PB[sd+' wrist']; tgt=loc+nr*0.03-(wr.tail-wr.head)*0.3; n2=nr
+    def want(): return (Vector(palm_toward)-PB[sd+' wrist'].head).normalized() if palm_toward is not None else -n2
+    pv=PALMV[sd] if (palm_only and len(PALMV[sd])) else HANDV[sd]
+    for k in range(8):
+        ik_hand_to(sd,tgt,elbow_pole,fingers_dir,want())
+        meshes_eval(True); co=body_co(); d=[x for x in sdist(T,co[pv],0.12) if x is not None]
+        if unsigned: d=[abs(x) for x in d]
+        pc=Vector(tuple(co[pv].mean(axis=0))); l2,nn,_,_=T.find_nearest(pc,0.4); meshes_eval(False)
+        if not d or l2 is None: break
+        n2=nn; dm=min(d); step=gap-dm
+        if abs(step)<0.0007 and k>1: break
+        tan=(l2+n2*(pc-l2).dot(n2))-pc
+        tgt=tgt+n2*step+tan*0.5
+    rep={}
+    meshes_eval(True); rep['palm']=hand_stats(sd,T,which=pv); meshes_eval(False)
+    finger_spread(sd,1.0)
+    if not unsigned: rep['fingers']=settle_fingers(sd,T)
+    meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False)
+    # last guard: any hand skin still inside -> lift the whole hand off along the normal, 1 mm steps (finger poses kept)
+    k=0
+    while not unsigned and rep['hand']['pen_verts']>0 and k<12:
+        tgt=tgt+n2*0.001; fb={pb.name:pb.matrix_basis.copy() for pb in PB if _bone_part(pb.name) and _bone_part(pb.name)[2]!='palm'}
+        ik_hand_to(sd,tgt,elbow_pole,fingers_dir,want())
+        for n_,m_ in fb.items(): PB[n_].matrix_basis=m_
+        upd(); meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False); k+=1
+    rep['lift_mm']=k; rep['T']=T
+    pr,_=_palm_roll(sd,want()); rep['palm_roll_err_deg']=round(pr,1)
+    return rep
+# ---------- feet
+def foot_co(sd,co=None):
+    co=body_co() if co is None else co; return co[FOOTV[sd]]
+def foot_stats(sd,FLOOR_,co=None):
+    fc=foot_co(sd,co); z=fc[:,2]; zmin=float(z.min())
+    # sole thirds along the foot's own forward axis (ankle -> toe tail), heel = back third, ball = front third
+    a_=np.array(tuple(PB[sd+' ankle'].head)); t_=np.array(tuple(PB[sd+' toe'].tail)) if sd+' toe' in PB else np.array(tuple(PB[sd+' ankle'].tail))
+    fw=t_-a_; fw[2]=0; n_=np.linalg.norm(fw); fw=fw/n_ if n_>1e-6 else np.array([0,-1,0])
+    s=(fc-a_)@fw; lo_,hi_=s.min(),s.max(); L_=hi_-lo_
+    heel=float(z[s<lo_+L_*0.30].min()); ball=float(z[s>lo_+L_*0.62].min())
+    return dict(min_mm=round((zmin-FLOOR_)*1000,1),below_verts=int((z<FLOOR_-0.001).sum()),heel_mm=round((heel-FLOOR_)*1000,1),ball_mm=round((ball-FLOOR_)*1000,1))
+def toe_pitch(sd):
+    a_=PB[sd+' ankle']; d=(a_.tail-a_.head).normalized(); return round(math.degrees(math.asin(max(-1,min(1,-d.z)))),1)
