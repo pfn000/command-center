@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance3 #5: head follows the source dancer (roll/yaw from ears, nod from nose about its median, chin floor only), free foot pushed off the other leg (14:28:09)"
+ "note": "dance3 #6: head follows mocap + pelvis follows the source fully (no caps) + feet point with the knees (<=15 deg), no rolled free ankle + no foot through foot (14:31:06)"
 }

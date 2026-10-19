@@ -896,6 +896,25 @@ elif MODE=='dance2':
     PMIN=float(E.get('HEAD_PITCH_MIN','3.0'))   # chin never below level+3 deg, so her bangs don't hide her face
     rest(); HEAD0=PB['Head'].matrix.to_3x3().copy(); _tf=(PB['Left toe'].tail-PB['Left ankle'].head); _tf.z=0; HEADF0=_tf.normalized()
     log('head fwd0 (arm space, from the feet)',[round(x,3) for x in HEADF0])
+    def pelvis_rec(f):
+        # her pelvis: yaw/roll of the hip line (deg) + hips position (cm) ; the source's hip line yaw/roll + mid-hip relative to the mid-ankle (cm)
+        hl=PB['Left leg'].head-PB['Right leg'].head; hp=(PB['Left leg'].head+PB['Right leg'].head)/2; an=(PB['Left ankle'].head+PB['Right ankle'].head)/2
+        w_=FR[f]; LH_,RH_=L(w_,23),L(w_,24); sh_=LH_-RH_; mh_=(LH_+RH_)/2; ma_=(L(w_,27)+L(w_,28))/2
+        dg=lambda v: (round(math.degrees(math.atan2(v.y,v.x)),1),round(math.degrees(math.asin(max(-1,min(1,v.z/max(v.length,1e-6))))),1))
+        return {'yaw_roll':dg(hl),'sway_cm':(round((hp.x-an.x)*100,1),round((hp.y-an.y)*100,1)),'src_yaw_roll':dg(sh_),'src_sway_cm':(round((mh_.x-ma_.x)*100,1),round((mh_.y-ma_.y)*100,1))}
+    KF0={}; UP0={}
+    for _sd in ('Left','Right'):
+        KF0[_sd]=PB[_sd+' knee'].matrix.to_3x3().inverted()@HEADF0; UP0[_sd]=PB[_sd+' ankle'].matrix.to_3x3().inverted()@Vector((0,0,1))
+    def ankle_angles(sd):
+        # twist: foot direction vs the knee's facing, about the shin; inv: shin leaning across the sole (+ = toward her outside = inversion); flex: ankle bend vs rest
+        a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
+        kf=PB[sd+' knee'].matrix.to_3x3()@KF0[sd]; ff=(PB[sd+' toe'].tail-PB[sd+' ankle'].head) if sd+' toe' in PB else (PB[sd+' ankle'].tail-PB[sd+' ankle'].head)
+        kp=(kf-a*kf.dot(a)); fp=(ff-a*ff.dot(a))
+        if kp.length<1e-6 or fp.length<1e-6: return 0.0,0.0
+        kp.normalize(); fp.normalize(); tw=math.degrees(math.atan2(kp.cross(fp).dot(a),kp.dot(fp)))
+        n=PB[sd+' ankle'].matrix.to_3x3()@UP0[sd]; lat=ff.normalized().cross(n).normalized(); sgo=1.0 if sd=='Left' else -1.0
+        inv=math.degrees(math.asin(max(-1,min(1,a.dot(lat)))))*sgo
+        return round(tw,1),round(inv,1)
     def head_pitch():
         f_=(PB['Head'].matrix.to_3x3()@HEAD0.inverted())@HEADF0; return math.degrees(math.asin(max(-1,min(1,f_.z)))),f_
     def head_up():
@@ -988,11 +1007,11 @@ elif MODE=='dance2':
         rest(); fingers_relaxed()
         w=FR[f]; G=lambda i: L(w,i)
         LS,RS,LH,RH=G(11),G(12),G(23),G(24); mh=(LH+RH)/2; ms=(LS+RS)/2; upt=(ms-mh)
-        Rh=frame_rot(LH-RH,Vector((0,0,1)).lerp(upt.normalized(),0.4)); set_world_rot('Hips',Rh,cap=60)
+        Rh=frame_rot(LH-RH,Vector((0,0,1)).lerp(upt.normalized(),0.6)); set_world_rot('Hips',Rh)   # dance3: pelvis follows the source hip line fully, no per-frame cap
         d0=(PB['Spine'].tail-PB['Spine'].head).normalized(); q=d0.rotation_difference(upt.normalized())
-        qrot('Spine',q,0.5,40); qrot('Chest',q,0.5,40)
+        qrot('Spine',q,0.5,60); qrot('Chest',q,0.5,60)
         sl=(LS-RS); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
-        tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-35,min(35,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
+        tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-50,min(50,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
         ear=(G(7)+G(8))/2; Rhd=frame_rot(G(7)-G(8),n_.lerp((ear-ms).normalized(),0.6))
         set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_follow(f)
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
@@ -1218,6 +1237,37 @@ elif MODE=='dance2':
                     ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
                     for n_,R_ in Ra.items(): set_rot(n_,R_)
                 e.setdefault('plant_level_iters',{})[sd]=it_
+            # feet point the way the knees point (<=15 deg): a planted foot brings its knee round (leg swung about hip->ankle, foot untouched); a free foot turns at the ankle
+            for sd in ('Left','Right'):
+                tw0,inv0=ankle_angles(sd); hist=[(tw0,inv0)]
+                for it_ in range(4):
+                    tw,inv=ankle_angles(sd)
+                    if abs(tw)<=15.0: break
+                    exc=tw-math.copysign(13.0,tw)
+                    if sd in e['locked']:
+                        hip=PB[sd+' leg'].head.copy(); ax=(PB[sd+' ankle'].head-hip).normalized()
+                        Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                        wrot_v(sd+' leg',exc,ax)
+                        for n_,R_ in Ra.items(): set_rot(n_,R_)
+                        if abs(ankle_angles(sd)[0])>abs(tw):
+                            wrot_v(sd+' leg',-2*exc,ax)
+                            for n_,R_ in Ra.items(): set_rot(n_,R_)
+                    else:
+                        a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
+                        wrot_v(sd+' ankle',-exc,a)
+                        if abs(ankle_angles(sd)[0])>abs(tw): wrot_v(sd+' ankle',2*exc,a)
+                    hist.append(ankle_angles(sd))
+                # free foot: no rolled ankle (inversion <=15, eversion <=10) - turn the foot about its own length
+                if sd not in e['locked']:
+                    for it_ in range(3):
+                        tw,inv=ankle_angles(sd)
+                        lim=15.0 if inv>0 else -10.0
+                        if (inv>0 and inv<=15.0) or (inv<=0 and inv>=-10.0): break
+                        ff=(PB[sd+' toe'].tail-PB[sd+' ankle'].head).normalized() if sd+' toe' in PB else (PB[sd+' ankle'].tail-PB[sd+' ankle'].head).normalized()
+                        d_=inv-lim; wrot_v(sd+' ankle',d_,ff)
+                        if abs(ankle_angles(sd)[1]-lim)>abs(d_): wrot_v(sd+' ankle',-2*d_,ff)
+                        hist.append(ankle_angles(sd))
+                upd(); e.setdefault('ankle',{})[sd]={'before':hist[0],'after':ankle_angles(sd)}
             # feet never through each other: push the free foot sideways off the other leg (ankle moved, orientation kept)
             meshes_eval(True)
             A_={sd:PB[sd+' ankle'].head.copy() for sd in ('Left','Right')}
@@ -1268,7 +1318,7 @@ elif MODE=='dance2':
                     e.setdefault('foot_tilt_steps',{})[sd]=k
                 a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
                 e.setdefault('feet',{})[sd]=fs
-            e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
+            e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); e['pelvis']=pelvis_rec(f); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
             meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
