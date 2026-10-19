@@ -45,12 +45,17 @@ def live(files=None, **st):
             except Exception as e: log('live upload failed', type(e).__name__, str(e)[:200]); time.sleep(4 * (k + 1))
 
 # ---------------- fetch ----------------
+PROXY = ['--proxy', os.environ['VW_PROXY']] if os.environ.get('VW_PROXY') else []       # optional repo secret: a residential proxy
+COOKIES = []
+if os.environ.get('YT_COOKIES'):                                                         # optional repo secret: Netscape cookies.txt text
+    open(os.path.join(W, 'cookies.txt'), 'w').write(os.environ['YT_COOKIES']); COOKIES = ['--cookies', os.path.join(W, 'cookies.txt')]
+meta['fetch_extras'] = {'proxy': bool(PROXY), 'cookies': bool(COOKIES)}
 def is_yt(u): return bool(re.search(r'(youtube\.com|youtu\.be)/', u))
 def ytdlp(extra, label, timeout=900):
     for f in os.listdir(W):
         if f.startswith('src.'): os.remove(os.path.join(W, f))
     cmd = ['yt-dlp', '--no-playlist', '--no-progress', '--newline', '-S', 'res:1080,fps', '-f', 'bv*+ba/b',
-           '--merge-output-format', 'mp4', '--write-info-json', '--js-runtimes', 'node', '-o', f'{W}/src.%(ext)s'] + extra + [URL]
+           '--merge-output-format', 'mp4', '--write-info-json', '-o', f'{W}/src.%(ext)s'] + PROXY + COOKIES + extra + [URL]
     t = time.time(); p = sh(cmd, timeout=timeout)
     vids = [f for f in os.listdir(W) if f.startswith('src.') and not f.endswith(('.json', '.part', '.ytdl'))]
     err = '\n'.join(l for l in (p.stderr or '').splitlines() if 'ERROR' in l or 'WARNING' in l)[-1200:]
@@ -216,6 +221,8 @@ def utterances(words):
 def write_md(utts, path, title, partial=False):
     with open(path, 'w') as f:
         f.write(f"# Transcript{' (partial, still running)' if partial else ''}: {title}\n\n")
+        if not utts and not partial:
+            w = meta.get('whisper', {}); f.write(f"(no speech detected: the voice detector kept {w.get('speech_s_after_vad')} s of {meta['probe']['duration']:.1f} s; likely music or no talking)\n")
         for u in utts: f.write(f"[{u['tc']}] **{u['speaker']}:** {u['text']}\n\n")
 def write_srt(utts, path):
     n = 0

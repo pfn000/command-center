@@ -31,10 +31,13 @@ jobs:
         run: |
           command -v ffmpeg >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null)
           pip install -q -U -r video-watch/requirements.txt
+          curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null 2>&1 && echo "$HOME/.deno/bin" >> "$GITHUB_PATH" || echo "deno install failed"
           ffmpeg -version | head -1; yt-dlp --version
       - name: Watch
         env:
           HF_TOKEN: ${{ secrets.VW_HF_TOKEN }}
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+          VW_PROXY: ${{ secrets.VW_PROXY }}
           RUN_ID: ${{ github.run_id }}
         run: |
           JOB=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- video-watch/jobs | head -1)
