@@ -51,7 +51,9 @@ def _poly_sd(H,q):
         a=H[i]; b=H[(i+1)%len(H)]; ex,ey=b[0]-a[0],b[1]-a[1]; L=_m.hypot(ex,ey) or 1e-9
         d=min(d,(ex*(q[1]-a[1])-ey*(q[0]-a[0]))/L)   # CCW hull: + left of every edge = inside; nearest edge = the margin
     return d
-def sm_support(floor_z,tol=0.004,co=None):
+def sm_support(floor_z,tol=None,co=None):
+    """footprint that bears weight: sole verts within the model's own heel lift + 3 mm of the floor (high-heel foot: ball + toes, and the heel at its natural lift)"""
+    if tol is None: tol=(max(SM_REST.get('heel_lift_mm',{}).values() or [0.0])+3.0)/1000.0
     co=body_co() if co is None else co; pts=[]
     for sd in ('Left','Right'):
         f=co[FOOTV[sd]]; f=f[f[:,2]<floor_z+tol]; pts+=[(p[0],p[1]) for p in f]
@@ -61,7 +63,7 @@ def sm_rel_angle(n):
     b=PB[n]; q=b.matrix_basis.to_quaternion(); return _m.degrees(2*_m.acos(max(-1.0,min(1.0,abs(q.w)))))
 def sm_knee_flex(sd):
     t=(PB[sd+' leg'].tail-PB[sd+' leg'].head).normalized(); s_=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized(); return _m.degrees(t.angle(s_))
-SM_TWIST={'Neck':70,'Head':80,'Spine':45,'Chest':45,'shoulder':30,'arm':95,'elbow':95,'wrist':95,'leg':50,'knee':35,'ankle':35}
+SM_TWIST={'Neck':70,'Head':80,'Spine':45,'Chest':45,'shoulder':30,'arm':95,'elbow':170,'wrist':170,'leg':50,'knee':35,'ankle':35}
 def sm_swing_twist(n):
     """bone n vs its bind pose, relative to its parent: (swing deg = bend of the bone's own axis, twist deg = roll about it)"""
     q=PB[n].matrix_basis.to_quaternion(); t=q.copy(); t.x=0.0; t.z=0.0
@@ -133,6 +135,7 @@ def sm_selfcheck(floor_z,seated=False,src=None,co=None):
     # SKELETON SANITY: joint limits (any view; recorded under the side view)
     J=sm_joints(); M['joints']=J
     for n,j_ in J.items():
+        if n.endswith('ankle') and M.get('foot_'+n[0],{}).get('min_mm',0)>20: continue   # pointed foot off the floor: plantar flexion allowed (rule)
         if j_['swing']>j_['swing_lim']: F.append({'det':'LIMIT','view':'side','joint':n,'what':'bend','value':j_['swing'],'limit':j_['swing_lim']})
         if j_['twist']>j_['twist_lim']: F.append({'det':'LIMIT','view':'front','joint':n,'what':'twist','value':j_['twist'],'limit':j_['twist_lim']})
     for sd in ('Left','Right'):

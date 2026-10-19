@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses4 #17: self-model auto-fix loop (ankle twist/roll), swing-twist joint limits, balance margin sign, full-body QC framing (15:00:40)"
+ "note": "anim10c poses4 #18: self-model detectors corrected (support footprint incl. heel at its natural lift, forearm roll range, pointed-foot exemption) (15:09:19)"
 }
