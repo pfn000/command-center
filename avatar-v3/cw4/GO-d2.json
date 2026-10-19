@@ -1,0 +1,9 @@
+{
+ "render": {
+  "shards": 6,
+  "samples": 8,
+  "res": "720x1280",
+  "nf": 300
+ },
+ "note": "dance2 attempt 1: V4 mocap 8.3-18.3 s, arms held outside torso (proxy + exact mesh check), planted feet IK-locked, V4 overlay + music"
+}
