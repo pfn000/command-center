@@ -654,5 +654,129 @@ elif MODE=='poses3':
         info['frames'][fn]={'pose':RFS[fn]['pose'],'tune':tw,'flags':fl,'hand_contact_mm':hc,'seated':seated}
         for vw in ('front','q34'): setcam(*cams[vw]); render(OUT+f'/{fn[:-4]}_{vw}.jpg')
         seat(False); log('pose3',fn,info['frames'][fn])
+# ======================= POSES3B: authored model poses with real contact (refs are the thumbnails beside them) =======================
+elif MODE=='poses3b':
+    from mathutils.bvhtree import BVHTree as _BV
+    POSES=['knee_over_knee','ankles_crossed','side_saddle','hand_on_hip','contrapposto','hand_behind_head']
+    mine=[n for i,n in enumerate(POSES) if i%SHN==SH]
+    relaxed(); meshes_eval(True); FLOOR=bbox([BODY])[0].z; meshes_eval(False); relaxed()
+    REST={n:PB[n].head.copy() for n in ('Hips','Left leg','Right leg','Left knee','Right knee','Left ankle','Right ankle','Head','Neck','Left arm','Right arm')}
+    ANKH=REST['Left ankle'].z-FLOOR; Lt=PB['Left leg'].length; Ls=PB['Left knee'].length
+    if CLS is None: CLS=_cls()
+    def bvh(classes):
+        co=ev_co(BODY); V=[Vector(tuple(x)) for x in co]; ps=[p for c in classes for p in CLS.get(c,[])]; return _BV.FromPolygons(V,ps)
+    def sgn_roll(bone,deg,ax,check):   # rotate, and flip the sign if the check says it went the wrong way
+        base={pb.name:pb.matrix_basis.copy() for pb in PB}; wrot(bone,deg,ax)
+        if not check():
+            for pb in PB: pb.matrix_basis=base[pb.name]
+            upd(); wrot(bone,-deg,ax)
+    def posture(pop_side=None,pop=6.0):
+        # chest lifted, shoulders down and relaxed, pelvis popped to one side (that hip higher)
+        wrot('Chest',-5,'X'); wrot('Left shoulder',8,'Y'); wrot('Right shoulder',-8,'Y'); wrot('Left shoulder',-3,'X'); wrot('Right shoulder',-3,'X')
+        if pop_side:
+            o='Right' if pop_side=='Left' else 'Left'
+            sgn_roll('Hips',pop,'Y',lambda: PB[pop_side+' leg'].head.z>PB[o+' leg'].head.z)
+            # shoulders tilt the other way (counter), half as much
+            sgn_roll('Chest',pop*0.9,'Y',lambda: PB[o+' arm'].head.z>=PB[pop_side+' arm'].head.z-0.002)
+    def leg_to(sd,ank,pole_dir,foot_dir):
+        hj=PB[sd+' leg'].head.copy(); ik2(sd+' leg',sd+' knee',ank,hj+pole_dir)
+        align(sd+' ankle',foot_dir.normalized(),cap=120)
+        if sd+' toe' in PB: align(sd+' toe',foot_dir.normalized()+Vector((0,-0.15,0.1)),cap=60)
+    def hand_on(sd,query,classes,elbow_pole,fingers_dir,off=0.028,maxd=0.25):
+        meshes_eval(True); T_=bvh(classes); loc,nr,idx,d=T_.find_nearest(query,maxd); meshes_eval(False)
+        if loc is None: return None
+        wr=PB[sd+' wrist']; hand=(wr.tail-wr.head)
+        tgt=loc+nr*off-hand*0.45
+        for _ in range(3):
+            ik2(sd+' arm',sd+' elbow',tgt,PB[sd+' arm'].head+elbow_pole); align(sd+' wrist',fingers_dir,cap=90)
+            pc=(PB[f'MiddleFinger1_{sd[0]}'].head+wr.head)*0.5; meshes_eval(True); T_=bvh(classes); l2,n2,_,d2=T_.find_nearest(pc,0.4); meshes_eval(False)
+            if l2 is None: break
+            tgt=tgt+(l2+n2*off-pc)*0.9
+        fingers_relaxed(0.8)
+        return True
+    def contact_mm(sd,classes):
+        meshes_eval(True); T_=bvh(classes); wr=PB[sd+' wrist']; best=9e9
+        for p in [(PB[f'MiddleFinger1_{sd[0]}'].head+wr.head)*0.5,PB[f'MiddleFinger2_{sd[0]}'].head,PB[f'IndexFinger2_{sd[0]}'].head,PB[f'RingFinger2_{sd[0]}'].head]:
+            l,n,_,d=T_.find_nearest(p,0.5)
+            if l is not None: best=min(best,d)
+        meshes_eval(False); return round(best*1000,1)
+    def seat_hips(top):
+        hz=PB['Left leg'].head.z; hip_drop((top+0.085)-hz,0,0.0)
+    def toe_point(sd):   # foot pitch: + = toes pointed down
+        a_=PB[sd+' ankle']; d=(a_.tail-a_.head).normalized(); return round(math.degrees(math.asin(max(-1,min(1,-d.z)))),1)
+    def pose(name,it):
+        relaxed(); info_={}
+        hipL=REST['Left leg']; hipR=REST['Right leg']; HX=REST['Hips'].x
+        if name in ('knee_over_knee','ankles_crossed','side_saddle'):
+            top=FLOOR+ANKH+Ls*0.93; seat_hips(top); posture(None)
+            wrot('Hips',-4,'X')   # sit tall: tiny forward tilt of the pelvis
+            hl=PB['Left leg'].head; hr=PB['Right leg'].head; fwd=Lt*0.95
+            if name=='knee_over_knee':
+                lift=0.02*it
+                leg_to('Left',Vector((hl.x+0.01,hl.y-fwd-0.04,FLOOR+ANKH+0.035)),Vector((0.05,-1,0.3)),Vector((0,-0.45,-0.89)))
+                leg_to('Right',Vector((hl.x+0.13,hl.y-fwd-0.16,FLOOR+ANKH+0.19+lift)),Vector((0.35,-1,0.9+lift*4)),Vector((0.15,-0.55,-0.82)))
+                q=PB['Right knee'].head+Vector((0.0,-0.02,0.06))
+                hand_on('Left',q+Vector((0.04,0,0.05)),['RL'],Vector((0.5,0.1,-0.3)),Vector((-0.3,-0.6,-0.5)))
+                hand_on('Right',q+Vector((-0.02,0.02,0.07)),['RL'],Vector((-0.5,0.1,-0.3)),Vector((0.3,-0.6,-0.5)))
+            elif name=='ankles_crossed':
+                sl=-0.13-0.01*it   # duchess slant: knees together, legs angled to her right, ankles crossed (left over right)
+                leg_to('Right',Vector((hr.x+sl,hr.y-fwd-0.02,FLOOR+ANKH+0.04)),Vector((sl*0.5-0.02*it,-1,0.25)),Vector((-0.1,-0.5,-0.86)))
+                ra=PB['Right ankle'].head
+                leg_to('Left',Vector((ra.x+0.03,ra.y-0.05,ra.z+0.05)),Vector((sl*0.5+0.02*it,-1,0.25)),Vector((-0.1,-0.5,-0.86)))
+                hand_on('Left',(PB['Left leg'].tail+PB['Right leg'].tail)*0.5+Vector((0.03,0.02,0.1)),['LL','RL'],Vector((0.5,0.2,-0.3)),Vector((-0.4,-0.6,-0.4)))
+                hand_on('Right',(PB['Left leg'].tail+PB['Right leg'].tail)*0.5+Vector((-0.03,0.07,0.11)),['LL','RL'],Vector((-0.5,0.2,-0.3)),Vector((0.4,-0.6,-0.4)))
+            else:
+                sl=0.16+0.01*it   # side-saddle: knees together to her left, feet tucked back, toes pointed
+                leg_to('Left',Vector((hl.x+sl,hl.y-fwd*0.55,FLOOR+ANKH+0.06)),Vector((sl+0.02*it,-1,0.4)),Vector((0.2,-0.4,-0.9)))
+                leg_to('Right',Vector((hr.x+sl+0.06,hr.y-fwd*0.45,FLOOR+ANKH+0.04)),Vector((sl-0.02*it,-1,0.4)),Vector((0.2,-0.4,-0.9)))
+                hand_on('Left',PB['Left leg'].tail+Vector((0.0,0.03,0.08)),['LL'],Vector((0.5,0.2,-0.3)),Vector((-0.2,-0.7,-0.5)))
+                hand_on('Right',PB['Right leg'].head+Vector((-0.17,0.0,-0.05)),['T','RL'],Vector((-0.4,0.3,-0.2)),Vector((0.1,-0.4,-0.9)),off=0.02)
+            info_['seat_top']=top
+        else:
+            w_=('Left' if name!='contrapposto' else 'Right'); f_='Right' if w_=='Left' else 'Left'; sgx=1 if f_=='Left' else -1
+            hip_drop(-0.012, (0.03 if w_=='Left' else -0.03), 0)
+            posture(w_, 7.0)
+            wa=REST[w_+' ankle']; leg_to(w_,Vector((wa.x,wa.y,wa.z)),Vector((0.0,-1,0)),Vector((0.0,-0.5,-0.12)))
+            fa=REST[f_+' ankle']; leg_to(f_,Vector((fa.x-sgx*0.05,fa.y-0.10,fa.z+0.055)),Vector((-sgx*0.25,-1,0.1)),Vector((-sgx*0.15,-0.55,-0.8)))
+            if name in ('hand_on_hip','hand_behind_head'):
+                hipq=PB['Left leg'].head+Vector((0.22,0.0,0.10))
+                hand_on('Left',hipq,['T','LL'],Vector((0.55,0.35,-0.15)),Vector((-0.35,-0.55,-0.6)))
+            if name=='hand_behind_head':
+                hd=PB['Head'].head; q=hd+Vector((-0.04,0.10,0.10))
+                ik2('Right arm','Right elbow',q,PB['Right arm'].head+Vector((-0.7,0.1,0.6))); align('Right wrist',Vector((0.4,0.3,0.8)),cap=120); fingers_relaxed(0.7)
+            if name=='contrapposto':
+                hand_on('Left',PB['Left leg'].head+Vector((0.07,-0.08,-0.16)),['LL'],Vector((0.4,0.2,-0.4)),Vector((0.0,-0.3,-0.95)),off=0.02)
+            # head: level, a touch toward the camera
+            wrot('Head',4 if w_=='Left' else -4,'Y')
+            ch={sd:min(PB[sd+' ankle'].head.z,PB[sd+' toe'].tail.z if sd+' toe' in PB else 9) for sd in ('Left','Right')}
+        for sd in ('Left','Right'): arm_clear(sd) if name not in ('hand_behind_head',) else None
+        return info_
+    def gates(name):
+        meshes_eval(True); fl=clip_flags(); meshes_eval(False); g={'flags':fl}
+        cls_={'knee_over_knee':['RL'],'ankles_crossed':['LL','RL'],'side_saddle':['LL','T','RL'],'hand_on_hip':['T','LL'],'contrapposto':['LL'],'hand_behind_head':['T','LL']}[name]
+        g['hand_contact_mm']={sd:contact_mm(sd,cls_) for sd in ('Left','Right')}
+        g['toe_point_deg']={sd:toe_point(sd) for sd in ('Left','Right')}
+        g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,PB['Left leg'].head.x-PB['Right leg'].head.x)),1)
+        g['shoulder_roll_deg']=round(math.degrees(math.atan2(PB['Left arm'].head.z-PB['Right arm'].head.z,PB['Left arm'].head.x-PB['Right arm'].head.x)),1)
+        g['ankle_x_order']=round((PB['Left ankle'].head.x-PB['Right ankle'].head.x)*100,1)
+        g['knee_z_cm']={sd:round(PB[sd+' knee'].head.z*100,1) for sd in ('Left','Right')}
+        return g
+    meshes_eval(True); relaxed(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z
+    for nm in mine:
+        best=None
+        for it in range(6):
+            meshes_eval(False); inf=pose(nm,it); g=gates(nm)
+            bad=(g['flags'].get('leg_vs_leg_tris') or 0)+(g['flags'].get('Larm_vs_torso_tris') or 0)+(g['flags'].get('Rarm_vs_torso_tris') or 0)+(g['flags'].get('Larm_vs_legs_tris') or 0)+(g['flags'].get('Rarm_vs_legs_tris') or 0)
+            log('pose3b',nm,it,g,inf)
+            if best is None or bad<best[0]: best=(bad,it)
+            if bad==0: break
+        meshes_eval(False); inf=pose(nm,best[1]); g=gates(nm); g.update(inf); g['iter']=best[1]
+        seated=nm in ('knee_over_knee','ankles_crossed','side_saddle')
+        if seated: seat(True,top=inf['seat_top'],cx=REST['Hips'].x,cy=REST['Hips'].y+0.12)
+        meshes_eval(True); mn2,mx2=bbox(MESHES); ctr=Vector(((mn2.x+mx2.x)/2,(mn2.y+mx2.y)/2,(mn2.z+mx2.z)/2)); hh=max(mx2.z-mn2.z,(mx2.x-mn2.x)*RH/RW)+0.16
+        for vw,az in (('front',0),('q34',-35)):
+            setcam(ctr,az,3,hh/(24/50),50); render(OUT+f'/{nm}_{vw}.jpg')
+        if seated: seat(False)
+        info['frames'][nm]=g; log('pose3b done',nm,g)
 json.dump(info,open(OUT+f'/{MODE}-shard{SH}.json','w'),indent=0,default=str)
 log('DONE'); sys.stdout.flush(); os._exit(0)
