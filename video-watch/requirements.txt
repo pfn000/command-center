@@ -1,0 +1,9 @@
+yt-dlp[default,curl-cffi]
+bgutil-ytdlp-pot-provider
+faster-whisper==1.1.1
+sherpa-onnx
+soundfile
+numpy<2.3
+pillow
+huggingface_hub
+requests
