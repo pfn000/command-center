@@ -1,0 +1,55 @@
+name: jena-svc3
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go3.txt']
+jobs:
+  svc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { n: A0, src: m0, ref: ref.mp3, steps: 50, cfg: 0.7 }
+          - { n: B0, src: m0, ref: ref-speech.mp3, steps: 30, cfg: 0.7 }
+          - { n: C0, src: m0, ref: ref-speech.mp3, steps: 50, cfg: 0.7 }
+          - { n: D0, src: m0, ref: ref.mp3, steps: 50, cfg: 1.0 }
+          - { n: E0, src: m0u, ref: ref.mp3, steps: 30, cfg: 0.7 }
+          - { n: A1, src: m1, ref: ref.mp3, steps: 50, cfg: 0.7 }
+          - { n: B1, src: m1, ref: ref-speech.mp3, steps: 30, cfg: 0.7 }
+          - { n: C1, src: m1, ref: ref-speech.mp3, steps: 50, cfg: 0.7 }
+          - { n: D1, src: m1, ref: ref.mp3, steps: 50, cfg: 1.0 }
+          - { n: E1, src: m1u, ref: ref.mp3, steps: 30, cfg: 0.7 }
+    env:
+      HF: ${{ secrets.AV2_HF_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone --depth 1 https://github.com/Plachtaa/seed-vc.git sv
+          pip install -q torch==2.4.0 torchaudio==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cpu
+          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url|gradio|FreeSimpleGUI|sounddevice)' sv/requirements.txt > req.txt
+          pip install -q -r req.txt huggingface_hub
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          for f in ['voice-lab/svc/in/${{ matrix.src }}.flac','voice-lab/svc/in/${{ matrix.ref }}']:
+              hf_hub_download('Saidie000/jena-avatar-assets',f,repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/svc/in/${{ matrix.src }}.flac -ar 44100 -ac 1 src.wav
+      - name: convert
+        run: |
+          cd sv
+          python inference.py --source ../src.wav --target ../voice-lab/svc/in/${{ matrix.ref }} --output ../out --diffusion-steps ${{ matrix.steps }} --length-adjust 1.0 --inference-cfg-rate ${{ matrix.cfg }} --f0-condition True --auto-f0-adjust False --semi-tone-shift 0 --fp16 False 2>&1 | grep -v -i warn | tail -5
+      - name: upload
+        run: |
+          f=$(ls out/*.wav | head -1); ffmpeg -nostdin -v error -i "$f" -c:a flac T-${{ matrix.n }}.flac
+          python - <<'EOF'
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_file(path_or_fileobj='T-${{ matrix.n }}.flac',path_in_repo='voice-lab/svc/test/T-${{ matrix.n }}.flac',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='clarity test ${{ matrix.n }}')
+          EOF
