@@ -570,5 +570,76 @@ elif MODE=='catwalk':
         info['frames'][f]=e; trk[f]={'px':proj_all(),'bones':bones_world() if f%2==0 else None}; log('frame',f,e)
     info['stance_ankle_vs_target_max_mm']=round(slide,2)
     json.dump(trk,open(OUT+f'/track-shard{SH}.json','w'))
+
+# ======================= POSES3: real reference photos -> MediaPipe -> her joints =======================
+elif MODE=='poses3':
+    RFS=json.load(open(DATA)); names=sorted(RFS); mine=[n for i,n in enumerate(names) if i%SHN==SH]
+    def mp2b(p): return Vector((p[0],p[2],-p[1]))
+    def rest_rot(n): return PB[n].bone.matrix_local.to_3x3()
+    def cur_rot(n): return PB[n].matrix.to_3x3()@rest_rot(n).inverted()
+    def frame_rot(xv,zv):
+        x=xv.normalized(); z=(zv-x*zv.dot(x)).normalized(); y=z.cross(x); return Matrix((x,y,z)).transposed()
+    def set_world_rot(n,Rt,frac=1.0,cap=180.0): qrot(n,(Rt@cur_rot(n).inverted()).to_quaternion(),frac,cap)
+    meshes_eval(True); rest(); FLOOR=bbox([BODY])[0].z; meshes_eval(False)
+    FOOT={'Left':('Left ankle','Left toe'),'Right':('Right ankle','Right toe')}
+    def foot_pts(sd): a_,t_=FOOT[sd]; return [PB[a_].head.copy(),PB[t_].head.copy(),PB[t_].tail.copy()]
+    rest(); REST_H={sd:[p.z for p in foot_pts(sd)] for sd in FOOT}
+    def body_bvh(classes):
+        co=ev_co(BODY); V=[Vector(tuple(x)) for x in co]; ps=[p for c in classes for p in CLS.get(c,[])]; return BVHTree.FromPolygons(V,ps)
+    def pose_ref(w,tw):
+        rest(); fingers_relaxed(1.15)
+        P=[mp2b(p) for p in w]; hl=(P[23]-P[24]); yaw=math.atan2(hl.y,hl.x); Rz=Matrix.Rotation(-yaw*float(tw.get('yaw_keep',0.0)) - (-yaw),3,'Z') if False else Matrix.Rotation(-yaw*(1-tw.get('yaw_keep',0.25)),3,'Z')
+        G=lambda i: Rz@P[i]
+        LS,RS,LH,RH=G(11),G(12),G(23),G(24); mh=(LH+RH)/2; ms=(LS+RS)/2; upt=(ms-mh)
+        Rh=frame_rot(LH-RH,Vector((0,0,1)).lerp(upt.normalized(),0.45)); set_world_rot('Hips',Rh,cap=70)
+        d0=(PB['Spine'].tail-PB['Spine'].head).normalized(); q=d0.rotation_difference(upt.normalized()); qrot('Spine',q,0.5,40); qrot('Chest',q,0.5,40)
+        n_=upt.normalized(); sl=(LS-RS); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=((LH-RH)-n_*(LH-RH).dot(n_)).normalized()
+        tw_=max(-35,min(35,math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))))); wrot_v('Spine',tw_*0.45,n_); wrot_v('Chest',tw_*0.55,n_)
+        # chest lifted + slight arch, shoulders relaxed/down (one a bit lower), slight roll back
+        wrot('Chest',-4,'X'); wrot('Left shoulder',7,'Y'); wrot('Right shoulder',-7-3*tw.get('drop_r',1),'Y'); wrot('Left shoulder',-3,'X'); wrot('Right shoulder',-3,'X')
+        ear=(G(7)+G(8))/2; Rhd=frame_rot(G(7)-G(8),n_.lerp((ear-ms).normalized(),0.6)); set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30)
+        for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
+            align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=45)
+        for sd,(h_,k_,an,he,ft) in (('Left',(23,25,27,29,31)),('Right',(24,26,28,30,32))):
+            align(sd+' leg',G(k_)-G(h_)); align(sd+' knee',G(an)-G(k_)); fd=G(ft)-G(an); fd.z=min(fd.z,0.3*fd.length); align(sd+' ankle',fd,cap=55)
+        for sd,a_ in tw.get('lift',{}).items(): wrot(sd+' leg',-a_,'X')
+        for sd in ('Left','Right'): arm_clear(sd)
+        # ground: lowest foot on the floor
+        ch={sd:min(p.z-h for p,h in zip(foot_pts(sd),REST_H[sd])) for sd in FOOT}; dz=-min(ch.values()); hip_drop(dz)
+        hipz=min(PB['Left leg'].head.z,PB['Right leg'].head.z); seated=hipz<0.56
+        if seated:
+            # seated: point the feet (ball of foot down), lifted chest
+            for sd in ('Left','Right'):
+                if ch[sd]-min(ch.values())<0.03: align(sd+' ankle',Vector((0,-0.55,-0.83)),cap=45)
+            ch={sd:min(p.z-h for p,h in zip(foot_pts(sd),REST_H[sd])) for sd in FOOT}; hip_drop(-min(ch.values()))
+        return seated
+    def hand_contact(seated):
+        # hands that are near her body rest ON it: wrist to the nearest torso/thigh surface + 2.5 cm
+        meshes_eval(True); out={}
+        for sd,own in (('Left','LA'),('Right','RA')):
+            tgt_cls=['T','LL','RL']; T_=body_bvh(tgt_cls); wv=PB[sd+' wrist'].tail.copy()
+            loc,nr,idx,d=T_.find_nearest(wv,0.12)
+            if loc is not None:
+                meshes_eval(False); ik2(sd+' arm',sd+' elbow',loc+nr*0.03-(PB[sd+' wrist'].tail-PB[sd+' wrist'].head),PB[sd+' elbow'].head+(PB[sd+' elbow'].head-PB[sd+' arm'].head).normalized()*0.2+Vector((0,0.1,0)))
+                out[sd]=round(d*1000,1); meshes_eval(True)
+        return out
+    meshes_eval(True); rest(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z; ctr=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,mn.z+0.5*Hh))
+    cams={'front':(ctr,0,3,(Hh+0.14)/(24/50),50),'q34':(ctr,-35,3,(Hh+0.14)/(24/50),50)}
+    if CLS is None: CLS=_cls()
+    for fn in mine:
+        w=RFS[fn]['w']; tw={}; best=None
+        for it in range(8):
+            meshes_eval(False); seated=pose_ref(w,tw); hc=hand_contact(seated); fl=clip_flags()
+            bad=(fl['leg_vs_leg_tris'] or 0); armb=sum((fl[k] or 0) for k in ('Larm_vs_torso_tris','Rarm_vs_torso_tris','Larm_vs_legs_tris','Rarm_vs_legs_tris'))
+            log('tune',fn,it,tw,fl,hc)
+            if best is None or bad+armb<best[0]: best=(bad+armb,json.loads(json.dumps(tw)),fl,hc,seated)
+            if bad==0 and armb==0: break
+            if bad:
+                kz={sd:PB[sd+' knee'].head.z for sd in ('Left','Right')}; top=max(kz,key=kz.get); L=tw.setdefault('lift',{}); L[top]=L.get(top,0)+3
+        tw=best[1]; meshes_eval(False); seated=pose_ref(w,tw); hc=hand_contact(seated); fl=clip_flags()
+        on=seated; seat(on,top=max(0.05,min(PB['Left leg'].head.z,PB['Right leg'].head.z)-0.075),cx=PB['Hips'].head.x,cy=PB['Hips'].head.y+0.10)
+        info['frames'][fn]={'pose':RFS[fn]['pose'],'tune':tw,'flags':fl,'hand_contact_mm':hc,'seated':seated}
+        for vw in ('front','q34'): setcam(*cams[vw]); render(OUT+f'/{fn[:-4]}_{vw}.jpg')
+        seat(False); log('pose3',fn,info['frames'][fn])
 json.dump(info,open(OUT+f'/{MODE}-shard{SH}.json','w'),indent=0,default=str)
 log('DONE'); sys.stdout.flush(); os._exit(0)
