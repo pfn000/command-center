@@ -1,1 +1,1 @@
-tt8k run 9c 39172605668 ed72771 attempt 2: 4 spp + OIDN (10 spp probe frame took 496 s at 8K)
+tt8k attempt 3: 8K turntable of RUN 10 (39177080150, jena-v37r10-final.blend), 4 spp + OIDN, 12 shards

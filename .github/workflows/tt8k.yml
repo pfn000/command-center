@@ -1,5 +1,5 @@
 name: tt8k turntable
-# 8K 360 turntable of the run-9c model (saved .blend from the private HF dataset, rendered as-is). Outputs go to the private dataset.
+# 8K 360 turntable of the avatar build named in RUNID/BLEND (saved .blend from the private HF dataset, rendered as-is). Outputs go to the private dataset.
 on:
   push:
     branches: [avatar-v3]
@@ -7,17 +7,20 @@ on:
 permissions:
   contents: read
 env:
-  RUNID: "39172605668"
+  RUNID: "39177080150"
+  BLEND: "jena-v37r10-final.blend"
+  OUTNAME: "v37r10-turntable-8k"
+  TT_POSE: '{"ARM_DOWN": 45, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
   NF: "300"
-  SHARDS: "20"
+  SHARDS: "12"
   SAMPLES: "4"
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     strategy:
       fail-fast: false
-      matrix: { shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19] }
+      matrix: { shard: [0,1,2,3,4,5,6,7,8,9,10,11] }
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -27,11 +30,11 @@ jobs:
           mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
           sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
           pip install -q huggingface_hub > /dev/null
-          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
       - name: Frames
         env: { TT_SHARD: "${{ matrix.shard }}" }
         run: |
-          TT_NF=$NF TT_SHARDS=$SHARDS TT_SAMPLES=$SAMPLES timeout -k 10 6600 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/jena-v37r9-final.blend /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
+          TT_NF=$NF TT_SHARDS=$SHARDS TT_SAMPLES=$SAMPLES timeout -k 10 8400 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
           ls /tmp/frames | wc -l; du -sh /tmp/frames
       - uses: actions/upload-artifact@v4
         if: always()
@@ -55,10 +58,10 @@ jobs:
           COL="-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv"
           if [ "$Q" = small ]; then
             ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=1:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -an -f null /dev/null
-            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=2:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an v37r9-turntable-8k.mp4
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=2:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}.mp4
             rm -f x265_2pass.log*
           else
-            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset medium -crf 14 -x265-params log-level=error $COL -tag:v hvc1 -movflags +faststart -an v37r9-turntable-8k-hq.mp4
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset medium -crf 14 -x265-params log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}-hq.mp4
           fi
           ls -la /tmp/o; ffprobe -v error -show_entries stream=width,height,codec_name,codec_tag_string,r_frame_rate,nb_frames:format=duration,size *.mp4
           pip install -q huggingface_hub > /dev/null

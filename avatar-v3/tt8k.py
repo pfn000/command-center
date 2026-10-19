@@ -16,8 +16,9 @@ B=max(arms,key=lambda o:len([c for c in sc.objects if c.parent==o or any(m.type=
 meshes=[o for o in sc.objects if o.type=='MESH' and not o.hide_render and o.visible_get()]
 log('armature',B.name,'meshes',[o.name for o in meshes]); log('lights',[o.name for o in sc.objects if o.type=='LIGHT'],'camera',sc.camera.name if sc.camera else None)
 log('engine',sc.render.engine,'view',sc.view_settings.view_transform,sc.view_settings.look,'exposure',sc.view_settings.exposure)
-# 9c params (build-report.json of run 39172605668/A0)
+# pose params: defaults = 9c (build-report.json of run 39172605668/A0); TT_POSE (JSON) overrides with the build's own report values
 P=dict(ARM_DOWN=45,SHOULDER_DOWN=10,ELBOW_BEND=-12,WRIST_BEND=8,RELAX=True)
+P.update(json.loads(E.get('TT_POSE','{}'))); log('pose params',P)
 def wrot(name,deg,axis):
     if not deg or name not in B.pose.bones: return
     pb=B.pose.bones[name]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,axis)@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
