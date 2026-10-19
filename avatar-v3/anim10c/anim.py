@@ -1,3 +1,4 @@
+# rev 175237
 
 # Jena v3.7 run-10c ANIMATION clips (Saidie 9:47 PM Oct 18): talk/blink/expressions, dance retargeted from her TikTok ref, with bone-track export.
 # Renders from the SAVED run-10c .blend as built (no model edits). Face uses her existing shape keys only.
@@ -1123,7 +1124,7 @@ elif MODE in ('poses4','poses6'):
                     y0=PB['Right ankle'].head.y; wrot_v('Right knee',2.0,lat_)
                     if PB['Right ankle'].head.y>y0: wrot_v('Right knee',-4.0,lat_)
                 p6['foot_vs_knee_gap_mm']=fk
-            p6['clamp']={n:clamp_bend(n,lim) for n,lim in (('Left wrist',74),('Right wrist',74),('Left leg',129),('Right leg',129))}
+            p6['bend_basis_deg']={n:clamp_bend(n,999) for n in ('Left wrist','Right wrist','Left leg','Right leg')}   # measured only (the #1 basis clamp wrecked the hands)
             for sd in ('Left','Right'):
                 if not hrep.get(sd): fingers_flat(sd); p6.setdefault('free_hand_relaxed',[]).append(sd)
             for sd in ('Left','Right'):

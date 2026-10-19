@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses6 #1 (17:34:34Z): Saidie 13:26-13:27 feet+hands+shirt: toes level on the floor (no claw), 38 mm high-heel lift on standing feet, foot-vs-knee >=5 mm, relaxed finger curl, hand-vs-body/shirt push-out + finger re-drape, shirt shrinkwrap OUTSIDE body on seated poses, wrist<=74 / hip<=129 clamp"
+ "note": "anim10c poses6 #2 (17:49:49Z): drop the wrist/hip basis-angle clamp from #1 (it bent the hands into claws); rest of the poses6 fixes kept [175237]"
 }
