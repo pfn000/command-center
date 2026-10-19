@@ -893,6 +893,19 @@ elif MODE=='catwalk4':
 elif MODE=='dance2':
     LM=json.load(open(DATA)); FR=LM['w']; NF=len(FR); fps=LM['fps']; WARM=30
     def mp2b(p): return Vector((p[0],p[2],-p[1]))
+    # MediaPipe sometimes swaps her left/right for a few frames (she spins round 180 deg for no reason): detect by hip-line yaw and swap back
+    PAIRS=[(1,4),(2,5),(3,6),(7,8),(9,10),(11,12),(13,14),(15,16),(17,18),(19,20),(21,22),(23,24),(25,26),(27,28),(29,30),(31,32)]
+    def hyaw(w): h=mp2b(w[23])-mp2b(w[24]); return math.degrees(math.atan2(h.y,h.x))
+    ys=[hyaw(w) for w in FR]; ref=float(np.median(ys[:15])); nsw=0; CT0=LM.get('contact')
+    for k_ in range(NF):
+        d_=(ys[k_]-ref+180)%360-180
+        if abs(d_)>110:
+            w=FR[k_]=[list(p) for p in FR[k_]]
+            for a_,b_ in PAIRS: w[a_],w[b_]=w[b_],w[a_]
+            if CT0 and CT0[k_]: CT0[k_]={'L':CT0[k_].get('R'),'R':CT0[k_].get('L'),**{kk:vv for kk,vv in CT0[k_].items() if kk not in('L','R')}}
+            nsw+=1; ys[k_]=hyaw(FR[k_])
+        ref=0.85*ref+0.15*ys[k_] if abs((ys[k_]-ref+180)%360-180)<60 else ref
+    info['lr_swaps_fixed']=nsw; log('lr swaps fixed',nsw)
     ups=[];rts=[]
     for w in FR:
         P_l=[mp2b(p) for p in w]; ups.append(((P_l[11]+P_l[12])/2-(P_l[23]+P_l[24])/2).normalized()); rts.append((P_l[23]-P_l[24]).normalized())
@@ -1017,13 +1030,17 @@ elif MODE=='dance2':
                 wgt=1.0 if a_<=f<=b_ else (1.0-abs(f-(a_ if f<a_ else b_))/3.0)
                 if locks[sd][f] is None or wgt>locks[sd][f][1]: locks[sd][f]=(tgt,wgt,yd)
     info['planted_spans']={sd:spans[sd] for sd in spans}
-    pts_all=[]
+    pts_all=[]; HXs=[]; HFs=[]
     for f in range(0,NF,3):
-        pose_dance(f,offs,locks)
-        for n in ('Head','Hips','Left wrist','Right wrist','Left toe','Right toe','Left ankle','Right ankle'): pts_all.append(B.matrix_world@PB[n].tail)
+        pose_dance(f,offs,locks); hx_=(B.matrix_world@PB['Hips'].head).x; HXs.append(hx_); HFs.append(f)
+        for n in ('Head','Hips','Left wrist','Right wrist','Left toe','Right toe','Left ankle','Right ankle'):
+            p_=B.matrix_world@PB[n].tail; pts_all.append(Vector((p_.x-hx_,p_.y,p_.z)))
     mn=Vector([min(p[i] for p in pts_all) for i in range(3)]); mx=Vector([max(p[i] for p in pts_all) for i in range(3)])
-    meshes_eval(True); relaxed(); mnr,mxr=bbox(MESHES); top=max(mx.z+0.18,mxr.z+0.02)
-    lo=FLOORW-0.06; Hh=(top-lo); wid=(mx.x-mn.x)+0.5; need=max(Hh,wid*RH/RW)*1.06; tgt=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,(top+lo)/2))
+    meshes_eval(True); relaxed(); mnr,mxr=bbox(MESHES); top=max(mx.z+0.15,mxr.z+0.02)
+    lo=FLOORW-0.05; Hh=(top-lo); wid=(mx.x-mn.x)+0.3; need=max(Hh*1.08,wid*RH/RW); tgt=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,(top+lo)/2))
+    # camera follows her hips sideways (smoothed), so she stays centred and big in frame
+    hxi=np.interp(np.arange(NF),HFs,HXs); kk_=np.exp(-0.5*(np.arange(-15,16)/6.0)**2); kk_/=kk_.sum(); CAMX=np.convolve(np.pad(hxi,15,mode='edge'),kk_,'valid')
+    info['cam_track_x_range_m']=[round(float(CAMX.min()),3),round(float(CAMX.max()),3)]
     CAM=(tgt,0,3,need/(24/50),50); info['camera']={'tgt':list(tgt),'az':0,'el':3,'dist':CAM[3],'lens':50}
     meshes_eval(False); bones=phys_bones()
     SIM=spring_sim(lambda f: pose_dance(max(f-WARM,0),offs,locks),NF+WARM,fps,bones)
@@ -1068,7 +1085,7 @@ elif MODE=='dance2':
     def px(p): c=w2c(sc,cam,p); return [round(c.x,5),round(1-c.y,5)]
     trk={}; slide={'Left':0.0,'Right':0.0}; prevA={}
     for f in frames_of(NF):
-        t0_=time.time(); meshes_eval(False); pose_dance(f,offs,locks); ang=apply_springs(SIM,f+WARM)
+        t0_=time.time(); meshes_eval(False); pose_dance(f,offs,locks); ang=apply_springs(SIM,f+WARM); setcam(Vector((float(CAMX[f])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
         e={'stance':stance[f],'locked':[sd for sd in FOOT if locks[sd][f] is not None and locks[sd][f][1]>0.99]}
         for sd in e['locked']:
             a_=W(sd+' ankle'); tg=B.matrix_world@locks[sd][f][0]; d_=(Vector((a_.x,a_.y))-Vector((tg.x,tg.y))).length*1000; slide[sd]=max(slide[sd],d_)
