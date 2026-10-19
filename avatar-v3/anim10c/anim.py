@@ -787,8 +787,84 @@ elif MODE=='poses3b':
         info['frames'][nm]=g; log('pose3b done',nm,g)
 # ======================= POSES4: feet + hands fix pass (worker 41c5b341, Oct 19): vertex-level hand contact (0 inside, <=3 mm), fingers draped,
 # feet grounded on a real floor (planted = bind-pose flat, pointed = ball on floor + toes flat), ankles crossed so the shins form an X from the front
-elif MODE=='poses4':
+elif MODE in ('poses4','poses6'):
+    P6=(MODE=='poses6')
     exec(open('avatar-v3/anim10c/contact.py').read(),globals())
+    if P6:
+        # poses6 (Saidie Oct 19 13:26-13:27): relaxed hands (MCP ~15-30, PIP ~20-40, never flat paddles), toes resting flat on the floor (no claw),
+        # visible high-heel lift on standing feet, foot-vs-knee gap, hand-vs-body/shirt colliders, shirt pushed outside the body on seated poses.
+        _ff0=fingers_flat; _sf0=settle_fingers
+        def fingers_flat(sd,c1=16.0,c2=24.0,c3=12.0): return _ff0(sd,c1,c2,c3)
+        def settle_fingers(sd,T,lo=-12.0,hi=40.0,goal=0.0012,rest_hover=30.0): return _sf0(sd,T,lo,hi,goal,rest_hover)
+        SHIRT=bpy.data.objects.get('Shirt') or next((o for o in bpy.data.objects if o.type=='MESH' and 'shirt' in o.name.lower()),None)
+        SHWRAP=None
+        if SHIRT is not None:
+            SHWRAP=SHIRT.modifiers.new('P6wrap','SHRINKWRAP'); SHWRAP.target=BODY; SHWRAP.wrap_method='NEAREST_SURFACEPOINT'; SHWRAP.wrap_mode='OUTSIDE'; SHWRAP.offset=0.002
+            SHWRAP.show_render=False; SHWRAP.show_viewport=False
+        log('P6 shirt object',SHIRT.name if SHIRT else None)
+        _vgn={g.index:g.name for g in BODY.vertex_groups}
+        def _dom_verts(bn):
+            out=[]
+            for v in BODY.data.vertices:
+                best=None; w=0.0
+                for ge in v.groups:
+                    if ge.weight>w: w=ge.weight; best=_vgn.get(ge.group)
+                if best==bn: out.append(v.index)
+            return np.array(out,dtype=int)
+        TOEV={sd:_dom_verts(sd+' toe') for sd in ('Left','Right')}
+        log('P6 toe verts',{k:len(v) for k,v in TOEV.items()})
+        def toe_settle(sd,lo=0.0003,hi=0.0022):
+            """toes lie on the floor: toe bone levelled, then nudged in 1.5 deg steps until the toe pads sit 0.3-2.2 mm above the floor (0 verts below, no curl)"""
+            n=sd+' toe'
+            if n not in PB or len(TOEV[sd])==0: return None
+            d=(PB[n].tail-PB[n].head); fl=Vector((d.x,d.y,0.0))
+            if fl.length>1e-6: align(n,fl.normalized(),cap=60)
+            lat=fl.normalized().cross(Vector((0,0,1))) if fl.length>1e-6 else Vector((1,0,0)); hist=[]
+            for k in range(14):
+                meshes_eval(True); z=float(body_co()[TOEV[sd]][:,2].min())-FLOOR; meshes_eval(False); hist.append(round(z*1000,1))
+                if lo<=z<=hi: break
+                st=1.5 if z<lo else -1.5
+                z0=PB[n].tail.z; wrot_v(n,st,lat)
+                if (PB[n].tail.z-z0)*(1 if z<lo else -1)<0: wrot_v(n,-2*st,lat)
+            return hist
+        def toe_curl_deg(sd):
+            n=sd+' toe'
+            if n not in PB: return None
+            a_=(PB[sd+' ankle'].tail-PB[sd+' ankle'].head).normalized(); t_=(PB[n].tail-PB[n].head).normalized()
+            return round(math.degrees(a_.angle(t_)),1)
+        def clamp_bend(n,lim):
+            if n not in PB: return None
+            q=PB[n].matrix_basis.to_quaternion(); ang=math.degrees(2*math.acos(min(1.0,abs(q.w))))
+            if ang<=lim: return round(ang,1)
+            loc=PB[n].matrix_basis.to_translation(); q2=Quaternion().slerp(q,lim/ang)
+            PB[n].matrix_basis=Matrix.Translation(loc)@q2.to_matrix().to_4x4(); upd(); return (round(ang,1),lim)
+        def hand_body_resolve(sd,with_shirt=True):
+            """hand outside the body (and shirt): push the whole hand out along the surface normal at its deepest point, wrist turn kept, then re-drape the fingers"""
+            own='LARM' if sd=='Left' else 'RARM'
+            hist=[]
+            for k in range(10):
+                meshes_eval(True); co=body_co()
+                T=target_bvh(['Body']+(['Shirt'] if with_shirt and SHIRT is not None else []),frozenset({own}),near=PB[sd+' wrist'].head,rad=0.30)
+                if T is None: meshes_eval(False); break
+                P=co[HANDV[sd]]; dd=sdist(T,P,0.08); worst=(0.0,None)
+                for p,dv in zip(P,dd):
+                    if dv is not None and dv<worst[0]: worst=(dv,p)
+                meshes_eval(False); hist.append(round(-worst[0]*1000,1))
+                if worst[1] is None or worst[0]>-0.0008: break
+                loc,nr,i,dist=T.find_nearest(Vector(tuple(worst[1])),0.1)
+                if nr is None: break
+                Rw=PB[sd+' wrist'].matrix.to_3x3().copy(); el=PB[sd+' elbow'].head.copy()
+                tgt=PB[sd+' wrist'].head+nr.normalized()*(-worst[0]+0.003)
+                ik2(sd+' arm',sd+' elbow',tgt,el+(el-PB[sd+' arm'].head).normalized()*0.0+ (el-(PB[sd+' arm'].head+tgt)/2).normalized()*0.3)
+                set_rot(sd+' wrist',Rw)
+            return hist
+        def finger_inside(sd,with_shirt=True):
+            own='LARM' if sd=='Left' else 'RARM'
+            T=target_bvh(['Body']+(['Shirt'] if with_shirt and SHIRT is not None else []),frozenset({own}),near=PB[sd+' wrist'].head,rad=0.30)
+            if T is None: return 0
+            vi=np.concatenate([FINGV[(sd,f)] for f in FING5 if len(FINGV[(sd,f)])]) if FING5 else HANDV[sd]
+            d=[x for x in sdist(T,body_co()[vi],0.05) if x is not None]
+            return int(sum(1 for x in d if x<-0.0008))
     POSES=['knee_over_knee','ankles_crossed','side_saddle','hand_on_hip','contrapposto','hand_behind_head']
     only=E.get('POSES','')
     mine=[n for i,n in enumerate(POSES) if i%SHN==SH] if not only else [p for i,p in enumerate(only.split(',')) if i%SHN==SH]
@@ -841,7 +917,7 @@ elif MODE=='poses4':
         Rz=Matrix.Rotation(math.radians(yaw),3,'Z'); Rx=Matrix.Rotation(math.radians(pitch),3,'X')
         set_rot(sd+' ankle',Rz@Rx@FLAT[sd+' ankle'])
         if sd+' toe' in PB:
-            tp={'floor':min(pitch,6.0),'line':pitch+10.0,'flat':pitch}[toe]
+            tp=({'floor':0.0,'line':pitch,'flat':0.0} if P6 else {'floor':min(pitch,6.0),'line':pitch+10.0,'flat':pitch})[toe]
             set_rot(sd+' toe',Rz@Matrix.Rotation(math.radians(tp),3,'X')@FLAT[sd+' toe'])
     def leg_to(sd,ank,knee_pt,pitch,yaw=0.0,toe='floor'):
         ik2(sd+' leg',sd+' knee',ank,knee_pt); foot_orient(sd,pitch,yaw,toe)
@@ -856,6 +932,8 @@ elif MODE=='poses4':
         return a_
     rest(); meshes_eval(True); HHp={_sd:float(foot_stats(_sd,0.0)['heel_mm']-foot_stats(_sd,0.0)['ball_mm']) for _sd in ('Left','Right')}; meshes_eval(False)
     log('high-heel foot: bind-pose heel lift above the ball (mm)',HHp)
+    if P6:
+        HHp={k:max(v,38.0) for k,v in HHp.items()}; log('P6 high-heel target: bind lift is only ~5 mm, so standing feet use a visible 38 mm heel lift (ball + toes on the floor)',HHp)
     def leg_flat(sd,ank,knee_pt,yaw=0.0):
         """planted foot, HIGH-HEEL shape (Saidie Oct 19): ball + toe pads on the floor, heel held at the bind-pose lift (HHp), never forced flat"""
         pt=0.0; a_=ank
@@ -1031,15 +1109,53 @@ elif MODE=='poses4':
             log('poses4 leg clearance',nm,inf['leg_vs_leg_vertex'])
         if seated: seat_on(inf['seat_top'])
         hrep=hands(nm,inf)
-        g=gates(nm,inf,hrep); g.update({k:v for k,v in inf.items()}); g['s_pose']=round(time.time()-t0,1)
+        p6={}
+        if P6:
+            if SHWRAP is not None: SHWRAP.show_render=SHWRAP.show_viewport=bool(seated)
+            if nm=='knee_over_knee':
+                # top foot/ankle must not rest INTO the lower knee/shin: swing the top shin forward in 2 deg steps until >= 5 mm gap
+                lat_=(PB['Left leg'].head-PB['Right leg'].head).normalized(); fk=[]
+                for k_ in range(16):
+                    meshes_eval(True); Tl=target_bvh(['Body'],frozenset({'LARM','RARM','CORE','HEAD','RLEG'}),near=PB['Left knee'].head,rad=0.6)
+                    d=[x for x in sdist(Tl,body_co()[FOOTV['Right']],0.10) if x is not None] if Tl is not None else []
+                    meshes_eval(False); gap=min(d) if d else 0.1; fk.append(round(gap*1000,1))
+                    if gap>=0.005: break
+                    y0=PB['Right ankle'].head.y; wrot_v('Right knee',2.0,lat_)
+                    if PB['Right ankle'].head.y>y0: wrot_v('Right knee',-4.0,lat_)
+                p6['foot_vs_knee_gap_mm']=fk
+            p6['clamp']={n:clamp_bend(n,lim) for n,lim in (('Left wrist',74),('Right wrist',74),('Left leg',129),('Right leg',129))}
+            for sd in ('Left','Right'):
+                if not hrep.get(sd): fingers_flat(sd); p6.setdefault('free_hand_relaxed',[]).append(sd)
+            for sd in ('Left','Right'):
+                if hrep.get(sd):
+                    p6.setdefault('hand_push_mm',{})[sd]=hand_body_resolve(sd)
+                    T_=hrep[sd].get('T')
+                    if T_ is not None:
+                        try: p6.setdefault('fingers_redrape',{})[sd]=settle_fingers(sd,T_)
+                        except Exception as ex_: p6.setdefault('fingers_redrape',{})[sd]=str(ex_)[:120]
+            for sd in ('Left','Right'):
+                meshes_eval(True); fz=float(foot_co(sd)[:,2].min())-FLOOR; meshes_eval(False)
+                if fz<0.012: p6.setdefault('toe_settle_mm',{})[sd]=toe_settle(sd)
+            meshes_eval(True); p6['finger_verts_inside_body_or_shirt']={sd:finger_inside(sd) for sd in ('Left','Right')}; meshes_eval(False)
+            p6['toe_vs_foot_deg']={sd:toe_curl_deg(sd) for sd in ('Left','Right')}
+            log('P6 post',nm,json.dumps(p6,default=str)[:2000])
+        g=gates(nm,inf,hrep); g['p6']=p6; g.update({k:v for k,v in inf.items()}); g['s_pose']=round(time.time()-t0,1)
         log('poses4 gates',nm,json.dumps(g,default=str)[:3000])
         views(nm,seated)
         try:
             M_,F_,HST=sm_autofix(FLOOR,seated=seated)
+            if P6:
+                ts2={}
+                for sd in ('Left','Right'):
+                    meshes_eval(True); fz=float(foot_co(sd)[:,2].min())-FLOOR; meshes_eval(False)
+                    if fz<0.012: ts2[sd]=toe_settle(sd)
+                meshes_eval(True); co_=body_co(); g['p6_final']={'feet':{sd:foot_stats(sd,FLOOR,co_) for sd in ('Left','Right')},'toe_settle_after_autofix':ts2,
+                    'toe_vs_foot_deg':{sd:toe_curl_deg(sd) for sd in ('Left','Right')},'finger_verts_inside_body_or_shirt':{sd:finger_inside(sd) for sd in ('Left','Right')},'clip':clip_flags()}
+                meshes_eval(False); log('P6 final',nm,json.dumps(g['p6_final'],default=str)[:2000])
             meshes_eval(True); mn2,mx2=bbox(MESHES); mn2.z=min(mn2.z,FLOORW); ctr=(mn2+mx2)/2; ext=mx2-mn2; size=max(ext.x,ext.y,ext.z)*1.12
             VV=sm_render_views(OUT+f'/{nm}_qc_{{}}.jpg',ctr,size,floor_obj=FLOOROBJ)
             json.dump({'pose':nm,'seated':seated,'measures':M_,'flags':F_,'history':HST,'views':VV},open(OUT+f'/{nm}_selfcheck.json','w'),default=str)
-            if any(h.get('ankle_fix') for h in HST):
+            if P6 or any(h.get('ankle_fix') for h in HST):
                 views(nm,seated)   # the beauty views + close-ups re-rendered after the auto-fix
             log('poses4 selfcheck',nm,len(F_),json.dumps(F_,default=str)[:1500])
         except Exception as ex:
