@@ -713,7 +713,7 @@ elif MODE=='poses3b':
             wrot('Hips',-4,'X')   # sit tall: tiny forward tilt of the pelvis
             hl=PB['Left leg'].head; hr=PB['Right leg'].head; fwd=Lt*0.95
             if name=='knee_over_knee':
-                lift=0.022*it; fw2=0.012*it
+                lift=0.025*it; fw2=0.0
                 leg_to('Left',Vector((hl.x+0.01,hl.y-fwd-0.04,FLOOR+ANKH+0.035)),Vector((0.05,-1,0.3)),Vector((0,-0.45,-0.89)))
                 leg_to('Right',Vector((hl.x+0.13,hl.y-fwd-0.16-fw2,FLOOR+ANKH+0.19+lift)),Vector((0.35,-1,0.9+lift*4)),Vector((0.15,-0.55,-0.82)))
                 q=PB['Right knee'].head+Vector((0.0,-0.02,0.06))
@@ -770,7 +770,7 @@ elif MODE=='poses3b':
     meshes_eval(True); relaxed(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z
     for nm in mine:
         best=None
-        NIT=13 if nm=='knee_over_knee' else (8 if nm in ('ankles_crossed','side_saddle') else 1)
+        NIT=10 if nm=='knee_over_knee' else (8 if nm in ('ankles_crossed','side_saddle') else 1)
         for it in range(NIT):
             meshes_eval(False); inf=pose(nm,it); g=gates(nm)
             bad=5*(g['flags'].get('leg_vs_leg_tris') or 0)+(g['flags'].get('Larm_vs_torso_tris') or 0)+(g['flags'].get('Rarm_vs_torso_tris') or 0)+(g['flags'].get('Larm_vs_legs_tris') or 0)+(g['flags'].get('Rarm_vs_legs_tris') or 0)
