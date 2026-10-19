@@ -52,7 +52,12 @@ def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9,np_=1):
                     cs=[((p_[23].x+p_[24].x)/2,(p_[23].y+p_[24].y)/2) for p_ in r.pose_landmarks]
                     if TRK.get('c') is None: k=int(np.argmax(hs))
                     else: k=int(np.argmin([(c[0]-TRK['c'][0])**2+(c[1]-TRK['c'][1])**2 for c in cs]))
-                else: others=0
+                else: others=0; k=0
+                if TRK.get('c') is not None:   # never jump to someone else: a detection far from her last spot = she was missed this frame
+                    pk_=r.pose_landmarks[k]; cc_=((pk_[23].x+pk_[24].x)/2,(pk_[23].y+pk_[24].y)/2)
+                    if (cc_[0]-TRK['c'][0])**2+(cc_[1]-TRK['c'][1])**2>0.09**2:
+                        TRK['miss']=TRK.get('miss',0)+1; R.append((i,cut,None,None,others)); i+=1; continue
+
                 pk=r.pose_landmarks[k]; TRK['c']=((pk[23].x+pk[24].x)/2,(pk[23].y+pk[24].y)/2)
                 R.append((i,cut,[[l.x,l.y,l.z] for l in r.pose_world_landmarks[k]],[[l.x,l.y,l.visibility] for l in r.pose_landmarks[k]],others))
             else: R.append((i,cut,None,None,0))
