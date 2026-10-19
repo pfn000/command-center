@@ -77,20 +77,21 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
   const { c, p } = await ctx(kind, theme)
   const k = `${kind}-${theme}`
   const deep = theme === 'dark'
+  console.log('ctx', k, Math.round((Date.now() - T0) / 1000))
   for (const [n, route] of ROUTES) {
     await go(p, route, theme, 2600)
     await snap(p, `${k}-${n}-${slug(route)}`)
-    await lazyAll(p)
+    if (deep) await lazyAll(p)
     if (route === '/' ) report.checks[`${k}-weight-home`] = await weigh(p, route)
     else if (deep) report.checks[`${k}-weight-${slug(route)}`] = await weigh(p, route)
     const slates = await p.evaluate(() => [...document.querySelectorAll('.pf-slate')].map((s) => Math.round(s.getBoundingClientRect().top + window.scrollY)))
     if (deep || ['/work', '/emmico'].includes(route)) {
       let j = 0
-      for (const y of slates.slice(0, kind === 'p' ? 7 : 7)) {
+      for (const y of slates.slice(0, deep ? (route === '/work' ? 7 : 3) : (route === '/work' ? 3 : 1))) {
         j++
         await p.evaluate((v) => window.scrollTo(0, v - 70), y); await p.waitForTimeout(700)
         await snap(p, `${k}-${n}b-${slug(route)}-slate${j}`)
-        if (deep && ['/work', '/emmico'].includes(route)) { await p.evaluate((v) => window.scrollTo(0, v + Math.round(window.innerHeight * 0.55)), y); await p.waitForTimeout(600); await snap(p, `${k}-${n}c-${slug(route)}-slate${j}-mid`) }
+        if (deep && route === '/work' && j <= 3) { await p.evaluate((v) => window.scrollTo(0, v + Math.round(window.innerHeight * 0.55)), y); await p.waitForTimeout(600); await snap(p, `${k}-${n}c-${slug(route)}-slate${j}-mid`) }
       }
     }
     if (route === '/' && deep) {
@@ -101,7 +102,7 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
       await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(900)
       await snap(p, `${k}-${n}f-home-footer`)
     }
-    if (deep && kind === 'd') { await p.evaluate(() => window.scrollTo(0, 0)); await snap(p, `${k}-${n}z-${slug(route)}-full`, { fullPage: true, quality: 45 }) }
+    if (deep && kind === 'd' && ['/', '/work'].includes(route)) { await p.evaluate(() => window.scrollTo(0, 0)); await snap(p, `${k}-${n}z-${slug(route)}-full`, { fullPage: true, quality: 45 }) }
   }
   if (kind === 'p') {
     await go(p, '/', theme, 2000)
@@ -118,17 +119,6 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
     report.checks[`vault-${r}`] = resp ? resp.status() : 'noresp'
   }
   await c.close()
-}
-// prismify.design nav, for the side-by-side
-for (const kind of ['d', 'p']) {
-  try {
-    const { c, p } = await ctx(kind, 'dark')
-    await p.goto('https://prismify.design', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {})
-    await p.waitForTimeout(2500)
-    await snap(p, `ref-prismify-${kind}`)
-    await snap(p, `ref-prismify-${kind}-nav`, { clip: { x: 0, y: 0, width: kind === 'p' ? 390 : 1600, height: 110 } })
-    await c.close()
-  } catch (e) { report.errors.push('prismify ' + String(e).slice(0, 120)) }
 }
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 // MP4s for Saidie: home scroll-throughs (desktop 1600, phone 390) + a tap-to-explain demo. H.264, faststart, each kept under 1.9 MB.
@@ -206,14 +196,14 @@ async function menuVideo() {
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 try { execSync('command -v ffmpeg') } catch { try { execSync('sudo apt-get install -y -q ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)', { stdio: 'inherit', timeout: 240000, shell: '/bin/bash' }) } catch (e) { report.errors.push('ffmpeg install ' + String(e).slice(0, 200)) } }
 for (const job of [() => scrollVideo('d'), () => scrollVideo('p'), () => menuVideo()]) {
-  if (Date.now() - T0 > 500000) { report.errors.push('video skipped: time'); continue }
+  if (Date.now() - T0 > 540000) { report.errors.push('video skipped: time'); continue }
   await job()
 }
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 // lighthouse last
 // Lighthouse (phone) on home, if it fits
 try {
-  if (Date.now() - T0 < 430000) {
+  if (Date.now() - T0 < 440000) {
     const chrome = chromium.executablePath()
     execSync(`CHROME_PATH=${chrome} timeout -k 5 150 npx -y lighthouse@12 ${B}/ --only-categories=performance --form-factor=mobile --quiet --chrome-flags="--headless=new --no-sandbox" --output=json --output-path=/tmp/lh.json`, { stdio: 'ignore', timeout: 170000, shell: '/bin/bash' })
     const lh = JSON.parse(fs.readFileSync('/tmp/lh.json', 'utf8'))

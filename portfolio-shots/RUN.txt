@@ -1,1 +1,1 @@
-v7 r12 proof run (multi-page restructure, glass nav, slates, aura shader, asset pipeline) 2026-10-19T00:01Z
+v7 r12b proof run (opaque slates, sheet, light aura, README dup images, videos) 2026-10-19T00:13Z
