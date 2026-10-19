@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance2 attempt 2: arms pushed straight out from her body by the exact mesh test (prepass, smoothed), best-of per-frame fix, hips drop when a planted foot is out of reach (no slide)"
+ "note": "dance2 attempt 3: + shortest-path neck/head turn, legs pushed apart by mesh test, deeper hip drop for planted feet"
 }

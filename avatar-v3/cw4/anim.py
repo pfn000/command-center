@@ -952,7 +952,7 @@ elif MODE=='dance2':
                 if lk is None or lk[1]<0.99: continue
                 S0=PB[sd+' leg'].head; reach=(PB[sd+' leg'].length+PB[sd+' knee'].length)*0.985
                 need=max(need,(lk[0]-S0).length-reach)
-            if need>0: hip_drop(-min(need*1.15,0.08))
+            if need>0: hip_drop(-min(need*1.2,0.15))
             for sd in ('Left','Right'):
                 lk=locks[sd][f]
                 if lk is None: continue
@@ -1090,6 +1090,19 @@ elif MODE=='dance2':
                     for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
                     upd(); meshes_eval(True); cf=clip_flags()
                 if k_: e.setdefault('extra_push_steps',{})[sd]=k_
+            # legs through each other: swing the free (unplanted) leg out from her centre line, exact mesh test, keep the best
+            free=[sd for sd in ('Left','Right') if sd not in e['locked']]
+            if (cf.get('leg_vs_leg_tris') or 0)>0 and free:
+                sdl=max(free,key=lambda s_: PB[s_+' ankle'].head.z); bestl=(cf.get('leg_vs_leg_tris') or 0,PB[sdl+' leg'].matrix_basis.copy()); kl=0
+                while (cf.get('leg_vs_leg_tris') or 0)>0 and kl<8:
+                    meshes_eval(False); pb=PB[sdl+' leg']; out=pb.head-PB['Hips'].head; out.z=0
+                    d=(pb.tail-pb.head).normalized(); ax=d.cross(out.normalized()) if out.length>1e-5 else Vector((0,1,0))
+                    if ax.length>1e-4: wrot_v(sdl+' leg',3,ax.normalized())
+                    kl+=1; meshes_eval(True); cf=clip_flags()
+                    if (cf.get('leg_vs_leg_tris') or 0)<bestl[0]: bestl=(cf.get('leg_vs_leg_tris') or 0,PB[sdl+' leg'].matrix_basis.copy())
+                if (cf.get('leg_vs_leg_tris') or 0)>bestl[0]:
+                    meshes_eval(False); PB[sdl+' leg'].matrix_basis=bestl[1]; upd(); meshes_eval(True); cf=clip_flags()
+                e['leg_push_steps']={sdl:kl}
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
         render(OUT+f'/f{f:03d}.jpg')
