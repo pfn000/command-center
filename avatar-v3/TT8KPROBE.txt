@@ -1,1 +1,1 @@
-probe a30: 10c (39182928356) ARM_DOWN 30, 4 spp + OIDN, frames 0/38/262 at 4320x7680
+probe a25/a20: 10c (39182928356) ARM_DOWN 25 and 20, 4 spp + OIDN, frame 38 (right front-3/4) at 4320x7680
