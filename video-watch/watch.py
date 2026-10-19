@@ -215,8 +215,8 @@ def diarize(wav):
     res = sd.process(audio).sort_by_start_time()
     segs = [{'start': round(r.start, 2), 'end': round(r.end, 2), 'spk': int(r.speaker)} for r in res]
     # second pass: one voice often gets split (voice changes, noisy rooms). Merge clusters whose average voiceprints are
-    # close (cosine >= merge, default 0.7; tuned on 4 clips: same speaker 0.82, different speakers 0.40).
-    merge = float(OPTS.get('merge', 0.7)); merged = []
+    # close (cosine >= merge, default 0.82; measured Oct 19: same voice split in two 0.86-0.91, two different people 0.39-0.78).
+    merge = float(OPTS.get('merge', 0.82)); merged = []
     if n <= 0 and len({s['spk'] for s in segs}) > 1 and merge < 1:
         ext = sherpa_onnx.SpeakerEmbeddingExtractor(sherpa_onnx.SpeakerEmbeddingExtractorConfig(model=emb, num_threads=2))
         def vec(a):
