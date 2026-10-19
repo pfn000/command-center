@@ -117,7 +117,7 @@ def finger_spread(sd,amt=1.0):
         if d1<d0:
             for k,m in base.items(): PB[k].matrix_basis=m
             upd(); wrot_v(n,-abs(a_)*amt,ax)
-def settle_fingers(sd,T,lo=-8.0,hi=50.0,goal=0.0012):
+def settle_fingers(sd,T,lo=-12.0,hi=26.0,goal=0.0012,rest_hover=12.0):
     """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
     rep={}
     for f in FING5:
@@ -140,7 +140,8 @@ def settle_fingers(sd,T,lo=-8.0,hi=50.0,goal=0.0012):
             d=at(b); rep[f]={'deg':round(b,1),'gap_mm':round(d*1000,1)}
         elif d0>0.0025 and (f!='Thumb' or d0<0.020):   # hovering: curl toward the surface until it touches (0-3 mm)
             a,b=0.0,hi; db=at(b)
-            if db>0.003: rep[f]={'deg':round(hi,1),'gap_mm':round(db*1000,1),'hover':True}; continue
+            if db>0.003:   # can't reach the surface without hooking: leave it softly curled in the air (natural), not a claw
+                d=at(rest_hover if f!='Thumb' else 0.0); rep[f]={'deg':rest_hover if f!='Thumb' else 0.0,'gap_mm':round(d*1000,1),'hover':True}; continue
             for _ in range(9):
                 m=(a+b)/2; dm=at(m)
                 if dm>goal: a=m
@@ -222,9 +223,9 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,
     if settle and not unsigned:
         # roll the hand about its own axis until the index side and the little-finger side sit at the same height off the surface
         df=side_diff(); a=0.0
-        for r_it in range(4):
+        for r_it in range(6):
             if abs(df)<0.003: break
-            st_=max(-14.0,min(14.0,math.degrees(math.atan2(df,0.07))))
+            st_=max(-20.0,min(20.0,math.degrees(math.atan2(df,0.06))))
             ROLL[0]+=st_; seat_hand(5); d2=side_diff()
             if abs(d2)>abs(df): ROLL[0]-=2*st_; seat_hand(5); d2=side_diff()
             df=d2
