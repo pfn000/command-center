@@ -793,6 +793,7 @@ elif MODE=='poses4':
     only=E.get('POSES','')
     mine=[n for i,n in enumerate(POSES) if i%SHN==SH] if not only else [p for i,p in enumerate(only.split(',')) if i%SHN==SH]
     rest(); FLAT={n:PB[n].matrix.to_3x3().copy() for n in ('Left ankle','Right ankle','Left toe','Right toe') if n in PB}
+    exec(open('avatar-v3/selfmodel/selfmodel.py').read(),globals()); log('selfmodel rest',{k:(v if k=='heel_lift_mm' else None) for k,v in sm_init().items()})
     meshes_eval(True); FLOOR=float(arm_co(BODY)[:,2].min()); FLOORW=bbox([BODY])[0].z
     # sanity: sign of the signed distance (outside +, inside -)
     _T=target_bvh(['Body'],frozenset({'LARM','RARM'}))
@@ -1018,6 +1019,14 @@ elif MODE=='poses4':
         g=gates(nm,inf,hrep); g.update({k:v for k,v in inf.items()}); g['s_pose']=round(time.time()-t0,1)
         log('poses4 gates',nm,json.dumps(g,default=str)[:3000])
         views(nm,seated)
+        try:
+            meshes_eval(True); M_,F_=sm_selfcheck(FLOOR,seated=seated)
+            mn2,mx2=bbox(MESHES); mn2.z=min(mn2.z,FLOORW); ctr=(mn2+mx2)/2; size=max((mx2-mn2).length*0.80,1.2)
+            VV=sm_render_views(OUT+f'/{nm}_qc_{{}}.jpg',ctr,size,floor_obj=FLOOROBJ)
+            json.dump({'pose':nm,'seated':seated,'measures':M_,'flags':F_,'views':VV},open(OUT+f'/{nm}_selfcheck.json','w'),default=str)
+            log('poses4 selfcheck',nm,len(F_),json.dumps(F_,default=str)[:1500])
+        except Exception as ex:
+            import traceback; log('selfcheck error',nm,traceback.format_exc()[-1500:])
         if seated: seat_off()
         info['frames'][nm]=g; log('poses4 done',nm,round(time.time()-t0,1),'s')
 elif MODE=='hair2':

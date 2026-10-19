@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses4 #15: knee-over-knee top hand on/beside the bottom hand (no hand-in-hand), head hand fingers across the back of the head, head close-ups front/back/top (14:47:38)"
+ "note": "anim10c poses4 #16: + body self-model (selfmodel.py): 9-view self-check, joint limits, COM/ball-of-foot balance, colliders, QC json per pose (14:50:26)"
 }
