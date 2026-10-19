@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 58
     strategy:
       fail-fast: false
-      matrix: { variant: [A0, A2, A3] }
+      matrix: { variant: [A0, A2] }
     env: { VARIANT: "${{ matrix.variant }}" }
     steps:
       - uses: actions/checkout@v4

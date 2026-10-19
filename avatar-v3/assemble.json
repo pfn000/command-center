@@ -44,7 +44,7 @@
   "WELD_SMOOTH": true,
   "WELD_SMOOTH_ITERS": 12,
   "SEAM_RELAX_DILATE": 8,
-  "ARM_DOWN": 45,
+  "ARM_DOWN": 40,
   "GROUP_MAX_AFTER_SMOOTH": true,
   "POSED_CONVERGE": true,
   "CONVERGE_ROUNDS": 5,
@@ -102,8 +102,5 @@
  },
  "P50": {
   "ARM_DOWN": 50
- },
- "A3": {
-  "SEAM_FOLD": false
  }
 }

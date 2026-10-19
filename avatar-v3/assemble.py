@@ -2470,9 +2470,10 @@ _FOLD_REST={}
 def fold_rest_cache(o):
     rest(); V,_,_=tri_arr(o); _FOLD_REST[o.name]=V.astype(np.float64)
 def fold_total(d): return d['flips_L']+d['flips_R']+d['sharp_L']+d['sharp_R']
-def fold_probe(o,arms=(45,30,60)):
+def fold_probe(o,arms=None):
     """fold counts at rest and with the arms at several angles (the proof pose is ARM_DOWN); rest geometry re-cached first"""
     fold_rest_cache(o); out={}; ad=P['ARM_DOWN']
+    if arms is None: arms=(ad,ad-15,ad+15)
     try:
         for a_ in arms:
             P['ARM_DOWN']=a_; pose_relaxed(); out[f'arm{a_}']=shirt_folds(o)
@@ -2538,7 +2539,7 @@ if SHIRT is not None and P.get('SELF_CLEAR',False):
 if SHIRT is not None:
     try:
         pose_relaxed(); _a=shirt_selfx(SHIRT); rest(); _b=shirt_selfx(SHIRT); rep['shirt_selfx_final']={'relaxed':_a,'rest':_b}; log('SELFX final',rep['shirt_selfx_final'])
-        try: rep['shirt_folds_final']=fold_probe(SHIRT,arms=(45,30,55,60,74)); log('FOLDS final',rep['shirt_folds_final'])
+        try: rep['shirt_folds_final']=fold_probe(SHIRT,arms=(40,30,35,45,55,60,74)); log('FOLDS final',rep['shirt_folds_final'])
         except Exception as e: traceback.print_exc(); log('FOLDFINALERR',e); rest()
     except Exception as e: traceback.print_exc(); log('SELFXERR',e); rest()
 
@@ -2908,27 +2909,37 @@ FINGERS=('IndexFinger','MiddleFinger','RingFinger','LittleFinger')
 def _hand_axes(sd):
     w=_bh(sd+' wrist'); m=_bh('MiddleFinger1_'+sd[0]); fdir=(m-w).normalized(); y=Vector((0,1,0))
     n=fdir.cross(y).normalized(); return w,m,fdir,n
+def _curl_frame(sd):
+    """knuckle axis k (index1 -> little1 heads) and the sign that moves fingertips toward the palm (the side the relaxed curl already bends to)"""
+    i1=_bh('IndexFinger1_'+sd[0]); l1=_bh('LittleFinger1_'+sd[0]); m1=_bh('MiddleFinger1_'+sd[0]); m1t=_bt('MiddleFinger1_'+sd[0]); m3t=_bt('MiddleFinger3_'+sd[0])
+    k=(l1-i1).normalized(); fdir=(m1t-m1).normalized(); v=m3t-m1; palm=(v-fdir*v.dot(fdir)).normalized()
+    s=1.0 if k.cross(fdir).dot(palm)>0 else -1.0
+    w=_bh(sd+' wrist'); t1=_bh('Thumb1_'+sd[0]) or w; tdir=((_bt('Thumb2_'+sd[0]) or t1)-t1).normalized()
+    return k,s,fdir,palm,tdir
 def finger_pose(f):
-    """96 frames at 12 fps: fist (curl), open, spread, then each finger alone thumb..pinky"""
+    """96 frames at 12 fps: fist (full curl, thumb across), open, spread, then each finger alone thumb..pinky. Curl = rotation about the hand's own
+       knuckle axis toward the palm (sign read from her relaxed curl), so every finger folds in its own plane."""
     pose_relaxed(); segs=[(0,12,'fist'),(12,24,'open'),(24,36,'spread'),(36,48,'thumb alone'),(48,60,'index alone'),(60,72,'middle alone'),(72,84,'ring alone'),(84,96,'pinky alone')]
-    s=[x for x in segs if x[0]<=f<x[1]][0]; u=(f-s[0])/(s[1]-s[0]); lab=s[2]
+    s_=[x for x in segs if x[0]<=f<x[1]][0]; u=(f-s_[0])/(s_[1]-s_[0]); lab=s_[2]
     for sd,sgn in (('Left',1),('Right',-1)):
+        k,s,fdir,palm,tdir=_curl_frame(sd)
         def curl(fn_,a):
             if fn_=='Thumb':
-                for j,dg in ((0,22),(1,30),(2,34)): wrot(f'Thumb{j}_{sd[0]}',sgn*dg*a,'Y')
+                ax=tdir.cross(palm).normalized(); st=1.0 if ax.cross(tdir).dot(palm)>0 else -1.0
+                wrot_v(f'Thumb0_{sd[0]}',st*25*a,ax)
+                for j,dg in ((1,35),(2,45)): wrot_v(f'Thumb{j}_{sd[0]}',st*dg*a,ax)
             else:
-                for j,dg in ((1,62),(2,80),(3,58)): wrot(f'{fn_}{j}_{sd[0]}',sgn*dg*a,'Y')
+                for j,dg in ((1,70),(2,95),(3,65)): wrot_v(f'{fn_}{j}_{sd[0]}',s*dg*a,k)
         if lab=='fist':
             for fn_ in FINGERS+('Thumb',): curl(fn_,_ss(u))
         elif lab=='open':
-            for fn_ in FINGERS+('Thumb',): curl(fn_,1-_ss(u)-0.29*math.sin(math.pi*u))
+            for fn_ in FINGERS+('Thumb',): curl(fn_,1-_ss(u))
         elif lab=='spread':
-            a=math.sin(math.pi*u); w,m,fdir,n=_hand_axes(sd)
-            for fn_,fac in zip(FINGERS,(-1.0,0.0,0.7,1.4)):
-                for j in (1,): wrot_v(f'{fn_}1_{sd[0]}',fac*16*a*(1 if (n.cross(fdir)).y>0 else -1),n)
-            for fn_ in FINGERS: 
-                for j,dg in ((1,-18),(2,-26),(3,-18)): wrot(f'{fn_}{j}_{sd[0]}',sgn*dg*a,'Y')
-            wrot_v(f'Thumb1_{sd[0]}',-22*a*(1 if (n.cross(fdir)).y>0 else -1),n)
+            a=math.sin(math.pi*u); n=palm.normalized()
+            sg2=1.0 if n.cross(fdir).dot(k)>0 else -1.0   # +deg about the palm normal moves tips toward the little-finger side
+            for fn_,fac in zip(FINGERS,(-1.0,-0.2,0.6,1.3)): wrot_v(f'{fn_}1_{sd[0]}',sg2*fac*14*a,n)
+            for fn_ in FINGERS:
+                for j,dg in ((1,-18),(2,-26),(3,-18)): wrot_v(f'{fn_}{j}_{sd[0]}',-s*abs(dg)*a*0.9,k)
         else:
             fn_={'thumb':'Thumb','index':'IndexFinger','middle':'MiddleFinger','ring':'RingFinger','pinky':'LittleFinger'}[lab.split()[0]]
             curl(fn_,math.sin(math.pi*u))
@@ -3050,7 +3061,7 @@ def qa_tests(test):
                 if all(k in KB for k in d_): rf(f'cand_{c_}',d_); info['frames'][c_]={'recipe':d_}
         setkeys({})
     elif test=='fing':
-        NF=96; per=(NF+n-1)//n; fr=range(sh*per,min(NF,(sh+1)*per)); dist=0.24/(24/85)
+        NF=96; per=(NF+n-1)//n; fr=range(sh*per,min(NF,(sh+1)*per)); dist=0.26/(24/85)
         for f in fr:
             lab=finger_pose(f); info['frames'][f]={'label':lab}
             for sd,az in (('Left',62),('Right',-62)):
