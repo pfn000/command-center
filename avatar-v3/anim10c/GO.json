@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses6 #3 (18:01:51Z): hand push body-only + capped (shirt in the BVH flung hands off), standing hips 3 cm forward over the raised heels (balance), shirt hem drapes over the raised thigh via a proxy-cylinder shrinkwrap (knee over knee)"
+ "note": "anim10c poses6 #4 (18:24:56Z): thigh proxy radius sanity (7.2 cm; #3 measured 41 cm), standing hips 4.5 cm forward (balance) [182723]"
 }

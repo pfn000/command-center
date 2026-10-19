@@ -1,4 +1,4 @@
-# rev 180151
+# rev 182723
 
 # Jena v3.7 run-10c ANIMATION clips (Saidie 9:47 PM Oct 18): talk/blink/expressions, dance retargeted from her TikTok ref, with bone-track export.
 # Renders from the SAVED run-10c .blend as built (no model edits). Face uses her existing shape keys only.
@@ -987,7 +987,7 @@ elif MODE in ('poses4','poses6'):
                 aR=Vector((hr.x+SG*(sl+0.06),hr.y-fwd*0.45,FLOOR+ANKH)); aR=ground('Right',aR,kRp+Vector((SG*0.1,-0.3,0.1)),48.0,SG*15.0,'floor')
         else:
             w_=('Left' if name!='contrapposto' else 'Right'); f_='Right' if w_=='Left' else 'Left'; sw=SG if w_=='Left' else -SG
-            hip_drop(-0.015,sw*0.025,(-0.03 if P6 else 0)); posture(w_,7.0); inf['weight']=w_
+            hip_drop(-0.015,sw*0.025,(-0.045 if P6 else 0)); posture(w_,7.0); inf['weight']=w_
             wa=REST[w_+' ankle']; hj=PB[w_+' leg'].head
             leg_flat(w_,Vector((wa.x,wa.y,wa.z)),hj+Vector((0,-0.6,-0.3)),yaw=sw*6.0)
             fa=REST[f_+' ankle']; hf=PB[f_+' leg'].head
@@ -1123,6 +1123,7 @@ elif MODE in ('poses4','poses6'):
                     meshes_eval(True); co_=body_co(); vi_=LEGV['Right']; P_=co_[vi_]; hh=np.array(tuple(PB['Right leg'].head)); kk_=np.array(tuple(PB['Right knee'].head)); dd=kk_-hh
                     u_=np.clip((P_-hh)@dd/max(dd@dd,1e-9),0,1); rad=np.linalg.norm(P_-(hh+u_[:,None]*dd),axis=1); r_=float(np.percentile(rad[(u_>0.2)&(u_<0.8)],80)); meshes_eval(False)
                 except Exception as ex_: r_=0.075; meshes_eval(False)
+                if not (0.04<=r_<=0.10): p6['thigh_radius_measured_cm']=round(r_*100,1); r_=0.072   # #3 measured 41 cm (wrong vertex set) -> her fitted thigh radius
                 bpy.ops.mesh.primitive_cylinder_add(vertices=32,radius=r_+0.009,depth=L_,location=h_+ax_*0.5)
                 cy=bpy.context.active_object; bpy.context.view_layer.objects.active=B; cy.name='P6thigh'; cy.rotation_mode='QUATERNION'; cy.rotation_quaternion=Vector((0,0,1)).rotation_difference(ax_.normalized())
                 for attr in ('visible_camera','visible_shadow','visible_diffuse','visible_glossy','visible_transmission','visible_volume_scatter'):
