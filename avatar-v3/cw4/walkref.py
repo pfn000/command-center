@@ -19,6 +19,12 @@ def fetch(s):
             if os.path.exists(p) and os.path.getsize(p)>100000: log('fetched',s['id'],'client',pc or 'default',os.path.getsize(p)); return p
             log('yt fail',s['id'],pc or 'default',(r.stderr or r.stdout).strip().splitlines()[-1:] )
         return None
+    if s['kind']=='ytdlp':
+        cmd=['yt-dlp','--no-playlist','-q','--no-warnings','-f','bv*[height<=1080]+ba/b[height<=1080]/b','--merge-output-format','mp4','-o',p]
+        if s.get('sections'): cmd+=['--download-sections',s['sections']]
+        r=subprocess.run(cmd+[s['url']],capture_output=True,text=True,timeout=600)
+        if os.path.exists(p) and os.path.getsize(p)>100000: log('fetched',s['id'],os.path.getsize(p)); return p
+        log('ytdlp fail',s['id'],(r.stderr or r.stdout).strip().splitlines()[-1:]); return None
     r=subprocess.run(['curl','-sL','-A',UA,'-o',p,s['url']],timeout=300)
     if os.path.exists(p) and os.path.getsize(p)>100000: log('fetched',s['id'],os.path.getsize(p)); return p
     log('fetch fail',s['id']); return None
@@ -41,7 +47,9 @@ def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9):
             else: R.append((i,cut,None,None))
         i+=1
     det.close(); return R,fps,W,H
+REJ={}
 def windows(R,fps,step,win_s):
+    REJ.clear()
     # score every window that sits inside one shot: single model, whole body in frame, feet visible, front-on, legs alternating
     n=len(R); L=max(4,int(round(win_s*fps/step))); best=[]
     cuts=[k for k,r in enumerate(R) if r[1]]
@@ -56,7 +64,9 @@ def windows(R,fps,step,win_s):
         height=np.median(np.max(N[:,[27,28,31,32],1],1)-N[:,0,1])
         d=(N[:,27,1]-N[:,28,1])/torso; d=d-np.convolve(d,np.ones(5)/5,'same')*0
         zc=int(np.sum(np.diff(np.sign(d-np.median(d)))!=0)); amp=float(np.percentile(d,90)-np.percentile(d,10))
-        if vis<0.6 or inb<0.9 or front<0.45 or amp<0.04: continue
+        st_=dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),zc=zc,amp=round(amp,3))
+        if REJ.get('n',0)<3 and (vis<0.5 or inb<0.85 or front<0.35 or amp<0.03): REJ['n']=REJ.get('n',0)+1; REJ.setdefault('ex',[]).append(st_)
+        if vis<0.5 or inb<0.85 or front<0.35 or amp<0.03: continue
         sc=vis*2+inb+min(height,0.9)+min(zc,8)*0.15+min(amp,0.3)
         best.append((round(float(sc),3),s,dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),height=round(float(height),3),zc=zc,amp=round(amp,3))))
     best.sort(key=lambda b:-b[0]); return best[:5]
@@ -68,13 +78,13 @@ for s in G['sources']:
         cap=cv2.VideoCapture(p); fps=cap.get(cv2.CAP_PROP_FPS) or 30; nfr=int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
         step=2 if nfr/fps>40 else 1
         R,fps,W,H=track(p,'lite',step=step,maxw=640)
-        ws=windows(R,fps,step,G.get('win_s',4.0))
-        log('scan',s['id'],'frames',len(R),'fps',round(fps,2),'size',W,H,'best',ws[:2])
+        ws=windows(R,fps,step,G.get('win_s',3.0))
+        log('scan',s['id'],'frames',len(R),'det',sum(1 for r in R if r[3]),'cuts',sum(1 for r in R if r[1]),'fps',round(fps,2),'size',W,H,'best',ws[:2],'rejected eg',REJ.get('ex'))
         for sc,st,info in ws[:2]: cands.append((sc,s,p,R[st][0]/fps,info,fps,W,H))
     except Exception as e: log('source error',s['id'],repr(e)[:300])
 if not cands: log('NO usable walk found'); json.dump({'ok':False,'log':LOG},open(OUT+'/walkref.json','w')); sys.exit(0)
 cands.sort(key=lambda c:-c[0]); sc,S,P,t0,info,fps,W,H=cands[0]
-WIN=G.get('win_s',4.0); t0=max(0,t0-0.2); t1=t0+WIN+0.4
+WIN=G.get('win_s',3.0); t0=max(0,t0-0.2); t1=t0+WIN+0.4
 log('PICK',S['id'],'t0',round(t0,2),'score',sc,info,'others',[(c[1]['id'],round(c[3],1),c[0]) for c in cands[1:6]])
 R,fps,W,H=track(P,'heavy',1,1280,t0,t1)
 N=np.array([r[3] if r[3] else [[np.nan]*3]*33 for r in R],float); Wd=np.array([r[2] if r[2] else [[np.nan]*3]*33 for r in R],float)

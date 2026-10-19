@@ -1,22 +1,52 @@
 {
  "walkref": {
-  "win_s": 4.0,
+  "win_s": 3.0,
   "sources": [
    {
-    "kind": "yt",
-    "id": "_twa9XKJun4"
+    "kind": "ytdlp",
+    "id": "dm_x6wxnev",
+    "url": "https://www.dailymotion.com/video/x6wxnev"
    },
    {
-    "kind": "yt",
-    "id": "297W0FZcJ7U"
+    "kind": "ytdlp",
+    "id": "dm_x54bpkv",
+    "url": "https://www.dailymotion.com/video/x54bpkv",
+    "sections": "*0-200"
    },
    {
-    "kind": "yt",
-    "id": "4YZ-aJamPzA"
+    "kind": "ytdlp",
+    "id": "tt_prokhorovanna",
+    "url": "https://www.tiktok.com/@prokhorovanna/video/7685017601390431521"
    },
    {
-    "kind": "yt",
-    "id": "G8Veye-N0A4"
+    "kind": "ytdlp",
+    "id": "tt_isabellaloren",
+    "url": "https://www.tiktok.com/@itsisabellaloren/video/7652823668451511582"
+   },
+   {
+    "kind": "ytdlp",
+    "id": "tt_annabelphoenixb",
+    "url": "https://www.tiktok.com/@annabelphoenixb/video/7626041357605293334"
+   },
+   {
+    "kind": "ytdlp",
+    "id": "tt_wantmanagement",
+    "url": "https://www.tiktok.com/@wantmanagement/video/7460600742894750981"
+   },
+   {
+    "kind": "ytdlp",
+    "id": "tt_genesis",
+    "url": "https://www.tiktok.com/@genesismodelmgmt/video/7512802359978904854"
+   },
+   {
+    "kind": "ytdlp",
+    "id": "tt_vs_top10",
+    "url": "https://www.tiktok.com/@victoriassecret/video/7691880042384657678"
+   },
+   {
+    "kind": "ytdlp",
+    "id": "tt_kenzlawren",
+    "url": "https://www.tiktok.com/@kenzlawren/video/7297085591706160430"
    },
    {
     "kind": "url",
@@ -36,5 +66,5 @@
   "res": "720x1280",
   "nf": 150
  },
- "note": "catwalk4 attempt 1"
+ "note": "catwalk4 attempt 2: YouTube blocks the runner too; TikTok/Dailymotion runway refs"
 }
