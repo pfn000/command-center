@@ -7,10 +7,10 @@ on:
 permissions:
   contents: read
 env:
-  RUNID: "39177080150"
+  RUNID: "39182928356"
   BLEND: "jena-v37r10-final.blend"
-  OUTNAME: "v37r10-turntable-8k"
-  TT_POSE: '{"ARM_DOWN": 45, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
+  OUTNAME: "v37r10c-turntable-8k-WIP"
+  TT_POSE: '{"ARM_DOWN": 40, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
   NF: "300"
   SHARDS: "12"
   SAMPLES: "4"
@@ -57,8 +57,8 @@ jobs:
           VF="scale=in_range=full:out_range=tv,format=yuv420p"
           COL="-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv"
           if [ "$Q" = small ]; then
-            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=1:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -an -f null /dev/null
-            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 20M -x265-params pass=2:vbv-maxrate=30000:vbv-bufsize=40000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}.mp4
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 10500k -x265-params pass=1:vbv-maxrate=14000:vbv-bufsize=21000:log-level=error $COL -an -f null /dev/null
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 10500k -x265-params pass=2:vbv-maxrate=14000:vbv-bufsize=21000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}.mp4
             rm -f x265_2pass.log*
           else
             ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset medium -crf 14 -x265-params log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}-hq.mp4

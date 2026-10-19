@@ -1,1 +1,1 @@
-tt8k attempt 3: 8K turntable of RUN 10 (39177080150, jena-v37r10-final.blend), 4 spp + OIDN, 12 shards
+tt8k attempt 4: 8K turntable WIP of RUN 10c (39182928356, jena-v37r10-final.blend, ARM_DOWN 40), 4 spp + OIDN, 12 shards, small <=15MB
