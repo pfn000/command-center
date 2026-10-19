@@ -1479,6 +1479,7 @@ elif MODE=='dance2':
                 a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
                 e.setdefault('feet',{})[sd]=fs
             e['head_pitch_deg']=round(head_pitch()[0],1); e['head_rpy']=head_rpy(); e['pelvis']=pelvis_rec(f); e['seg'],e['src_seg']=seg_rec(f); _sh=src_head(); e['src_rpy']=(round(float(_sh['roll'][f]),1),round(float(_sh['yaw'][f]),1),round(float(_sh['pitch'][f]),1))
+            if D4: e['leg_cap_pass2_mm']=round(leg_capsules(locks,f)*1000,1); upd()
             if D4: e['head_rel']=[round(x,2) for x in head_rel_jena()]; e['src_head_rel']=[round(float(x),2) for x in SRC_HPYR[f]]; e['leg_cap_pen_mm']=round(leg_pen()[0]*1000,1)
             meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf

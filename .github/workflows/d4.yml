@@ -1,3 +1,4 @@
+# rev 172210
 name: d4
 # Jena v3.7 DANCE4 big-fix: rig27 (33 body bones), One-Euro on every channel, face track (MediaPipe Face Landmarker) -> head/neck + her own shape keys,
 # leg capsule colliders, 120 fps by slerp between solved poses, spring camera, full-bone glow overlay. Inputs/outputs in the private HF dataset.
@@ -93,7 +94,7 @@ jobs:
           sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
           pip install -q opencv-python-headless numpy huggingface_hub mediapipe > /dev/null
           ls /tmp/fr | wc -l
-          mkdir -p /tmp/split && FACEJ=/tmp/face/face.json SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/d4/compose120.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance4 2>&1 | tail -40; ls -la /tmp/split
+          sudo apt-get install -y -qq libegl1 libgles2 libgl1 > /dev/null 2>&1; mkdir -p /tmp/split && FACEJ=/tmp/face/face.json SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/d4/compose120.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance4 2>&1 | tail -40; ls -la /tmp/split
       - name: Upload (private)
         if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }

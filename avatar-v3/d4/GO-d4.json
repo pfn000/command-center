@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nout": 1200
  },
- "note": "dance4 #2 (17:05:42Z): GH Actions incident cleared; head from face matrix (flipYZ) + crop face track, all big-fix items"
+ "note": "dance4 #3 (17:19:53Z): face.json committed (crop face track 227/300; run #2's render jobs could not find it), leg capsule 2nd pass, libEGL for compose re-track"
 }
