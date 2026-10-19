@@ -91,7 +91,15 @@
   "TEST_SAMPLES": 8,
   "CLOSE_RES": 1024,
   "CLOSE_SAMPLES": 16,
-  "SHIRT_THICK_DIR": "in"
+  "SHIRT_THICK_DIR": "in",
+  "R11_W": true,
+  "R11_ALONG": 0.06,
+  "R11_R0": 0.05,
+  "R11_R1": 0.085,
+  "R11_SMOOTH": 2,
+  "R11_SMOOTH_K": 0.5,
+  "R11_SMOOTH_R": 0.012,
+  "R11_SMOOTH_SIG": 0.006
  },
  "A2": {
   "SHIRT": false,
@@ -102,5 +110,10 @@
  },
  "P50": {
   "ARM_DOWN": 50
+ },
+ "A1": {
+  "R11_R0": 0.065,
+  "R11_R1": 0.1,
+  "R11_SMOOTH": 3
  }
 }
