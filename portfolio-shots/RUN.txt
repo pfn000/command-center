@@ -1,3 +1,1 @@
-v7 r13c supplement: phone-light pages, genie-on-work shots, 3 videos (r13b run 39184778125 has the rest) 2026-10-19T01:40Z
-retry 1792374059089678540
-retry 1792374120973030403
+v7 r13d genie playback proof in Google Chrome 2026-10-19T01:56Z 1792374979068998965
