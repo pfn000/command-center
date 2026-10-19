@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance3 #11 (tracking audit fixes): pelvis track tilt/roll 1.15x, real 2D hip bounce, slow camera follow, fingers from hand landmarks, clavicle shrug from shoulder markers, spine lag, per-bone rotation audit, full-rig QC overlay (15:31:50) ."
+ "note": "dance3 #11 (tracking audit fixes): pelvis track tilt/roll 1.15x, real 2D hip bounce, slow camera follow, fingers from hand landmarks, clavicle shrug from shoulder markers, spine lag, per-bone rotation audit, full-rig QC overlay (15:31:50) (requeue 15:49)"
 }

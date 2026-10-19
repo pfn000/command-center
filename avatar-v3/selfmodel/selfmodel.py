@@ -88,6 +88,12 @@ def sm_derived(co=None):
     co=body_co() if co is None else co; D={}
     L_=PB['Left leg'].head; R_=PB['Right leg'].head; lat=(L_-R_).normalized(); fwd=lat.cross(Vector((0,0,1))).normalized(); up=(PB['Spine'].head-(L_+R_)/2).normalized()
     D['pelvis:L']=L_.copy(); D['pelvis:R']=R_.copy(); D['pelvis:S']=(L_+R_)/2+up*0.06-fwd*0.09
+    try:
+        ch=PB['Chest']; nb=PB['Neck'].head.copy(); cu=(ch.tail-ch.head).normalized(); sls=(PB['Left arm'].head-PB['Right arm'].head); fw2=sls.normalized().cross(cu).normalized()*-1.0
+        if fw2.dot(fwd)<0: fw2=-fw2
+        D['neckbase']=nb; D['sternum']=ch.head.lerp(ch.tail,0.55)+fw2*0.09; D['xiphoid']=ch.head+fw2*0.08
+        D['rib:L']=ch.head+sls*0.42+fw2*0.03; D['rib:R']=ch.head-sls*0.42+fw2*0.03
+    except Exception: pass
     for sd in ('Left','Right'):
         fv=co[FOOTV[sd]]; a=PB[sd+' ankle'].head; tt=PB[sd+' toe'].tail if sd+' toe' in PB else PB[sd+' ankle'].tail
         ff=np.array(tuple((tt-a).normalized())); pr=(fv-np.array(tuple(a)))@ff
