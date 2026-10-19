@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses6 #2 (17:49:49Z): drop the wrist/hip basis-angle clamp from #1 (it bent the hands into claws); rest of the poses6 fixes kept [175237]"
+ "note": "anim10c poses6 #3 (18:01:51Z): hand push body-only + capped (shirt in the BVH flung hands off), standing hips 3 cm forward over the raised heels (balance), shirt hem drapes over the raised thigh via a proxy-cylinder shrinkwrap (knee over knee)"
 }
