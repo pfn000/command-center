@@ -2,7 +2,7 @@
 > my-project@0.1.0 build /tmp/site
 > node scripts/assets.mjs && next build
 
-[assets] 109 images, 11.5 MB originals -> 13.7 MB in all AVIF+WebP sizes; svg -0 B; 22.4 s
+[assets] 109 images, 11.5 MB originals -> 13.7 MB in all AVIF+WebP sizes; svg -0 B; 12.2 s
 ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
 This information is used to shape Next.js' roadmap and prioritize features.
@@ -12,15 +12,15 @@ https://nextjs.org/telemetry
 ▲ Next.js 16.2.6 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 7.0s
+✓ Compiled successfully in 4.5s
   Skipping validation of types
-  Finished TypeScript config validation in 9ms ...
+  Finished TypeScript config validation in 5ms ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/30) ...
   Generating static pages using 3 workers (7/30) 
   Generating static pages using 3 workers (14/30) 
   Generating static pages using 3 workers (22/30) 
-✓ Generating static pages using 3 workers (30/30) in 952ms
+✓ Generating static pages using 3 workers (30/30) in 598ms
   Finalizing page optimization ...
 
 Route (app)                       Revalidate  Expire

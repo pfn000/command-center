@@ -1,2403 +1,6 @@
 {
  "shots": [
   {
-   "name": "d-dark-01-home",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-01d-home-nav-scrolled",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-01e-home-nav",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-01f-home-footer",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-01z-home-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-02-work",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02c-work-slate1-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02c-work-slate2-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate3",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02c-work-slate3-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate4",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate5",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate6",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate7",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02b-work-slate8",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02z-work-full",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-03b-emmico-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-03b-emmico-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-04-worlds",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [
-    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
-    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
-   ],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-04b-worlds-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [
-    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
-    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
-   ],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-05-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-06-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/logos/resonite.png",
-     2
-    ],
-    [
-     "/logos/alison-t.png",
-     2
-    ]
-   ],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-07-about",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-07b-about-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-07b-about-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-08-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-08b-companies-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-09-plex",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-dark-02p-work-plexcode",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-02g-work-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-03g-emmico-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "d-dark-11-404",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-01-home",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-01d-home-nav-scrolled",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-01e-home-nav",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-01f-home-footer",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-02-work",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02c-work-slate1-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02c-work-slate2-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate3",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02c-work-slate3-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate4",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate5",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate6",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate7",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02b-work-slate8",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-03b-emmico-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-03b-emmico-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-04-worlds",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [
-    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
-    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
-   ],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-04b-worlds-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [
-    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
-    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
-   ],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-05-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-06-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/logos/resonite.png",
-     2
-    ],
-    [
-     "/logos/alison-t.png",
-     2
-    ]
-   ],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": [
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-07-about",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-07b-about-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-07b-about-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-08-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-08b-companies-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-09-plex",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-02p-work-plexcode",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-02g-work-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-03g-emmico-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(14, 12, 26)",
-    "rgb(14, 12, 26)"
-   ],
-   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
-   "monoLogos": [
-    "none"
-   ]
-  },
-  {
-   "name": "p-dark-10-menu-open",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": "rgb(6, 6, 11) | none",
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "p-dark-11-404",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 58,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 0.0705882 0.0627451 0.12549 / 0.433726)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-01-home",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-02-work",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02b-work-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02c-work-slate1-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02b-work-slate2",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02c-work-slate2-mid",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02b-work-slate3",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-03-emmico",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": [
-    "brightness(0) opacity(0.82)"
-   ]
-  },
-  {
-   "name": "d-light-03b-emmico-slate1",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "brightness(0) opacity(0.82)"
-   ]
-  },
-  {
-   "name": "d-light-04-worlds",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [
-    "https://vrchat.com/home/launch?worldId=wrld_383e8b28-9a2c-46de-b7db-2a8ea30f9469",
-    "https://vrchat.com/home/launch?worldId=wrld_358ffb01-26fc-4566-b2fb-67b099ed3a00"
-   ],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-05-writing",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-06-resume",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/logos/resonite.png",
-     2
-    ],
-    [
-     "/logos/alison-t.png",
-     2
-    ]
-   ],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": [
-    "brightness(0) opacity(0.82)",
-    "brightness(0) opacity(0.82)"
-   ]
-  },
-  {
-   "name": "d-light-07-about",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-08-companies",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-09-plex",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
-   "name": "d-light-02p-work-plexcode",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-02g-work-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "none",
-    "none",
-    "none"
-   ]
-  },
-  {
-   "name": "d-light-03g-emmico-genie",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [
-    [
-     "/images/emmico-vtuber-logo.png",
-     2
-    ]
-   ],
-   "navH": 52,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 1,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [
-    "rgb(255, 255, 255)",
-    "rgb(255, 255, 255)"
-   ],
-   "navBg": "color(srgb 1 1 1 / 0.94)",
-   "monoLogos": [
-    "brightness(0) opacity(0.82)"
-   ]
-  },
-  {
-   "name": "d-light-11-404",
-   "overflowX": 0,
-   "broken": [],
-   "badLinks": [],
-   "launch": [],
-   "dupImgs": [],
-   "navH": 60,
-   "whiteTiles": [],
-   "oldNos": [],
-   "peter": false,
-   "notMine": [],
-   "counts": [],
-   "oldEmail": false,
-   "mailto": [],
-   "cutLogos": 0,
-   "liberapay": false,
-   "sheetBg": null,
-   "slateBg": [],
-   "navBg": "color(srgb 1 1 1 / 0.406275)",
-   "monoLogos": []
-  },
-  {
    "name": "p-light-01-home",
    "overflowX": 0,
    "broken": [],
@@ -2705,49 +308,366 @@
    "slateBg": [],
    "navBg": "color(srgb 1 1 1 / 0.406275)",
    "monoLogos": []
+  },
+  {
+   "name": "p-light-06-resume",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/logos/resonite.png",
+     2
+    ],
+    [
+     "/logos/alison-t.png",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": [
+    "brightness(0) opacity(0.82)",
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-07-about",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-08-companies",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-09-plex",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-02g-work-genie",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.94)",
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-02p-work-plexcode",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.94)",
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-light-03g-emmico-genie",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [
+    [
+     "/images/emmico-vtuber-logo.png",
+     2
+    ]
+   ],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 1,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.94)",
+   "monoLogos": [
+    "brightness(0) opacity(0.82)"
+   ]
+  },
+  {
+   "name": "p-light-10-menu-open",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": "rgb(255, 255, 255) | none",
+   "slateBg": [],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": []
+  },
+  {
+   "name": "p-light-11-404",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [],
+   "navBg": "color(srgb 1 1 1 / 0.406275)",
+   "monoLogos": []
+  },
+  {
+   "name": "d-dark-02g-work-genie",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(14, 12, 26)",
+    "rgb(14, 12, 26)"
+   ],
+   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "p-dark-02g-work-genie",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 58,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(14, 12, 26)",
+    "rgb(14, 12, 26)"
+   ],
+   "navBg": "color(srgb 0.0235294 0.0235294 0.0431373 / 0.94)",
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
+  },
+  {
+   "name": "d-light-02g-work-genie",
+   "overflowX": 0,
+   "broken": [],
+   "badLinks": [],
+   "launch": [],
+   "dupImgs": [],
+   "navH": 52,
+   "whiteTiles": [],
+   "oldNos": [],
+   "peter": false,
+   "notMine": [],
+   "counts": [],
+   "oldEmail": false,
+   "mailto": [],
+   "cutLogos": 0,
+   "liberapay": false,
+   "sheetBg": null,
+   "slateBg": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 255, 255)"
+   ],
+   "navBg": "color(srgb 1 1 1 / 0.94)",
+   "monoLogos": [
+    "none",
+    "none",
+    "none"
+   ]
   }
  ],
  "errors": [
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b41726ce-70d6-47ad-b00a-e3863db40a5c' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/b3813970-e45b-46dc-a658-d2c75a756eb6' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
-  "d-dark: Access to fetch at 'https://github.com/user-attachments/assets/26630de9-7ca5-4da5-9257-9cfab5b5f42d' from origin 'http://localhost:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origi",
-  "d-dark: Failed to load resource: net::ERR_FAILED",
+  "p-light: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
   "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "d-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "p-dark: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "d-light: Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "shot p-light-06-resume try1: Error: page.screenshot: Target page, context or browser has been closed\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load..",
-  "shot p-light-06-resume FAILED: Error: page.waitForTimeout: Target page, context or browser has been closed",
-  "ctx p-light died: Error: page.evaluate: Target page, context or browser has been closed"
+  "video d: hard timeout 200s",
+  "video d: Error: page.evaluate: Target page, context or browser has been closed",
+  "video p: hard timeout 200s"
  ],
  "checks": {
-  "d-dark-weight-home": {
-   "jsKB": 244,
-   "allKB": 1241,
+  "p-light-weight-home": {
+   "jsKB": 234,
+   "allKB": 769,
    "imgs": 5,
    "imgOrigKB": 600,
    "imgShippedKB": 188,
    "opt": 4
   },
-  "d-dark-weight-work": {
-   "jsKB": 241,
-   "allKB": 5584,
-   "imgs": 40,
-   "imgOrigKB": 13043,
-   "imgShippedKB": 10108,
-   "opt": 25
+  "p-light-genie-work": {
+   "paused": true,
+   "t": 0,
+   "muted": true,
+   "loop": true,
+   "w": 0,
+   "ready": 0
+  },
+  "p-light-genie-emmico": {
+   "paused": true,
+   "t": 0,
+   "ready": 0
   },
   "d-dark-genie-work": {
    "paused": true,
@@ -2757,11 +677,7 @@
    "w": 0,
    "ready": 0
   },
-  "d-dark-genie-emmico": {
-   "paused": true,
-   "t": 0,
-   "ready": 0
-  },
+  "d-dark-genie-emmico": null,
   "redirect-/projects": "/work?theme=dark",
   "redirect-/arch": "/work?theme=dark#ncom",
   "redirect-/emmi": "/emmico?theme=dark",
@@ -2771,22 +687,6 @@
   "vault-LocalLLM-iOS": 404,
   "vault-MS-Outlook-MCP": 404,
   "vault-linux": 404,
-  "p-dark-weight-home": {
-   "jsKB": 244,
-   "allKB": 1231,
-   "imgs": 5,
-   "imgOrigKB": 600,
-   "imgShippedKB": 188,
-   "opt": 4
-  },
-  "p-dark-weight-work": {
-   "jsKB": 241,
-   "allKB": 5566,
-   "imgs": 33,
-   "imgOrigKB": 12733,
-   "imgShippedKB": 9798,
-   "opt": 25
-  },
   "p-dark-genie-work": {
    "paused": true,
    "t": 0,
@@ -2795,19 +695,7 @@
    "w": 0,
    "ready": 0
   },
-  "p-dark-genie-emmico": {
-   "paused": true,
-   "t": 0,
-   "ready": 0
-  },
-  "d-light-weight-home": {
-   "jsKB": 234,
-   "allKB": 785,
-   "imgs": 5,
-   "imgOrigKB": 600,
-   "imgShippedKB": 188,
-   "opt": 4
-  },
+  "p-dark-genie-emmico": null,
   "d-light-genie-work": {
    "paused": true,
    "t": 0,
@@ -2816,18 +704,28 @@
    "w": 0,
    "ready": 0
   },
-  "d-light-genie-emmico": {
-   "paused": true,
-   "t": 0,
-   "ready": 0
+  "d-light-genie-emmico": null
+ },
+ "videos": [
+  {
+   "file": "video-p-dark-home-work-scroll.mp4",
+   "bytes": 1581641,
+   "duration": 182.291667,
+   "crf": 33
   },
-  "p-light-weight-home": {
-   "jsKB": 234,
-   "allKB": 769,
-   "imgs": 5,
-   "imgOrigKB": 600,
-   "imgShippedKB": 188,
-   "opt": 4
+  {
+   "file": "video-p-dark-menu-nav.mp4",
+   "bytes": 393827,
+   "duration": 19.833333,
+   "crf": 30
   }
+ ],
+ "lighthouse": {
+  "perf": 89,
+  "lcp": "3.7 s",
+  "cls": "0",
+  "tbt": "100 ms",
+  "fcp": "0.9 s",
+  "weight": "Total size was 739 KiB"
  }
 }
