@@ -1,5 +1,5 @@
 name: tt8k turntable
-# 8K 360 turntable of the avatar build named in RUNID/BLEND (saved .blend from the private HF dataset, rendered as-is). Outputs go to the private dataset.
+# 8K 360 turntable (attempt 5: FINAL 10c, arms ARM_DOWN 30) of the avatar build named in RUNID/BLEND (saved .blend from the private HF dataset, rendered as-is). Outputs go to the private dataset.
 on:
   push:
     branches: [avatar-v3]
@@ -9,18 +9,18 @@ permissions:
 env:
   RUNID: "39182928356"
   BLEND: "jena-v37r10-final.blend"
-  OUTNAME: "v37r10c-turntable-8k-WIP"
-  TT_POSE: '{"ARM_DOWN": 40, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
+  OUTNAME: "v37r10c-turntable-8k"
+  TT_POSE: '{"ARM_DOWN": 30, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
   NF: "300"
-  SHARDS: "12"
+  SHARDS: "8"
   SAMPLES: "4"
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 340
     strategy:
       fail-fast: false
-      matrix: { shard: [0,1,2,3,4,5,6,7,8,9,10,11] }
+      matrix: { shard: [0,1,2,3,4,5,6,7] }
     steps:
       - uses: actions/checkout@v4
       - name: Setup
@@ -34,7 +34,7 @@ jobs:
       - name: Frames
         env: { TT_SHARD: "${{ matrix.shard }}" }
         run: |
-          TT_NF=$NF TT_SHARDS=$SHARDS TT_SAMPLES=$SAMPLES timeout -k 10 8400 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
+          TT_NF=$NF TT_SHARDS=$SHARDS TT_SAMPLES=$SAMPLES timeout -k 10 19800 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
           ls /tmp/frames | wc -l; du -sh /tmp/frames
       - uses: actions/upload-artifact@v4
         if: always()
@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      matrix: { q: [small, hq] }
+      matrix: { q: [small, hq, preview] }
     steps:
       - uses: actions/download-artifact@v4
         with: { pattern: "tt8k-*", path: /tmp/frames, merge-multiple: true }
@@ -60,6 +60,8 @@ jobs:
             ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 10500k -x265-params pass=1:vbv-maxrate=14000:vbv-bufsize=21000:log-level=error $COL -an -f null /dev/null
             ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset fast -b:v 10500k -x265-params pass=2:vbv-maxrate=14000:vbv-bufsize=21000:log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}.mp4
             rm -f x265_2pass.log*
+          elif [ "$Q" = preview ]; then
+            ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "scale=1080:1920:flags=lanczos,$VF" -c:v libx264 -profile:v high -preset slow -b:v 5000k -maxrate 6000k -bufsize 10000k $COL -movflags +faststart -an ${OUTNAME}-1080p.mp4
           else
             ffmpeg -nostdin -loglevel error -y -framerate 30 -i /tmp/frames/f%03d.jpg -vf "$VF" -c:v libx265 -preset medium -crf 14 -x265-params log-level=error $COL -tag:v hvc1 -movflags +faststart -an ${OUTNAME}-hq.mp4
           fi
