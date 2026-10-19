@@ -1,34 +1,5 @@
 {
- "render": [
-  {
-   "anim": "talk",
-   "shards": 4,
-   "samples": 10,
-   "res": "1080x1920",
-   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
-  },
-  {
-   "anim": "catwalk",
-   "shards": 2,
-   "samples": 8,
-   "res": "720x1280",
-   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
-  },
-  {
-   "anim": "poses2",
-   "shards": 2,
-   "samples": 8,
-   "res": "720x1280",
-   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
-  },
-  {
-   "anim": "fist",
-   "shards": 1,
-   "samples": 12,
-   "res": "720x720",
-   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
-  }
- ],
+ "render": [],
  "dance": {
   "src": "avatar-v3/anim10c/inputs/tiktok-1035.mp4",
   "win": 10,
@@ -36,5 +7,5 @@
   "samples": 8,
   "res": "720x1280"
  },
- "note": "anim10c attempt 2: arms down at sides, real catwalk travel, poses2, fist"
+ "note": "anim10c attempt 2b: dance only (pose job fix: setup-python 3.11 + mediapipe 0.10.14)"
 }

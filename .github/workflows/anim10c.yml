@@ -35,20 +35,24 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
       - name: Pose
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          pip install -q huggingface_hub mediapipe opencv-python-headless numpy > /dev/null 2>&1 || pip install huggingface_hub mediapipe opencv-python-headless numpy
-          SRC=$(python3 -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['src'])"); WIN=$(python3 -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['win'])")
-          python3 -c "import os,sys; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','$SRC',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
-          mkdir -p /tmp/pose && python3 avatar-v3/anim10c/pose.py /tmp/in/$SRC /tmp/pose/dance-landmarks.json $WIN
-          ls -la /tmp/pose
+          mkdir -p /tmp/pose
+          python -m pip install -q huggingface_hub mediapipe==0.10.14 opencv-python-headless numpy 2>&1 | tail -5
+          SRC=$(python -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['src'])"); WIN=$(python -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['win'])")
+          python -c "import os,sys; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','$SRC',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+          python avatar-v3/anim10c/pose.py /tmp/in/$SRC /tmp/pose/dance-landmarks.json $WIN 2>&1 | tee /tmp/pose/pose-log.txt | tail -40
+          ls -la /tmp/pose; test -f /tmp/pose/dance-landmarks.json
       - uses: actions/upload-artifact@v4
         with: { name: "pose", path: /tmp/pose, retention-days: 3 }
       - name: Upload pose (private)
+        if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
         run: |
-          python3 -c "import os; from huggingface_hub import HfApi; HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/pose',path_in_repo='avatar-v3/anim10c/'+os.environ['GITHUB_RUN_ID']+'/pose',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+          python -c "import os; from huggingface_hub import HfApi; HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/pose',path_in_repo='avatar-v3/anim10c/'+os.environ['GITHUB_RUN_ID']+'/pose',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
   render:
     needs: plan
     if: needs.plan.outputs.r1 == '1'
