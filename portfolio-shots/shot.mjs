@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 const T0 = Date.now()
-// v7 r13 proof (solid slates/sheet, no donate links, transparent 404 chibi): multi-page restructure (home / work / emmico / worlds / writing / resume / about / companies / plex), glass nav, slates, aura shader, asset pipeline; 1600x900 + 390x844, dark + light
+// v7 r13b proof (PleX slate + genie video; solid slates/sheet, no donate links, transparent 404 chibi): multi-page restructure (home / work / emmico / worlds / writing / resume / about / companies / plex), glass nav, slates, aura shader, asset pipeline; 1600x900 + 390x844, dark + light
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {} }
@@ -32,7 +32,12 @@ async function audit(page) {
   })).catch((e) => ({ err: String(e).slice(0, 200) }))
 }
 async function snap(page, name, opts = {}) {
-  await page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 80, ...opts })
+  try { await page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 80, timeout: 45000, ...opts }) }
+  catch (e) {
+    report.errors.push(`shot ${name} try1: ${String(e).slice(0, 140)}`)
+    try { await page.waitForTimeout(1500); await page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 80, timeout: 60000, animations: 'disabled', ...opts }) }
+    catch (e2) { report.errors.push(`shot ${name} FAILED: ${String(e2).slice(0, 140)}`); console.log('shot FAILED', name); return }
+  }
   const a = await audit(page)
   report.shots.push({ name, ...a })
   console.log('shot', name, JSON.stringify(a))
@@ -78,6 +83,7 @@ async function weigh(p, route) {
 }
 for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p', 'light']]) {
   const { c, p } = await ctx(kind, theme)
+  try {
   const k = `${kind}-${theme}`
   const deep = theme === 'dark'
   console.log('ctx', k, Math.round((Date.now() - T0) / 1000))
@@ -86,11 +92,11 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
     await snap(p, `${k}-${n}-${slug(route)}`)
     if (deep) await lazyAll(p)
     if (route === '/' ) report.checks[`${k}-weight-home`] = await weigh(p, route)
-    else if (deep) report.checks[`${k}-weight-${slug(route)}`] = await weigh(p, route)
+    else if (deep && route === '/work') report.checks[`${k}-weight-${slug(route)}`] = await weigh(p, route)
     const slates = await p.evaluate(() => [...document.querySelectorAll('.pf-slate')].map((s) => Math.round(s.getBoundingClientRect().top + window.scrollY)))
     if (deep || ['/work', '/emmico'].includes(route)) {
       let j = 0
-      for (const y of slates.slice(0, deep ? (route === '/work' ? 7 : 3) : (route === '/work' ? 3 : 1))) {
+      for (const y of slates.slice(0, deep ? (route === '/work' ? 8 : 3) : (route === '/work' ? 3 : 1))) {
         j++
         await p.evaluate((v) => window.scrollTo(0, v - 70), y); await p.waitForTimeout(700)
         await snap(p, `${k}-${n}b-${slug(route)}-slate${j}`)
@@ -107,6 +113,19 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
     }
     if (deep && kind === 'd' && ['/', '/work'].includes(route)) { await p.evaluate(() => window.scrollTo(0, 0)); await snap(p, `${k}-${n}z-${slug(route)}-full`, { fullPage: true, quality: 45 }) }
   }
+  // r13 additions: PleX Code slate and the genie-minimize video (on /work and on /emmico)
+  try {
+    await go(p, '/work', theme, 2200)
+    await to(p, '#plexcode', kind === 'p' ? 70 : 100); await p.waitForTimeout(500)
+    await snap(p, `${k}-02p-work-plexcode`)
+    await to(p, '#ncom .pf-genie', kind === 'p' ? 90 : 120); await p.waitForTimeout(1200)
+    await snap(p, `${k}-02g-work-genie`)
+    report.checks[`${k}-genie-work`] = await p.evaluate(() => { const v = document.querySelector('#ncom .pf-genie video'); return v ? { paused: v.paused, t: v.currentTime, muted: v.muted, loop: v.loop, w: v.videoWidth, ready: v.readyState } : null })
+    await go(p, '/emmico', theme, 2200)
+    await to(p, '#emmi-official .pf-genie', kind === 'p' ? 90 : 120); await p.waitForTimeout(1200)
+    await snap(p, `${k}-03g-emmico-genie`)
+    report.checks[`${k}-genie-emmico`] = await p.evaluate(() => { const v = document.querySelector('#emmi-official .pf-genie video'); return v ? { paused: v.paused, t: v.currentTime, ready: v.readyState } : null })
+  } catch (e) { report.errors.push(`r13 extras ${k}: ${String(e).slice(0, 200)}`) }
   if (kind === 'p') {
     await go(p, '/', theme, 2000)
     const btn = await p.$('.pf-menu-btn')
@@ -121,7 +140,9 @@ for (const [kind, theme] of [['d', 'dark'], ['p', 'dark'], ['d', 'light'], ['p',
     const resp = await p.goto(`${B}/vault/${r}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null)
     report.checks[`vault-${r}`] = resp ? resp.status() : 'noresp'
   }
-  await c.close()
+  } catch (e) { report.errors.push(`ctx ${kind}-${theme} died: ${String(e).slice(0, 300)}`) }
+  await c.close().catch(() => {})
+  fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 }
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 // MP4s for Saidie: home scroll-throughs (desktop 1600, phone 390) + a tap-to-explain demo. H.264, faststart, each kept under 1.9 MB.
@@ -199,14 +220,14 @@ async function menuVideo() {
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 try { execSync('command -v ffmpeg') } catch { try { execSync('sudo apt-get install -y -q ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)', { stdio: 'inherit', timeout: 240000, shell: '/bin/bash' }) } catch (e) { report.errors.push('ffmpeg install ' + String(e).slice(0, 200)) } }
 for (const job of [() => scrollVideo('d'), () => scrollVideo('p'), () => menuVideo()]) {
-  if (Date.now() - T0 > 540000) { report.errors.push('video skipped: time'); continue }
+  if (Date.now() - T0 > 760000) { report.errors.push('video skipped: time'); continue }
   await job()
 }
 fs.writeFileSync(`${out}/report.json`, JSON.stringify(report, null, 1))
 // lighthouse last
 // Lighthouse (phone) on home, if it fits
 try {
-  if (Date.now() - T0 < 440000) {
+  if (Date.now() - T0 < 780000) {
     const chrome = chromium.executablePath()
     execSync(`CHROME_PATH=${chrome} timeout -k 5 150 npx -y lighthouse@12 ${B}/ --only-categories=performance --form-factor=mobile --quiet --chrome-flags="--headless=new --no-sandbox" --output=json --output-path=/tmp/lh.json`, { stdio: 'ignore', timeout: 170000, shell: '/bin/bash' })
     const lh = JSON.parse(fs.readFileSync('/tmp/lh.json', 'utf8'))
