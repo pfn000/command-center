@@ -2,18 +2,39 @@
  "render": [
   {
    "anim": "talk",
-   "shards": 5,
+   "shards": 4,
    "samples": 10,
    "res": "1080x1920",
+   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
+  },
+  {
+   "anim": "catwalk",
+   "shards": 2,
+   "samples": 8,
+   "res": "720x1280",
+   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
+  },
+  {
+   "anim": "poses2",
+   "shards": 2,
+   "samples": 8,
+   "res": "720x1280",
+   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
+  },
+  {
+   "anim": "fist",
+   "shards": 1,
+   "samples": 12,
+   "res": "720x720",
    "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
   }
  ],
  "dance": {
   "src": "avatar-v3/anim10c/inputs/tiktok-1035.mp4",
   "win": 10,
-  "shards": 4,
+  "shards": 3,
   "samples": 8,
   "res": "720x1280"
  },
- "note": "anim10c attempt 1"
+ "note": "anim10c attempt 2: arms down at sides, real catwalk travel, poses2, fist"
 }
