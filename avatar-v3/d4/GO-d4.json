@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nout": 1200
  },
- "note": "dance5 #1 (17:59:13Z): 30 mm high-heel + toes flat on floor / free toes in line, relaxed grouped finger curl (no splay/paddle), upper-arm twist bones (28 moving deform body bones; 8 helpers now listed as non-deforming markers), arms+root lower zero-phase cutoff"
+ "note": "dance6 #1 (18:29:38Z): cross-keyframe pose smoothing (arms/hands/spine/neck/head, 1-4-6-4-1, +2 keyframes per shard side) against solver wrist noise; relaxed finger floor MCP20/PIP28/DIP15"
 }

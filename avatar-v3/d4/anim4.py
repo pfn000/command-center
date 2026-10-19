@@ -1,3 +1,4 @@
+# rev 182938
 
 # Jena v3.7 dance4 big-fix (D4=1: rig27, One-Euro, face/head track, leg capsules, 120 fps) on top of run-10c ANIMATION clips (Saidie 9:47 PM Oct 18): talk/blink/expressions, dance retargeted from her TikTok ref, with bone-track export.
 # Renders from the SAVED run-10c .blend as built (no model edits). Face uses her existing shape keys only.
@@ -945,10 +946,10 @@ elif MODE=='dance2':
             FCURL[(_sd,_fn)]=A
     if D4:
         # D5 hands: a relaxed hand moves its fingers together (each long finger 50% toward the four-finger mean: no spider splay),
-        # never flatter than a resting hand (MCP>=15, PIP>=20, DIP>=10; thumb >=8), and a light zero-phase smoothing (sigma 1 frame) against flicker
+        # never flatter than a resting hand (MCP>=20, PIP>=28, DIP>=15; thumb >=8), and a light zero-phase smoothing (sigma 1 frame) against flicker
         _K5=np.array([0.054,0.244,0.404,0.244,0.054])
         def _gf5(a,s,mode=None): return np.convolve(np.pad(np.asarray(a,float),2,mode='edge'),_K5,'valid')
-        LONG5=('IndexFinger','MiddleFinger','RingFinger','LittleFinger'); FLOOR5=(15.0,20.0,10.0)
+        LONG5=('IndexFinger','MiddleFinger','RingFinger','LittleFinger'); FLOOR5=(20.0,28.0,15.0)
         for _sd in ('Left','Right'):
             if not all((_sd,f_) in FCURL for f_ in LONG5): continue
             for j in range(3):
@@ -1342,6 +1343,7 @@ elif MODE=='dance2':
     if D4:
         per_=(NOUT+SHN-1)//SHN; G_SH=list(range(SH*per_,min(NOUT,(SH+1)*per_)))
         KEYS_SH=sorted({k for g in G_SH for k in (int(math.floor(TG[g])),min(int(math.floor(TG[g]))+1,NF-1))}); SNAP={}
+        if E.get('POSE_SMOOTH','1')=='1': _k0,_k1=KEYS_SH[0],KEYS_SH[-1]; KEYS_CORE=set(KEYS_SH); KEYS_SH=list(range(max(0,_k0-2),min(NF,_k1+3)))   # D6: 2 extra keyframes each side for the cross-keyframe smoothing
         CLOSE_SH={c for c in CLOSE if int(round(c*(NOUT-1)/(NF-1))) in G_SH}; log('D4 shard',SH,'out',G_SH[:1],G_SH[-1:],'keys',len(KEYS_SH),'close',sorted(CLOSE_SH))
     for f in (KEYS_SH if D4 else frames_of(NF)):
         t0_=time.time(); meshes_eval(False); pose_dance(f,offs,locks); ang=apply_springs(SIM,f+WARM); setcam(Vector((float(CAMX[f])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
@@ -1571,6 +1573,25 @@ elif MODE=='dance2':
         info['frames'][f]=e; log('frame',f,e)
     if D4:
         info['d4_leg_capsule_fix']=dict(LEGFIX); info['d4_rig']={'body_bones':len(RIG27_BODY),'mocap_driven':RIG27_DRIVEN['mocap'],'derived':RIG27_DRIVEN['derived']}
+        if E.get('POSE_SMOOTH','1')=='1':
+            # D6: arms, hands, spine, neck and head smoothed across solved keyframes (binomial 1-4-6-4-1, quaternion sign-aligned) - the solver's per-frame
+            # pushes added wrist noise above the filtered source; hips and legs are left as solved so planted feet keep their floor contact
+            SM6=[n for n in PB.keys() if not any(t in n for t in ('leg','knee','ankle','toe','Hip_','Heel_','Ball_','Sacrum')) and n!='Hips']
+            ks6=sorted(SNAP); W6=(1.0,4.0,6.0,4.0,1.0); NEW6={}
+            for i,k in enumerate(ks6):
+                b_,kv_=SNAP[k]; nb=dict(b_)
+                for n in SM6:
+                    if n not in b_: continue
+                    l0,q0,s0=b_[n]; acc=np.zeros(4); wt=0.0
+                    for d,w in zip(range(-2,3),W6):
+                        j=i+d
+                        if j<0 or j>=len(ks6) or ks6[j]-k!=d: continue
+                        q2=SNAP[ks6[j]][0][n][1]; v=np.array([q2.w,q2.x,q2.y,q2.z])
+                        if np.dot(v,[q0.w,q0.x,q0.y,q0.z])<0: v=-v
+                        acc+=w*v; wt+=w
+                    if wt>0: acc/=np.linalg.norm(acc); nb[n]=(l0,Quaternion(acc.tolist()),s0)
+                NEW6[k]=(nb,kv_)
+            SNAP.update(NEW6); info['d6_pose_smooth']={'bones':len(SM6),'kernel':W6,'keyframes':len(ks6)}
         for g in G_SH:
             t=float(TG[g]); k0=int(math.floor(t)); k1=min(k0+1,NF-1); a=t-k0
             if k0 not in SNAP or k1 not in SNAP: log('D4 missing snap',g,k0,k1); continue
