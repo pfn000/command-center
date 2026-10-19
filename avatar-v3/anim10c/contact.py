@@ -64,7 +64,7 @@ def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None):
         if mi is None:
             pl=[tuple(p.vertices) for p in o.data.polygons]; pls=[frozenset() for _ in pl]
         else: pl,pls=mi['polys'],mi['plims']
-        if near is not None:
+        if near is not None and mi is not None:
             ok=np.linalg.norm(co-np.array(tuple(near)),axis=1)<rad
         else: ok=None
         idx={}
@@ -116,7 +116,7 @@ def finger_spread(sd,amt=1.0):
         if d1<d0:
             for k,m in base.items(): PB[k].matrix_basis=m
             upd(); wrot_v(n,-abs(a_)*amt,ax)
-def settle_fingers(sd,T,lo=-30.0,hi=45.0,goal=0.0015):
+def settle_fingers(sd,T,lo=-16.0,hi=50.0,goal=0.0015):
     """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
     rep={}
     for f in FING5:
@@ -137,7 +137,7 @@ def settle_fingers(sd,T,lo=-30.0,hi=45.0,goal=0.0015):
                 if dm<0.0: a=m
                 else: b=m
             d=at(b); rep[f]={'deg':round(b,1),'gap_mm':round(d*1000,1)}
-        elif d0>0.003 and f!='Thumb':   # hovering: curl toward the surface until it touches (0-3 mm)
+        elif d0>0.003 and (f!='Thumb' or d0<0.025):   # hovering: curl toward the surface until it touches (0-3 mm)
             a,b=0.0,hi; db=at(b)
             if db>0.003: rep[f]={'deg':round(hi,1),'gap_mm':round(db*1000,1),'hover':True}; continue
             for _ in range(9):
@@ -151,10 +151,18 @@ def settle_fingers(sd,T,lo=-30.0,hi=45.0,goal=0.0015):
         else:
             at(0.0); rep[f]={'deg':0.0,'gap_mm':round(d0*1000,1)}
     return rep
+PALM_LOCAL={}
+def palm_init():
+    """palm normal in the wrist bone's frame, read once from the relaxed pose (fingers curl toward the palm)"""
+    for sd in ('Left','Right'):
+        s=sd[0]; w=PB[sd+' wrist']; ax=(PB[f'MiddleFinger1_{s}'].head-w.head).normalized()
+        p=(PB[f'MiddleFinger3_{s}'].tail-PB[f'MiddleFinger1_{s}'].head)+(PB[f'IndexFinger3_{s}'].tail-PB[f'IndexFinger1_{s}'].head); p=(p-ax*p.dot(ax)).normalized()
+        PALM_LOCAL[sd]=w.matrix.to_3x3().inverted()@p
+def palm_normal(sd): return (PB[sd+' wrist'].matrix.to_3x3()@PALM_LOCAL[sd]).normalized()
 def _palm_roll(sd,want):
     """signed angle (deg) about the hand axis that turns the palm normal onto `want`"""
     s=sd[0]; w=PB[sd+' wrist'].head; ax=(PB[f'MiddleFinger1_{s}'].head-w).normalized()
-    p=(PB[f'MiddleFinger3_{s}'].tail-PB[f'MiddleFinger1_{s}'].head); p=p-ax*p.dot(ax)
+    p=palm_normal(sd); p=p-ax*p.dot(ax)
     q=want-ax*want.dot(ax)
     if p.length<1e-6 or q.length<1e-6: return 0.0,ax
     p.normalize(); q.normalize(); return math.degrees(math.atan2(p.cross(q).dot(ax),p.dot(q))),ax
@@ -173,14 +181,19 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,p
     if loc is None: return None
     wr=PB[sd+' wrist']; tgt=loc+nr*0.03-(wr.tail-wr.head)*0.3; n2=nr
     def want(): return (Vector(palm_toward)-PB[sd+' wrist'].head).normalized() if palm_toward is not None else -n2
+    def fdir():
+        if unsigned: return fingers_dir
+        f_=Vector(fingers_dir).normalized(); t_=f_-n2*f_.dot(n2)
+        if t_.length<1e-4: return f_
+        return (t_.normalized()-n2*0.12).normalized()
     pv=PALMV[sd] if (palm_only and len(PALMV[sd])) else HANDV[sd]
-    for k in range(8):
-        ik_hand_to(sd,tgt,elbow_pole,fingers_dir,want())
+    for k in range(10):
+        ik_hand_to(sd,tgt,elbow_pole,fdir(),want())
         meshes_eval(True); co=body_co(); d=[x for x in sdist(T,co[pv],0.12) if x is not None]
         if unsigned: d=[abs(x) for x in d]
-        pc=Vector(tuple(co[pv].mean(axis=0))); l2,nn,_,_=T.find_nearest(pc,0.4); meshes_eval(False)
-        if not d or l2 is None: break
-        n2=nn; dm=min(d); step=gap-dm
+        pc=Vector(tuple(co[pv].mean(axis=0))); l2,nn,_,dl=T.find_nearest(pc,0.5); meshes_eval(False)
+        if l2 is None: break
+        n2=nn; dm=min(d) if d else dl; step=gap-dm
         if abs(step)<0.0007 and k>1: break
         tan=(l2+n2*(pc-l2).dot(n2))-pc
         tgt=tgt+n2*step+tan*0.5
@@ -192,12 +205,12 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,p
     # last guard: any hand skin still inside -> lift the whole hand off along the normal, 1 mm steps (finger poses kept)
     k=0
     while not unsigned and rep['hand']['pen_verts']>0 and k<12:
-        tgt=tgt+n2*0.001; fb={pb.name:pb.matrix_basis.copy() for pb in PB if _bone_part(pb.name) and _bone_part(pb.name)[2]!='palm'}
-        ik_hand_to(sd,tgt,elbow_pole,fingers_dir,want())
+        tgt=tgt+n2*(rep['hand']['pen_mm']*0.001+0.0006); fb={pb.name:pb.matrix_basis.copy() for pb in PB if _bone_part(pb.name) and _bone_part(pb.name)[2]!='palm'}
+        ik_hand_to(sd,tgt,elbow_pole,fdir(),want())
         for n_,m_ in fb.items(): PB[n_].matrix_basis=m_
         upd(); meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False); k+=1
     rep['lift_mm']=k; rep['T']=T
-    pr,_=_palm_roll(sd,want()); rep['palm_roll_err_deg']=round(pr,1)
+    pr,_=_palm_roll(sd,want()); rep['palm_roll_err_deg']=round(pr,1); rep['palm_normal_vs_surface_deg']=round(math.degrees(palm_normal(sd).angle(-n2)),1) if not unsigned else None
     return rep
 # ---------- feet
 def foot_co(sd,co=None):

@@ -797,7 +797,7 @@ elif MODE=='poses4':
     # sanity: sign of the signed distance (outside +, inside -)
     _T=target_bvh(['Body'],frozenset({'LARM','RARM'}))
     _hp=PB['Hips'].head.copy(); log('sdist sanity inside(hips)',sdist(_T,[_hp],0.5),'outside',sdist(_T,[_hp+Vector((0,-0.4,0))],0.6))
-    meshes_eval(False); relaxed()
+    meshes_eval(False); relaxed(); palm_init(); log('palm local',{k:[round(x,3) for x in v] for k,v in PALM_LOCAL.items()})
     REST={n:PB[n].head.copy() for n in ('Hips','Left leg','Right leg','Left knee','Right knee','Left ankle','Right ankle','Head','Neck','Left arm','Right arm')}
     SG=1.0 if REST['Left leg'].x>REST['Right leg'].x else -1.0
     ANKH=REST['Left ankle'].z-FLOOR; Lt=PB['Left leg'].length; Ls=PB['Left knee'].length
@@ -854,8 +854,14 @@ elif MODE=='poses4':
             a_=a_+Vector((0,0,dz))
         return a_
     def leg_flat(sd,ank,knee_pt,yaw=0.0):
-        """planted foot: bind-pose flat sole, grounded"""
-        return ground(sd,ank,knee_pt,0.0,yaw,'flat')
+        """planted foot: sole flat (heel and ball both on the floor), grounded"""
+        pt=0.0; a_=ank
+        for _ in range(3):
+            a_=ground(sd,a_,knee_pt,pt,yaw,'flat'); meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
+            dh=(fs['heel_mm']-fs['ball_mm'])/1000.0
+            if abs(dh)<0.0015: break
+            pt-=math.degrees(math.atan2(dh,0.16))   # heel high -> toes up (negative pitch) until the sole is level
+        return a_
     def seat_hips(top):
         hz=PB['Left leg'].head.z; hip_drop((top+0.085)-hz,0,0.0)
     def legleg():
@@ -875,17 +881,17 @@ elif MODE=='poses4':
                 aL=ground('Left',aL,kL+Vector((0,-0.3,0.1)),28.0,SG*4.0,'floor')
                 la=PB['Left ankle'].head.copy(); lk=PB['Left knee'].head.copy()
                 # top leg (right): thigh over the left knee, shin hanging down in front of the left shin, foot pointed (not kicked out)
-                aR=Vector((la.x+SG*(0.035+0.004*it),la.y-(0.055+0.010*it),FLOOR+0.17+0.016*it))
-                kR=lk+Vector((SG*0.02,-0.05,0.14))
+                aR=Vector((la.x+SG*(0.035+0.003*it),la.y-(0.055+0.004*it),FLOOR+0.17+0.017*it))
+                kR=lk+Vector((SG*0.02,-0.05,0.14+0.008*it))
                 leg_to('Right',aR,kR,52.0,SG*12.0,'line')
                 inf['top_foot_kick_cm']=round((la.y-PB['Right ankle'].head.y)*100,1)
             elif name=='ankles_crossed':
-                ks=0.050+0.003*it; dy=0.050+0.008*it
+                ks=0.050+0.003*it; dy=0.050+0.010*it
                 y0=hl.y-fwd*0.80
                 kLp=Vector((kc.x+SG*ks,hl.y-fwd,top+0.03)); kRp=Vector((kc.x-SG*ks,hr.y-fwd,top+0.03))
                 # right (back) ankle crosses to her left side, left (front) ankle crosses to her right side -> the shins make an X from the front
                 aR=Vector((kc.x+SG*0.035,y0,FLOOR+ANKH)); aR=ground('Right',aR,kRp+Vector((0,-0.3,0.05)),40.0,SG*8.0,'floor')
-                aL=Vector((kc.x-SG*0.035,y0-dy,FLOOR+ANKH+0.02)); aL=ground('Left',aL,kLp+Vector((0,-0.3,0.05)),42.0,-SG*8.0,'floor')
+                aL=Vector((kc.x-SG*0.035,y0-dy,FLOOR+ANKH+0.02+0.004*it)); aL=ground('Left',aL,kLp+Vector((0,-0.3,0.05)),42.0,-SG*8.0,'floor')
             else:
                 sl=0.15+0.008*it
                 kLp=Vector((hl.x+SG*sl*0.6,hl.y-fwd,top+0.03)); kRp=Vector((hr.x+SG*sl*0.6,hr.y-fwd,top+0.03))
@@ -955,7 +961,7 @@ elif MODE=='poses4':
             r_=hrep.get(sd)
             if not r_: g['hands'][sd]=None; continue
             T=r_.get('T'); hs=hand_stats(sd,T,co) if T is not None else None
-            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin')}
+            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin'),'palm_vs_surface_deg':r_.get('palm_normal_vs_surface_deg'),'palm':r_.get('palm')}
         lk,rk,la,ra=PB['Left knee'].head,PB['Right knee'].head,PB['Left ankle'].head,PB['Right ankle'].head
         g['front_X']={'knee_dx_cm':round((lk.x-rk.x)*SG*100,1),'ankle_dx_cm':round((la.x-ra.x)*SG*100,1),'crossed':bool((lk.x-rk.x)*(la.x-ra.x)<0)}
         g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,abs(PB['Left leg'].head.x-PB['Right leg'].head.x))),1)
@@ -981,7 +987,7 @@ elif MODE=='poses4':
         sc.render.resolution_x,sc.render.resolution_y=RW,RH
     for nm in mine:
         t0=time.time(); seated=nm in ('knee_over_knee','ankles_crossed','side_saddle')
-        NIT=14 if nm=='knee_over_knee' else (8 if seated else 1); best=None
+        NIT=22 if nm=='knee_over_knee' else (12 if seated else 1); best=None
         for it in range(NIT):
             meshes_eval(False); inf=legs(nm,it); ll=legleg()
             log('poses4 legs',nm,it,'leg_leg',ll,inf)

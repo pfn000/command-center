@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses4 (worker 41c5b341): feet + hands fix pass: real floor, grounded feet, vertex-level hand contact (0 inside, <=3 mm), draped fingers, ankles crossed into a front X, knee-over-knee top foot tucked; close-ups of both hands + both feet"
+ "note": "anim10c poses4 #2: fingers along the surface (tangent), palm normal from the wrist frame, hover fix, seat hand, flat planted sole, more leg iterations"
 }
