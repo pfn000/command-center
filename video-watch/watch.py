@@ -186,7 +186,7 @@ def diarize(wav):
         tb = get('https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2', os.path.join(MODELS, 'seg.tar.bz2'))
         tarfile.open(tb).extractall(MODELS)
     emb = get('https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34_LM.onnx', os.path.join(MODELS, 'wespeaker_en_voxceleb_resnet34_LM.onnx'))
-    n = int(OPTS.get('speakers', -1)); thr = float(OPTS.get('thr', 0.6))
+    n = int(OPTS.get('speakers', -1)); thr = float(OPTS.get('thr', 0.5))
     cfg = sherpa_onnx.OfflineSpeakerDiarizationConfig(
         segmentation=sherpa_onnx.OfflineSpeakerSegmentationModelConfig(pyannote=sherpa_onnx.OfflineSpeakerSegmentationPyannoteModelConfig(model=os.path.join(segd, 'model.onnx')), num_threads=2),
         embedding=sherpa_onnx.SpeakerEmbeddingExtractorConfig(model=emb, num_threads=2),
