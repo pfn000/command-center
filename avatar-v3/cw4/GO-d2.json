@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance3 #8: planted foot pivots on its ball when the shin rolls the ankle (<=15 inv/<=10 ev), smoothed head drive, nod +-25 (14:56:18)"
+ "note": "dance3 #9: planted foot rolls onto its edge (no pivot) + re-grounded; body self-model per frame (qc flags + 9-view QC on close-up frames) (15:16:01)"
 }

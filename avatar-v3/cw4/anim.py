@@ -905,6 +905,7 @@ elif MODE=='dance2':
     KF0={}; UP0={}
     for _sd in ('Left','Right'):
         KF0[_sd]=PB[_sd+' knee'].matrix.to_3x3().inverted()@HEADF0; UP0[_sd]=PB[_sd+' ankle'].matrix.to_3x3().inverted()@Vector((0,0,1))
+    exec(open('avatar-v3/selfmodel/selfmodel.py').read(),globals()); sm_init()   # body self-model (rest pose)
     meshes_eval(True); HH={}
     for _sd in ('Left','Right'):
         _fs=foot_stats(_sd,0.0); HH[_sd]=float(_fs['heel_mm']-_fs['ball_mm'])
@@ -1263,30 +1264,26 @@ elif MODE=='dance2':
                         wrot_v(sd+' ankle',-exc,a)
                         if abs(ankle_angles(sd)[0])>abs(tw): wrot_v(sd+' ankle',2*exc,a)
                     hist.append(ankle_angles(sd))
-                # planted foot with the shin leaning across it (rolled ankle): pivot the foot on its ball (about the vertical) until the lean is inside 15 deg inversion / 10 deg eversion
+                # planted foot with the shin leaning across it: the foot rolls onto its edge (as a real ankle does) until inversion <=15 / eversion <=10, then is re-grounded (ball/edge 0.6 mm)
                 if sd in e['locked']:
-                    tw,inv=ankle_angles(sd); piv=0.0
-                    def _out(v): return max(0.0,v-15.0)+max(0.0,-10.0-v)
-                    for it_ in range(8):
+                    roll_=0.0
+                    for it_ in range(4):
                         tw,inv=ankle_angles(sd)
-                        if _out(inv)<=0: break
-                        meshes_eval(True); co_=body_co(); fv=co_[FOOTV[sd]]; meshes_eval(False)
-                        ball=Vector(tuple(fv[fv[:,2]<fv[:,2].min()+0.004].mean(axis=0)))
-                        best_=None
-                        for dth in (8.0,-8.0):
-                            Rz=Matrix.Rotation(math.radians(dth),3,'Z'); A0=PB[sd+' ankle'].head.copy()
-                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}; Bm={n_:PB[n_].matrix_basis.copy() for n_ in (sd+' leg',sd+' knee',sd+' ankle',sd+' toe') if n_ in PB}
-                            pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+A0)/2).normalized()*0.5
-                            ik2(sd+' leg',sd+' knee',ball+Rz@(A0-ball),pole_)
-                            for n_,R_ in Ra.items(): set_rot(n_,Rz@R_)
-                            v_=_out(ankle_angles(sd)[1])
-                            if best_ is None or v_<best_[0]: best_=(v_,dth,{n_:PB[n_].matrix_basis.copy() for n_ in Bm})
-                            for n_,m_ in Bm.items(): PB[n_].matrix_basis=m_
-                            upd()
-                        if best_[0]>=_out(inv): break
-                        for n_,m_ in best_[2].items(): PB[n_].matrix_basis=m_
-                        upd(); piv+=best_[1]
-                    e.setdefault('foot_pivot_deg',{})[sd]=piv
+                        if -10.0<=inv<=15.0: break
+                        lim=13.0 if inv>0 else -8.0; d_=inv-lim
+                        ff=((PB[sd+' toe'].tail if sd+' toe' in PB else PB[sd+' ankle'].tail)-PB[sd+' ankle'].head).normalized()
+                        wrot_v(sd+' ankle',d_,ff)
+                        if abs(ankle_angles(sd)[1]-lim)>abs(d_): wrot_v(sd+' ankle',-2*d_,ff); roll_-=d_
+                        else: roll_+=d_
+                    if roll_!=0.0:
+                        pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                        for k_ in range(4):
+                            meshes_eval(True); fs_=foot_stats(sd,FLOOR); meshes_eval(False); dz=(0.6-fs_['min_mm'])/1000.0
+                            if abs(dz)<0.0004: break
+                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                            ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
+                            for n_,R_ in Ra.items(): set_rot(n_,R_)
+                    e.setdefault('foot_edge_roll_deg',{})[sd]=round(roll_,1)
                     hist.append(ankle_angles(sd))
                 # free foot: no rolled ankle (inversion <=15, eversion <=10) - turn the foot about its own length
                 if sd not in e['locked']:
@@ -1353,6 +1350,12 @@ elif MODE=='dance2':
             meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
+        # body self-model (selfmodel.py): every detector each frame, the view that caught it; full measures + 9 views on the close-up frames
+        try:
+            meshes_eval(True); Mq,Fq=sm_selfcheck(FLOOR,seated=False)
+            e['qc_flags']=Fq; e['qc']={k:Mq.get(k) for k in ('balance_margin_cm','com','front_knee_minus_ankle_gap_cm','side_spine_bends','side_knee_bend_L','side_knee_bend_R','ankle_twist_L','ankle_inv_L','ankle_twist_R','ankle_inv_R')}
+            if f in CLOSE: json.dump({'frame':f,'measures':Mq,'flags':Fq},open(OUT+f'/q{f:03d}_selfcheck.json','w'),default=str)
+        except Exception as ex: e['qc_error']=repr(ex)[:200]
         render(OUT+f'/f{f:03d}.jpg')
         if f in CLOSE:
             try:
@@ -1362,6 +1365,8 @@ elif MODE=='dance2':
                     setcam(c_,40 if c_.x>bc.x else -40,10,max(ext*2.0,0.26)/(24/85),85); render(OUT+f'/c{f:03d}_hand{sd[0]}.jpg')
                 fw=np.concatenate([cw[FOOTV['Left']],cw[FOOTV['Right']]]); c_=Vector(tuple(fw.mean(axis=0))); ext=float((fw.max(axis=0)-fw.min(axis=0)).max())
                 setcam(c_+Vector((0,0,0.03)),0,7,max(ext*1.5,0.36)/(24/70),70); render(OUT+f'/c{f:03d}_feet.jpg')
+                mn_,mx_=bbox([BODY]); mn_.z=min(mn_.z,FLOORW); ext_=mx_-mn_; VVq=sm_render_views(OUT+f'/q{f:03d}_qc_{{}}.jpg',(mn_+mx_)/2,max(ext_.x,ext_.y,ext_.z)*1.12,floor_obj=bpy.data.objects.get('Floor4'))
+                json.dump(VVq,open(OUT+f'/q{f:03d}_views.json','w'))
             except Exception as ex_: e['close_error']=repr(ex_)[:200]
             sc.render.resolution_x,sc.render.resolution_y=RW,RH; setcam(Vector((float(CAMX[f])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
         e['max_back_hair_deg']=round(max([v for k_,v in ang.items() if k_.startswith('Back hair')] or [0]),1); e['s']=round(time.time()-t0_,1)
