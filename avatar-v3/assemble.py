@@ -521,6 +521,58 @@ def world_bvh(objs):
         e=t.evaluated_get(dg); me=e.to_mesh(); off=len(V)
         V+=[tuple(t.matrix_world@v.co) for v in me.vertices]; F+=[tuple(off+i for i in p.vertices) for p in me.polygons]; e.to_mesh_clear()
     return BVHTree.FromPolygons(V,F)
+# ---------- run 10 (Saidie 7:18 PM Oct 18: "the shirt thickness increased to like 0.5%"). Her shirt is a thin double-layer shell (outer layer with
+#            normals out, inner layer with normals in, ~0.5 mm apart; measured on her mesh). The OUTER layer is pushed out along its own area-weighted
+#            normal by SHIRT_THICK_PCT % of the shirt's own bounding-box diagonal (her mesh as imported, loose verts excluded); the inner layer against
+#            the body stays, so the shell is thicker and nothing moves toward the skin. Positions only: her weights, UVs and shape-key deltas untouched.
+#            The weld record is re-based so every later group-coherent pass keeps the new thickness.
+def _thick_meas(V,outer,inner):
+    if outer.sum()==0 or inner.sum()==0: return None
+    kd=KDTree(int(inner.sum())); ii=np.where(inner)[0]
+    for k,i in enumerate(ii): kd.insert(Vector(tuple(V[i])),k)
+    kd.balance(); d=np.array([kd.find(Vector(tuple(V[i])))[2] for i in np.where(outer)[0]])
+    d=d[d<0.02]
+    return {'median_mm':round(float(np.median(d))*1000,3),'p10_mm':round(float(np.percentile(d,10))*1000,3),'p90_mm':round(float(np.percentile(d,90))*1000,3)} if len(d) else None
+def shirt_thicken(o):
+    pct=float(P.get('SHIRT_THICK_PCT',0)); r={'pct':pct}
+    if pct<=0: return None
+    Vs=np.asarray(SOLO['shirt']['V'],dtype=np.float64); Fs=np.asarray(SOLO['shirt']['F'])
+    used=np.zeros(len(Vs),bool); used[np.unique(Fs)]=True; W=Vs[used]; dims=W.max(0)-W.min(0); diag=float(np.linalg.norm(dims))
+    basis=P.get('SHIRT_THICK_BASIS','diag'); size=diag if basis=='diag' else float(dims.max()); d=pct/100.0*size
+    r.update({'basis':basis,'bbox_dims_mm':[round(float(x)*1000,1) for x in dims],'bbox_diag_mm':round(diag*1000,1),'loose_verts_excluded':int((~used).sum()),'applied_mm':round(d*1000,3)})
+    V,F,_=tri_arr(o,evaluated=False); V=V.astype(np.float64); F=F.astype(np.int64)
+    fn=np.cross(V[F[:,1]]-V[F[:,0]],V[F[:,2]]-V[F[:,0]]); N=np.zeros_like(V)
+    for k in range(3): np.add.at(N,F[:,k],fn)
+    N/=np.maximum(np.linalg.norm(N,axis=1),1e-12)[:,None]
+    TB=world_bvh([BODY]); cen=np.array(tuple(sum((Vector(b) for b in BODY.bound_box),Vector())/8)); cen=np.array(tuple(BODY.matrix_world@Vector(tuple(cen))))
+    dot=np.zeros(len(V))
+    for i,p in enumerate(V):
+        loc,nr,idx,dd=TB.find_nearest(Vector(tuple(p)),0.25)
+        if loc is None:
+            v_=p-cen; v_[2]=0; dot[i]=float(N[i]@(v_/max(np.linalg.norm(v_),1e-9)))
+        else: dot[i]=float(N[i]@np.array(tuple(nr)))
+    dirn=P.get('SHIRT_THICK_DIR','out'); r['direction']=dirn
+    # 'out': the OUTER layer moves out along its own normal; 'in' (Solidify-style, offset -1): the visible outer layer stays where her shirt is and
+    # the INNER layer moves in along its own (inward) normal; the later clearance passes then lift the whole shell only where the skin needs room.
+    w=np.clip((dot if dirn=='out' else -dot)/0.5,0,1); w[~(np.linalg.norm(N,axis=1)>0.5)]=0
+    outer=dot>0.5; inner=dot<-0.5
+    r['outer_verts']=int(outer.sum()); r['inner_verts']=int(inner.sum()); r['rim_or_ambiguous_verts']=int(len(V)-outer.sum()-inner.sum())
+    r['thickness_before']=_thick_meas(V,outer,inner)
+    D=(d*w)[:,None]*N
+    if o.name in WELD:
+        # split duplicates on the SAME layer (seam loops, <0.6 mm) move as one: mean push of the members on the pushed side
+        for gg in WELD[o.name]['groups']:
+            pm=w[gg]>0.5
+            if pm.sum()>1: D[gg[pm]]=D[gg[pm]].mean(0)
+    set_world(o,V+D)
+    V2=wco(o); r['thickness_after']=_thick_meas(V2,outer,inner)
+    r['max_move_mm']=round(float(np.linalg.norm(D,axis=1).max())*1000,3)
+    if o.name in WELD: WELD[o.name]['X0']=V2.copy()
+    rep['shirt_thicken']=r; log('SHIRT thicken',json.dumps(r,default=str)); return r
+if SHIRT is not None and float(P.get('SHIRT_THICK_PCT',0))>0:
+    try: shirt_thicken(SHIRT)
+    except Exception as e: traceback.print_exc(); log('THICKERR',e); rep['shirt_thicken_error']=str(e)
+    if SHIRT.name in WELD: WELD[SHIRT.name]['XR']=wco(SHIRT)
 def fit_out(o,targets,off,deep=0.05,iters=5,only=None,damp=None):
     T=world_bvh(targets); mw=o.matrix_world; n=len(o.data.vertices)
     dg=bpy.context.evaluated_depsgraph_get(); ev=o.evaluated_get(dg)
@@ -1281,7 +1333,7 @@ rep['tris']={o.name:tris(o) for o in meshes}; rep['tris_total']=sum(rep['tris'].
 rep['shapekeys_head']=[k.name for k in FH.data.shape_keys.key_blocks] if FH.data.shape_keys else []
 log('tris',rep['tris_total'],rep['tris'])
 json.dump(rep,open(OUT+'/build-report.json','w'),indent=1,default=str)
-SAVE_NAME={'A0':'jena-v37r9-final','A1':'jena-v37r9-A1','A2':'jena-v37r9-noshirt'}.get(VAR)
+SAVE_NAME={'A0':'jena-v37r10-final','A1':'jena-v37r10-A1','A2':'jena-v37r10-noshirt','A3':'jena-v37r10-nofoldfix'}.get(VAR)
 # ---------- studio: IDENTICAL to the solo asset renders (grey world 0.18, warm key / cool fill / rim suns, AgX Base Contrast, 85 mm, same framing rule)
 sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=P['ASM_SAMPLES']; sc.cycles.use_denoising=True
 sc.render.film_transparent=False; sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -1863,6 +1915,7 @@ def qa_sweep():
         log('still',k,a)
     if os.environ.get('QA_CLOSE') and sh==0:
         # run 9b: 360 seam close-up sweep around each shoulder (her slit crop), arms-down proof pose
+        sc.render.resolution_x=sc.render.resolution_y=int(P.get('CLOSE_RES',1024)); sc.cycles.samples=int(P.get('CLOSE_SAMPLES',16))
         for sd_,bn_ in (('R','Right arm'),('L','Left arm')):
             if bn_ not in B.pose.bones: continue
             pb_=B.pose.bones[bn_]; h_=B.matrix_world@pb_.head; t_=B.matrix_world@pb_.tail; c_=h_+(t_-h_).normalized()*float(P.get('CLOSE_ALONG',0.07))
@@ -1883,7 +1936,7 @@ def qa_sweep():
                     band.setdefault(nmr,{})[o.name]={'verts':int(m.sum()),'inside_body_gt_1mm':int((Sm<-0.001).sum()),'min_mm':round(float(Sm.min())*1000,2)}
         out['clipping_by_ring_relaxed_pose']=band; out['hair_through_face_below_brow']=face_cross()
         out['params_pose']={k_:P.get(k_) for k_ in ('ARM_DOWN','SHOULDER_DOWN','ELBOW_BEND')}
-        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture')}
+        out['rep']={k_:rep.get(k_) for k_ in ('posed_converge','back_hair_curl','hair_final_pen','shirt_selfx_final','shirt_self_clear','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture','shirt_thicken','seam_fold_fix','shirt_folds_final','visemes')}
         if SHIRT is not None and not SHIRT.hide_render:
             try: pose_relaxed(); out['shirt_selfx_relaxed']=shirt_selfx(SHIRT)
             except Exception as e: out['shirt_selfx_error']=str(e)
@@ -2366,6 +2419,103 @@ def seam_crumple(o):
     if c2['zone_gt1mm']>c0['zone_gt1mm'] or zt(sx1)>zt(sx0) or zt(sx1r)>zt(sx0r): set_world(o,X0); r['reverted']=True
     r['secs']=round(_t.time()-t0,1); rep['seam_crumple']=r; log('SEAM crumple',json.dumps(r,default=str)[:1500])
     return not r.get('reverted') and c2['zone_gt1mm']<c0['zone_gt1mm']
+# ---------- run 10: CRUMPLE / FOLD DETECTOR (RUN9: the last right-seam notches are folded faces, which the intersection count no longer sees).
+#            In the shoulder zones (face centroid within SELFX_ZONE_R of the posed upper-arm head): FLIPS = real faces (>= 2 mm^2) whose posed normal
+#            points against their rest normal carried by their own skinning rotation; SHARP = interior edges between two real faces whose posed
+#            dihedral exceeds FOLD_DEG and is >= 30 deg sharper than the same edge at rest (her authored hems/rims and the shell rim do not count).
+_FOLD_CACHE={}
+def _fold_topo(o,F):
+    k=(o.name,len(F))
+    if k in _FOLD_CACHE: return _FOLD_CACHE[k]
+    E=np.sort(np.concatenate([F[:,[0,1]],F[:,[1,2]],F[:,[2,0]]]),1); fi=np.tile(np.arange(len(F)),3)
+    o_=np.lexsort((E[:,1],E[:,0])); E=E[o_]; fi=fi[o_]
+    same=np.all(E[1:]==E[:-1],axis=1); st=np.where(same)[0]
+    # keep only edges with exactly two faces
+    cnt=np.ones(len(E),int); 
+    key=E[:,0].astype(np.int64)*10_000_000+E[:,1]; u,inv,c=np.unique(key,return_inverse=True,return_counts=True)
+    two=c[inv[st]]==2; st=st[two]
+    pairs=np.c_[fi[st],fi[st+1]]; edges=E[st]
+    _FOLD_CACHE[k]=(pairs,edges); return pairs,edges
+def _fnorm(V,F):
+    fn=np.cross(V[F[:,1]]-V[F[:,0]],V[F[:,2]]-V[F[:,0]]); A=np.linalg.norm(fn,axis=1); return fn/np.maximum(A,1e-15)[:,None],A/2
+def shirt_folds(o,detail=False,zone_r=None):
+    """call in the POSED state; reads rest normals by switching to rest and back is NOT done here: uses the cached rest geometry"""
+    zone_r=float(zone_r or P.get('SELFX_ZONE_R',0.11)); deg_=float(P.get('FOLD_DEG',100))
+    Vp,F,_=tri_arr(o); Vp=Vp.astype(np.float64); F=F.astype(np.int64)
+    Vr=_FOLD_REST.get(o.name)
+    if Vr is None or len(Vr)!=len(Vp): return None
+    pairs,edges=_fold_topo(o,F)
+    nr,Ar=_fnorm(Vr,F); npz,Ap=_fnorm(Vp,F)
+    Mv=_skin_mats(o)[:,:3,:3]; Rf=Mv[F].mean(1); nc=np.einsum('fab,fb->fa',Rf,nr); nc/=np.maximum(np.linalg.norm(nc,axis=1),1e-12)[:,None]
+    real=(Ar>2e-6)&(Ap>2e-6)
+    C=_arm_centres(); Cn=Vp[F].mean(1); zone=np.full(len(F),'',dtype=object)
+    for sd,c in C.items(): zone[np.linalg.norm(Cn-c,axis=1)<zone_r]=sd
+    flip=real&((npz*nc).sum(1)<0.0)
+    a,b=pairs[:,0],pairs[:,1]; ok=real[a]&real[b]
+    ang_p=np.degrees(np.arccos(np.clip((npz[a]*npz[b]).sum(1),-1,1))); ang_r=np.degrees(np.arccos(np.clip((nr[a]*nr[b]).sum(1),-1,1)))
+    sharp=ok&(ang_p>deg_)&(ang_p-ang_r>30)
+    out={}
+    for sd in ('L','R'):
+        fz=zone==sd; ez=(zone[a]==sd)|(zone[b]==sd)
+        out['flips_'+sd]=int((flip&fz).sum()); out['sharp_'+sd]=int((sharp&ez).sum())
+    out['flips_other']=int((flip&(zone=='')).sum()); out['sharp_other']=int((sharp&(zone[a]=='')&(zone[b]=='')).sum())
+    if detail:
+        m=np.zeros(len(Vp),bool); fz=(zone=='L')|(zone=='R')
+        for f_ in np.where(flip&fz)[0]: m[F[f_]]=True
+        ez=sharp&((zone[a]!='')|(zone[b]!=''))
+        m[edges[ez].ravel()]=True
+        return out,m,Vp
+    return out
+_FOLD_REST={}
+def fold_rest_cache(o):
+    rest(); V,_,_=tri_arr(o); _FOLD_REST[o.name]=V.astype(np.float64)
+def fold_total(d): return d['flips_L']+d['flips_R']+d['sharp_L']+d['sharp_R']
+def fold_probe(o,arms=(45,30,60)):
+    """fold counts at rest and with the arms at several angles (the proof pose is ARM_DOWN); rest geometry re-cached first"""
+    fold_rest_cache(o); out={}; ad=P['ARM_DOWN']
+    try:
+        for a_ in arms:
+            P['ARM_DOWN']=a_; pose_relaxed(); out[f'arm{a_}']=shirt_folds(o)
+    finally:
+        P['ARM_DOWN']=ad; rest()
+    return out
+# ---------- run 10 fold fix (non-weight): fold-flagged verts in the shoulder zones + FOLD_RINGS rings are Taubin-smoothed IN THE POSED shape with a small
+#            step (FOLD_LAM, FOLD_STEPS) and a hard per-pass cap per vertex (FOLD_CAP), carried back to rest by inverse LBS, group-coherent. A pass is kept
+#            only if the fold total drops in the proof pose AND does not rise at arms 30/60 or rest AND the shirt self-intersection count does not rise.
+def seam_fold_fix(o):
+    t0=_t.time(); r={'passes':[]}; X0=wco(o).copy(); E=WELD[o.name]['E'] if o.name in WELD else np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64)
+    n=len(o.data.vertices); deg=np.zeros(n); np.add.at(deg,E[:,0],1); np.add.at(deg,E[:,1],1); deg=np.maximum(deg,1)
+    def zt(d): return d['pairs_L']+d['pairs_R']
+    def probe_all():
+        pr=fold_probe(o); pose_relaxed(); sx=shirt_selfx(o); rest(); sxr=shirt_selfx(o); return pr,sx,sxr
+    pr0,sx0,sxr0=probe_all(); r['before']={'folds':pr0,'selfx_relaxed':sx0,'selfx_rest':sxr0}
+    ad=P['ARM_DOWN']; key=f'arm{ad}'; prev=pr0
+    cap=float(P.get('FOLD_CAP',0.003)); lam=float(P.get('FOLD_LAM',0.15))
+    for it in range(int(P.get('FOLD_ITERS',4))):
+        fold_rest_cache(o); pose_relaxed(); res=shirt_folds(o,detail=True)
+        if res is None: rest(); r['error']='no rest cache'; break
+        cnt,m,V=res
+        if not m.any(): rest(); break
+        seeds=int(m.sum())
+        for _ in range(int(P.get('FOLD_RINGS',2))):
+            g=m.copy(); g[E[:,0][m[E[:,1]]]]=True; g[E[:,1][m[E[:,0]]]]=True; m=g
+        Vs=V.copy()
+        for _ in range(int(P.get('FOLD_STEPS',15))):
+            for l_ in (lam,-lam*1.06):
+                A=np.zeros_like(Vs); np.add.at(A,E[:,0],Vs[E[:,1]]); np.add.at(A,E[:,1],Vs[E[:,0]]); A/=deg[:,None]
+                Vs[m]+=l_*(A[m]-Vs[m])
+        dp=Vs-V; dp[~m]=0; nm=np.linalg.norm(dp,axis=1); k=nm>cap; dp[k]*=(cap/nm[k])[:,None]
+        Mx=_skin_mats(o); R=np.linalg.inv(Mx[:,:3,:3]+np.eye(3)*1e-9); dr=np.einsum('nab,nb->na',R,dp)
+        rest(); Xb=wco(o).copy(); dr=group_max(o,dr); set_world(o,wco(o)+dr)
+        pr1,sx1,sxr1=probe_all()
+        worse=fold_total(pr1[key])>=fold_total(prev[key]) or any(fold_total(pr1[a_])>fold_total(prev[a_]) for a_ in pr1 if a_!=key) or zt(sx1)>zt(sx0) or zt(sxr1)>zt(sxr0)
+        r['passes'].append({'iter':it,'proof_before':cnt,'seed_verts':seeds,'region_verts':int(m.sum()),'max_move_mm':round(float(min(nm.max(),cap))*1000,2),'folds_after':pr1,'selfx_relaxed':sx1,'selfx_rest':sxr1})
+        if worse: set_world(o,Xb); r['passes'][-1]['undone']=True; break
+        prev=pr1
+    pr2,sx2,sxr2=probe_all(); r['after']={'folds':pr2,'selfx_relaxed':sx2,'selfx_rest':sxr2}
+    if fold_total(pr2[key])>fold_total(pr0[key]) or zt(sx2)>zt(sx0) or zt(sxr2)>zt(sxr0): set_world(o,X0); r['reverted']=True
+    r['secs']=round(_t.time()-t0,1); rep['seam_fold_fix']=r; log('SEAM fold',json.dumps(r,default=str)[:2000])
+    return not r.get('reverted') and fold_total(pr2[key])<fold_total(pr0[key])
 if SHIRT is not None and P.get('SEAM_SMOOTH',False):
     try:
         _ok1=seam_posed_smooth(SHIRT)
@@ -2373,6 +2523,9 @@ if SHIRT is not None and P.get('SEAM_SMOOTH',False):
         if P.get('SEAM_CRUMPLE',False):
             try: _ok2=seam_crumple(SHIRT)
             except Exception as e: traceback.print_exc(); log('CRUMPLEERR',e); rep['seam_crumple_error']=str(e); rest()
+        if P.get('SEAM_FOLD',False):
+            try: _ok2=seam_fold_fix(SHIRT) or _ok2
+            except Exception as e: traceback.print_exc(); log('FOLDERR',e); rep['seam_fold_fix_error']=str(e); rest()
         if (_ok1 or _ok2) and P.get('POSED_CONVERGE',False):
             P['CONVERGE_ROUNDS']=3; P['CONVERGE_MAX_S']=300; _pc=rep.get('posed_converge'); posed_converge(SHIRT); rep['posed_converge_after_seam_smooth']=rep['posed_converge']; rep['posed_converge']=_pc
     except Exception as e: traceback.print_exc(); log('SEAMSMOOTHERR',e); rep['seam_posed_smooth_error']=str(e); rest()
@@ -2385,6 +2538,8 @@ if SHIRT is not None and P.get('SELF_CLEAR',False):
 if SHIRT is not None:
     try:
         pose_relaxed(); _a=shirt_selfx(SHIRT); rest(); _b=shirt_selfx(SHIRT); rep['shirt_selfx_final']={'relaxed':_a,'rest':_b}; log('SELFX final',rep['shirt_selfx_final'])
+        try: rep['shirt_folds_final']=fold_probe(SHIRT,arms=(45,30,55,60,74)); log('FOLDS final',rep['shirt_folds_final'])
+        except Exception as e: traceback.print_exc(); log('FOLDFINALERR',e); rest()
     except Exception as e: traceback.print_exc(); log('SELFXERR',e); rest()
 
 # ---------- run 8 (Saidie 3:38 PM screenshot, HARD gate): no dark slits/specks at the band/sleeve seam. After everything else, the shirt's INNER shell is
@@ -2683,6 +2838,257 @@ def hair_final_pen():
     rep['hair_final_pen']=out; log('HAIR final pen',json.dumps(out,default=str)[:900])
 try: hair_final_pen()
 except Exception as e: log('HFPERR',e)
+# ---------- run 10 TEST VIDEOS (Saidie 7:19 PM + 7:21 PM Oct 18): every facial shape key, the 15 VRChat visemes, fingers, limbs range-of-motion, and a
+#            jump with spring jiggle on her own breast / butt / thigh bones. Frames only here (540x1080 per view, two views); labels, mp4 and contact
+#            sheets are composed off-runner. Nothing here touches the saved files.
+VIS15=[('sil','vrc.v_sil'),('PP','vrc.v_pp'),('FF','vrc.v_ff'),('TH','vrc.v_th'),('DD','vrc.v_dd'),('kk','vrc.v_kk'),('CH','vrc.v_ch'),('SS','vrc.v_ss'),
+       ('nn','vrc.v_nn'),('RR','vrc.v_rr'),('aa','vrc.v_aa'),('E','vrc.v_e'),('ih','vrc.v_ih'),('oh','vrc.v_oh'),('ou','vrc.v_ou')]
+def _kb_disp(o,kb):
+    a=np.empty(len(o.data.vertices)*3); kb.data.foreach_get('co',a); b=np.empty_like(a); kb.relative_key.data.foreach_get('co',b)
+    d=np.linalg.norm((a-b).reshape(-1,3),axis=1)*float(o.matrix_world.to_scale()[0]); return d
+def viseme_audit():
+    out={'names':{},'missing':[],'empty':[]}
+    KB=FH.data.shape_keys.key_blocks if FH.data.shape_keys else {}
+    low={k.name.lower():k.name for k in KB} if KB else {}
+    for lab,kn in VIS15:
+        nm_=kn if kn in KB else low.get(kn.lower())
+        if nm_ is None: out['missing'].append(lab); out['names'][lab]=None; continue
+        d=_kb_disp(FH,KB[nm_]); mx=float(d.max())*1000
+        out['names'][lab]={'key':nm_,'max_disp_mm':round(mx,2),'moved_verts':int((d>0.0001).sum())}
+        if mx<0.05: out['empty'].append(lab)
+    out['vowels_ok']=all(out['names'].get(v) and v not in out['empty'] for v in ('aa','E','ih','oh','ou'))
+    out['unity_descriptor']='none: the export is a .blend + .fbx only (no Unity/VRChat avatar descriptor is part of it); the vrc.v_* names are the VRChat viseme names Unity auto-detects'
+    rep['visemes']=out; log('VISEMES',json.dumps(out)); return out
+try: viseme_audit()
+except Exception as e: traceback.print_exc(); log('VISEMEERR',e)
+def _tv_setup(samples=None):
+    sc.render.resolution_x,sc.render.resolution_y=540,1080; sc.render.resolution_percentage=100; sc.cycles.samples=int(samples or P.get('TEST_SAMPLES',8))
+    sc.render.use_persistent_data=True; sc.render.image_settings.file_format='JPEG'; sc.render.image_settings.quality=90
+def _tv_shot(path,target,az,el,dist,lens=50):
+    _setcam(target,az,el,dist,lens); sc.render.filepath=path
+    try: bpy.ops.render.render(write_still=True); return True
+    except Exception as e: log('TVERR',e); return False
+def _bh(n): return B.pose.bones[n].head.copy() if n in B.pose.bones else None
+def _bt(n): return B.pose.bones[n].tail.copy() if n in B.pose.bones else None
+def wrot_v(name,deg,axis):
+    if not deg or name not in B.pose.bones: return
+    pb=B.pose.bones[name]; h=pb.head.copy(); ax=Vector(tuple(axis)).normalized()
+    pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,ax)@Matrix.Translation(-h)@pb.matrix; bpy.context.view_layer.update()
+def _ss(u): u=min(max(u,0.0),1.0); return u*u*(3-2*u)
+def _hip_drop(dz):
+    hp=B.pose.bones['Hips']; hp.matrix=Matrix.Translation(B.matrix_world.inverted().to_3x3()@Vector((0,0,dz)))@hp.matrix; bpy.context.view_layer.update()
+def _geo_flags(vis,REST0,TB_polys):
+    """clothing verts > 3 mm inside the body and edges stretched > 40 % (vs rest) per mesh"""
+    cur={o.name:tri_arr(o)[0] for o in vis}; f={}
+    TBq=BVHTree.FromPolygons([tuple(p) for p in cur[BODY.name]],TB_polys)
+    for o in vis:
+        Vp=cur[o.name]; E_,L0=REST0[o.name]
+        st=0
+        if len(E_): r_=np.linalg.norm(Vp[E_[:,0]]-Vp[E_[:,1]],axis=1)/np.maximum(L0,1e-7); st=int(((r_>1.4)|(r_<0.6)).sum())
+        e={'stretch_edges_gt40pct':st}
+        if o in [x for x in (SHIRT,BRA,SH) if x is not None]:
+            c3=0; mn_=0.0
+            for p in Vp[::2]:
+                loc,nr,idx,d=TBq.find_nearest(Vector(tuple(p)),0.03)
+                if loc is None: continue
+                s_=(Vector(tuple(p))-loc).dot(nr); mn_=min(mn_,s_); c3+=int(s_<-0.003)
+            e['inside_body_gt3mm_x2']=c3; e['min_signed_mm']=round(mn_*1000,1)
+        f[o.name]=e
+    return f
+def _rest_edges(vis):
+    rest(); R={}
+    for o in vis:
+        V_,_,_=tri_arr(o); E_=np.array([tuple(e.vertices) for e in o.data.edges],dtype=np.int64)
+        R[o.name]=(E_,np.linalg.norm(V_[E_[:,0]]-V_[E_[:,1]],axis=1) if len(E_) else np.zeros(0))
+    return R
+def _face_frame():
+    V_,_,_=tri_arr(FH); V_=V_[V_[:,2]>float(EYE_TOP_Z)-0.12]
+    c=Vector((float(np.median(V_[:,0])),float(V_[:,1].min())+0.06,float(EYE_TOP_Z)-0.035)); return c
+FINGERS=('IndexFinger','MiddleFinger','RingFinger','LittleFinger')
+def _hand_axes(sd):
+    w=_bh(sd+' wrist'); m=_bh('MiddleFinger1_'+sd[0]); fdir=(m-w).normalized(); y=Vector((0,1,0))
+    n=fdir.cross(y).normalized(); return w,m,fdir,n
+def _curl_frame(sd):
+    """knuckle axis k (index1 -> little1 heads) and the sign that moves fingertips toward the palm (the side the relaxed curl already bends to)"""
+    i1=_bh('IndexFinger1_'+sd[0]); l1=_bh('LittleFinger1_'+sd[0]); m1=_bh('MiddleFinger1_'+sd[0]); m1t=_bt('MiddleFinger1_'+sd[0]); m3t=_bt('MiddleFinger3_'+sd[0])
+    k=(l1-i1).normalized(); fdir=(m1t-m1).normalized(); v=m3t-m1; palm=(v-fdir*v.dot(fdir)).normalized()
+    s=1.0 if k.cross(fdir).dot(palm)>0 else -1.0
+    w=_bh(sd+' wrist'); t1=_bh('Thumb1_'+sd[0]) or w; tdir=((_bt('Thumb2_'+sd[0]) or t1)-t1).normalized()
+    return k,s,fdir,palm,tdir
+def finger_pose(f):
+    """96 frames at 12 fps: fist (full curl, thumb across), open, spread, then each finger alone thumb..pinky. Curl = rotation about the hand's own
+       knuckle axis toward the palm (sign read from her relaxed curl), so every finger folds in its own plane."""
+    pose_relaxed(); segs=[(0,12,'fist'),(12,24,'open'),(24,36,'spread'),(36,48,'thumb alone'),(48,60,'index alone'),(60,72,'middle alone'),(72,84,'ring alone'),(84,96,'pinky alone')]
+    s_=[x for x in segs if x[0]<=f<x[1]][0]; u=(f-s_[0])/(s_[1]-s_[0]); lab=s_[2]
+    for sd,sgn in (('Left',1),('Right',-1)):
+        k,s,fdir,palm,tdir=_curl_frame(sd)
+        def curl(fn_,a):
+            if fn_=='Thumb':
+                ax=tdir.cross(palm).normalized(); st=1.0 if ax.cross(tdir).dot(palm)>0 else -1.0
+                wrot_v(f'Thumb0_{sd[0]}',st*25*a,ax)
+                for j,dg in ((1,35),(2,45)): wrot_v(f'Thumb{j}_{sd[0]}',st*dg*a,ax)
+            else:
+                for j,dg in ((1,70),(2,95),(3,65)): wrot_v(f'{fn_}{j}_{sd[0]}',s*dg*a,k)
+        if lab=='fist':
+            for fn_ in FINGERS+('Thumb',): curl(fn_,_ss(u))
+        elif lab=='open':
+            for fn_ in FINGERS+('Thumb',): curl(fn_,1-_ss(u))
+        elif lab=='spread':
+            a=math.sin(math.pi*u); n=palm.normalized()
+            sg2=1.0 if n.cross(fdir).dot(k)>0 else -1.0   # +deg about the palm normal moves tips toward the little-finger side
+            for fn_,fac in zip(FINGERS,(-1.0,-0.2,0.6,1.3)): wrot_v(f'{fn_}1_{sd[0]}',sg2*fac*14*a,n)
+            for fn_ in FINGERS:
+                for j,dg in ((1,-18),(2,-26),(3,-18)): wrot_v(f'{fn_}{j}_{sd[0]}',-s*abs(dg)*a*0.9,k)
+        else:
+            fn_={'thumb':'Thumb','index':'IndexFinger','middle':'MiddleFinger','ring':'RingFinger','pinky':'LittleFinger'}[lab.split()[0]]
+            curl(fn_,math.sin(math.pi*u))
+    bpy.context.view_layer.update(); return lab
+LIMB_SEGS=[(0,24,'arms: raise to the side'),(24,48,'arms: forward'),(48,72,'arms: cross-body'),(72,96,'arms: elbow bend'),(96,114,'legs: kick forward'),
+           (114,132,'legs: kick back'),(132,150,'legs: out to the side'),(150,180,'knees: deep squat'),(180,204,'hips: rotate'),(204,228,'hips: sit pose')]
+def limb_pose(f):
+    pose_relaxed(); s=[x for x in LIMB_SEGS if x[0]<=f<x[1]][0]; u=(f-s[0])/(s[1]-s[0]); a=math.sin(math.pi*u); S=math.sin(2*math.pi*u); lab=s[2]
+    if lab.endswith('raise to the side'):
+        for sd,sg in (('Left',1),('Right',-1)): wrot(sd+' arm',-sg*110*a,'Y')
+    elif lab.endswith('forward'):
+        for sd in ('Left','Right'): wrot(sd+' arm',-75*a,'X')
+    elif lab.endswith('cross-body'):
+        for sd,sg in (('Left',1),('Right',-1)): wrot(sd+' arm',-70*a,'X'); wrot(sd+' arm',-sg*35*a,'Z')
+    elif lab.endswith('elbow bend'):
+        for sd in ('Left','Right'): wrot(sd+' arm',-35*a,'X'); wrot(sd+' elbow',-110*a,'X')
+    elif lab.endswith('kick forward'): wrot('Left leg',-70*a,'X'); wrot('Left knee',20*a,'X')
+    elif lab.endswith('kick back'): wrot('Left leg',35*a,'X'); wrot('Left knee',40*a,'X')
+    elif lab.endswith('out to the side'): wrot('Left leg',-40*a,'Y'); wrot('Right leg',40*a,'Y')
+    elif lab.endswith('deep squat'):
+        _hip_drop(-0.30*a)
+        for sd in ('Left','Right'): wrot(sd+' leg',-95*a,'X'); wrot(sd+' knee',140*a,'X'); wrot(sd+' ankle',-50*a,'X')
+        for sd in ('Left','Right'): wrot(sd+' arm',-60*a,'X')
+    elif lab.endswith('rotate'):
+        wrot('Hips',22*S,'Z'); wrot('Spine',-14*S,'Z'); wrot('Chest',-8*S,'Z')
+    else:
+        _hip_drop(-0.24*a)
+        for sd in ('Left','Right'): wrot(sd+' leg',-88*a,'X'); wrot(sd+' knee',92*a,'X')
+    bpy.context.view_layer.update(); return lab
+JIG=[('BreastUpper2_L',300.0,8.0,18.0),('BreastUpper2_R',300.0,8.0,18.0),('Twist_Butt.L',260.0,9.0,12.0),('Twist_Butt.R',260.0,9.0,12.0),('Twist_Leg.L',320.0,12.0,6.0),('Twist_Leg.R',320.0,12.0,6.0)]
+JFPS=60; JN=120
+def jump_base(f):
+    t=f/JFPS; pose_relaxed(); c=0.0; z=0.0; arm=0.0; lab='crouch'
+    if t<0.35: c=_ss(t/0.35); arm=0.6*c; lab='crouch'
+    elif t<0.5: c=1-_ss((t-0.35)/0.15); arm=0.6-1.8*_ss((t-0.35)/0.15); lab='takeoff'
+    elif t<1.25: u=(t-0.45)/0.8; z=4*0.30*u*(1-u); arm=-1.2+0.8*_ss((t-0.5)/0.75); lab='airborne'
+    elif t<1.5: c=0.85*_ss((t-1.25)/0.25); arm=-0.4+0.9*_ss((t-1.25)/0.25); lab='landing'
+    else: c=0.85*(1-_ss((t-1.5)/0.5)); arm=0.5*(1-_ss((t-1.5)/0.5)); lab='recover'
+    if t>=0.45 and t<1.25: u=(t-0.45)/0.8; z=4*0.30*u*(1-u)
+    if z>0: _hip_drop(z)
+    if c>0:
+        _hip_drop(-0.16*c)
+        for sd in ('Left','Right'): wrot(sd+' leg',-60*c,'X'); wrot(sd+' knee',108*c,'X'); wrot(sd+' ankle',-42*c,'X')
+    if lab=='airborne':
+        tk=math.sin(math.pi*min(max((t-0.5)/0.7,0),1))
+        for sd in ('Left','Right'): wrot(sd+' leg',-14*tk,'X'); wrot(sd+' knee',30*tk,'X')
+    for sd in ('Left','Right'): wrot(sd+' arm',45*arm,'X')
+    bpy.context.view_layer.update(); return lab
+def jump_sim():
+    """spring (damped) secondary motion on the jiggle bones' tails, armature space, 4 substeps per 1/60 s frame; returns per-frame offset angles"""
+    bones=[j for j in JIG if j[0] in B.pose.bones]; T={}; H={}
+    for f in range(JN):
+        jump_base(f)
+        for b,_,_,_ in bones: T.setdefault(b,[]).append(np.array(tuple(B.pose.bones[b].tail))); H.setdefault(b,[]).append(np.array(tuple(B.pose.bones[b].head)))
+    OUTA={}; dt=1.0/JFPS; ns=4; h=dt/ns
+    for b,k,cdm,lim in bones:
+        tg=np.array(T[b]); x=tg[0].copy(); v=np.zeros(3); res=[]
+        for f in range(JN):
+            for s in range(ns):
+                tt=tg[max(f-1,0)]+(tg[f]-tg[max(f-1,0)])*((s+1)/ns) if f>0 else tg[0]
+                a=k*(tt-x)-cdm*v; v=v+a*h; x=x+v*h
+            res.append(x.copy())
+        OUTA[b]=(np.array(res),lim)
+    return OUTA,bones
+def jump_pose(f,SIM):
+    lab=jump_base(f); OUTA,bones=SIM; ang={}
+    for b,k,cdm,lim in bones:
+        pb=B.pose.bones[b]; hd=pb.head.copy(); tl=pb.tail.copy(); x=Vector(tuple(OUTA[b][0][f]))
+        d0=(tl-hd); d1=(x-hd)
+        if d0.length<1e-6 or d1.length<1e-6: continue
+        q=d0.normalized().rotation_difference(d1.normalized()); an=min(math.degrees(q.angle),lim)
+        if an>0.01: wrot_v(b,an,q.axis)
+        ang[b]=round(an,2)
+    bpy.context.view_layer.update(); return lab,ang
+def qa_tests(test):
+    sh=int(os.environ.get('QA_SHARD','0')); n=int(os.environ.get('QA_SHARDS','1')); D_=OUT+f'/tests/{test}'; os.makedirs(D_,exist_ok=True); _tv_setup()
+    pose_relaxed(); vis=[o for o in MESHES if not o.hide_render]; mn,mx=bbox(vis); Hh=mx.z-mn.z; ctr=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,mn.z+0.5*Hh))
+    info={'test':test,'shard':sh,'shards':n,'frames':{}}; KB=FH.data.shape_keys.key_blocks if FH.data.shape_keys else None
+    base={k.name:k.value for k in KB} if KB else {}
+    info['base_nonzero_keys']={k:round(v,3) for k,v in base.items() if v>1e-4}
+    def setkeys(d):
+        for k in KB: k.value=base[k.name]
+        for k,v in d.items():
+            if k in KB: KB[k].value=v
+        bpy.context.view_layer.update()
+    if test in ('face','vis'):
+        fc=_face_frame(); views=(('front',0,2),('q34',-35,2)); dist=0.34/(24/85)
+        def rf(tag,keys):
+            setkeys(keys); fl={}
+            for vw,az,el in views: _tv_shot(D_+f'/{tag}_{vw}.jpg',fc,az,el,dist,85)
+            return fl
+        if test=='face':
+            keys=[k.name for k in KB][1:]; per=(len(keys)+n-1)//n; mine=keys[sh*per:(sh+1)*per]
+            Vb,_,_=tri_arr(FH); E_=np.array([tuple(e.vertices) for e in FH.data.edges],dtype=np.int64); L0=np.linalg.norm(Vb[E_[:,0]]-Vb[E_[:,1]],axis=1)
+            if sh==0: rf('neutral',{})
+            for i,kn in enumerate(mine):
+                idx=keys.index(kn); d=_kb_disp(FH,KB[kn]); mxd=float(d.max())*1000
+                e={'key':kn,'index':idx,'max_disp_mm':round(mxd,2)}
+                if mxd<0.05: e['verdict']='EMPTY'; info['frames'][f'k{idx:03d}']=e; continue
+                setkeys({kn:1.0}); V1,_,_=tri_arr(FH); r_=np.linalg.norm(V1[E_[:,0]]-V1[E_[:,1]],axis=1)/np.maximum(L0,1e-7)
+                mv=d>0.0001; p99=float(np.percentile(d[mv],99))*1000 if mv.any() else 0
+                e.update({'stretch_edges_gt80pct':int((r_>1.8).sum()),'squash_edges_lt30pct':int((r_<0.3).sum()),'p99_mm':round(p99,2),'spike':bool(mv.sum()>=3 and mxd>3*max(p99,0.5) and mxd>5)})
+                e['verdict']='CHECK spike' if e['spike'] else ('CHECK tear/stretch' if e['stretch_edges_gt80pct']>20 else 'PASS')
+                for v_ in (0.5,1.0): rf(f'k{idx:03d}_{int(v_*10):02d}',{kn:v_})
+                info['frames'][f'k{idx:03d}']=e; log('tface',idx,kn,e['verdict'])
+        else:
+            if sh==0: rf('neutral',{})
+            for lab,kn in VIS15:
+                nm_=rep.get('visemes',{}).get('names',{}).get(lab); kk=nm_['key'] if nm_ else None
+                info['frames'][lab]={'key':kk,'max_disp_mm':nm_['max_disp_mm'] if nm_ else None}
+                if kk is None: continue
+                for v_ in (0.5,1.0): rf(f'v_{lab}_{int(v_*10):02d}',{kk:v_})
+            vow=['aa','E','ih','oh','ou']; vk={l:(rep['visemes']['names'].get(l) or {}).get('key') for l in vow}
+            for a_,b_ in zip(vow,vow[1:]+vow[:1]):
+                if vk[a_] and vk[b_]: rf(f'mix_{a_}_{b_}',{vk[a_]:0.5,vk[b_]:0.5})
+            # PP candidates from her existing keys only (not baked into the model)
+            cands={'ppA':{':|':1.0},'ppB':{'Lips -':1.0},'ppC':{'Lips -':0.7,'vrc.v_ff':0.35}}
+            for c_,d_ in cands.items():
+                if all(k in KB for k in d_): rf(f'cand_{c_}',d_); info['frames'][c_]={'recipe':d_}
+        setkeys({})
+    elif test=='fing':
+        NF=96; per=(NF+n-1)//n; fr=range(sh*per,min(NF,(sh+1)*per)); dist=0.26/(24/85)
+        for f in fr:
+            lab=finger_pose(f); info['frames'][f]={'label':lab}
+            for sd,az in (('Left',62),('Right',-62)):
+                w=_bh(sd+' wrist'); m=_bh('MiddleFinger1_'+sd[0]); t_=_bt('MiddleFinger3_'+sd[0]) or m
+                c=B.matrix_world@((w+t_)*0.5); _tv_shot(D_+f'/f{f:03d}_{sd[0]}.jpg',c,az,8,dist,85)
+            log('tfing',f,lab)
+    elif test in ('limb','jump'):
+        RE=_rest_edges(vis); polys=[tuple(p.vertices) for p in BODY.data.polygons]
+        if test=='limb':
+            NF=LIMB_SEGS[-1][1]; per=(NF+n-1)//n; fr=range(sh*per,min(NF,(sh+1)*per)); fps=12
+        else:
+            NF=JN; per=(NF+n-1)//n; fr=range(sh*per,min(NF,(sh+1)*per)); SIM=jump_sim(); fps=JFPS
+            info['jiggle']={'method':'damped spring on each existing jiggle bone tail (explicit Euler, 4 substeps per 1/60 s), bone aimed at the simulated tail, angle clamped',
+                            'bones':[{'bone':b,'stiffness_per_s2':k,'damping_per_s':c,'max_deg':l,'exists':b in B.pose.bones,
+                                      'weighted_verts':{o.name:gcount(o,b) for o in vis if b in o.vertex_groups}} for b,k,c,l in JIG]}
+        info['fps']=fps; lift=0.32 if test=='jump' else 0.0
+        c0=ctr.copy(); c0.z+=lift*0.5; dist=(Hh+lift+0.12)/(24/50)
+        for f in fr:
+            if test=='limb': lab=limb_pose(f); ang=None
+            else: lab,ang=jump_pose(f,SIM)
+            e={'label':lab}
+            if ang: e['jiggle_deg']=ang
+            try: e['flags']=_geo_flags(vis,RE,polys)
+            except Exception as ex: e['flags_error']=str(ex)
+            info['frames'][f]=e
+            for vw,az in (('front',0),('side',-90)): _tv_shot(D_+f'/f{f:03d}_{vw}.jpg',c0,az,3,dist,50)
+            log('t'+test,f,lab)
+    rest(); json.dump(info,open(D_+f'/{test}-shard{sh}.json','w'),indent=1,default=str)
 QA=os.environ.get('QA')
 if QA:
     try:
@@ -2695,9 +3101,10 @@ if QA:
                 except Exception as e: traceback.print_exc(); log('SCHEMAERR',e)
             qa_bones()
         elif QA=='shapes': qa_shapes()
+        elif QA=='tests': qa_tests(os.environ.get('TEST','face'))
         elif QA=='schema':
             os.makedirs(OUT+'/training',exist_ok=True); body_schema()
-            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture')},open(OUT+'/training/run9-fit-report.json','w'),indent=1,default=str)
+            json.dump({k:rep.get(k) for k in ('weld','seam_weight_avg','shirt_post','tummy_clear','shirt_body_weights','posed_clear','strap_rigid','hair_run7','hair_final_pen','shirt_shell_flush','shirt_seam_relax','head_hair_meshes','outfit_retarget','eyes_after','posed_converge','posed_converge_after_selfclear','shirt_self_clear','shirt_selfx_final','back_hair_curl','seam_posed_smooth','seam_crumple','posed_converge_after_seam_smooth','hair_texture','shirt_thicken','seam_fold_fix','shirt_folds_final','visemes')},open(OUT+'/training/run10-fit-report.json','w'),indent=1,default=str)
     except Exception as e: traceback.print_exc(); log('QAERR',e)
     log('QA DONE'); import sys as _s; _s.stdout.flush(); os._exit(0)
 if not P['TT'] and not os.environ.get('QA'):
