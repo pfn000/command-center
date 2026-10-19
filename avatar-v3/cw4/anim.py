@@ -896,15 +896,67 @@ elif MODE=='dance2':
     PMIN=float(E.get('HEAD_PITCH_MIN','3.0'))   # chin never below level+3 deg, so her bangs don't hide her face
     rest(); HEAD0=PB['Head'].matrix.to_3x3().copy(); _tf=(PB['Left toe'].tail-PB['Left ankle'].head); _tf.z=0; HEADF0=_tf.normalized()
     log('head fwd0 (arm space, from the feet)',[round(x,3) for x in HEADF0])
+    # ---- dance3 #11 tracking: every channel the V4 mocap file has (audit Oct 19: pelvis track, 2D hip travel, hand landmarks, shoulder shrug were unused) ----
+    _k5=np.ones(5)/5; _sm5=lambda a: np.convolve(np.pad(np.asarray(a,dtype=float),2,mode='edge'),_k5,mode='valid')
+    _k31=np.ones(31)/31; _mm31=lambda a: np.convolve(np.pad(np.asarray(a,dtype=float),15,mode='edge'),_k31,mode='valid')
+    _PR=LM.get('pelvis_rpy') or [{'roll':0,'pitch':0,'yaw':0}]*NF
+    _pp=np.array([d['pitch'] for d in _PR],dtype=float); _pr=np.array([d['roll'] for d in _PR],dtype=float)
+    PELV={'pitch':(_pp-np.median(_pp))*1.15,'roll':(_pr-np.median(_pr))*1.15}
+    _B2=np.array(LM.get('body2d_px') or [[[0,0]]*33]*NF,dtype=float); _W3=np.array(FR,dtype=float)
+    _tpx=np.linalg.norm((_B2[:,11]+_B2[:,12])/2-(_B2[:,23]+_B2[:,24])/2,axis=1).mean(); _tm=np.linalg.norm((_W3[:,11]+_W3[:,12])/2-(_W3[:,23]+_W3[:,24])/2,axis=1).mean()
+    _mpp=_tm/max(_tpx,1e-6); _hy=(_B2[:,23,1]+_B2[:,24,1])/2
+    BOUNCE=np.clip(-(_hy-_mm31(_hy))*_mpp,-0.12,0.03)      # m, + = up (image y is down); 1 s moving mean removed
+    log('tracking: pelvis pitch/roll delta ranges',round(float(np.ptp(PELV['pitch'])),1),round(float(np.ptp(PELV['roll'])),1),'bounce range cm',round(float(np.ptp(BOUNCE))*100,1),'m/px',round(float(_mpp),5))
+    _HP=LM.get('hands_px') or [{}]*NF; FCURL={}
+    _FI={'Thumb':(1,2,3,4),'IndexFinger':(5,6,7,8),'MiddleFinger':(9,10,11,12),'RingFinger':(13,14,15,16),'LittleFinger':(17,18,19,20)}
+    def _ang2(a,b):
+        na=np.linalg.norm(a); nb=np.linalg.norm(b)
+        if na<1e-6 or nb<1e-6: return 0.0
+        return float(np.degrees(np.arccos(np.clip(np.dot(a,b)/(na*nb),-1,1))))
+    for _sd,_k in (('Left','L'),('Right','R')):
+        for _fn,_ix in _FI.items():
+            A=[[],[],[]]
+            for f_ in range(NF):
+                h_=_HP[f_].get(_k) if isinstance(_HP[f_],dict) else None
+                if not h_ or len(h_)<21:
+                    for j in range(3): A[j].append(np.nan)
+                    continue
+                P=np.array(h_,dtype=float); ch=[0]+list(_ix)
+                for j in range(3): A[j].append(_ang2(P[ch[j+1]]-P[ch[j]],P[ch[j+2]]-P[ch[j+1]]))
+            for j in range(3):
+                a_=np.array(A[j]); m_=np.isnan(a_)
+                if m_.all(): a_[:]=15.0
+                elif m_.any(): a_[m_]=np.interp(np.flatnonzero(m_),np.flatnonzero(~m_),a_[~m_])
+                A[j]=np.clip(_sm5(a_),3.0,95.0)
+            FCURL[(_sd,_fn)]=A
+    log('tracking: finger curl means (deg)',{f'{k[0][0]}{k[1][:3]}':[round(float(np.mean(x)),1) for x in v] for k,v in FCURL.items()})
+    _ms3=(_W3[:,11]+_W3[:,12])/2; _hm3=(_W3[:,23]+_W3[:,24])/2; _up3=_ms3-_hm3; _up3=_up3/np.linalg.norm(_up3,axis=1)[:,None]
+    SHRUG={}
+    for _sd,_i in (('Left',11),('Right',12)):
+        r_=np.einsum('ij,ij->i',_W3[:,_i]-_ms3,_up3); SHRUG[_sd]=_sm5(r_-np.median(r_))   # MP units ~ m, + = shoulder risen along the torso (sign checked at use)
+    log('tracking: shrug ranges cm',{k:round(float(np.ptp(v))*100,1) for k,v in SHRUG.items()})
+    def finger_drive(f):
+        for sd in ('Left','Right'):
+            s_=sd[0]
+            for fn in ('Thumb','IndexFinger','MiddleFinger','RingFinger','LittleFinger'):
+                A=FCURL.get((sd,fn))
+                if A is None: continue
+                for j,a_ in enumerate((A[0][f],A[1][f],A[2][f])):
+                    n_=f'{fn}{j+1}_{s_}'
+                    if n_ not in PB: continue
+                    if fn=='Thumb' and j==2: continue
+                    sg=FSIGN.get((s_,fn),FSIGN.get((sd,fn),1.0)) if isinstance(FSIGN,dict) else 1.0
+                    wrot_v(n_,sg*float(a_)*(0.6 if fn=='Thumb' else 1.0),_lx(n_))
     SEG_GAIN={'chest':float(E.get('CHEST_GAIN','1.0'))}
+    CUR_F=[0]
     def clavicles():
         # loose shoulders: each clavicle lifts with its arm (0.3 x elevation past 40 deg, <=18 deg)
         for sd in ('Left','Right'):
             n=sd+' shoulder'
             if n not in PB: continue
             ad=(PB[sd+' elbow'].head-PB[sd+' arm'].head).normalized(); el=math.degrees(math.asin(max(-1,min(1,ad.z))))+90.0
-            lift=max(0.0,min(18.0,0.3*(el-40.0)))
-            if lift<0.5: continue
+            lift=max(0.0,min(18.0,0.3*(el-40.0)))+max(-8.0,min(15.0,math.degrees(math.atan2(float(SHRUG[sd][CUR_F[0]])*1.3,0.15))))   # arm elevation + the source's own shrug
+            if abs(lift)<0.5: continue
             ax=(PB[n].tail-PB[n].head).normalized().cross(Vector((0,0,1)))
             if ax.length<1e-5: continue
             ax.normalize(); z0=PB[sd+' arm'].head.z; wrot_v(n,lift,ax)
@@ -928,6 +980,7 @@ elif MODE=='dance2':
     for _sd in ('Left','Right'):
         KF0[_sd]=PB[_sd+' knee'].matrix.to_3x3().inverted()@HEADF0; UP0[_sd]=PB[_sd+' ankle'].matrix.to_3x3().inverted()@Vector((0,0,1))
     exec(open('avatar-v3/selfmodel/selfmodel.py').read(),globals()); sm_init()   # body self-model (rest pose)
+    log('RIG BONES',len(B.pose.bones),[b_.name for b_ in B.pose.bones])
     meshes_eval(True); HH={}
     for _sd in ('Left','Right'):
         _fs=foot_stats(_sd,0.0); HH[_sd]=float(_fs['heel_mm']-_fs['ball_mm'])
@@ -1033,12 +1086,19 @@ elif MODE=='dance2':
         meshes_eval(False); return n
     ABD=None; CROTCH=[0]
     def pose_dance(f,offs=None,locks=None):
-        rest(); fingers_relaxed()
+        rest(); CUR_F[0]=f; finger_drive(f)
         w=FR[f]; G=lambda i: L(w,i)
         LS,RS,LH,RH=G(11),G(12),G(23),G(24); mh=(LH+RH)/2; ms=(LS+RS)/2; upt=(ms-mh)
         # dance3 #10 (Saidie 11:17 "hips and head still stiff"): pelvis 1.15x the source roll, spine chain pelvis->lumbar->thoracic->neck->head with 2-4 frame overlap
         hlx=(LH-RH); hlx.z*=1.15
         Rh=frame_rot(hlx,Vector((0,0,1)).lerp(upt.normalized(),0.6)); set_world_rot('Hips',Rh)
+        # pelvis track (V4 pelvis_rpy, 1.15x about its median): forward/back tilt (thrust) + extra side roll, signs checked on her own bones
+        lat_=(PB['Left leg'].head-PB['Right leg'].head).normalized(); fwd_=lat_.cross(Vector((0,0,1))).normalized()
+        dp=float(PELV['pitch'][f]); y0=PB['Spine'].head.y; wrot_v('Hips',dp,lat_)
+        if dp!=0 and ((PB['Spine'].head.y-y0)*(1 if dp>0 else -1))>0: wrot_v('Hips',-2*dp,lat_)   # + pitch = top of pelvis forward (toward -Y, her front)
+        dr=float(PELV['roll'][f])-(math.degrees(math.asin(max(-1,min(1,hlx.normalized().z))))-math.degrees(math.asin(max(-1,min(1,(LH-RH).normalized().z)))))*0.0
+        z0=PB['Left leg'].head.z; wrot_v('Hips',dr*0.5,fwd_)
+        if dr!=0 and ((PB['Left leg'].head.z-z0)*(1 if dr>0 else -1))<0: wrot_v('Hips',-dr,fwd_)   # + roll = her left hip up
         wl=FR[max(0,f-2)]; LSl,RSl=L(wl,11),L(wl,12); msl=(LSl+RSl)/2; uptl=(msl-(L(wl,23)+L(wl,24))/2)   # chest/shoulders lag the hips by 2 frames (overlap / follow-through)
         d0=(PB['Spine'].tail-PB['Spine'].head).normalized(); q=d0.rotation_difference(upt.normalized()); ql=d0.rotation_difference(uptl.normalized())
         qrot('Spine',q,0.40,60); qrot('Chest',ql,0.60,60)
@@ -1118,6 +1178,7 @@ elif MODE=='dance2':
     _ox=np.array([o[0] for o in offs]); _oy=np.array([o[1] for o in offs]); _k=np.ones(31)/31
     _mx=np.convolve(np.pad(_ox,15,mode='edge'),_k,mode='valid'); _my=np.convolve(np.pad(_oy,15,mode='edge'),_k,mode='valid')
     for i in range(NF): offs[i][0]=float(_mx[i]+1.15*(_ox[i]-_mx[i])); offs[i][1]=float(_my[i]+1.15*(_oy[i]-_my[i]))
+    for i in range(NF): offs[i][2]=float(offs[i][2]+BOUNCE[i])   # the source's real hip bounce (2D track), knees absorb it on planted feet
     # 3) planted-foot spans: foot on the floor (<=12 mm) and slow (<0.35 m/s) for >=3 frames, or V4 says contact -> ankle IK-locked
     H_={sd:[] for sd in FOOT}; P_={sd:[] for sd in FOOT}; Y_={sd:[] for sd in FOOT}
     for f in range(NF):
@@ -1154,7 +1215,7 @@ elif MODE=='dance2':
     meshes_eval(True); relaxed(); mnr,mxr=bbox(MESHES); top=max(mx.z+0.15,mxr.z+0.02)
     lo=FLOORW-0.05; Hh=(top-lo); wid=(mx.x-mn.x)+0.3; need=max(Hh*1.08,wid*RH/RW); tgt=Vector(((mn.x+mx.x)/2,(mn.y+mx.y)/2,(top+lo)/2))
     # camera follows her hips sideways (smoothed), so she stays centred and big in frame
-    hxi=np.interp(np.arange(NF),HFs,HXs); kk_=np.exp(-0.5*(np.arange(-15,16)/6.0)**2); kk_/=kk_.sum(); CAMX=np.convolve(np.pad(hxi,15,mode='edge'),kk_,'valid')
+    hxi=np.interp(np.arange(NF),HFs,HXs); kk_=np.exp(-0.5*(np.arange(-90,91)/45.0)**2); kk_/=kk_.sum(); CAMX=np.convolve(np.pad(hxi,90,mode='edge'),kk_,'valid')   # slow follow (~1.5 s) so her sway reads
     info['cam_track_x_range_m']=[round(float(CAMX.min()),3),round(float(CAMX.max()),3)]
     CAM=(tgt,0,3,need/(24/50),50); info['camera']={'tgt':list(tgt),'az':0,'el':3,'dist':CAM[3],'lens':50}
     meshes_eval(False); bones=phys_bones()
@@ -1389,6 +1450,7 @@ elif MODE=='dance2':
         # body self-model (selfmodel.py): every detector each frame, the view that caught it; full measures + 9 views on the close-up frames
         try:
             meshes_eval(True); Mq,Fq=sm_selfcheck(FLOOR,seated=False)
+            e['brot']={n_.name:round(math.degrees(2*math.acos(min(1.0,abs(n_.matrix_basis.to_quaternion().w)))),1) for n_ in B.pose.bones}; e['bloc']={n_.name:round(n_.matrix_basis.to_translation().length*100,1) for n_ in B.pose.bones if n_.matrix_basis.to_translation().length>1e-5}
             e['qc_flags']=Fq; e['qc']={k:Mq.get(k) for k in ('balance_margin_cm','com','front_knee_minus_ankle_gap_cm','side_spine_bends','side_knee_bend_L','side_knee_bend_R','ankle_twist_L','ankle_inv_L','ankle_twist_R','ankle_inv_R')}
             if f in CLOSE: json.dump({'frame':f,'measures':Mq,'flags':Fq},open(OUT+f'/q{f:03d}_selfcheck.json','w'),default=str)
         except Exception as ex: e['qc_error']=repr(ex)[:200]

@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nf": 300
  },
- "note": "dance3 #10: spine chain with 2-3 frame overlap (chest/head lag), loose clavicles, hips 1.15x roll+sway, free-side hip drop, nod 1.0x (floor -8), planted ankle edge roll, self-model per frame + segment STIFF data (15:22:33)"
+ "note": "dance3 #11 (tracking audit fixes): pelvis track tilt/roll 1.15x, real 2D hip bounce, slow camera follow, fingers from hand landmarks, clavicle shrug from shoulder markers, spine lag, per-bone rotation audit, full-rig QC overlay (15:31:50) ."
 }

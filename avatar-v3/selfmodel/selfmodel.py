@@ -82,9 +82,22 @@ def sm_view_basis(az,el):
     d=Vector((_m.sin(_m.radians(az))*_m.cos(_m.radians(el)),-_m.cos(_m.radians(az))*_m.cos(_m.radians(el)),_m.sin(_m.radians(el))))   # camera position direction (from target)
     fwd=-d; up0=Vector((0,0,1)) if abs(el)<80 else Vector((0,1,0))*(1 if el>0 else -1)
     r=fwd.cross(up0).normalized(); u=r.cross(fwd).normalized(); return r,u,d
-SM_JOINTS2D=['Hips','Spine','Chest','Neck','Head','Left arm','Left elbow','Left wrist','Right arm','Right elbow','Right wrist','Left leg','Left knee','Left ankle','Left toe','Right leg','Right knee','Right ankle','Right toe']
-def sm_project(az,el,mirror=False):
+SM_JOINTS2D=['Hips','Spine','Chest','Neck','Head','Left arm','Left elbow','Left wrist','Right arm','Right elbow','Right wrist','Left leg','Left knee','Left ankle','Left toe','Right leg','Right knee','Right ankle','Right toe']+['Left shoulder','Right shoulder']+[f'{fn}{j}_{s}' for s in 'LR' for fn in ('Thumb','IndexFinger','MiddleFinger','RingFinger','LittleFinger') for j in (1,2,3)]
+def sm_derived(co=None):
+    """points the rig has no bone for: pelvis triangle (L hip, R hip, sacrum) and each foot's heel / ball / toe tip"""
+    co=body_co() if co is None else co; D={}
+    L_=PB['Left leg'].head; R_=PB['Right leg'].head; lat=(L_-R_).normalized(); fwd=lat.cross(Vector((0,0,1))).normalized(); up=(PB['Spine'].head-(L_+R_)/2).normalized()
+    D['pelvis:L']=L_.copy(); D['pelvis:R']=R_.copy(); D['pelvis:S']=(L_+R_)/2+up*0.06-fwd*0.09
+    for sd in ('Left','Right'):
+        fv=co[FOOTV[sd]]; a=PB[sd+' ankle'].head; tt=PB[sd+' toe'].tail if sd+' toe' in PB else PB[sd+' ankle'].tail
+        ff=np.array(tuple((tt-a).normalized())); pr=(fv-np.array(tuple(a)))@ff
+        D[f'{sd}:heel']=Vector(tuple(fv[int(np.argmin(pr))])); D[f'{sd}:toe']=Vector(tuple(fv[int(np.argmax(pr))]))
+        D[f'{sd}:ball']=PB[sd+' toe'].head.copy() if sd+' toe' in PB else a.copy()
+    return D
+def sm_project(az,el,mirror=False,extra=None):
     r,u,d=sm_view_basis(az,el); P={}
+    for k_,v in (extra or {}).items():
+        x=v.dot(r); y=v.dot(u); P[k_]=(round(-x if mirror else x,4),round(y,4))
     for n in SM_JOINTS2D:
         if n not in PB: continue
         for tag,v in (('h',PB[n].head),('t',PB[n].tail)):
@@ -95,7 +108,9 @@ def sm_ang2(a,b):
 def sm_selfcheck(floor_z,seated=False,src=None,co=None):
     """one frame/pose: every detector, measured in the view(s) where it is observable. returns (measures, flags[{det,view,value,limit,where}])"""
     co=body_co() if co is None else co; M={}; F=[]
-    V={nm:sm_project(az,el,nm=='mirror') for nm,az,el in SM_VIEWS}
+    try: DX=sm_derived(co)
+    except Exception: DX={}
+    V={nm:sm_project(az,el,nm=='mirror',DX) for nm,az,el in SM_VIEWS}
     def p(vn,n,t='h'): return V[vn].get(n+':'+t)
     # FRONT: knee alignment / cowboy (knees wider than feet), frontal knee angle
     fr=V['front']
