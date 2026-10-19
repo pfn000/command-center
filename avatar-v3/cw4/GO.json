@@ -4,86 +4,14 @@
   "sources": [
    {
     "kind": "ytdlp",
-    "id": "tt_vs_angelreese",
-    "url": "https://www.tiktok.com/@victoriassecret/video/7559198047784209678",
-    "bonus": 0.4
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_pagesix_vs",
-    "url": "https://www.tiktok.com/@pagesix/video/7561628591235075359",
-    "bonus": 0.4
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_judith_vs",
-    "url": "https://www.tiktok.com/@judith.ene.laizer/video/7561780551795903756",
-    "bonus": 0.4
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_whowhatwear",
-    "url": "https://www.tiktok.com/@whowhatwear/video/7265806083623537963",
-    "bonus": 0.3
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_prokh_comp",
-    "url": "https://www.tiktok.com/@prokhorovanna/video/7688362480703180064",
-    "bonus": 0.3
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_modeldr",
-    "url": "https://www.tiktok.com/@modeldr_thanolokeutlwile/video/7526148860335459589",
-    "bonus": 0.3
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_temmyyy",
-    "url": "https://www.tiktok.com/@_temmyyy1/video/7692824903145229588",
-    "bonus": 0.3
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_calhub",
-    "url": "https://www.tiktok.com/@cal_hub00/video/7692982097811737886",
-    "bonus": 0.3
-   },
-   {
-    "kind": "ytdlp",
-    "id": "dm_swimweek",
-    "url": "https://www.dailymotion.com/video/xactjny",
-    "bonus": 0.4,
-    "sections": "*0-240"
-   },
-   {
-    "kind": "ytdlp",
-    "id": "dm_x6wxnev",
-    "url": "https://www.dailymotion.com/video/x6wxnev",
-    "bonus": 0.4
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_isabellaloren",
-    "url": "https://www.tiktok.com/@itsisabellaloren/video/7652823668451511582"
-   },
-   {
-    "kind": "ytdlp",
     "id": "tt_annabelphoenixb",
     "url": "https://www.tiktok.com/@annabelphoenixb/video/7626041357605293334"
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_wantmanagement",
-    "url": "https://www.tiktok.com/@wantmanagement/video/7460600742894750981"
-   },
-   {
-    "kind": "ytdlp",
-    "id": "tt_kenzlawren",
-    "url": "https://www.tiktok.com/@kenzlawren/video/7297085591706160430"
    }
-  ]
+  ],
+  "force": {
+   "id": "tt_annabelphoenixb",
+   "t0": 83.0
+  }
  },
  "render": {
   "shards": 4,
@@ -91,5 +19,5 @@
   "res": "720x1280",
   "nf": 150
  },
- "note": "catwalk4 attempt 4: single real runway model (solo filter, runway bonus), no eye-line head roll (it flipped), knees a touch out"
+ "note": "catwalk4 attempt 5: forced source = attempt-3 blonde runway-tutorial walk (2 clean cycles, she actually walks), tracked by identity, inset cropped to her only; attempt-4 head fix (no eye-line roll) + knees a touch out"
 }

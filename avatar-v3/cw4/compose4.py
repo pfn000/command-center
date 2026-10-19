@@ -19,7 +19,7 @@ src=cv2.VideoCapture(SRCV); sfps=src.get(cv2.CAP_PROP_FPS) or 30; src.set(cv2.CA
 while True:
     ok,f=src.read()
     if not ok or (ST1 is not None and len(SRC)>=int(round((ST1-ST0)*sfps))): break
-    SRC.append(cv2.resize(f,(210,int(f.shape[0]*210/f.shape[1]))))
+    sc_=min(210/f.shape[1],400/f.shape[0]); SRC.append(cv2.resize(f,(int(f.shape[1]*sc_),int(f.shape[0]*sc_))))
 def P(a): return np.array(a,float)*np.array([W,H])
 YEL=(0,235,255); GRN=(80,255,120)
 def draw_grid(img,segs,fx,fy,bh):
@@ -96,7 +96,7 @@ for k in ks:
             for j in (ia,it): cv2.circle(ov,tuple(int(x) for x in b[j]),7,(0,0,0),-1,cv2.LINE_AA); cv2.circle(ov,tuple(int(x) for x in b[j]),5,GRN,-1,cv2.LINE_AA)
     # inset: the real model, same moment of her stride (source played at its own speed, looped)
     if SRC:
-        si=int((k/fps)*sfps)%len(SRC); ins=SRC[si]; iw=210; ih=ins.shape[0]
+        si=int((k/fps)*sfps)%len(SRC); ins=SRC[si]; iw=ins.shape[1]; ih=ins.shape[0]
         x0=W-iw-14; y0=14; clean[y0:y0+ih,x0:x0+iw]=ins; cv2.rectangle(clean,(x0-1,y0-1),(x0+iw,y0+ih),(255,255,255),2)
         OV.text(clean,'real runway model (ref)' if MODE2!='dance2' else 'source dance (ref)',(x0,y0+ih+20),0.45,(255,255,255))
     OV.text(clean,'Jena v3.7  clean render',(14,H-20),0.55,(255,255,255))

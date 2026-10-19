@@ -32,7 +32,9 @@ def model(name):
     f=f'/tmp/pl_{name}.task'
     if not os.path.exists(f): urllib.request.urlretrieve(f'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_{name}/float16/latest/pose_landmarker_{name}.task',f)
     return f
+TRK={}
 def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9,np_=1):
+    TRK.clear()
     det=vision.PoseLandmarker.create_from_options(vision.PoseLandmarkerOptions(base_options=BaseOptions(model_asset_path=model(name)),running_mode=vision.RunningMode.VIDEO,num_poses=np_,min_pose_detection_confidence=0.5,min_pose_presence_confidence=0.5,min_tracking_confidence=0.5))
     cap=cv2.VideoCapture(path); fps=cap.get(cv2.CAP_PROP_FPS) or 30; W=int(cap.get(3)); H=int(cap.get(4)); R=[]; i=0; prev=None
     cap.set(cv2.CAP_PROP_POS_MSEC,t0*1000); i=int(round(t0*fps))
@@ -45,9 +47,13 @@ def track(path,name,step=1,maxw=720,t0=0.0,t1=1e9,np_=1):
             r=det.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB,data=cv2.cvtColor(fr,cv2.COLOR_BGR2RGB)),int(i*1000/fps))
             if r.pose_world_landmarks:
                 k=0
-                if len(r.pose_landmarks)>1:   # the biggest person is the model; remember that someone else is in frame
-                    hs=[max(l.y for l in p_)-min(l.y for l in p_) for p_ in r.pose_landmarks]; k=int(np.argmax(hs)); others=sum(1 for h in hs if h>0.35*max(hs))-1
+                if len(r.pose_landmarks)>1:   # first frame: the biggest person is the model; after that, stay on the same person (nearest hip centre)
+                    hs=[max(l.y for l in p_)-min(l.y for l in p_) for p_ in r.pose_landmarks]; others=sum(1 for h in hs if h>0.35*max(hs))-1
+                    cs=[((p_[23].x+p_[24].x)/2,(p_[23].y+p_[24].y)/2) for p_ in r.pose_landmarks]
+                    if TRK.get('c') is None: k=int(np.argmax(hs))
+                    else: k=int(np.argmin([(c[0]-TRK['c'][0])**2+(c[1]-TRK['c'][1])**2 for c in cs]))
                 else: others=0
+                pk=r.pose_landmarks[k]; TRK['c']=((pk[23].x+pk[24].x)/2,(pk[23].y+pk[24].y)/2)
                 R.append((i,cut,[[l.x,l.y,l.z] for l in r.pose_world_landmarks[k]],[[l.x,l.y,l.visibility] for l in r.pose_landmarks[k]],others))
             else: R.append((i,cut,None,None,0))
         i+=1
@@ -80,7 +86,15 @@ def windows(R,fps,step,win_s):
         best.append((round(float(sc),3),s,dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),height=round(float(height),3),zc=zc,amp=round(amp,3),armout=round(armout,2),grow=round(grow,3))))
     best.sort(key=lambda b:-b[0]); return best[:5]
 cands=[]
-for s in G['sources']:
+FORCE=G.get('force')
+if FORCE:   # a window already judged by eye: that source, that start
+    for s in G['sources']:
+        if s['id']!=FORCE['id']: continue
+        p=fetch(s)
+        if p:
+            cap=cv2.VideoCapture(p); fps=cap.get(cv2.CAP_PROP_FPS) or 30; W=int(cap.get(3)); H=int(cap.get(4)); cap.release()
+            cands.append((9.9,s,p,float(FORCE['t0']),{'forced':True},fps,W,H)); log('FORCED',s['id'],FORCE)
+for s in ([] if FORCE else G['sources']):
     try:
         p=fetch(s)
         if not p: continue
@@ -164,7 +178,11 @@ res={'ok':bool(cyc),'src':S,'pick_score':sc,'pick_info':info,'fps':fps,'size':[W
 json.dump(res,open(OUT+'/walkref.json','w'),indent=0)
 log('cycle_s',Tc,'cycles',len(cyc),'ranges',res['ranges'])
 # source segment for the inset (same frames), and a skeleton proof sheet
-subprocess.run(['ffmpeg','-v','error','-y','-ss',str(t0),'-i',P,'-t',str(T/fps),'-vf','scale=-2:720','-an','-c:v','libx264','-crf','22','-pix_fmt','yuv420p',OUT+'/walkref-src.mp4'])
+xs=N[:,[0,11,12,15,16,23,24,27,28,31,32],0]; cx0=max(0.0,float(np.nanmin(xs))-0.08); cx1=min(1.0,float(np.nanmax(xs))+0.08)
+if G.get('inset_crop',True) and cx1-cx0<0.85:
+    cw=int((cx1-cx0)*W)//2*2; cxp=int(cx0*W)//2*2; VF=f'crop={cw}:ih:{cxp}:0,scale=-2:720'; log('inset crop x',round(cx0,3),round(cx1,3))
+else: VF='scale=-2:720'
+subprocess.run(['ffmpeg','-v','error','-y','-ss',str(t0),'-i',P,'-t',str(T/fps),'-vf',VF,'-an','-c:v','libx264','-crf','22','-pix_fmt','yuv420p',OUT+'/walkref-src.mp4'])
 Eg=[(11,12),(11,13),(13,15),(12,14),(14,16),(11,23),(12,24),(23,24),(23,25),(25,27),(24,26),(26,28),(27,29),(29,31),(27,31),(28,30),(30,32),(28,32)]
 cap=cv2.VideoCapture(P); cap.set(cv2.CAP_PROP_POS_MSEC,t0*1000); tiles=[]; picks=set(np.linspace(0,T-1,8).astype(int).tolist())
 for i in range(T):
