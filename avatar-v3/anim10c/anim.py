@@ -469,28 +469,51 @@ elif MODE=='fist':
 elif MODE=='catwalk':
     T_=1.0; S_=0.36; v=2*S_/T_; NF=int(E.get('CW_NF','120')); fps=30; Y0=1.6; WARM=30
     relaxed(); ANK=PB['Left ankle'].head.z; LX=PB['Left leg'].head.x
+    def ease(x): x=max(0.0,min(1.0,x)); return x*x*(3-2*x)
+    LEGX=abs(PB['Left leg'].head.x); H0=PB['Left leg'].head.z; DT=float(E.get('CW_DT','0.624'))   # soft knee (~15-18 deg) at full reach
     def foot_target(sd,t):
         off=0.0 if sd=='Left' else 0.5; ph=((t/T_)+off)%1.0; n=math.floor((t/T_)+off)
-        land_t=(n-off)*T_; yl=Y0-v*land_t-S_/2; x=0.04 if sd=='Left' else -0.04
+        land_t=(n-off)*T_; yl=Y0-v*land_t-S_/2; x=0.03 if sd=='Left' else -0.03
         if ph<0.6:
-            heel=max(0.0,(ph-0.45)/0.15); return Vector((x,yl,ANK+0.035*heel)),ph,'stance',heel
-        u=(ph-0.6)/0.4; s_=u*u*(3-2*u); y1=yl-2*S_; return Vector((x,yl+(y1-yl)*s_,ANK+0.035*(1-u)+0.09*math.sin(math.pi*u))),ph,'swing',u
+            heel=ease((ph-0.42)/0.18); return Vector((x,yl,ANK+0.05*heel)),ph,'stance',ph/0.6
+        u=(ph-0.6)/0.4; s_=ease(u); y1=yl-2*S_; return Vector((x,yl+(y1-yl)*s_,ANK+0.05*(1-ease(u*2.5))+0.065*math.sin(math.pi*u)**1.2)),ph,'swing',u
+    def sway_of(t): return 0.008*math.cos(2*math.pi*(t/T_))
+    def hip_need(t):
+        hy=Y0-v*t; sw=sway_of(t); best=9
+        for sd,sg in (('Left',1),('Right',-1)):
+            tg,ph,m,u=foot_target(sd,t)
+            if m!='stance': continue
+            h=math.hypot(sg*LEGX+sw-tg.x,hy-tg.y); best=min(best,tg.z+math.sqrt(max(DT*DT-h*h,0.04)))
+        return best
+    NT=NF+WARM+12; HZ=np.array([hip_need(max(f-WARM,0)/fps) for f in range(NT)])
+    kk=np.exp(-0.5*(np.arange(-4,5)/1.8)**2); kk/=kk.sum(); HZs=np.minimum(np.convolve(np.pad(HZ,4,mode='edge'),kk,'valid'),HZ)-0.003
+    info['hip_height_range_m']=[round(float(HZs.min()),3),round(float(HZs.max()),3)]
     def walk(f):
-        t=max(f-WARM,0)/fps if f>=0 else 0; relaxed(); ph=(t/T_)%1.0; c=math.cos(2*math.pi*ph)
-        sway=0.028*c   # toward the stance foot
-        hip_drop(-0.05+0.01*math.cos(4*math.pi*ph),sway,Y0-v*t)
-        wrot('Hips',7*math.sin(2*math.pi*ph),'Z'); wrot('Hips',-5*c,'Y'); wrot('Chest',-9*math.sin(2*math.pi*ph),'Z'); wrot('Chest',3*c,'Y')
+        t=max(f-WARM,0)/fps; relaxed(); ph=(t/T_)%1.0; W2=2*math.pi
+        hip_drop(float(HZs[min(f,NT-1)])-H0,sway_of(t),Y0-v*t)
+        yaw=6*math.sin(W2*ph); wrot('Hips',yaw,'Z'); wrot('Hips',-2.5*math.cos(W2*ph),'Y')        # pelvis rotation + gentle drop on the swing side
+        wrot('Spine',-0.45*yaw*1.0*math.sin(W2*(ph-0.03))/max(1e-6,math.sin(W2*ph)) if abs(math.sin(W2*ph))>0.05 else -0.45*yaw,'Z')
+        cyaw=-9*math.sin(W2*(ph-0.05)); wrot('Chest',cyaw+0.0,'Z'); wrot('Chest',1.8*math.cos(W2*(ph-0.05)),'Y'); wrot('Chest',-1.5,'X')
         st={}
         for sd in ('Left','Right'):
             tg,p_,mode_,u=foot_target(sd,t); hip=PB[sd+' leg'].head
             ik2(sd+' leg',sd+' knee',tg,hip+Vector((0,-1.0,0))+(tg-hip)*0.5)
-            if mode_=='stance': align(sd+' ankle',Vector((0,-0.89,-0.45-1.3*u)),cap=70)
-            else: align(sd+' ankle',Vector((0,-0.89,-0.6+0.15*u)),cap=70)
+            if mode_=='stance':
+                # heel strike (toes up) -> roll to flat -> heel-off/toe-off
+                if u<0.18: pz=-0.18-0.27*ease(u/0.18)
+                elif u<0.7: pz=-0.45
+                else: pz=-0.45-1.25*ease((u-0.7)/0.3)
+            else:
+                pz=-1.7+1.25*ease(u/0.45) if u<0.45 else -0.45+0.27*ease((u-0.45)/0.55)
+            align(sd+' ankle',Vector((0,-0.89,pz)),cap=75)
+            if sd+' toe' in PB and mode_=='stance' and u>0.7: wrot(sd+' toe',-28*ease((u-0.7)/0.3),'X')
             st[sd]=(mode_,tg)
         for sd,sg in (('Left',1),('Right',-1)):
-            sw=math.sin(2*math.pi*(ph+(0.5 if sd=='Left' else 0.0)))
-            wrot(sd+' arm',-17*sw,'X'); wrot(sd+' elbow',-6-8*max(0,sw),'X')
-        wrot('Head',-2*c,'Y'); return st
+            sw=math.sin(W2*(ph-0.06+(0.5 if sd=='Left' else 0.0)))
+            wrot(sd+' arm',-15*sw,'X'); wrot(sd+' elbow',-12-9*max(0.0,sw),'X')
+        # head steady: cancel most of the torso yaw, tiny nod with the bob
+        wrot('Neck',-0.5*(yaw-0.45*yaw+cyaw),'Z'); wrot('Head',-0.4*(yaw-0.45*yaw+cyaw),'Z'); wrot('Head',0.8*math.cos(2*W2*ph),'X')
+        return st
     meshes_eval(False)
     # framing: fixed runway camera in front; she walks toward it (from 1.6 m behind to 1.6 m in front of the mark)
     pts=[]

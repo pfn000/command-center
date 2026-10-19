@@ -1,13 +1,12 @@
 {
  "render": [
   {
-   "anim": "poses2",
-   "shards": 2,
+   "anim": "catwalk",
+   "shards": 3,
    "samples": 8,
    "res": "720x1280",
-   "data": "avatar-v3/anim10c/inputs/talk-timeline.json",
-   "poses": "0,1"
+   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
   }
  ],
- "note": "anim10c attempt 2c: poses2 redo knee-over-knee + ankles crossed"
+ "note": "anim10c catwalk v3 (Saidie 10:48 PM: less robotic, no waddle)"
 }
