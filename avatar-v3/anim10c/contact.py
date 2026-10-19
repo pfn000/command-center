@@ -51,6 +51,7 @@ HANDV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='han
 PALMV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='palm'],dtype=np.int64) for sd in ('Left','Right')}
 FINGV={(sd,f):np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]==f],dtype=np.int64) for sd in ('Left','Right') for f in FING5}
 FOOTV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='foot'],dtype=np.int64) for sd in ('Left','Right')}
+LEGV={sd:np.array([i for i,l in enumerate(MESHINFO['Body']['lim']) if l==sd[0]+'LEG'],dtype=np.int64) for sd in ('Left','Right')}
 TOEV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='toe'],dtype=np.int64) for sd in ('Left','Right')}
 log('contact verts',{k:len(v) for k,v in list(HANDV.items())+list(FOOTV.items())},{f'{k[0][0]}{k[1][:4]}':len(v) for k,v in FINGV.items()},'toe',{k:len(v) for k,v in TOEV.items()})
 
@@ -284,3 +285,13 @@ def foot_stats(sd,FLOOR_,co=None):
     return dict(min_mm=round((zmin-FLOOR_)*1000,1),below_verts=int((z<FLOOR_-0.001).sum()),heel_mm=round((heel-FLOOR_)*1000,1),ball_mm=round((ball-FLOOR_)*1000,1))
 def toe_pitch(sd):
     a_=PB[sd+' ankle']; d=(a_.tail-a_.head).normalized(); return round(math.degrees(math.asin(max(-1,min(1,-d.z)))),1)
+
+def leg_vs_leg(top,co=None,min_from_hip=0.16):
+    """top leg's skin (beyond the upper thigh) vs the other leg's closed surface: (pen_verts, pen_mm, gap_mm)"""
+    co=body_co() if co is None else co; bot='Left' if top=='Right' else 'Right'
+    T=target_bvh(['Body'],frozenset({'LARM','RARM','CORE','HEAD',top[0]+'LEG'}),near=PB[bot+' knee'].head,rad=0.7)
+    if T is None: return {'pen_verts':0,'pen_mm':0.0,'gap_mm':None}
+    vi=LEGV[top]; P=co[vi]; hp=np.array(tuple(PB[top+' leg'].head)); P=P[np.linalg.norm(P-hp,axis=1)>min_from_hip][::2]
+    d=np.array([x for x in sdist(T,P,0.06) if x is not None])
+    if len(d)==0: return {'pen_verts':0,'pen_mm':0.0,'gap_mm':None}
+    return {'pen_verts':int((d<-0.0008).sum()),'pen_mm':round(float(max(0.0,-d.min()))*1000,1),'gap_mm':round(float(d.min())*1000,1)}

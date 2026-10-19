@@ -165,12 +165,17 @@ def sm_selfcheck(floor_z,seated=False,src=None,co=None):
             hs=hand_stats(sd,Tsh,co); M[f'hand_vs_head_shell_{sd[0]}']=hs
             if hs['pen_verts']>0: F.append({'det':'CLIP','view':'back+top','what':'hand inside head/hair shell','side':sd,'value':hs['pen_mm'],'verts':hs['pen_verts']})
     except Exception as ex: M['shell_error']=str(ex)[:120]
+    for top in ('Left','Right'):
+        try:
+            lv=leg_vs_leg(top,co); M[f'leg_vs_leg_{top[0]}']=lv
+            if lv['pen_verts']>0: F.append({'det':'CLIP','view':'front+bottom','what':'leg inside other leg','side':top,'value':lv['pen_mm'],'verts':lv['pen_verts']})
+        except Exception as ex: M['leg_error']=repr(ex)[:120]
     for sd,o_ in (('Left','Right'),('Right','Left')):
         try:
             To=target_bvh(['Body'],frozenset({'LARM' if o_=='Right' else 'RARM','CORE','HEAD','LLEG','RLEG'}),near=PB[o_+' wrist'].head,rad=0.16)
             if To is None: continue
             hs=hand_stats(sd,To,co); M[f'hand_vs_hand_{sd[0]}']=hs
-            if hs['pen_verts']>20: F.append({'det':'CLIP','view':'front','what':'hand inside other hand/arm','side':sd,'value':hs['pen_mm'],'verts':hs['pen_verts']})
+            if hs['pen_verts']>0: F.append({'det':'CLIP','view':'front','what':'hand inside other hand/arm','side':sd,'value':hs['pen_mm'],'verts':hs['pen_verts']})
         except Exception: pass
     M['views2d']=V
     return M,F

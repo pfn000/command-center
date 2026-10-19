@@ -924,6 +924,7 @@ elif MODE=='poses4':
             rep['Left']=place_hand('Left',PB['Right leg'].head.lerp(kn,0.86)+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
             q=PB['Right leg'].head.lerp(PB['Right knee'].head,0.62)+Vector((0,-0.01,0.10))
             rep['Right']=place_hand('Right',q,['Body','Shorts'],ex('Right'),Vector((-SG*0.8,0.1,-0.2)),fd,incl=frozenset({'RLEG','LARM'}))   # top hand rests on the thigh or ON the left hand, never inside it
+            rep['Left']=place_hand('Left',PB['Right leg'].head.lerp(kn,0.86)+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG','RARM'}))   # re-seated: on the knee or ON the right forearm, never under it
         elif name=='ankles_crossed':
             for sd,sx in (('Left',SG),('Right',-SG)):
                 q=PB[sd+' leg'].head.lerp(PB[sd+' knee'].head,0.70)+Vector((0,0,0.10))
@@ -1014,6 +1015,20 @@ elif MODE=='poses4':
             if best is None or ll<best[0]: best=(ll,it)
             if ll==0: break
         meshes_eval(False); inf=legs(nm,best[1]); inf['leg_iter']=best[1]
+        if nm=='knee_over_knee':
+            # top leg rests ON the bottom knee: raise the top thigh (knee up) in 1.2 deg steps until 0 skin inside the bottom leg; then swing the shin forward if it still cuts the bottom shin
+            lat_=(PB['Left leg'].head-PB['Right leg'].head).normalized(); hist_=[]
+            for k_ in range(30):
+                meshes_eval(True); lv=leg_vs_leg('Right'); meshes_eval(False); hist_.append((lv['pen_verts'],lv['pen_mm']))
+                if lv['pen_verts']==0: break
+                if k_<20:
+                    z0=PB['Right knee'].head.z; wrot_v('Right leg',1.2,lat_)
+                    if PB['Right knee'].head.z<z0: wrot_v('Right leg',-2.4,lat_)
+                else:
+                    y0=PB['Right ankle'].head.y; wrot_v('Right knee',2.0,lat_)
+                    if PB['Right ankle'].head.y>y0: wrot_v('Right knee',-4.0,lat_)
+            meshes_eval(True); inf['leg_vs_leg_vertex']={'steps':hist_,'final':leg_vs_leg('Right')}; meshes_eval(False)
+            log('poses4 leg clearance',nm,inf['leg_vs_leg_vertex'])
         if seated: seat_on(inf['seat_top'])
         hrep=hands(nm,inf)
         g=gates(nm,inf,hrep); g.update({k:v for k,v in inf.items()}); g['s_pose']=round(time.time()-t0,1)
