@@ -130,5 +130,15 @@ G={'foot_slide_mm_max':round(M.get('slide_mm',0),2) if MODE2!='dance2' else max(
    'clip_final_frames_with_arm_in_torso':sum(1 for f in fr_ if f.get('clip_final') and ((f['clip_final'].get('Larm_vs_torso_tris') or 0)+(f['clip_final'].get('Rarm_vs_torso_tris') or 0))>0),
    'clip_final_checked':sum(1 for f in fr_ if f.get('clip_final')),
    'clip_final_max':{kk:max((f['clip_final'].get(kk) or 0) for f in fr_ if f.get('clip_final')) for kk in ('leg_vs_leg_tris','Larm_vs_torso_tris','Rarm_vs_torso_tris')} if any(f.get('clip_final') for f in fr_) else None,
+   'dance3_frames_leg_leg_final':sum(1 for f in fr_ if (f.get('clip_final') or {}).get('leg_vs_leg_tris')),
+   'dance3_leg_leg_final_max':max([(f.get('clip_final') or {}).get('leg_vs_leg_tris') or 0 for f in fr_] or [0]),
+   'dance3_frames_hand_inside_body':sum(1 for f in fr_ if any((h or {}).get('pen_verts',0)>0 for h in (f.get('hand_body') or {}).values())),
+   'dance3_hand_pen_mm_max':max([(h or {}).get('pen_mm',0) for f in fr_ for h in (f.get('hand_body') or {}).values()] or [0]),
+   'dance3_frames_arm_vs_legs_tris':sum(1 for f in fr_ if ((f.get('clip_final') or {}).get('Larm_vs_legs_tris') or 0)+((f.get('clip_final') or {}).get('Rarm_vs_legs_tris') or 0)>0),
+   'dance3_frames_foot_below_floor':sum(1 for f in fr_ if any((x or {}).get('below_verts',0)>0 for x in (f.get('feet') or {}).values())),
+   'dance3_foot_below_floor_mm_min':min([(x or {}).get('min_mm',0) for f in fr_ for x in (f.get('feet') or {}).values()] or [0]),
+   'dance3_planted_heel_ball_mm_max':max([max(abs((f['feet'][sd] or {}).get('heel_mm',0)),abs((f['feet'][sd] or {}).get('ball_mm',0))) for f in fr_ for sd in (f.get('locked') or []) if f.get('feet')] or [0]),
+   'dance3_toe_rel_deg_range':[min([v for f in fr_ for v in (f.get('toe_rel_deg') or {}).values()] or [0]),max([v for f in fr_ for v in (f.get('toe_rel_deg') or {}).values()] or [0])],
+   'dance3_head_pitch_deg_range':[min([f.get('head_pitch_deg',0) for f in fr_] or [0]),max([f.get('head_pitch_deg',0) for f in fr_] or [0])],
    'gait':INFO[0].get('gait') if INFO else None,'source':INFO[0].get('source') if INFO else None,'frames':len(fr_)}
 json.dump(G,open(OUT+f'/{NAME}-gates.json','w'),indent=1); print(json.dumps(G))

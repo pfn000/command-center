@@ -892,6 +892,22 @@ elif MODE=='catwalk4':
 # ======================= DANCE2: her V4 mocap of the TikTok (body world points + contacts) -> Jena, arms kept out of the torso, planted feet IK-locked =======================
 elif MODE=='dance2':
     LM=json.load(open(DATA)); FR=LM['w']; NF=len(FR); fps=LM['fps']; WARM=30
+    exec(open('avatar-v3/anim10c/contact.py').read(),globals())   # dance3 (worker 41c5b341): vertex-level hand/foot contact tools
+    PMIN=float(E.get('HEAD_PITCH_MIN','3.0'))   # chin never below level+3 deg, so her bangs don't hide her face
+    rest(); HEAD0=PB['Head'].matrix.to_3x3().copy(); _tf=(PB['Left toe'].tail-PB['Left ankle'].head); _tf.z=0; HEADF0=_tf.normalized()
+    log('head fwd0 (arm space, from the feet)',[round(x,3) for x in HEADF0])
+    def head_pitch():
+        f_=(PB['Head'].matrix.to_3x3()@HEAD0.inverted())@HEADF0; return math.degrees(math.asin(max(-1,min(1,f_.z)))),f_
+    def head_up():
+        for _ in range(3):
+            p_,f_=head_pitch()
+            if p_>=PMIN-0.05: return
+            ax=f_.cross(Vector((0,0,1)))
+            if ax.length<1e-5: return
+            ax.normalize(); need=PMIN-p_; wrot_v('Neck',need*0.4,ax); wrot_v('Head',need*0.6,ax)
+    def set_rot(n,R):
+        if n not in PB: return
+        q=(R@PB[n].matrix.to_3x3().inverted()).to_quaternion(); qrot(n,q)
     def mp2b(p): return Vector((p[0],p[2],-p[1]))
     # MediaPipe sometimes swaps her left/right for a few frames (she spins round 180 deg for no reason): detect by hip-line yaw and swap back
     PAIRS=[(1,4),(2,5),(3,6),(7,8),(9,10),(11,12),(13,14),(15,16),(17,18),(19,20),(21,22),(23,24),(25,26),(27,28),(29,30),(31,32)]
@@ -948,7 +964,7 @@ elif MODE=='dance2':
         sl=(LS-RS); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
         tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-35,min(35,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
         ear=(G(7)+G(8))/2; Rhd=frame_rot(G(7)-G(8),n_.lerp((ear-ms).normalized(),0.6))
-        set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30)
+        set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_up()
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
             if ABD is not None:
@@ -1052,6 +1068,10 @@ elif MODE=='dance2':
     meshes_eval(False); bones=phys_bones()
     SIM=spring_sim(lambda f: pose_dance(max(f-WARM,0),offs,locks),NF+WARM,fps,bones)
     meshes_eval(True); setcam(*CAM)
+    _me=bpy.data.meshes.new('Floor4'); _me.from_pydata([(tgt.x+x_,tgt.y+y_,FLOORW) for x_,y_ in ((-4,-4),(4,-4),(4,4),(-4,4))],[],[(0,1,2,3)]); _me.update()
+    _fo=bpy.data.objects.new('Floor4',_me); sc.collection.objects.link(_fo); _fm=bpy.data.materials.new('Floor4M'); _fm.use_nodes=True
+    _fm.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value=(0.46,0.46,0.48,1); _fm.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value=0.9; _me.materials.append(_fm)
+    CLOSE=[int(x) for x in E.get('CLOSE','5,28,67,100,160,188,233,265').split(',')]
     gx=[]
     for i in range(-6,7):
         gx.append([[tgt.x+i*0.25,tgt.y-1.5,FLOORW],[tgt.x+i*0.25,tgt.y+1.5,FLOORW]]); gx.append([[tgt.x-1.5,tgt.y+i*0.25,FLOORW],[tgt.x+1.5,tgt.y+i*0.25,FLOORW]])
@@ -1114,22 +1134,74 @@ elif MODE=='dance2':
                     for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
                     upd(); meshes_eval(True); cf=clip_flags()
                 if k_: e.setdefault('extra_push_steps',{})[sd]=k_
-            # legs through each other: swing the free (unplanted) leg out from her centre line, exact mesh test, keep the best
-            free=[sd for sd in ('Left','Right') if sd not in e['locked']]
-            if (cf.get('leg_vs_leg_tris') or 0)>0 and free:
-                sdl=max(free,key=lambda s_: PB[s_+' ankle'].head.z); bestl=(cf.get('leg_vs_leg_tris') or 0,PB[sdl+' leg'].matrix_basis.copy()); kl=0
-                while (cf.get('leg_vs_leg_tris') or 0)>0 and kl<8:
-                    meshes_eval(False); pb=PB[sdl+' leg']; out=pb.head-PB['Hips'].head; out.z=0
-                    d=(pb.tail-pb.head).normalized(); ax=d.cross(out.normalized()) if out.length>1e-5 else Vector((0,1,0))
-                    if ax.length>1e-4: wrot_v(sdl+' leg',3,ax.normalized())
-                    kl+=1; meshes_eval(True); cf=clip_flags()
-                    if (cf.get('leg_vs_leg_tris') or 0)<bestl[0]: bestl=(cf.get('leg_vs_leg_tris') or 0,PB[sdl+' leg'].matrix_basis.copy())
-                if (cf.get('leg_vs_leg_tris') or 0)>bestl[0]:
-                    meshes_eval(False); PB[sdl+' leg'].matrix_basis=bestl[1]; upd(); meshes_eval(True); cf=clip_flags()
-                e['leg_push_steps']={sdl:kl}
+            # legs through each other: swing a knee out about its own hip->ankle line (the ankle, and so a planted foot, does not move)
+            nll=cf.get('leg_vs_leg_tris') or 0
+            if nll>0:
+                meshes_eval(False)
+                names=[n_ for sd_ in ('Left','Right') for n_ in (sd_+' leg',sd_+' knee',sd_+' ankle',sd_+' toe') if n_ in PB]
+                best=(nll,{n_:PB[n_].matrix_basis.copy() for n_ in names}); tried=0
+                order=[s_ for s_ in ('Left','Right') if s_ not in e['locked']]+[s_ for s_ in ('Left','Right') if s_ in e['locked']]
+                for sdl in order:
+                    for sg_ in (1,-1):
+                        for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
+                        upd()
+                        for k in range(8):
+                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sdl+' ankle',sdl+' toe') if n_ in PB}
+                            hip=PB[sdl+' leg'].head.copy(); ank=PB[sdl+' ankle'].head.copy(); ax=(ank-hip).normalized()
+                            wrot_v(sdl+' leg',sg_*3.0,ax)
+                            for n_,R_ in Ra.items(): set_rot(n_,R_)
+                            meshes_eval(True); c_=clip_flags().get('leg_vs_leg_tris') or 0; meshes_eval(False); tried+=1
+                            if c_<best[0]: best=(c_,{n_:PB[n_].matrix_basis.copy() for n_ in names})
+                            if c_==0: break
+                        if best[0]==0: break
+                    if best[0]==0: break
+                for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
+                upd(); meshes_eval(True); cf=clip_flags(); e['leg_swing']={'tries':tried,'before':nll,'after':cf.get('leg_vs_leg_tris')}
+            # hands: never inside her thighs/hips/chest (vertex test), pushed out along the surface normal by the depth + 1 mm, contact kept
+            for sd in ('Left','Right'):
+                meshes_eval(True); hc=Vector(tuple(body_co()[HANDV[sd]].mean(axis=0)))
+                T_=target_bvh(['Body','Shorts','Shirt','Bra'],frozenset({sd[0]+'ARM'}),near=hc,rad=0.25)
+                if T_ is None: continue
+                hs=hand_stats(sd,T_); hs0=dict(hs); k=0
+                while hs['pen_verts']>0 and k<14:
+                    hv=body_co()[HANDV[sd]]; d=sdist(T_,hv,0.08); j=int(np.argmin([x if x is not None else 9 for x in d])); p=Vector(tuple(hv[j]))
+                    loc,nr,_,_=T_.find_nearest(p,0.08); meshes_eval(False)
+                    if loc is None: break
+                    r=p-PB[sd+' arm'].head; disp=nr*((hs['pen_mm']+1.0)/1000.0); ax=r.cross(disp)
+                    if ax.length<1e-10: break
+                    wrot_v(sd+' arm',math.degrees(disp.length/max(r.length,0.1)),ax.normalized())
+                    k+=1; meshes_eval(True); hs=hand_stats(sd,T_)
+                if k: e.setdefault('hand_push',{})[sd]={'steps':k,'pen_before':hs0['pen_verts'],'pen_mm_before':hs0['pen_mm']}
+                e.setdefault('hand_body',{})[sd]=hs
+            # feet: no skin through the floor; a free foot that dips is tilted (2 deg steps) until it clears
+            for sd in ('Left','Right'):
+                meshes_eval(True); fs=foot_stats(sd,FLOOR); k=0
+                if fs['below_verts']>0 and sd not in e['locked']:
+                    fw_=PB[sd+' toe'].tail-PB[sd+' ankle'].head; fw_.z=0; lat=fw_.normalized().cross(Vector((0,0,1)))
+                    sgn=1.0
+                    while fs['below_verts']>0 and k<14:
+                        meshes_eval(False); wrot_v(sd+' ankle',sgn*2.0,lat); meshes_eval(True); f2=foot_stats(sd,FLOOR); k+=1
+                        if k==1 and f2['min_mm']<fs['min_mm']:
+                            meshes_eval(False); wrot_v(sd+' ankle',-4.0,lat); sgn=-1.0; meshes_eval(True); f2=foot_stats(sd,FLOOR)
+                        fs=f2
+                    e.setdefault('foot_tilt_steps',{})[sd]=k
+                a_=PB[sd+' ankle']; t_=PB[sd+' toe']; e.setdefault('toe_rel_deg',{})[sd]=round(math.degrees((a_.tail-a_.head).angle(t_.tail-t_.head)),1)
+                e.setdefault('feet',{})[sd]=fs
+            e['head_pitch_deg']=round(head_pitch()[0],1)
+            meshes_eval(True); cf=clip_flags()
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
         render(OUT+f'/f{f:03d}.jpg')
+        if f in CLOSE:
+            try:
+                sc.render.resolution_x,sc.render.resolution_y=640,640; cw=ev_co(BODY); bc=Vector(tuple(cw.mean(axis=0)))
+                for sd in ('Left','Right'):
+                    hw=cw[HANDV[sd]]; c_=Vector(tuple(hw.mean(axis=0))); ext=float((hw.max(axis=0)-hw.min(axis=0)).max())
+                    setcam(c_,40 if c_.x>bc.x else -40,10,max(ext*2.0,0.26)/(24/85),85); render(OUT+f'/c{f:03d}_hand{sd[0]}.jpg')
+                fw=np.concatenate([cw[FOOTV['Left']],cw[FOOTV['Right']]]); c_=Vector(tuple(fw.mean(axis=0))); ext=float((fw.max(axis=0)-fw.min(axis=0)).max())
+                setcam(c_+Vector((0,0,0.03)),0,7,max(ext*1.5,0.36)/(24/70),70); render(OUT+f'/c{f:03d}_feet.jpg')
+            except Exception as ex_: e['close_error']=repr(ex_)[:200]
+            sc.render.resolution_x,sc.render.resolution_y=RW,RH; setcam(Vector((float(CAMX[f])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
         e['max_back_hair_deg']=round(max([v for k_,v in ang.items() if k_.startswith('Back hair')] or [0]),1); e['s']=round(time.time()-t0_,1)
         P33,fw=mp33()
         trk[f]={'mp33_px':[px(p) for p in P33],'mp33_w':[[round(c,4) for c in p] for p in P33],'hands':{s:[px(p) for p in hand21(s)] for s in 'LR'},

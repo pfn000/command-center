@@ -69,7 +69,7 @@ jobs:
           sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
           pip install -q opencv-python-headless numpy huggingface_hub > /dev/null
           ls /tmp/fr | head; ls /tmp/fr | wc -l
-          mkdir -p /tmp/split && CMODE=dance2 SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/cw4/compose4.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance2 2>&1 | tail -30; ls -la /tmp/split
+          mkdir -p /tmp/split && CMODE=dance2 SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/cw4/compose4.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance3 2>&1 | tail -30; ls -la /tmp/split
       - name: Upload (private)
         if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
