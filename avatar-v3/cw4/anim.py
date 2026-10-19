@@ -941,12 +941,14 @@ elif MODE=='dance2':
             def sm(a):
                 a=np.array(a,dtype=float); a=np.unwrap(np.radians(a)); a=np.degrees(a); k_=np.ones(5)/5; pad=np.pad(a,2,mode='edge'); return np.convolve(pad,k_,mode='valid')
             R_,Y_,P__=sm(R_),sm(Y_),sm(P__)
-            SRCH[0]=dict(roll=R_,yaw=Y_-float(np.median(Y_)),pitch=P__,pmed=float(np.median(P__)))
+            E7=np.array([tuple(L(w_,7)) for w_ in FR]); E8=np.array([tuple(L(w_,8)) for w_ in FR]); k5=np.ones(5)/5
+            sm3=lambda A: np.stack([np.convolve(np.pad(A[:,i],2,mode='edge'),k5,mode='valid') for i in range(3)],axis=1)
+            SRCH[0]=dict(roll=R_,yaw=Y_-float(np.median(Y_)),pitch=P__,pmed=float(np.median(P__)),e7=sm3(E7),e8=sm3(E8))
             log('source head ranges roll',round(float(R_.min()),1),round(float(R_.max()),1),'yaw',round(float(SRCH[0]['yaw'].min()),1),round(float(SRCH[0]['yaw'].max()),1),'pitch',round(float(P__.min()),1),round(float(P__.max()),1),'median pitch',round(SRCH[0]['pmed'],1))
         return SRCH[0]
     def head_follow(f):
         # pitch = a lifted base (PMIN+5) plus the source's own nod about its median; never below PMIN. roll/yaw stay as the ears drove them.
-        sh_=src_head(); nod=max(-15.0,min(15.0,float(sh_['pitch'][f])-sh_['pmed'])); tgt=max(PMIN,PMIN+5.0+nod)
+        sh_=src_head(); nod=max(-25.0,min(25.0,float(sh_['pitch'][f])-sh_['pmed'])); tgt=max(PMIN,PMIN+6.0+nod)
         for _ in range(3):
             p_,f_=head_pitch(); need=tgt-p_
             if abs(need)<0.1: break
@@ -1016,7 +1018,7 @@ elif MODE=='dance2':
         qrot('Spine',q,0.5,60); qrot('Chest',q,0.5,60)
         sl=(LS-RS); hl=(LH-RH); n_=upt.normalized(); sl_=(sl-n_*sl.dot(n_)).normalized(); hl_=(hl-n_*hl.dot(n_)).normalized()
         tw=math.degrees(math.atan2(hl_.cross(sl_).dot(n_),hl_.dot(sl_))); tw=max(-50,min(50,tw)); wrot_v('Spine',tw*0.45,n_); wrot_v('Chest',tw*0.55,n_)
-        ear=(G(7)+G(8))/2; Rhd=frame_rot(G(7)-G(8),n_.lerp((ear-ms).normalized(),0.6))
+        _sh=src_head(); e7=Vector(tuple(_sh['e7'][f])); e8=Vector(tuple(_sh['e8'][f])); ear=(e7+e8)/2; Rhd=frame_rot(e7-e8,n_.lerp((ear-ms).normalized(),0.6))   # 5-frame smoothed ears (no jitter overshoot)
         set_world_rot('Neck',Rhd,0.4,20); set_world_rot('Head',Rhd,1.0,30); head_follow(f)
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
@@ -1260,6 +1262,31 @@ elif MODE=='dance2':
                         a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
                         wrot_v(sd+' ankle',-exc,a)
                         if abs(ankle_angles(sd)[0])>abs(tw): wrot_v(sd+' ankle',2*exc,a)
+                    hist.append(ankle_angles(sd))
+                # planted foot with the shin leaning across it (rolled ankle): pivot the foot on its ball (about the vertical) until the lean is inside 15 deg inversion / 10 deg eversion
+                if sd in e['locked']:
+                    tw,inv=ankle_angles(sd); piv=0.0
+                    def _out(v): return max(0.0,v-15.0)+max(0.0,-10.0-v)
+                    for it_ in range(8):
+                        tw,inv=ankle_angles(sd)
+                        if _out(inv)<=0: break
+                        meshes_eval(True); co_=body_co(); fv=co_[FOOTV[sd]]; meshes_eval(False)
+                        ball=Vector(tuple(fv[fv[:,2]<fv[:,2].min()+0.004].mean(axis=0)))
+                        best_=None
+                        for dth in (8.0,-8.0):
+                            Rz=Matrix.Rotation(math.radians(dth),3,'Z'); A0=PB[sd+' ankle'].head.copy()
+                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}; Bm={n_:PB[n_].matrix_basis.copy() for n_ in (sd+' leg',sd+' knee',sd+' ankle',sd+' toe') if n_ in PB}
+                            pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+A0)/2).normalized()*0.5
+                            ik2(sd+' leg',sd+' knee',ball+Rz@(A0-ball),pole_)
+                            for n_,R_ in Ra.items(): set_rot(n_,Rz@R_)
+                            v_=_out(ankle_angles(sd)[1])
+                            if best_ is None or v_<best_[0]: best_=(v_,dth,{n_:PB[n_].matrix_basis.copy() for n_ in Bm})
+                            for n_,m_ in Bm.items(): PB[n_].matrix_basis=m_
+                            upd()
+                        if best_[0]>=_out(inv): break
+                        for n_,m_ in best_[2].items(): PB[n_].matrix_basis=m_
+                        upd(); piv+=best_[1]
+                    e.setdefault('foot_pivot_deg',{})[sd]=piv
                     hist.append(ankle_angles(sd))
                 # free foot: no rolled ankle (inversion <=15, eversion <=10) - turn the foot about its own length
                 if sd not in e['locked']:
