@@ -58,17 +58,19 @@ def windows(R,fps,step,win_s):
         if any(c for c in cuts if s<c<s+L): continue
         if sum(1 for r in seg if r[3])<0.95*L: continue
         N=np.array([r[3] for r in seg if r[3]]); vis=N[:,[27,28,29,30,31,32],2].mean()
-        inb=((N[:,[0,27,28,31,32],1]>0.0)&(N[:,[0,27,28,31,32],1]<0.995)).mean()
+        inb=((N[:,[0,27,28,29,30,31,32],1]>0.0)&(N[:,[0,27,28,29,30,31,32],1]<0.985)).all(1).mean()
         torso=np.linalg.norm((N[:,11,:2]+N[:,12,:2])/2-(N[:,23,:2]+N[:,24,:2])/2,axis=1); torso=np.maximum(torso,1e-3)
         front=np.median(np.abs(N[:,11,0]-N[:,12,0])/torso)
+        hipx=(N[:,23,0]+N[:,24,0])/2; armout=float(np.max(np.maximum(np.abs(N[:,15,0]-hipx),np.abs(N[:,16,0]-hipx))/torso))   # arms out = posing / turning, not walking
+        grow=float(np.polyfit(np.arange(len(N)),np.max(N[:,[27,28,31,32],1],1)-N[:,0,1],1)[0]*len(N))                 # body grows in frame = walking toward camera
         height=np.median(np.max(N[:,[27,28,31,32],1],1)-N[:,0,1])
         d=(N[:,27,1]-N[:,28,1])/torso; d=d-np.convolve(d,np.ones(5)/5,'same')*0
         zc=int(np.sum(np.diff(np.sign(d-np.median(d)))!=0)); amp=float(np.percentile(d,90)-np.percentile(d,10))
         st_=dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),zc=zc,amp=round(amp,3))
         if REJ.get('n',0)<3 and (vis<0.5 or inb<0.85 or front<0.35 or amp<0.03): REJ['n']=REJ.get('n',0)+1; REJ.setdefault('ex',[]).append(st_)
-        if vis<0.5 or inb<0.85 or front<0.35 or amp<0.03: continue
+        if vis<0.5 or inb<0.97 or front<0.35 or amp<0.03 or armout>0.9 or grow<0.0: continue
         sc=vis*2+inb+min(height,0.9)+min(zc,8)*0.15+min(amp,0.3)
-        best.append((round(float(sc),3),s,dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),height=round(float(height),3),zc=zc,amp=round(amp,3))))
+        best.append((round(float(sc),3),s,dict(vis=round(float(vis),3),inb=round(float(inb),3),front=round(float(front),3),height=round(float(height),3),zc=zc,amp=round(amp,3),armout=round(armout,2),grow=round(grow,3))))
     best.sort(key=lambda b:-b[0]); return best[:5]
 cands=[]
 for s in G['sources']:
@@ -84,7 +86,7 @@ for s in G['sources']:
     except Exception as e: log('source error',s['id'],repr(e)[:300])
 if not cands: log('NO usable walk found'); json.dump({'ok':False,'log':LOG},open(OUT+'/walkref.json','w')); sys.exit(0)
 cands.sort(key=lambda c:-c[0]); sc,S,P,t0,info,fps,W,H=cands[0]
-WIN=G.get('win_s',3.0); t0=max(0,t0-0.2); t1=t0+WIN+0.4
+WIN=G.get('win_s',3.0); t0=max(0,t0); t1=t0+WIN
 log('PICK',S['id'],'t0',round(t0,2),'score',sc,info,'others',[(c[1]['id'],round(c[3],1),c[0]) for c in cands[1:6]])
 R,fps,W,H=track(P,'heavy',1,1280,t0,t1)
 N=np.array([r[3] if r[3] else [[np.nan]*3]*33 for r in R],float); Wd=np.array([r[2] if r[2] else [[np.nan]*3]*33 for r in R],float)
