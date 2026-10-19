@@ -1020,10 +1020,12 @@ elif MODE=='poses4':
         log('poses4 gates',nm,json.dumps(g,default=str)[:3000])
         views(nm,seated)
         try:
-            meshes_eval(True); M_,F_=sm_selfcheck(FLOOR,seated=seated)
-            mn2,mx2=bbox(MESHES); mn2.z=min(mn2.z,FLOORW); ctr=(mn2+mx2)/2; size=max((mx2-mn2).length*0.80,1.2)
+            M_,F_,HST=sm_autofix(FLOOR,seated=seated)
+            meshes_eval(True); mn2,mx2=bbox(MESHES); mn2.z=min(mn2.z,FLOORW); ctr=(mn2+mx2)/2; ext=mx2-mn2; size=max(ext.x,ext.y,ext.z)*1.12
             VV=sm_render_views(OUT+f'/{nm}_qc_{{}}.jpg',ctr,size,floor_obj=FLOOROBJ)
-            json.dump({'pose':nm,'seated':seated,'measures':M_,'flags':F_,'views':VV},open(OUT+f'/{nm}_selfcheck.json','w'),default=str)
+            json.dump({'pose':nm,'seated':seated,'measures':M_,'flags':F_,'history':HST,'views':VV},open(OUT+f'/{nm}_selfcheck.json','w'),default=str)
+            if any(h.get('ankle_fix') for h in HST):
+                views(nm,seated)   # the beauty views + close-ups re-rendered after the auto-fix
             log('poses4 selfcheck',nm,len(F_),json.dumps(F_,default=str)[:1500])
         except Exception as ex:
             import traceback; log('selfcheck error',nm,traceback.format_exc()[-1500:])

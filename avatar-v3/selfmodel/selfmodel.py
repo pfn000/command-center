@@ -49,7 +49,7 @@ def _poly_sd(H,q):
     d=1e9
     for i in range(len(H)):
         a=H[i]; b=H[(i+1)%len(H)]; ex,ey=b[0]-a[0],b[1]-a[1]; L=_m.hypot(ex,ey) or 1e-9
-        d=min(d,((q[0]-a[0])*(-ey)+(q[1]-a[1])*ex)/L*-1.0)
+        d=min(d,(ex*(q[1]-a[1])-ey*(q[0]-a[0]))/L)   # CCW hull: + left of every edge = inside; nearest edge = the margin
     return d
 def sm_support(floor_z,tol=0.004,co=None):
     co=body_co() if co is None else co; pts=[]
@@ -61,12 +61,20 @@ def sm_rel_angle(n):
     b=PB[n]; q=b.matrix_basis.to_quaternion(); return _m.degrees(2*_m.acos(max(-1.0,min(1.0,abs(q.w)))))
 def sm_knee_flex(sd):
     t=(PB[sd+' leg'].tail-PB[sd+' leg'].head).normalized(); s_=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized(); return _m.degrees(t.angle(s_))
+SM_TWIST={'Neck':70,'Head':80,'Spine':45,'Chest':45,'shoulder':30,'arm':95,'elbow':95,'wrist':95,'leg':50,'knee':35,'ankle':35}
+def sm_swing_twist(n):
+    """bone n vs its bind pose, relative to its parent: (swing deg = bend of the bone's own axis, twist deg = roll about it)"""
+    q=PB[n].matrix_basis.to_quaternion(); t=q.copy(); t.x=0.0; t.z=0.0
+    if t.magnitude<1e-9: return round(_m.degrees(2*_m.acos(min(1.0,abs(q.w)))),1),0.0
+    t.normalize(); sw=q@t.inverted()
+    return round(_m.degrees(2*_m.acos(min(1.0,abs(sw.w)))),1),round(_m.degrees(2*_m.acos(min(1.0,abs(t.w)))),1)
 def sm_joints():
     out={}
     for k,lim in SM_LIMIT.items():
         names=[k] if k in ('Neck','Head','Spine','Chest') else ['Left '+k,'Right '+k]
         for n in names:
-            if n in PB: out[n]=(round(sm_rel_angle(n),1),lim)
+            if n in PB:
+                sw,tw=sm_swing_twist(n); out[n]={'swing':sw,'swing_lim':lim,'twist':tw,'twist_lim':SM_TWIST[k]}
     return out
 def sm_view_basis(az,el):
     d=Vector((_m.sin(_m.radians(az))*_m.cos(_m.radians(el)),-_m.cos(_m.radians(az))*_m.cos(_m.radians(el)),_m.sin(_m.radians(el))))   # camera position direction (from target)
@@ -124,8 +132,9 @@ def sm_selfcheck(floor_z,seated=False,src=None,co=None):
         if fs['below_verts']>0: F.append({'det':'FLOOR','view':'bottom','side':sd,'value':fs['min_mm'],'limit':0})
     # SKELETON SANITY: joint limits (any view; recorded under the side view)
     J=sm_joints(); M['joints']=J
-    for n,(a,lim) in J.items():
-        if a>lim: F.append({'det':'LIMIT','view':'side','joint':n,'value':a,'limit':lim})
+    for n,j_ in J.items():
+        if j_['swing']>j_['swing_lim']: F.append({'det':'LIMIT','view':'side','joint':n,'what':'bend','value':j_['swing'],'limit':j_['swing_lim']})
+        if j_['twist']>j_['twist_lim']: F.append({'det':'LIMIT','view':'front','joint':n,'what':'twist','value':j_['twist'],'limit':j_['twist_lim']})
     for sd in ('Left','Right'):
         try:
             kf=sm_knee_flex(sd)
@@ -164,3 +173,48 @@ def sm_render_views(path_fmt,ctr,size,res=(360,480),floor_obj=None):
     if floor_obj is not None: floor_obj.hide_render=False
     cam.data.type='PERSP'; sc.render.engine=eng; sc.render.resolution_x,sc.render.resolution_y=rx,ry
     return out
+
+def _sm_set_rot(n,R):
+    if n not in PB: return
+    q=(R@PB[n].matrix.to_3x3().inverted()).to_quaternion(); qrot(n,q)
+def sm_fix_ankles(floor_z,sides=('Left','Right')):
+    """AUTO-FIX ANKLE: foot turned toward its knee (twist <=15) and no rolled ankle (inv <=15, ev <=10); a foot that was on the floor is re-grounded (ball 0.6 mm)"""
+    rep={}
+    def _out(tw,inv): return max(0.0,abs(tw)-15.0)+max(0.0,inv-15.0)+max(0.0,-10.0-inv)
+    for sd in sides:
+        b=sm_ankle(sd); meshes_eval(True); fs0=foot_stats(sd,floor_z); meshes_eval(False); grounded=fs0['min_mm']<3.0
+        if _out(*b)<=0: continue
+        for it in range(5):
+            tw,inv=sm_ankle(sd)
+            if _out(tw,inv)<=0: break
+            a=(PB[sd+' knee'].tail-PB[sd+' knee'].head).normalized()
+            if abs(tw)>15.0:
+                ex=tw-_m.copysign(13.0,tw); wrot_v(sd+' ankle',-ex,a)
+                if abs(sm_ankle(sd)[0])>abs(tw): wrot_v(sd+' ankle',2*ex,a)
+            tw,inv=sm_ankle(sd)
+            if inv>15.0 or inv<-10.0:
+                lim=13.0 if inv>0 else -8.0; d=inv-lim
+                ff=((PB[sd+' toe'].tail if sd+' toe' in PB else PB[sd+' ankle'].tail)-PB[sd+' ankle'].head).normalized()
+                wrot_v(sd+' ankle',d,ff)
+                if abs(sm_ankle(sd)[1]-lim)>abs(d): wrot_v(sd+' ankle',-2*d,ff)
+        fs=None
+        if grounded:
+            for k in range(5):
+                meshes_eval(True); fs=foot_stats(sd,floor_z); meshes_eval(False); dz=(0.6-fs['min_mm'])/1000.0
+                if abs(dz)<0.0004: break
+                Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                kn=PB[sd+' knee'].head.copy(); pole=kn+(kn-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole)
+                for n_,R_ in Ra.items(): _sm_set_rot(n_,R_)
+        upd(); rep[sd]={'before':b,'after':sm_ankle(sd),'grounded':grounded,'min_mm_after':(fs or {}).get('min_mm')}
+    return rep
+def sm_autofix(floor_z,seated=False,passes=3):
+    """detect -> fix -> re-detect (<=3 passes). returns (final measures, final flags, history [{pass, flags_before, fixed}])"""
+    hist=[]
+    for p_ in range(passes):
+        M_,F_=sm_selfcheck(floor_z,seated)
+        fixable=[f for f in F_ if f['det']=='ANKLE']
+        hist.append({'pass':p_,'flags':[{k:v for k,v in f.items()} for f in F_]})
+        if not fixable: return M_,F_,hist
+        hist[-1]['ankle_fix']=sm_fix_ankles(floor_z,tuple(sorted({f['side'] for f in fixable})))
+    M_,F_=sm_selfcheck(floor_z,seated); hist.append({'pass':passes,'flags':F_}); return M_,F_,hist
