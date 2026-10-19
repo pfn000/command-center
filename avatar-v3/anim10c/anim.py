@@ -188,6 +188,28 @@ def clip_flags():
 os.makedirs(OUT,exist_ok=True); info={'anim':MODE,'shard':SH,'shards':SHN,'res':[RW,RH],'samples':SAMP,'frames':{}}
 def frames_of(NF):
     per=(NF+SHN-1)//SHN; return list(range(SH*per,min(NF,(SH+1)*per)))
+
+def _torso_in(p,margin=0.0):
+    a=PB['Hips'].head; b=PB['Neck'].head; ab=b-a; t=max(0.0,min(1.0,(p-a).dot(ab)/ab.length_squared)); c=a+ab*t
+    M=PB['Chest'].matrix.to_3x3() if t>0.45 else PB['Spine'].matrix.to_3x3()
+    X=M.col[0].normalized(); Z=ab.normalized(); Y=Z.cross(X).normalized(); X=Y.cross(Z)
+    q=p-c; rl=(0.165 if t>0.45 else 0.135)+margin; rd=(0.15 if t>0.45 else 0.125)+margin
+    return (q.dot(X)/rl)**2+(q.dot(Y)/rd)**2<1.0, X, Y
+def arm_clear(sd):
+    # keep elbow + wrist (and the hand) outside her torso volume: abduct the upper arm, then the forearm, in 4 deg steps
+    sg=1 if sd=='Left' else -1
+    def pts(): return [PB[sd+' elbow'].head.copy(),PB[sd+' wrist'].head.copy(),PB[sd+' wrist'].tail.copy()]
+    for _ in range(12):
+        ins=[_torso_in(p,0.035) for p in pts()]
+        if not any(i[0] for i in ins[:1]): break
+        fwd=ins[0][2]; wrot_v(sd+' arm',sg*4,-fwd if sg>0 else -fwd)
+    for _ in range(14):
+        ins=[_torso_in(p,0.035) for p in pts()[1:]]
+        if not any(i[0] for i in ins): break
+        # swing the forearm forward/outward, away from the body
+        el=PB[sd+' elbow']; d=(el.tail-el.head).normalized(); out=(ins[0][1]*sg+ins[0][2]*-0.6).normalized(); ax=d.cross(out)
+        if ax.length<1e-4: break
+        wrot_v(sd+' elbow',5,ax)
 # ======================= TALK =======================
 if MODE=='talk':
     TL=json.load(open(DATA)); NF=TL['nf']; fps=TL['fps']
@@ -246,6 +268,7 @@ elif MODE=='dance':
         # limbs: bone directions from the source joints
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
+            arm_clear(sd)
         for sd,(h_,k_,an,he,ft) in (('Left',(23,25,27,29,31)),('Right',(24,26,28,30,32))):
             align(sd+' leg',G(k_)-G(h_)); align(sd+' knee',G(an)-G(k_))
             fd=G(ft)-G(an); fd.z=min(fd.z,0.35*fd.length) ; align(sd+' ankle',fd,cap=55)
