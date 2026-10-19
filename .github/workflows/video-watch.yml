@@ -6,6 +6,7 @@ on:
     paths: ["video-watch/jobs/**"]
 permissions:
   contents: read
+  checks: write
 jobs:
   watch:
     runs-on: ubuntu-24.04
@@ -36,6 +37,7 @@ jobs:
       - name: Watch
         env:
           HF_TOKEN: ${{ secrets.VW_HF_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           YT_COOKIES: ${{ secrets.YT_COOKIES }}
           VW_PROXY: ${{ secrets.VW_PROXY }}
           RUN_ID: ${{ github.run_id }}
@@ -55,6 +57,6 @@ jobs:
           from huggingface_hub import HfApi
           api = HfApi(token=os.environ["HF_TOKEN"]); req = json.load(open(os.environ["VW_JOB"]))["req"]
           if os.path.exists("watch-log.txt"):
-              api.upload_file(path_or_fileobj="watch-log.txt", path_in_repo="live/" + req + "/runner-log.txt", repo_id="Saidie000/tab-render-out", repo_type="dataset")
+              api.upload_file(path_or_fileobj="watch-log.txt", path_in_repo="live/" + req + "/runner-log.txt", repo_id="Saidie000/video-watcher-out", repo_type="dataset")
           print("log published")
           PY

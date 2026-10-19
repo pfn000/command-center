@@ -10,7 +10,7 @@ URL = (JOB.get('url') or os.environ.get('VW_URL', '')).strip(); REQ = JOB.get('r
 if not re.match(r'^https?://\S+$', URL): sys.exit('bad url: %r' % URL)
 if not re.match(r'^[\w.-]+$', REQ): sys.exit('bad req')
 OPTS = dict(kv.split('=', 1) for kv in (JOB.get('opts') or os.environ.get('VW_OPTS', '')).split() if '=' in kv)
-HF = os.environ.get('HF_TOKEN', ''); DS = 'Saidie000/tab-render-out'
+HF = os.environ.get('HF_TOKEN', ''); DS = 'Saidie000/video-watcher-out'
 W = os.path.abspath('work'); OUT = os.path.abspath('out'); MODELS = os.path.expanduser('~/.cache/vw-models')
 for d in (W, OUT, MODELS): os.makedirs(d, exist_ok=True)
 meta = {'url': URL, 'req': REQ, 'run_id': RUN_ID, 'opts': OPTS, 'errors': [], 'fetch_attempts': [], 'started_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}
@@ -26,23 +26,41 @@ def ts(t, ms=False):
     return f'{h:02d}:{m:02d}:{s:05.2f}' if h else f'{m:02d}:{s:05.2f}'
 
 # ---------------- live publishing ----------------
+# Live status + partial transcript ride a GitHub check run on this job's commit (updated every ~30 s, no commit limits);
+# the box reads it through the GitHub API. HF gets only 2 commits per run (contact sheet mid-run, everything at the end),
+# because HF caps commits at 128/hour per repo (hit on Oct 19 03:5x UTC while testing).
+import requests
 api = None
 if HF:
     from huggingface_hub import HfApi, CommitOperationAdd
     api = HfApi(token=HF)
-_live_lock = threading.Lock()
-def live(files=None, **st):
-    """write status.json (+ given local files) into live/<req>/ in one commit; never fatal"""
+GH = os.environ.get('GH_TOKEN'); GREPO = os.environ.get('GITHUB_REPOSITORY'); GSHA = os.environ.get('GITHUB_SHA'); CHECK = {}
+def _gh(method, path, body):
+    try:
+        r = requests.request(method, f'https://api.github.com{path}', json=body, timeout=15,
+                             headers={'Authorization': f'Bearer {GH}', 'Accept': 'application/vnd.github+json'})
+        return r.json() if r.content else {}
+    except Exception as e: log('check-run update failed', type(e).__name__, str(e)[:150]); return {}
+def live(files=None, tail=None, **st):
+    """status (+ the last partial transcript lines) -> check run 'live' on this commit; never blocks the pipeline long"""
     status.update(st); status['elapsed_s'] = round(time.time() - T0, 1); status['updated_utc'] = time.strftime('%H:%M:%SZ', time.gmtime())
-    log('LIVE', json.dumps({k: v for k, v in status.items() if k != 'partial_tail'})[:300])
+    log('LIVE', json.dumps(status)[:300])
+    if not (GH and GREPO and GSHA): return
+    summary = json.dumps(status)[:2500]
+    if tail: summary += '\n---\n' + '\n'.join(tail)[-3500:]
+    body = {'output': {'title': f"{status['stage']} {status['elapsed_s']}s", 'summary': summary}}
+    if status['stage'] in ('done', 'failed'): body.update(status='completed', conclusion='success' if status['stage'] == 'done' else 'failure')
+    if not CHECK.get('id'):
+        j = _gh('POST', f'/repos/{GREPO}/check-runs', dict(name='live', head_sha=GSHA, status='in_progress', **body)); CHECK['id'] = j.get('id')
+        log('check run', CHECK.get('id'), j.get('message', ''))
+    else: _gh('PATCH', f"/repos/{GREPO}/check-runs/{CHECK['id']}", body)
+def hf_commit(files, msg):
     if not api: return
-    ops = [CommitOperationAdd(path_in_repo=f'live/{REQ}/status.json', path_or_fileobj=json.dumps(status, indent=1).encode())]
-    for f in files or []:
-        if os.path.exists(f): ops.append(CommitOperationAdd(path_in_repo=f'live/{REQ}/{os.path.basename(f)}', path_or_fileobj=f))
-    with _live_lock:
-        for k in range(3):
-            try: api.create_commit(repo_id=DS, repo_type='dataset', operations=ops, commit_message=f'live {REQ} {status["stage"]}'); return
-            except Exception as e: log('live upload failed', type(e).__name__, str(e)[:200]); time.sleep(4 * (k + 1))
+    ops = [CommitOperationAdd(path_in_repo=f'live/{REQ}/{os.path.basename(f)}', path_or_fileobj=f) for f in files if os.path.exists(f)]
+    def up():
+        try: api.create_commit(repo_id=DS, repo_type='dataset', operations=ops, commit_message=msg)
+        except Exception as e: meta['errors'].append(f'mid-run upload: {type(e).__name__}: {str(e)[:200]}'); log('hf mid-run upload failed', e)
+    threading.Thread(target=up, daemon=True).start()          # never wait on it
 
 # ---------------- fetch ----------------
 PROXY = ['--proxy', os.environ['VW_PROXY']] if os.environ.get('VW_PROXY') else []       # optional repo secret: a residential proxy
@@ -276,13 +294,14 @@ def main():
     meta['probe'] = pr = probe(src); log('probe', pr)
     meta['native_fps'] = pr['fps_avg']
     json.dump(meta, open(os.path.join(OUT, 'meta.json'), 'w'), indent=1)
-    live(stage='frames', title=meta['title'], duration=pr['duration'], fps=pr['fps_avg'], files=[os.path.join(OUT, 'meta.json')])
+    live(stage='frames', title=meta['title'], duration=pr['duration'], fps=pr['fps_avg'], size=f"{pr['width']}x{pr['height']}")
     try:
         frames(src, pr['duration'])
         if OPTS.get('burst'): burst(src, pr['fps_avg'])
     except Exception as e: meta['errors'].append(f'frames: {type(e).__name__}: {str(e)[:500]}'); traceback.print_exc()
     json.dump(meta, open(os.path.join(OUT, 'meta.json'), 'w'), indent=1)
-    live(stage='audio', scenes=len(meta.get('scenes', [])), files=[os.path.join(OUT, 'contact_sheet.jpg'), os.path.join(OUT, 'meta.json')])
+    hf_commit([os.path.join(OUT, 'contact_sheet.jpg'), os.path.join(OUT, 'meta.json')], f'live {REQ} contact sheet')
+    live(stage='audio', scenes=len(meta.get('scenes', [])), contact_sheet=True)
     if not pr['has_audio']:
         meta['errors'].append('no audio stream in the source'); finish(True); return
     wav = os.path.join(W, 'a16.wav'); sh(['ffmpeg', '-v', 'error', '-y', '-i', src, '-ac', '1', '-ar', '16000', wav], check=True)
@@ -308,7 +327,7 @@ def main():
             utts = utterances(words); write_md(utts, pmd, title, partial=True)
             json.dump({'audio_done_s': round(s.end, 2), 'duration': pr['duration'], 'utterances': utts}, open(pjs, 'w'), indent=1)
             live(stage='transcribing', audio_done_s=round(s.end, 1), pct=round(100 * s.end / max(pr['duration'], 1)), utterances=len(utts),
-                 partial_tail=[f"[{u['tc']}] {u['speaker']}: {u['text']}" for u in utts[-3:]], files=[pmd, pjs]); last_push = time.time()
+                 tail=[f"[{u['tc']}] {u['speaker']}: {u['text'][:300]}" for u in utts[-12:]]); last_push = time.time()
     utts = utterances(words); meta['speakers_in_transcript'] = sorted({u['speaker'] for u in utts})
     write_md(utts, os.path.join(OUT, 'transcript.md'), title); write_srt(utts, os.path.join(OUT, 'transcript.srt'))
     json.dump({'title': title, 'url': URL, 'language': tinfo.language, 'model': model, 'utterances': utts, 'segments': segs_out, 'words': words, 'diarization': segs},
@@ -321,10 +340,13 @@ def finish(ok):
     meta['ok'] = ok; meta['total_s'] = round(time.time() - T0, 1)
     json.dump(meta, open(os.path.join(OUT, 'meta.json'), 'w'), indent=1)
     if api:
-        try:
-            api.upload_folder(folder_path=OUT, path_in_repo=f'runs/{RUN_ID}', repo_id=DS, repo_type='dataset', commit_message=f'video-watch {REQ} run {RUN_ID}')
-        except Exception as e: meta['errors'].append(f'final upload: {e}'); log('final upload failed', e)
-    live(stage='done' if ok else 'failed', ok=ok, errors=meta['errors'], fetch_attempts=meta['fetch_attempts'], files=[os.path.join(OUT, 'meta.json')])
+        res = {}
+        def up():
+            try: api.upload_folder(folder_path=OUT, path_in_repo=f'runs/{RUN_ID}', repo_id=DS, repo_type='dataset', commit_message=f'video-watch {REQ} run {RUN_ID}'); res['ok'] = True
+            except Exception as e: res['err'] = f'{type(e).__name__}: {str(e)[:300]}'
+        th = threading.Thread(target=up, daemon=True); th.start(); th.join(600)
+        if not res.get('ok'): meta['errors'].append(f"final upload: {res.get('err', 'timed out after 600 s')}"); log('final upload failed', res)
+    live(stage='done' if ok else 'failed', ok=ok, errors=[e[:300] for e in meta['errors']], fetch_attempts=[{k: (str(v)[:240] if k == 'error' and v else v) for k, v in a.items()} for a in meta['fetch_attempts']])
     log('DONE ok=%s' % ok, json.dumps(meta['errors'])[:800])
 if __name__ == '__main__':
     try: main()
