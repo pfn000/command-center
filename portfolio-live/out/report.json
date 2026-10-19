@@ -1,0 +1,646 @@
+{
+ "base": "https://skills-cli-command.vercel.app",
+ "shots": [
+  {
+   "name": "d-dark-01-home",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40372,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\n03 World · Jena’s 3"
+  },
+  {
+   "name": "d-dark-01z-home-full",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40372,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\n03 World · Jena’s 3"
+  },
+  {
+   "name": "d-dark-02-work",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-02z-work-full",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-03-emmico",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/emmico?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-04-worlds",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/worlds?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-05-writing",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/writing?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-06-resume",
+   "status": 200,
+   "title": "Résumé · Saidie Newara, XR UI/UX designer",
+   "url": "https://skills-cli-command.vercel.app/resume?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 3730,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n\nRÉSUMÉ\n\nSaidie Newara\nXR UI/UX concept designer\n\nOpen the PDF\nDownload PDF\nof"
+  },
+  {
+   "name": "d-dark-07-about",
+   "status": 200,
+   "title": "Résumé — Saidie Newara",
+   "url": "https://skills-cli-command.vercel.app/about?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 7123,
+   "head": "Saidie Newara\n/ portfolio\nHOME\nWORK\nJENA\nN•OS\nRÉSUMÉ\nWRITING\nCONTACT\nRésumé\n\nXR UI/UX concept designer. Put me in a room with a bunch of geniuses and nerds and "
+  },
+  {
+   "name": "d-dark-08-companies",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/companies?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-09-plex",
+   "status": 200,
+   "title": "PleX Code — Built For Direct Intent",
+   "url": "https://skills-cli-command.vercel.app/plex?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 3601,
+   "head": "Saidie Newara\n/ portfolio\nHOME\nWORK\nJENA\nN•OS\nRÉSUMÉ\nWRITING\nCONTACT\n\n$ ./PLEX --RUN\n\nMy own sovereign language. It runs on any system.\n\nPleX is its own program"
+  },
+  {
+   "name": "d-dark-11-404",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/this-page-does-not-exist?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-01-home",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40346,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\nSaidie Newara\nXR UI"
+  },
+  {
+   "name": "p-dark-01z-home-full",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40346,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\nSaidie Newara\nXR UI"
+  },
+  {
+   "name": "p-dark-02-work",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-02z-work-full",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-03-emmico",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/emmico?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-04-worlds",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/worlds?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-05-writing",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/writing?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-06-resume",
+   "status": 200,
+   "title": "Résumé · Saidie Newara, XR UI/UX designer",
+   "url": "https://skills-cli-command.vercel.app/resume?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 3730,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n\nRÉSUMÉ\n\nSaidie Newara\nXR UI/UX concept designer\n\nOpen the PDF\nDownload PDF\nof"
+  },
+  {
+   "name": "p-dark-07-about",
+   "status": 200,
+   "title": "Résumé — Saidie Newara",
+   "url": "https://skills-cli-command.vercel.app/about?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 7080,
+   "head": "Saidie Newara\n/ portfolio\nRésumé\n\nXR UI/UX concept designer. Put me in a room with a bunch of geniuses and nerds and I'll quickly sketch up concepts for their U"
+  },
+  {
+   "name": "p-dark-08-companies",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/companies?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-09-plex",
+   "status": 200,
+   "title": "PleX Code — Built For Direct Intent",
+   "url": "https://skills-cli-command.vercel.app/plex?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [
+    "official_emmi"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 3558,
+   "head": "Saidie Newara\n/ portfolio\n\n$ ./PLEX --RUN\n\nMy own sovereign language. It runs on any system.\n\nPleX is its own programming language, not derived from C or Python"
+  },
+  {
+   "name": "p-dark-10-menu-open",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=dark",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40346,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\nSaidie Newara\nXR UI"
+  },
+  {
+   "name": "p-dark-11-404",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/this-page-does-not-exist?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-light-01-home",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=light",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40372,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\n03 World · Jena’s 3"
+  },
+  {
+   "name": "d-light-02-work",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=light",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-light-01-home",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=light",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40346,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\nSaidie Newara\nXR UI"
+  },
+  {
+   "name": "p-light-02-work",
+   "status": 404,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=light",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-light-10-menu-open",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/?theme=light",
+   "overflowX": 0,
+   "bannedText": [
+    "liberapay",
+    "Liberapay",
+    "official_emmi"
+   ],
+   "bannedHtml": [
+    "liberapay",
+    "Liberapay",
+    "724-831-3809",
+    "7248313809",
+    "official_emmi",
+    "724) 831-3809"
+   ],
+   "email": false,
+   "mailto": true,
+   "broken": [],
+   "login": false,
+   "textLen": 40346,
+   "head": "Saidie Newara\nWork\nNow\nProjects\nPleX\nEmmiCO\nRésumé\nContact\nTry the NCOM Arch demo\n01 Sketch · NCOM Arch window\n02 Built · N•OS glass desktop\nSaidie Newara\nXR UI"
+  },
+  {
+   "name": "d-dark-02g-work-genie-playing",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "d-dark-03g-emmico-genie-playing",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/emmico?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-02g-work-genie-playing",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/work?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  },
+  {
+   "name": "p-dark-03g-emmico-genie-playing",
+   "status": 200,
+   "title": "Saidie Newara · XR UI/UX concept designer",
+   "url": "https://skills-cli-command.vercel.app/emmico?theme=dark",
+   "overflowX": 0,
+   "bannedText": [],
+   "bannedHtml": [],
+   "email": false,
+   "mailto": false,
+   "broken": [],
+   "login": false,
+   "textLen": 33,
+   "head": "404\nThis page could not be found."
+  }
+ ],
+ "errors": [
+  "no .pf-menu-btn p-dark",
+  "no .pf-menu-btn p-light"
+ ],
+ "play": {
+  "d-dark-02g-work-genie": {
+   "a": null,
+   "b": null,
+   "plays": false
+  },
+  "d-dark-03g-emmico-genie": {
+   "a": null,
+   "b": null,
+   "plays": false
+  },
+  "p-dark-02g-work-genie": {
+   "a": null,
+   "b": null,
+   "plays": false
+  },
+  "p-dark-03g-emmico-genie": {
+   "a": null,
+   "b": null,
+   "plays": false
+  }
+ },
+ "browser": "chrome 155.0.8059.84"
+}

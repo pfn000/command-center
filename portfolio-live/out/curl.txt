@@ -1,0 +1,10 @@
+/ 200 28739
+/work 404 12377
+/emmico 404 12377
+/worlds 404 12377
+/writing 404 12377
+/resume 200 29819
+/about 200 148239
+/companies 404 12377
+/plex 200 77131
+/this-page-does-not-exist 404 12377
