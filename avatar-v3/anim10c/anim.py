@@ -778,5 +778,24 @@ elif MODE=='poses3b':
             setcam(ctr,az,3,hh/(24/50),50); render(OUT+f'/{nm}_{vw}.jpg')
         if seated: seat(False)
         info['frames'][nm]=g; log('pose3b done',nm,g)
+elif MODE=='hair2':
+    NF=120; fps=30
+    def base(f):
+        relaxed(); fingers_relaxed()
+        if f<40: wrot('Neck',14*math.sin(2*math.pi*f/40),'Z'); wrot('Head',22*math.sin(2*math.pi*f/40),'Z'); lab='head turn L/R'
+        elif f<80:
+            u=(f-40)/40.0; wrot('Neck',6*math.sin(2*math.pi*u),'X'); wrot('Head',10*math.sin(2*math.pi*u),'X'); wrot('Head',8*math.sin(4*math.pi*u),'Y'); lab='nod + tilt'
+        else:
+            u=(f-80)/40.0; yw=25*math.sin(2*math.pi*u); wrot('Hips',yw,'Z'); wrot('Chest',0.3*yw,'Z'); lab='body turn (hair swing)'
+        return lab
+    bones=phys_bones(); WARM=45; SIM=spring_sim(lambda f: base(max(f-WARM,0)),NF+WARM,fps,bones)
+    meshes_eval(True); relaxed(); mna,mxa=bbox(MESHES); top=mxa.z
+    lo=float((B.matrix_world@PB['Hips'].head).z)-0.12; hh=(top-lo)*1.12; tg=Vector(((mna.x+mxa.x)/2,(mna.y+mxa.y)/2,(top+lo)/2))
+    CAMS=[(tg,-30,4,hh/(24/50),50),(tg,150,4,hh/(24/50),50)]
+    for f in frames_of(NF):
+        meshes_eval(False); lab=base(f); ang=apply_springs(SIM,f+WARM)
+        setcam(*CAMS[0 if (f//20)%2==0 or f>=80 else 1]); render(OUT+f'/f{f:03d}.jpg')
+        info['frames'][f]={'label':lab,'view':'front-3/4' if (f//20)%2==0 or f>=80 else 'back-3/4','max_hair_deg':round(max(ang.values() or [0]),1),'max_back_hair_deg':round(max([v for k_,v in ang.items() if k_.startswith('Back hair')] or [0]),1)}
+        log('hair2',f,info['frames'][f])
 json.dump(info,open(OUT+f'/{MODE}-shard{SH}.json','w'),indent=0,default=str)
 log('DONE'); sys.stdout.flush(); os._exit(0)

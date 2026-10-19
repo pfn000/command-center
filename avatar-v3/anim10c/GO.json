@@ -1,12 +1,12 @@
 {
  "render": [
   {
-   "anim": "poses3b",
+   "anim": "hair2",
    "shards": 3,
-   "samples": 10,
+   "samples": 8,
    "res": "720x1280",
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c poses3b: authored model poses with real hand contact (IK onto her body surface), pointed toes, crossed ankles, hip pop, chest lift, relaxed shoulders; gated"
+ "note": "anim10c hair2: hair swing test on the arms-down 10c body (head turn, nod/tilt, body turn; front-3/4 + back-3/4)"
 }
