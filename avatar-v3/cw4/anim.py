@@ -30,9 +30,10 @@ def wrot_v(name,deg,axis):
     pb=PB[name]; h=pb.head.copy(); pb.matrix=Matrix.Translation(h)@Matrix.Rotation(math.radians(deg),4,Vector(axis).normalized())@Matrix.Translation(-h)@pb.matrix; upd()
 def wrot(name,deg,ax): wrot_v(name,deg,{'X':(1,0,0),'Y':(0,1,0),'Z':(0,0,1)}[ax])
 def qrot(name,q,frac=1.0,cap=180.0):
-    ang=math.degrees(q.angle)
+    ang=math.degrees(q.angle); ax=q.axis
+    if ang>180.0: ang=360.0-ang; ax=-ax      # shortest way round (a quaternion and its negative are the same turn)
     if ang<1e-3: return
-    wrot_v(name,min(ang*frac,cap),q.axis)
+    wrot_v(name,min(ang*frac,cap),ax)
 def align(name,target,cap=180.0,frac=1.0):
     if name not in PB or target.length<1e-6: return
     pb=PB[name]; d0=(pb.tail-pb.head)
@@ -124,8 +125,13 @@ except Exception as e: log('denoiser',e)
 sc.render.use_persistent_data=True; sc.render.film_transparent=False
 sc.render.resolution_x,sc.render.resolution_y=RW,RH; sc.render.resolution_percentage=100
 sc.render.image_settings.file_format='JPEG'; sc.render.image_settings.quality=92
+_RF=[0]
 def render(path):
-    meshes_eval(True); sc.render.filepath=path; bpy.ops.render.render(write_still=True)
+    # the first render of a shard came out from a stale mesh (head on her shoulder while the bones read level): warm it once, throw that one away
+    meshes_eval(True); bpy.context.view_layer.update()
+    if _RF[0]==0:
+        sc.render.filepath='/tmp/_warm_render.jpg'; bpy.ops.render.render(write_still=True); _RF[0]=1
+    sc.render.filepath=path; bpy.ops.render.render(write_still=True)
 def bbox(objs):
     dg=bpy.context.evaluated_depsgraph_get(); pts=[]
     for o in objs:
@@ -867,6 +873,7 @@ elif MODE=='catwalk4':
         hx=W('Hips').x*100; M['hip_sway_cm'].append(round(hx,2))
         HWc=(B.matrix_world.to_3x3()@PB['Head'].matrix.to_3x3()); upv=HWc@Vector((0,1,0)); fv=HWc@Vector((0,0,1))
         e['head_up']=[round(x,3) for x in upv]
+        nk=(B.matrix_world.to_3x3()@PB['Neck'].matrix.to_3x3())@Vector((0,1,0)); e['neck_tilt_deg']=round(math.degrees(math.acos(max(-1,min(1,nk.normalized().z)))),1); hp_=W('Head'); e['head_off_cm']=round((hp_.x-(W('Left arm').x+W('Right arm').x)/2)*100,1)
         xv=HWc@Vector((1,0,0)); xv0=(B.matrix_world.to_3x3()@REST_HEAD.to_matrix())@Vector((1,0,0)) if False else None
         M['head_roll_deg'].append(round(math.degrees(math.asin(max(-1,min(1,xv.normalized().z)))),2))
         la_=W('Left arm'); ra_=W('Right arm'); M.setdefault('shoulder_roll_deg',[]).append(round(math.degrees(math.atan2(la_.z-ra_.z,la_.x-ra_.x)),2)); M['head_pitch_deg'].append(round(math.degrees(math.atan2(upv.y,upv.z)),2))
