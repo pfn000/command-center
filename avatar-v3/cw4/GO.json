@@ -1,0 +1,40 @@
+{
+ "walkref": {
+  "win_s": 4.0,
+  "sources": [
+   {
+    "kind": "yt",
+    "id": "_twa9XKJun4"
+   },
+   {
+    "kind": "yt",
+    "id": "297W0FZcJ7U"
+   },
+   {
+    "kind": "yt",
+    "id": "4YZ-aJamPzA"
+   },
+   {
+    "kind": "yt",
+    "id": "G8Veye-N0A4"
+   },
+   {
+    "kind": "url",
+    "id": "px9510022",
+    "url": "https://videos.pexels.com/video-files/9510022/9510022-sd_640_338_25fps.mp4"
+   },
+   {
+    "kind": "url",
+    "id": "px18156294",
+    "url": "https://videos.pexels.com/video-files/18156294/18156294-sd_360_640_25fps.mp4"
+   }
+  ]
+ },
+ "render": {
+  "shards": 4,
+  "samples": 8,
+  "res": "720x1280",
+  "nf": 150
+ },
+ "note": "catwalk4 attempt 1"
+}

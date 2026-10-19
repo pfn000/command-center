@@ -1,0 +1,103 @@
+name: cw4
+# Jena v3.7 run-10c CATWALK4: a real runway model's walk (MediaPipe) retargeted onto Jena with gates; V4-style split. Inputs/outputs in the private HF dataset.
+on:
+  push:
+    branches: [avatar-v3]
+    paths: [avatar-v3/cw4/GO.json]
+permissions:
+  contents: read
+env:
+  RUNID: "39182928356"
+  BLEND: "jena-v37r10-final.blend"
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      m: ${{ steps.p.outputs.m }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        run: |
+          python3 -c "import json; g=json.load(open('avatar-v3/cw4/GO.json'))['render']; print('m='+json.dumps({'include':[{'shard':i,'shards':g['shards'],'samples':g['samples'],'res':g['res'],'nf':g['nf']} for i in range(g['shards'])]}))" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+  walkref:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Walk reference
+        run: |
+          sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
+          python -m pip install -q "yt-dlp[default,curl-cffi]" mediapipe==0.10.14 opencv-python-headless numpy 2>&1 | tail -3
+          mkdir -p /tmp/wr && python avatar-v3/cw4/walkref.py /tmp/wr avatar-v3/cw4/GO.json 2>&1 | grep -v -E "^W0000|^I0000|warn" | tail -60
+          ls -la /tmp/wr; python -c "import json,sys; j=json.load(open('/tmp/wr/walkref.json')); print('OK',j['ok']); sys.exit(0 if j['ok'] else 1)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "walkref", path: /tmp/wr, retention-days: 3 }
+      - name: Upload (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          pip install -q huggingface_hub > /dev/null
+          python -c "import os; from huggingface_hub import HfApi; HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/wr',path_in_repo='avatar-v3/cw4/'+os.environ['GITHUB_RUN_ID']+'/walkref',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+  render:
+    needs: [plan, walkref]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.m) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: walkref, path: /tmp/wr }
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Frames
+        env: { ANIM: "catwalk4", SHARD: "${{ matrix.shard }}", SHARDS: "${{ matrix.shards }}", SAMPLES: "${{ matrix.samples }}", RES: "${{ matrix.res }}", CW_NF: "${{ matrix.nf }}" }
+        run: |
+          mkdir -p /tmp/out/catwalk4
+          timeout -k 10 6000 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/cw4/anim.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/out/catwalk4 /tmp/wr/walkref.json > /tmp/log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "^\[anim\]|Error|Traceback|line [0-9]+" /tmp/log.txt | cut -c1-700 | tail -60; cp /tmp/log.txt /tmp/out/catwalk4/log-shard$SHARD.txt || true; ls /tmp/out/catwalk4 | wc -l
+      - uses: actions/upload-artifact@v4
+        with: { name: "frames-${{ matrix.shard }}", path: /tmp/out/catwalk4, retention-days: 3 }
+      - name: Upload (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python3 -c "import os,time; from huggingface_hub import HfApi
+          for k in range(5):
+              try: HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/cw4/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded'); break
+              except Exception as e: print('retry',e); time.sleep(20+15*k)"
+  compose:
+    needs: [render]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/download-artifact@v4
+        with: { name: walkref, path: /tmp/wr }
+      - uses: actions/download-artifact@v4
+        with: { pattern: "frames-*", path: /tmp/fr, merge-multiple: true }
+      - name: Compose
+        run: |
+          sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
+          pip install -q opencv-python-headless numpy huggingface_hub > /dev/null
+          ls /tmp/fr | head; ls /tmp/fr | wc -l
+          mkdir -p /tmp/split && python avatar-v3/cw4/compose4.py /tmp/fr /tmp/wr /tmp/split 2>&1 | tail -30; ls -la /tmp/split
+      - name: Upload (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python -c "import os; from huggingface_hub import HfApi; HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/split',path_in_repo='avatar-v3/cw4/'+os.environ['GITHUB_RUN_ID']+'/split',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
