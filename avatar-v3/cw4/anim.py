@@ -189,6 +189,16 @@ os.makedirs(OUT,exist_ok=True); info={'anim':MODE,'shard':SH,'shards':SHN,'res':
 def frames_of(NF):
     per=(NF+SHN-1)//SHN; return list(range(SH*per,min(NF,(SH+1)*per)))
 
+
+def radial_push(sd,deg,joint='arm'):
+    # rotate the upper arm (joint='arm') or forearm (joint='elbow') so its end point moves straight AWAY from her torso axis
+    bn=sd+(' arm' if joint=='arm' else ' elbow'); pb=PB[bn]; end=pb.tail.copy()
+    a=PB['Hips'].head; b=PB['Neck'].head; ab=b-a; t=max(0.0,min(1.0,(end-a).dot(ab)/ab.length_squared)); c=a+ab*t
+    out=end-c; out=out-ab.normalized()*out.dot(ab.normalized())
+    if out.length<1e-5: return
+    d=(pb.tail-pb.head).normalized(); ax=d.cross(out.normalized())
+    if ax.length<1e-4: return
+    wrot_v(bn,deg,ax.normalized())
 def _torso_in(p,margin=0.0):
     a=PB['Hips'].head; b=PB['Neck'].head; ab=b-a; t=max(0.0,min(1.0,(p-a).dot(ab)/ab.length_squared)); c=a+ab*t
     M=PB['Chest'].matrix.to_3x3() if t>0.45 else PB['Spine'].matrix.to_3x3()
@@ -901,12 +911,12 @@ elif MODE=='dance2':
         pts+=[wr.tail.copy(),PB['MiddleFinger3_'+sd[0]].tail.copy() if 'MiddleFinger3_'+sd[0] in PB else wr.tail.copy()]
         return pts
     def arm_out_needed(sd,margin):
-        sg=1 if sd=='Left' else -1; n=0
-        for _ in range(16):
-            ins=[_torso_in(p,margin) for p in torso_pts(sd)]
-            if not any(i[0] for i in ins): break
-            fwd=ins[0][2]; wrot_v(sd+' arm',sg*3,-fwd); n+=1
-        return n
+        # exact mesh test (arm tris inside her torso), pushing the arm straight out from her body in 3 deg steps
+        key='Larm_vs_torso_tris' if sd=='Left' else 'Rarm_vs_torso_tris'; n=0
+        meshes_eval(True); c0=clip_flags().get(key) or 0
+        while c0>0 and n<16:
+            meshes_eval(False); radial_push(sd,3,'arm'); n+=1; meshes_eval(True); c0=clip_flags().get(key) or 0
+        meshes_eval(False); return n
     ABD=None
     def pose_dance(f,offs=None,locks=None):
         rest(); fingers_relaxed()
@@ -922,13 +932,20 @@ elif MODE=='dance2':
         for sd,(s,e_,wr,ix,px_) in (('Left',(11,13,15,19,17)),('Right',(12,14,16,20,18))):
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
             if ABD is not None:
-                sg=1 if sd=='Left' else -1; ins=_torso_in(PB[sd+' elbow'].head,0.0); wrot_v(sd+' arm',sg*ABD[sd][f],-ins[2])
+                radial_push(sd,ABD[sd][f],'arm')
         for sd,(h_,k_,an,he,ft) in (('Left',(23,25,27,29,31)),('Right',(24,26,28,30,32))):
             align(sd+' leg',G(k_)-G(h_)); align(sd+' knee',G(an)-G(k_))
             fd=G(ft)-G(an); fd.z=min(fd.z,0.35*fd.length); align(sd+' ankle',fd,cap=55)
         if offs is not None:
             dx,dy,dz=offs[f]; hp=PB['Hips']; hp.matrix=Matrix.Translation(Vector((dx,dy,dz)))@hp.matrix; upd()
         if locks is not None:
+            need=0.0   # a planted foot the leg can't reach would slide: lower her hips just enough first
+            for sd in ('Left','Right'):
+                lk=locks[sd][f]
+                if lk is None or lk[1]<0.99: continue
+                S0=PB[sd+' leg'].head; reach=(PB[sd+' leg'].length+PB[sd+' knee'].length)*0.985
+                need=max(need,(lk[0]-S0).length-reach)
+            if need>0: hip_drop(-min(need*1.15,0.08))
             for sd in ('Left','Right'):
                 lk=locks[sd][f]
                 if lk is None: continue
@@ -944,10 +961,12 @@ elif MODE=='dance2':
         a_,t_=FOOT[sd]; return [PB[a_].head.copy(),PB[t_].head.copy(),PB[t_].tail.copy()]
     rest(); REST_H={sd:[p.z for p in foot_pts(sd)] for sd in FOOT}
     # 1) arm abduction needed per frame (torso proxy with margin), smoothed + held so arms never pop
-    raw={'Left':[],'Right':[]}
-    for f in range(NF):
-        pose_dance(f)
-        for sd in ('Left','Right'): raw[sd].append(arm_out_needed(sd,0.055)*3.0)
+    raw={'Left':[0.0]*NF,'Right':[0.0]*NF}
+    for f in range(0,NF,2):
+        for sd in ('Left','Right'):
+            pose_dance(f); v_=arm_out_needed(sd,0.055)*3.0; raw[sd][f]=v_
+            if f+1<NF: raw[sd][f+1]=v_
+    log('abd prepass done',{sd:max(raw[sd]) for sd in raw})
     ABD={}
     for sd in raw:
         a_=np.array(raw[sd]); mx=np.array([a_[max(0,i-5):i+6].max() for i in range(NF)]); k_=np.exp(-0.5*(np.arange(-5,6)/2.0)**2); k_/=k_.sum()
@@ -1051,10 +1070,19 @@ elif MODE=='dance2':
             # last-resort per-frame fix if the exact mesh test still finds an arm inside her torso
             for sd,key in (('Left','Larm_vs_torso_tris'),('Right','Rarm_vs_torso_tris')):
                 k_=0
-                while (cf.get(key) or 0)>0 and k_<6:
-                    meshes_eval(False); sg=1 if sd=='Left' else -1; ins=_torso_in(PB[sd+' elbow'].head,0.0); wrot_v(sd+' arm',sg*3,-ins[2]); k_+=1
-                    meshes_eval(True); cf=clip_flags()
-                if k_: e.setdefault('extra_abd_deg',{})[sd]=3*k_
+                best=(cf.get(key) or 0,{n_:PB[n_].matrix_basis.copy() for n_ in (sd+' arm',sd+' elbow')})
+                while (cf.get(key) or 0)>0 and k_<10:
+                    meshes_eval(False)
+                    wr_in=_torso_in(PB[sd+' wrist'].head,0.03)[0] or _torso_in(PB[sd+' elbow'].tail,0.03)[0]
+                    radial_push(sd,3,'arm')
+                    if wr_in: radial_push(sd,5,'elbow')
+                    k_+=1; meshes_eval(True); cf=clip_flags()
+                    if (cf.get(key) or 0)<best[0]: best=(cf.get(key) or 0,{n_:PB[n_].matrix_basis.copy() for n_ in (sd+' arm',sd+' elbow')})
+                if k_ and (cf.get(key) or 0)>best[0]:   # keep the best try, never a worse one
+                    meshes_eval(False)
+                    for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
+                    upd(); meshes_eval(True); cf=clip_flags()
+                if k_: e.setdefault('extra_push_steps',{})[sd]=k_
             e['clip_final']=cf
         except Exception as ex: e['clip_error']=str(ex)[:200]
         render(OUT+f'/f{f:03d}.jpg')
