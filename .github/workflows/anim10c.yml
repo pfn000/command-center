@@ -1,0 +1,117 @@
+name: anim10c
+# Jena v3.7 run-10c animation clips (talk/blink/expressions, dance retarget + bone-track export). Renders from the saved run-10c .blend; inputs/outputs in the private HF dataset.
+on:
+  push:
+    branches: [avatar-v3]
+    paths: [avatar-v3/anim10c/GO.json]
+permissions:
+  contents: read
+env:
+  RUNID: "39182928356"
+  BLEND: "jena-v37r10-final.blend"
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      m1: ${{ steps.p.outputs.m1 }}
+      m2: ${{ steps.p.outputs.m2 }}
+      dance: ${{ steps.p.outputs.dance }}
+      r1: ${{ steps.p.outputs.r1 }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        run: |
+          python3 - <<'EOF' >> $GITHUB_OUTPUT
+          import json; g=json.load(open('avatar-v3/anim10c/GO.json'))
+          m1=[{'anim':r['anim'],'shard':i,'shards':r['shards'],'samples':r['samples'],'res':r['res'],'data':r['data']} for r in g.get('render',[]) for i in range(r['shards'])]
+          d=g.get('dance'); m2=[{'anim':'dance','shard':i,'shards':d['shards'],'samples':d['samples'],'res':d['res']} for i in range(d['shards'])] if d else []
+          print('m1='+json.dumps({'include':m1 or [{'anim':'none'}]})); print('m2='+json.dumps({'include':m2 or [{'anim':'none'}]})); print('dance='+('1' if d else '0')); print('r1='+('1' if m1 else '0'))
+          EOF
+          cat $GITHUB_OUTPUT
+  pose:
+    needs: plan
+    if: needs.plan.outputs.dance == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pose
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          pip install -q huggingface_hub mediapipe opencv-python-headless numpy > /dev/null 2>&1 || pip install huggingface_hub mediapipe opencv-python-headless numpy
+          SRC=$(python3 -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['src'])"); WIN=$(python3 -c "import json;print(json.load(open('avatar-v3/anim10c/GO.json'))['dance']['win'])")
+          python3 -c "import os,sys; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','$SRC',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+          mkdir -p /tmp/pose && python3 avatar-v3/anim10c/pose.py /tmp/in/$SRC /tmp/pose/dance-landmarks.json $WIN
+          ls -la /tmp/pose
+      - uses: actions/upload-artifact@v4
+        with: { name: "pose", path: /tmp/pose, retention-days: 3 }
+      - name: Upload pose (private)
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python3 -c "import os; from huggingface_hub import HfApi; HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/pose',path_in_repo='avatar-v3/anim10c/'+os.environ['GITHUB_RUN_ID']+'/pose',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
+  render:
+    needs: plan
+    if: needs.plan.outputs.r1 == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.m1) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in')); print(d('Saidie000/jena-avatar-assets','${{ matrix.data }}',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Frames
+        env: { ANIM: "${{ matrix.anim }}", SHARD: "${{ matrix.shard }}", SHARDS: "${{ matrix.shards }}", SAMPLES: "${{ matrix.samples }}", RES: "${{ matrix.res }}" }
+        run: |
+          mkdir -p /tmp/out/$ANIM
+          timeout -k 10 9600 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/anim10c/anim.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/out/$ANIM /tmp/in/${{ matrix.data }} > /tmp/log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "^\[anim\]|Error|Traceback|line [0-9]+" /tmp/log.txt | cut -c1-600 | tail -80; cp /tmp/log.txt /tmp/out/$ANIM/log-shard$SHARD.txt || true; ls /tmp/out/$ANIM | wc -l
+      - name: Upload (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python3 -c "import os,time; from huggingface_hub import HfApi
+          for k in range(5):
+              try: HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/anim10c/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded'); break
+              except Exception as e: print('retry',e); time.sleep(20+15*k)"
+  dance:
+    needs: [plan, pose]
+    if: needs.plan.outputs.dance == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.m2) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: pose, path: /tmp/pose }
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Frames
+        env: { ANIM: "dance", SHARD: "${{ matrix.shard }}", SHARDS: "${{ matrix.shards }}", SAMPLES: "${{ matrix.samples }}", RES: "${{ matrix.res }}" }
+        run: |
+          mkdir -p /tmp/out/dance
+          timeout -k 10 9600 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/anim10c/anim.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/out/dance /tmp/pose/dance-landmarks.json > /tmp/log.txt 2>&1 || echo "BLENDER EXIT $?"
+          grep -E "^\[anim\]|Error|Traceback|line [0-9]+" /tmp/log.txt | cut -c1-600 | tail -80; cp /tmp/log.txt /tmp/out/dance/log-shard$SHARD.txt || true; ls /tmp/out/dance | wc -l
+      - name: Upload (private)
+        if: always()
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          python3 -c "import os,time; from huggingface_hub import HfApi
+          for k in range(5):
+              try: HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/out',path_in_repo='avatar-v3/anim10c/'+os.environ['GITHUB_RUN_ID'],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded'); break
+              except Exception as e: print('retry',e); time.sleep(20+15*k)"

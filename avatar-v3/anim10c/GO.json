@@ -1,0 +1,19 @@
+{
+ "render": [
+  {
+   "anim": "talk",
+   "shards": 5,
+   "samples": 10,
+   "res": "1080x1920",
+   "data": "avatar-v3/anim10c/inputs/talk-timeline.json"
+  }
+ ],
+ "dance": {
+  "src": "avatar-v3/anim10c/inputs/tiktok-1035.mp4",
+  "win": 10,
+  "shards": 4,
+  "samples": 8,
+  "res": "720x1280"
+ },
+ "note": "anim10c attempt 1"
+}
