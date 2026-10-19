@@ -1,68 +1,120 @@
+  [90m69 |[0m   font-display: swap;
+[31m[1m>[0m [90m70 |[0m   src: url(@vercel/turbopack-next/internal/font/google/font?{%[35m22[0murl%[35m22[0m:%[35m22[0mhttps:[90m//fonts.gs...[0m
+  [90m   |[0m        [31m[1m^[0m
+  [90m71 |[0m   unicode-range: [33mU[0m+[35m0102[0m-[35m0103[0m, [33mU[0m+[35m0110[0m-[35m0111[0m, [33mU[0m+[35m0128[0m-[35m0129[0m, [33mU[0m+[35m0168[0m-[35m0169[0m, [33mU[0m+[35m01[0m[33mA0[0m-[35m01[0m[33mA1[0m, [33mU[0m+[35m01[0m[33mAF[0m-[35m0.[0m[33m..[0m
+  [90m72 |[0m }
+  [90m73 |[0m [90m/* latin-ext */[0m
 
-> my-project@0.1.0 build /tmp/site
-> node scripts/assets.mjs && next build
+next/font/google queries have exactly one entry
 
-[assets] 108 images, 11.5 MB originals -> 13.7 MB in all AVIF+WebP sizes; svg -0 B; 21.7 s
-⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
+Debug info:
+- Execution of *AssetContext::process_resolve_result failed
+- Execution of resolve failed
+- Execution of resolve_internal failed
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+Error while looking up import map: next/font/google queries have exactly one entry
 
-▲ Next.js 16.2.6 (Turbopack)
-
-  Creating an optimized production build ...
-✓ Compiled successfully in 7.0s
-  Skipping validation of types
-  Finished TypeScript config validation in 8ms ...
-  Collecting page data using 3 workers ...
-  Generating static pages using 3 workers (0/30) ...
-  Generating static pages using 3 workers (7/30) 
-  Generating static pages using 3 workers (14/30) 
-  Generating static pages using 3 workers (22/30) 
-✓ Generating static pages using 3 workers (30/30) in 739ms
-  Finalizing page optimization ...
-
-Route (app)                       Revalidate  Expire
-┌ ○ /
-├ ○ /_not-found
-├ ○ /about
-├ ƒ /admin
-├ ƒ /admin/edit/[id]
-├ ƒ /admin/login
-├ ƒ /admin/new
-├ ƒ /api/admin/upload
-├ ƒ /api/contact
-├ ƒ /api/vault/file
-├ ○ /arch
-├ ○ /companies
-├ ○ /contact
-├ ○ /emmi
-├ ○ /emmico
-├ ○ /icon.png
-├ ○ /jena
-├ ○ /ncom
-├ ƒ /news
-├ ƒ /news-sitemap.xml
-├ ƒ /news/[slug]
-├ ○ /nos
-├ ○ /plex
-├ ○ /projects
-├ ○ /resume
-├ ○ /resume/download
-├ ○ /robots.txt
-├ ○ /sitemap.xml
-├ ○ /vault                                1h      1y
-├ ƒ /vault/[repo]
-├ ○ /work
-├ ○ /worlds
-├ ○ /writing
-└ ● /writing/[slug]
-  ├ /writing/ai-being-used-wrong
-  └ /writing/future-of-ads
+Debug info:
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
 
 
-○  (Static)   prerendered as static content
-●  (SSG)      prerendered as static HTML (uses generateStaticParams)
-ƒ  (Dynamic)  server-rendered on demand
+Import trace:
+  Server Component:
+    [next]/internal/font/google/oswald_1312afc4.module.css
+    [next]/internal/font/google/oswald_1312afc4.js
+    ./app/layout.tsx
 
+https://nextjs.org/docs/messages/module-not-found
+
+
+[next]/internal/font/google/oswald_1312afc4.module.css:79:8
+Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
+  [90m77 |[0m   font-weight: [35m700[0m;
+  [90m78 |[0m   font-display: swap;
+[31m[1m>[0m [90m79 |[0m   src: url(@vercel/turbopack-next/internal/font/google/font?{%[35m22[0murl%[35m22[0m:%[35m22[0mhttps:[90m//fonts.gs...[0m
+  [90m   |[0m        [31m[1m^[0m
+  [90m80 |[0m   unicode-range: [33mU[0m+[35m0100[0m-[35m02[0m[33mBA[0m, [33mU[0m+[35m02[0m[33mBD[0m-[35m02[0m[33mC5[0m, [33mU[0m+[35m02[0m[33mC7[0m-[35m02[0m[33mCC[0m, [33mU[0m+[35m02[0m[33mCE[0m-[35m02[0m[33mD7[0m, [33mU[0m+[35m02[0m[33mDD[0m-[35m02[0m[33mFF[0m, [33mU[0m+[35m0304[0m, [33m.[0m.[35m.[0m
+  [90m81 |[0m }
+  [90m82 |[0m [90m/* latin */[0m
+
+next/font/google queries have exactly one entry
+
+Debug info:
+- Execution of *AssetContext::process_resolve_result failed
+- Execution of resolve failed
+- Execution of resolve_internal failed
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+Error while looking up import map: next/font/google queries have exactly one entry
+
+Debug info:
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+
+
+Import trace:
+  Server Component:
+    [next]/internal/font/google/oswald_1312afc4.module.css
+    [next]/internal/font/google/oswald_1312afc4.js
+    ./app/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[next]/internal/font/google/oswald_1312afc4.module.css:88:8
+Module not found: Can't resolve '@vercel/turbopack-next/internal/font/google/font'
+  [90m86 |[0m   font-weight: [35m700[0m;
+  [90m87 |[0m   font-display: swap;
+[31m[1m>[0m [90m88 |[0m   src: url(@vercel/turbopack-next/internal/font/google/font?{%[35m22[0murl%[35m22[0m:%[35m22[0mhttps:[90m//fonts.gs...[0m
+  [90m   |[0m        [31m[1m^[0m
+  [90m89 |[0m   unicode-range: [33mU[0m+[35m0000[0m-[35m00[0m[33mFF[0m, [33mU[0m+[35m0131[0m, [33mU[0m+[35m0152[0m-[35m0153[0m, [33mU[0m+[35m02[0m[33mBB[0m-[35m02[0m[33mBC[0m, [33mU[0m+[35m02[0m[33mC6[0m, [33mU[0m+[35m02[0m[33mDA[0m, [33mU[0m+[35m02[0m[33mDC[0m, [33mU[0m+[35m...[0m
+  [90m90 |[0m }
+  [90m91 |[0m @font-face {
+
+next/font/google queries have exactly one entry
+
+Debug info:
+- Execution of *AssetContext::process_resolve_result failed
+- Execution of resolve failed
+- Execution of resolve_internal failed
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+Error while looking up import map: next/font/google queries have exactly one entry
+
+Debug info:
+- Execution of <NextFontGoogleFontFileReplacer as ImportMappingReplacement>::result failed
+- next/font/google queries have exactly one entry
+
+
+Import trace:
+  Server Component:
+    [next]/internal/font/google/oswald_1312afc4.module.css
+    [next]/internal/font/google/oswald_1312afc4.js
+    ./app/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:7:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:16:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:25:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:34:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:43:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:52:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:61:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:70:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:79:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> ([next]/internal/font/google/oswald_1312afc4.module.css:88:8)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+ ELIFECYCLE  Command failed with exit code 1.
