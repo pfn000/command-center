@@ -233,7 +233,7 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,
     rep={}
     meshes_eval(True); rep['palm']=hand_stats(sd,T,which=pv); meshes_eval(False)
     if settle and not unsigned:
-        finger_spread(sd,0.8); rep['fingers']=settle_fingers(sd,T)
+        finger_spread(sd,0.3); rep['fingers']=settle_fingers(sd,T)
     meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False)
     # last guard: any hand skin still inside -> lift the whole hand off along the normal, 1 mm steps (finger poses kept)
     k=0
