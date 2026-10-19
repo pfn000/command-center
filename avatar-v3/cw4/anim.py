@@ -937,7 +937,7 @@ elif MODE=='dance2':
         while c0>0 and n<16:
             meshes_eval(False); radial_push(sd,3,'arm'); n+=1; meshes_eval(True); c0=clip_flags().get(key) or 0
         meshes_eval(False); return n
-    ABD=None
+    ABD=None; CROTCH=[0]
     def pose_dance(f,offs=None,locks=None):
         rest(); fingers_relaxed()
         w=FR[f]; G=lambda i: L(w,i)
@@ -953,6 +953,13 @@ elif MODE=='dance2':
             align(sd+' arm',G(e_)-G(s)); align(sd+' elbow',G(wr)-G(e_)); align(sd+' wrist',(G(ix)+G(px_))/2-G(wr),cap=40)
             if ABD is not None:
                 radial_push(sd,ABD[sd][f],'arm')
+            # never a hand in front of her crotch: if the source puts it there (her proportions differ), slide it out to her hip side
+            hc_=(PB['Left leg'].head+PB['Right leg'].head)/2; hw_=(PB['Left leg'].head-PB['Right leg'].head).length
+            hp_=(PB[sd+' wrist'].head+PB[sd+' wrist'].tail)/2; sg_=1 if sd=='Left' else -1
+            if abs(hp_.x-hc_.x)<0.9*hw_ and hc_.z-0.28<hp_.z<hc_.z+0.10 and hp_.y<hc_.y+0.06:
+                tgt_=PB[sd+' wrist'].head.copy(); tgt_.x=hc_.x+sg_*1.15*hw_
+                ik2(sd+' arm',sd+' elbow',tgt_,PB[sd+' arm'].head+Vector((sg_*0.5,0.25,-0.2)))
+                align(sd+' wrist',Vector((0,-0.2,-1)),cap=40); CROTCH[0]+=1
         for sd,(h_,k_,an,he,ft) in (('Left',(23,25,27,29,31)),('Right',(24,26,28,30,32))):
             align(sd+' leg',G(k_)-G(h_)); align(sd+' knee',G(an)-G(k_))
             fd=G(ft)-G(an); fd.z=min(fd.z,0.35*fd.length); align(sd+' ankle',fd,cap=55)
@@ -1129,6 +1136,7 @@ elif MODE=='dance2':
                 'contact':{'L':'Left' in e['locked'],'R':'Right' in e['locked']},'face':{k:px(v_) for k,v_ in fw.items()},'grid_px':[[px(Vector(a_)),px(Vector(b_))] for a_,b_ in gx],
                 'hips_w':[round(c,4) for c in W('Hips')]}
         info['frames'][f]=e; log('frame',f,e)
+    info['crotch_hand_fixes']=CROTCH[0]
     info['locked_foot_slide_mm']={k:round(v,2) for k,v in slide.items()}
     json.dump(trk,open(OUT+f'/track-shard{SH}.json','w'))
 json.dump(info,open(OUT+f'/{MODE}-shard{SH}.json','w'),indent=0,default=str)
