@@ -20,9 +20,9 @@ jobs:
       - name: deps
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
-          git clone --depth 1 https://github.com/Plachta/seed-vc.git sv
-          pip install -q torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cpu
-          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url)' sv/requirements.txt > req.txt
+          git clone --depth 1 https://github.com/Plachtaa/seed-vc.git sv
+          pip install -q torch==2.4.0 torchaudio==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cpu
+          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url|gradio|FreeSimpleGUI|sounddevice)' sv/requirements.txt > req.txt
           pip install -q -r req.txt huggingface_hub
       - name: fetch
         run: |
