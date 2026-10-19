@@ -880,11 +880,16 @@ elif MODE=='poses4':
                 kL=Vector((hl.x-SG*0.005,hl.y-fwd,top+0.02)); aL=Vector((hl.x-SG*0.01,hl.y-fwd*0.98,FLOOR+ANKH))
                 aL=ground('Left',aL,kL+Vector((0,-0.3,0.1)),28.0,SG*4.0,'floor')
                 la=PB['Left ankle'].head.copy(); lk=PB['Left knee'].head.copy()
-                # top leg (right): thigh over the left knee, shin hanging down in front of the left shin, foot pointed (not kicked out)
-                aR=Vector((la.x+SG*(0.035+0.003*it),la.y-(0.055+0.004*it),FLOOR+0.17+0.017*it))
-                kR=lk+Vector((SG*0.02,-0.05,0.14+0.008*it))
-                leg_to('Right',aR,kR,52.0,SG*12.0,'line')
+                # top leg (right): thigh LYING across the left thigh just behind the left knee (near horizontal, like the ref),
+                # shin hanging down in front of the left shin, foot softly pointed; only the thigh lift iterates until 0 leg-leg
+                K=lk+Vector((SG*0.035,0.035,0.105+0.008*it)); hp_=PB['Right leg'].head.copy()
+                align('Right leg',K-hp_)
+                kk=PB['Right knee'].head.copy()
+                sh_=Vector((SG*0.06,-0.30,-1.0)).normalized(); align('Right knee',sh_)
+                foot_orient('Right',50.0,SG*10.0,'line')
                 inf['top_foot_kick_cm']=round((la.y-PB['Right ankle'].head.y)*100,1)
+                inf['top_thigh_pitch_deg']=round(math.degrees(math.asin(max(-1,min(1,(kk-hp_).normalized().z)))),1)
+                inf['top_foot_above_floor_cm']=round((PB['Right toe'].tail.z-FLOOR)*100,1) if 'Right toe' in PB else None
             elif name=='ankles_crossed':
                 ks=0.050+0.003*it; dy=0.050+0.010*it
                 y0=hl.y-fwd*0.80
@@ -912,8 +917,8 @@ elif MODE=='poses4':
         rep={}
         if name=='knee_over_knee':
             kn=PB['Right knee'].head.copy(); th=(PB['Right knee'].head-PB['Right leg'].head).normalized()
-            fd=(th+Vector((0,0,-0.9))).normalized()
-            rep['Left']=place_hand('Left',kn+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
+            fd=(th+Vector((0,0,-0.6))).normalized()
+            rep['Left']=place_hand('Left',PB['Right leg'].head.lerp(kn,0.86)+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
             q=PB['Right leg'].head.lerp(PB['Right knee'].head,0.62)+Vector((0,0,0.10))
             rep['Right']=place_hand('Right',q,['Body','Shorts'],ex('Right'),Vector((-SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
         elif name=='ankles_crossed':
@@ -923,14 +928,14 @@ elif MODE=='poses4':
         elif name=='side_saddle':
             q=PB['Left knee'].head+Vector((0,0.03,0.10))
             rep['Left']=place_hand('Left',q,['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),Vector((-SG*0.2,-0.7,-0.5)),incl=frozenset({'LLEG'}))
-            q=PB['Right leg'].head+Vector((-SG*0.17,0.0,-0.10))
+            q=PB['Right leg'].head+Vector((-SG*0.13,0.02,-0.10))
             rep['Right']=place_hand('Right',q,['TestSeat'],frozenset(),Vector((-SG*0.4,0.3,-0.2)),Vector((-SG*0.25,-0.55,-0.8)))
         else:
             wrot('Head',4 if inf.get('weight')=='Left' else -4,'Y')
             def on_hip(sd):
                 sx=SG if sd=='Left' else -SG
                 q=PB[sd+' leg'].head+Vector((sx*0.16,0.0,0.11))
-                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.85,0.45,0.05)),Vector((-sx*0.15,-0.55,-0.82)),incl=frozenset({'CORE',sd[0]+'LEG'}))
+                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.85,0.45,0.05)),Vector((-sx*0.10,-0.75,-0.65)),incl=frozenset({'CORE',sd[0]+'LEG'}))
             def at_side(sd):
                 sx=SG if sd=='Left' else -SG
                 q=PB[sd+' leg'].head+Vector((sx*0.16,0.01,-0.13))
@@ -961,12 +966,12 @@ elif MODE=='poses4':
             r_=hrep.get(sd)
             if not r_: g['hands'][sd]=None; continue
             T=r_.get('T'); hs=hand_stats(sd,T,co) if T is not None else None
-            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin'),'palm_vs_surface_deg':r_.get('palm_normal_vs_surface_deg'),'palm':r_.get('palm')}
+            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin'),'palm_vs_surface_deg':r_.get('palm_normal_vs_surface_deg'),'palm':r_.get('palm'),'roll_off_deg':r_.get('roll_off_deg'),'side_diff_mm':r_.get('side_diff_mm')}
         lk,rk,la,ra=PB['Left knee'].head,PB['Right knee'].head,PB['Left ankle'].head,PB['Right ankle'].head
         g['front_X']={'knee_dx_cm':round((lk.x-rk.x)*SG*100,1),'ankle_dx_cm':round((la.x-ra.x)*SG*100,1),'crossed':bool((lk.x-rk.x)*(la.x-ra.x)<0)}
         g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,abs(PB['Left leg'].head.x-PB['Right leg'].head.x))),1)
         g['shoulder_roll_deg']=round(math.degrees(math.atan2(PB['Left arm'].head.z-PB['Right arm'].head.z,abs(PB['Left arm'].head.x-PB['Right arm'].head.x))),1)
-        if name=='knee_over_knee': g['top_foot_kick_cm']=inf.get('top_foot_kick_cm')
+        if name=='knee_over_knee': g['top_foot_kick_cm']=inf.get('top_foot_kick_cm'); g['top_thigh_pitch_deg']=inf.get('top_thigh_pitch_deg'); g['top_foot_above_floor_cm']=inf.get('top_foot_above_floor_cm')
         meshes_eval(False); return g
     def views(nm,seated):
         meshes_eval(True); mn2,mx2=bbox(MESHES); mn2.z=min(mn2.z,FLOORW); ctr=Vector(((mn2.x+mx2.x)/2,(mn2.y+mx2.y)/2,(mn2.z+mx2.z)/2)); hh=max(mx2.z-mn2.z,(mx2.x-mn2.x)*RH/RW)+0.14
@@ -987,7 +992,7 @@ elif MODE=='poses4':
         sc.render.resolution_x,sc.render.resolution_y=RW,RH
     for nm in mine:
         t0=time.time(); seated=nm in ('knee_over_knee','ankles_crossed','side_saddle')
-        NIT=22 if nm=='knee_over_knee' else (12 if seated else 1); best=None
+        NIT=16 if nm=='knee_over_knee' else (12 if seated else 1); best=None
         for it in range(NIT):
             meshes_eval(False); inf=legs(nm,it); ll=legleg()
             log('poses4 legs',nm,it,'leg_leg',ll,inf)

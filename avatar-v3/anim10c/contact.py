@@ -100,7 +100,7 @@ def _fing_bones(sd,f):
     s=sd[0]
     if f=='Thumb': return [n for n in (f'Thumb1_{s}',f'Thumb2_{s}') if n in PB]
     return [n for n in (f'{f}1_{s}',f'{f}2_{s}',f'{f}3_{s}') if n in PB]
-_CURLW={'Thumb':(0.6,0.8),'IndexFinger':(0.55,1.0,0.7),'MiddleFinger':(0.55,1.0,0.7),'RingFinger':(0.55,1.0,0.7),'LittleFinger':(0.55,1.0,0.7)}
+_CURLW={'Thumb':(0.6,0.8),'IndexFinger':(0.8,0.9,0.5),'MiddleFinger':(0.8,0.9,0.5),'RingFinger':(0.8,0.9,0.5),'LittleFinger':(0.8,0.9,0.5)}
 def finger_curl(sd,f,deg):
     sgn=FSIGN[(sd[0],f)] if FSIGN else 1
     for n,w in zip(_fing_bones(sd,f),_CURLW[f]): wrot_v(n,sgn*deg*w,_lx(n))
@@ -117,7 +117,7 @@ def finger_spread(sd,amt=1.0):
         if d1<d0:
             for k,m in base.items(): PB[k].matrix_basis=m
             upd(); wrot_v(n,-abs(a_)*amt,ax)
-def settle_fingers(sd,T,lo=-8.0,hi=35.0,goal=0.0012):
+def settle_fingers(sd,T,lo=-8.0,hi=50.0,goal=0.0012):
     """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
     rep={}
     for f in FING5:
@@ -167,13 +167,13 @@ def _palm_roll(sd,want):
     q=want-ax*want.dot(ax)
     if p.length<1e-6 or q.length<1e-6: return 0.0,ax
     p.normalize(); q.normalize(); return math.degrees(math.atan2(p.cross(q).dot(ax),p.dot(q))),ax
-def ik_hand_to(sd,tgt,elbow_pole,fingers_dir,palm_want=None):
+def ik_hand_to(sd,tgt,elbow_pole,fingers_dir,palm_want=None,roll_off=0.0):
     ik2(sd+' arm',sd+' elbow',tgt,PB[sd+' arm'].head+elbow_pole); align(sd+' wrist',fingers_dir,cap=180)
     if palm_want is not None:
         a,_=_palm_roll(sd,palm_want)
         el=PB[sd+' elbow']; fa=(el.tail-el.head).normalized()
         wrot_v(sd+' elbow',max(-80.0,min(80.0,a*0.7)),fa); align(sd+' wrist',fingers_dir,cap=180)
-        a2,ax=_palm_roll(sd,palm_want); wrot_v(sd+' wrist',max(-45.0,min(45.0,a2)),ax)
+        a2,ax=_palm_roll(sd,palm_want); wrot_v(sd+' wrist',max(-45.0,min(45.0,a2))+roll_off,ax)
 def fingers_flat(sd,c1=6.0,c2=10.0,c3=6.0):
     """long fingers nearly straight (a soft 6/10/6 deg curl) before they are draped onto a surface"""
     s=sd[0]
@@ -200,16 +200,35 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,
         if t_.length<1e-4: return f_
         return t_.normalized()
     thv=set(FINGV[(sd,'Thumb')].tolist()); pv=np.array([i for i in HANDV[sd].tolist() if i not in thv],dtype=np.int64) if settle else HANDV[sd]
-    for k in range(10):
-        ik_hand_to(sd,tgt,elbow_pole,fdir(),want())
-        meshes_eval(True); co=body_co(); d=[x for x in sdist(T,co[pv],0.12) if x is not None]
-        if unsigned: d=[abs(x) for x in d]
-        pc=Vector(tuple(co[pv].mean(axis=0))); l2,nn,_,dl=T.find_nearest(pc,0.5); meshes_eval(False)
-        if l2 is None: break
-        n2=nn; dm=min(d) if d else dl; step=gap-dm
-        if abs(step)<0.0007 and k>1: break
-        tan=(l2+n2*(pc-l2).dot(n2))-pc
-        tgt=tgt+n2*step+tan*0.5
+    ROLL=[0.0]
+    def seat_hand(nit=10):
+        nonlocal tgt,n2
+        for k in range(nit):
+            ik_hand_to(sd,tgt,elbow_pole,fdir(),want(),ROLL[0])
+            meshes_eval(True); co=body_co(); d=[x for x in sdist(T,co[pv],0.12) if x is not None]
+            if unsigned: d=[abs(x) for x in d]
+            pc=Vector(tuple(co[pv].mean(axis=0))); l2,nn,_,dl=T.find_nearest(pc,0.5); meshes_eval(False)
+            if l2 is None: break
+            n2=nn; dm=min(d) if d else dl; step=gap-dm
+            if abs(step)<0.0007 and k>1: break
+            tan=(l2+n2*(pc-l2).dot(n2))-pc
+            tgt=tgt+n2*step+tan*0.5
+    def side_diff():
+        meshes_eval(True); co=body_co(); r={}
+        for grp,fs_ in (('i',('IndexFinger','MiddleFinger')),('p',('RingFinger','LittleFinger'))):
+            vi=np.concatenate([FINGV[(sd,f)] for f in fs_]); d=[x for x in sdist(T,co[vi],0.08) if x is not None]; r[grp]=min(d) if d else 0.08
+        meshes_eval(False); return r['p']-r['i']
+    seat_hand()
+    if settle and not unsigned:
+        # roll the hand about its own axis until the index side and the little-finger side sit at the same height off the surface
+        df=side_diff(); a=0.0
+        for r_it in range(4):
+            if abs(df)<0.003: break
+            st_=max(-14.0,min(14.0,math.degrees(math.atan2(df,0.07))))
+            ROLL[0]+=st_; seat_hand(5); d2=side_diff()
+            if abs(d2)>abs(df): ROLL[0]-=2*st_; seat_hand(5); d2=side_diff()
+            df=d2
+        ROLL.append(round(df*1000,1))
     rep={}
     meshes_eval(True); rep['palm']=hand_stats(sd,T,which=pv); meshes_eval(False)
     if settle and not unsigned:
@@ -219,10 +238,10 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,
     k=0
     while not unsigned and rep['hand']['pen_verts']>0 and k<12:
         tgt=tgt+n2*(rep['hand']['pen_mm']*0.001+0.0006); fb={pb.name:pb.matrix_basis.copy() for pb in PB if _bone_part(pb.name) and _bone_part(pb.name)[2]!='palm'}
-        ik_hand_to(sd,tgt,elbow_pole,fdir(),want())
+        ik_hand_to(sd,tgt,elbow_pole,fdir(),want(),ROLL[0])
         for n_,m_ in fb.items(): PB[n_].matrix_basis=m_
         upd(); meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False); k+=1
-    rep['lift_mm']=k; rep['T']=T
+    rep['lift_mm']=k; rep['T']=T; rep['roll_off_deg']=round(ROLL[0],1); rep['side_diff_mm']=ROLL[1] if len(ROLL)>1 else None
     pr,_=_palm_roll(sd,want()); rep['palm_roll_err_deg']=round(pr,1); rep['palm_normal_vs_surface_deg']=round(math.degrees(palm_normal(sd).angle(-n2)),1) if not unsigned else None
     return rep
 # ---------- feet
