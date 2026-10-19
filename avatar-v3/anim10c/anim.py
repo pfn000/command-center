@@ -945,7 +945,7 @@ elif MODE=='poses4':
             else:
                 rep['Left']=on_hip('Left')
                 hd=PB['Head'].head; q=hd+Vector((-SG*0.03,0.10,0.11))
-                r_=place_hand('Right',q,['Hair'],frozenset(),Vector((-SG*0.8,0.15,0.6)),Vector((SG*0.55,0.25,0.8)),gap=0.004,unsigned=True,palm_toward=PB['Head'].head+Vector((0,0,0.10)))
+                r_=place_hand('Right',q,['HeadShell'],frozenset(),Vector((-SG*0.8,0.15,0.6)),Vector((SG*0.55,0.25,0.8)),gap=0.0015)   # head collider: hair+skull envelope fitted to her mesh
                 if r_:
                     # never into her skull/face: signed test against the head meshes, lift off in 2 mm steps
                     meshes_eval(True); Th=target_bvh(['Female Head','Cranium','Body'],frozenset({'RARM'}),near=PB['Right wrist'].head,rad=0.3); hs=hand_stats('Right',Th); meshes_eval(False); k=0
@@ -953,6 +953,7 @@ elif MODE=='poses4':
                         wrot_v('Right elbow',-2.0,(PB['Right elbow'].tail-PB['Right elbow'].head).cross(Vector((0,0,1))).normalized()); k+=1
                         meshes_eval(True); hs=hand_stats('Right',Th); meshes_eval(False)
                     r_['head_skin']=hs; r_['head_lift_steps']=k
+                    meshes_eval(True); Tsh=head_shell_bvh(); r_['head_shell']=hand_stats('Right',Tsh); r_['head_shell_fit']=SHELL.get('info'); meshes_eval(False)
                 rep['Right']=r_
         for sd in ('Left','Right'):
             if not rep.get(sd): arm_clear(sd)
@@ -966,7 +967,14 @@ elif MODE=='poses4':
             r_=hrep.get(sd)
             if not r_: g['hands'][sd]=None; continue
             T=r_.get('T'); hs=hand_stats(sd,T,co) if T is not None else None
-            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin'),'palm_vs_surface_deg':r_.get('palm_normal_vs_surface_deg'),'palm':r_.get('palm'),'roll_off_deg':r_.get('roll_off_deg'),'side_diff_mm':r_.get('side_diff_mm')}
+            g['hands'][sd]={'final':hs,'fingers':r_.get('fingers'),'lift_mm':r_.get('lift_mm'),'head_skin':r_.get('head_skin'),'head_shell':r_.get('head_shell'),'head_shell_fit':r_.get('head_shell_fit'),'palm_vs_surface_deg':r_.get('palm_normal_vs_surface_deg'),'palm':r_.get('palm'),'roll_off_deg':r_.get('roll_off_deg'),'side_diff_mm':r_.get('side_diff_mm')}
+        # colliders (QC): every hand vs the head/hair shell and vs the other hand
+        try:
+            Tsh=head_shell_bvh(); g['qc_hand_vs_head_shell']={sd:hand_stats(sd,Tsh,co) for sd in ('Left','Right')}
+            for sd,o_ in (('Left','Right'),('Right','Left')):
+                To=target_bvh(['Body'],frozenset({'LARM' if o_=='Right' else 'RARM','CORE','HEAD','LLEG','RLEG'}),near=PB[o_+' wrist'].head,rad=0.16)
+                g.setdefault('qc_hand_vs_hand',{})[sd]=hand_stats(sd,To,co) if To is not None else None
+        except Exception as ex: g['qc_error']=str(ex)[:200]
         lk,rk,la,ra=PB['Left knee'].head,PB['Right knee'].head,PB['Left ankle'].head,PB['Right ankle'].head
         g['front_X']={'knee_dx_cm':round((lk.x-rk.x)*SG*100,1),'ankle_dx_cm':round((la.x-ra.x)*SG*100,1),'crossed':bool((lk.x-rk.x)*(la.x-ra.x)<0)}
         g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,abs(PB['Left leg'].head.x-PB['Right leg'].head.x))),1)

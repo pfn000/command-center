@@ -53,8 +53,34 @@ FINGV={(sd,f):np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]==
 FOOTV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='foot'],dtype=np.int64) for sd in ('Left','Right')}
 TOEV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='toe'],dtype=np.int64) for sd in ('Left','Right')}
 log('contact verts',{k:len(v) for k,v in list(HANDV.items())+list(FOOTV.items())},{f'{k[0][0]}{k[1][:4]}':len(v) for k,v in FINGV.items()},'toe',{k:len(v) for k,v in TOEV.items()})
+
+SHELL={}
+def head_shell_bvh():
+    """head collider fitted to her real mesh: the convex envelope of her hair + head skin from the skull base up (closed, so signed distance is exact)"""
+    import bmesh
+    zc=PB['Head'].head.z-0.01; pts=[]
+    for nm in ('Hair','Female Head','Cranium','Eyebrows'):
+        o=bpy.data.objects.get(nm)
+        if o is None or o.hide_render: continue
+        co=arm_co(o); pts.append(co[co[:,2]>zc])
+    P=np.concatenate(pts) if pts else None
+    if P is None or len(P)<10: return None
+    if len(P)>40000: P=P[::max(1,len(P)//40000)]
+    bm=bmesh.new()
+    for p in P: bm.verts.new(tuple(float(x) for x in p))
+    res=bmesh.ops.convex_hull(bm,input=bm.verts[:])
+    kill=[g for g in res.get('geom_interior',[])+res.get('geom_unused',[]) if isinstance(g,bmesh.types.BMVert)]
+    if kill: bmesh.ops.delete(bm,geom=kill,context='VERTS')
+    bm.normal_update(); T=BVHTree.FromBMesh(bm)
+    cen=Vector(tuple(P.mean(axis=0))); loc,nr,_,_=T.find_nearest(cen,1.0)
+    if loc is not None and (cen-loc).dot(nr)>0:
+        bmesh.ops.reverse_faces(bm,faces=bm.faces[:]); bm.normal_update(); T=BVHTree.FromBMesh(bm)
+    mn=P.min(axis=0); mx=P.max(axis=0)
+    SHELL['info']={'verts_in':int(len(P)),'hull_faces':len(bm.faces),'size_cm':[round(float(x)*100,1) for x in (mx-mn)]}
+    bm.free(); return T
 def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None,incl=None):
     """BVH over the given meshes' polys (armature space), dropping polys that touch an excluded limb, kept within rad of `near`."""
+    if list(meshes)==['HeadShell']: return head_shell_bvh()
     V=[];P=[]
     for nm in meshes:
         o=bpy.data.objects.get(nm)
