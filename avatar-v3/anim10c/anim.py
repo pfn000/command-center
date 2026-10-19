@@ -913,16 +913,16 @@ elif MODE=='poses4':
         if name=='knee_over_knee':
             kn=PB['Right knee'].head.copy(); th=(PB['Right knee'].head-PB['Right leg'].head).normalized()
             fd=(th+Vector((0,0,-0.9))).normalized()
-            rep['Left']=place_hand('Left',kn+Vector((0,0.0,0.10)),BODYX,ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd)
+            rep['Left']=place_hand('Left',kn+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
             q=PB['Right leg'].head.lerp(PB['Right knee'].head,0.62)+Vector((0,0,0.10))
-            rep['Right']=place_hand('Right',q,BODYX,ex('Right'),Vector((-SG*0.5,0.2,-0.3)),fd)
+            rep['Right']=place_hand('Right',q,['Body','Shorts'],ex('Right'),Vector((-SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
         elif name=='ankles_crossed':
             for sd,sx in (('Left',SG),('Right',-SG)):
                 q=PB[sd+' leg'].head.lerp(PB[sd+' knee'].head,0.70)+Vector((0,0,0.10))
-                rep[sd]=place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.5,0.25,-0.3)),Vector((-sx*0.25,-0.6,-0.75)))
+                rep[sd]=place_hand(sd,q,['Body','Shorts'],ex(sd),Vector((sx*0.5,0.25,-0.3)),Vector((-sx*0.25,-0.6,-0.75)),incl=frozenset({sd[0]+'LEG'}))
         elif name=='side_saddle':
             q=PB['Left knee'].head+Vector((0,0.03,0.10))
-            rep['Left']=place_hand('Left',q,BODYX,ex('Left'),Vector((SG*0.5,0.2,-0.3)),Vector((-SG*0.2,-0.7,-0.5)))
+            rep['Left']=place_hand('Left',q,['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),Vector((-SG*0.2,-0.7,-0.5)),incl=frozenset({'LLEG'}))
             q=PB['Right leg'].head+Vector((-SG*0.17,0.0,-0.10))
             rep['Right']=place_hand('Right',q,['TestSeat'],frozenset(),Vector((-SG*0.4,0.3,-0.2)),Vector((-SG*0.25,-0.55,-0.8)))
         else:
@@ -930,11 +930,11 @@ elif MODE=='poses4':
             def on_hip(sd):
                 sx=SG if sd=='Left' else -SG
                 q=PB[sd+' leg'].head+Vector((sx*0.16,0.0,0.11))
-                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.85,0.45,0.05)),Vector((-sx*0.15,-0.55,-0.82)))
+                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.85,0.45,0.05)),Vector((-sx*0.15,-0.55,-0.82)),incl=frozenset({'CORE',sd[0]+'LEG'}))
             def at_side(sd):
                 sx=SG if sd=='Left' else -SG
                 q=PB[sd+' leg'].head+Vector((sx*0.16,0.01,-0.13))
-                return place_hand(sd,q,BODYX,ex(sd),Vector((sx*0.7,0.5,0.0)),Vector((sx*0.05,-0.10,-0.99)))
+                return place_hand(sd,q,['Body','Shorts'],ex(sd),Vector((sx*0.7,0.5,0.0)),Vector((sx*0.05,-0.10,-0.99)),gap=0.010,incl=frozenset({sd[0]+'LEG'}),settle=False)
             if name=='hand_on_hip': rep['Left']=on_hip('Left'); rep['Right']=at_side('Right')
             elif name=='contrapposto': rep['Left']=on_hip('Left'); rep['Right']=on_hip('Right')
             else:

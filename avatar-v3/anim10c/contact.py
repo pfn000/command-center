@@ -53,7 +53,7 @@ FINGV={(sd,f):np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]==
 FOOTV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[1]=='foot'],dtype=np.int64) for sd in ('Left','Right')}
 TOEV={sd:np.array([i for i,p in enumerate(_BP) if p and p[0]==sd and p[2]=='toe'],dtype=np.int64) for sd in ('Left','Right')}
 log('contact verts',{k:len(v) for k,v in list(HANDV.items())+list(FOOTV.items())},{f'{k[0][0]}{k[1][:4]}':len(v) for k,v in FINGV.items()},'toe',{k:len(v) for k,v in TOEV.items()})
-def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None):
+def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None,incl=None):
     """BVH over the given meshes' polys (armature space), dropping polys that touch an excluded limb, kept within rad of `near`."""
     V=[];P=[]
     for nm in meshes:
@@ -70,6 +70,7 @@ def target_bvh(meshes,excl=frozenset(),near=None,rad=0.30,extra=None):
         idx={}
         for p,ls in zip(pl,pls):
             if ls & excl: continue
+            if incl is not None and mi is not None and not (ls <= incl): continue
             if ok is not None and not all(ok[i] for i in p): continue
             q=[]
             for i in p:
@@ -116,7 +117,7 @@ def finger_spread(sd,amt=1.0):
         if d1<d0:
             for k,m in base.items(): PB[k].matrix_basis=m
             upd(); wrot_v(n,-abs(a_)*amt,ax)
-def settle_fingers(sd,T,lo=-16.0,hi=50.0,goal=0.0015):
+def settle_fingers(sd,T,lo=-8.0,hi=35.0,goal=0.0012):
     """drape each finger onto the surface: curl until its closest skin point sits 0-3 mm off the surface, never inside."""
     rep={}
     for f in FING5:
@@ -137,7 +138,7 @@ def settle_fingers(sd,T,lo=-16.0,hi=50.0,goal=0.0015):
                 if dm<0.0: a=m
                 else: b=m
             d=at(b); rep[f]={'deg':round(b,1),'gap_mm':round(d*1000,1)}
-        elif d0>0.003 and (f!='Thumb' or d0<0.025):   # hovering: curl toward the surface until it touches (0-3 mm)
+        elif d0>0.0025 and (f!='Thumb' or d0<0.020):   # hovering: curl toward the surface until it touches (0-3 mm)
             a,b=0.0,hi; db=at(b)
             if db>0.003: rep[f]={'deg':round(hi,1),'gap_mm':round(db*1000,1),'hover':True}; continue
             for _ in range(9):
@@ -173,10 +174,22 @@ def ik_hand_to(sd,tgt,elbow_pole,fingers_dir,palm_want=None):
         el=PB[sd+' elbow']; fa=(el.tail-el.head).normalized()
         wrot_v(sd+' elbow',max(-80.0,min(80.0,a*0.7)),fa); align(sd+' wrist',fingers_dir,cap=180)
         a2,ax=_palm_roll(sd,palm_want); wrot_v(sd+' wrist',max(-45.0,min(45.0,a2)),ax)
-def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,palm_only=True,unsigned=False,palm_toward=None):
+def fingers_flat(sd,c1=6.0,c2=10.0,c3=6.0):
+    """long fingers nearly straight (a soft 6/10/6 deg curl) before they are draped onto a surface"""
+    s=sd[0]
+    for f in ('IndexFinger','MiddleFinger','RingFinger','LittleFinger'):
+        for j,a_ in ((1,c1),(2,c2),(3,c3)):
+            n=f'{f}{j}_{s}'
+            if n in PB: PB[n].matrix_basis=BASE[n]
+        upd()
+        for j,a_ in ((1,c1),(2,c2),(3,c3)):
+            n=f'{f}{j}_{s}'
+            if n in PB: wrot_v(n,FSIGN[(s,f)]*a_,_lx(n))
+def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.0012,maxd=0.30,palm_only=True,unsigned=False,palm_toward=None,incl=None,settle=True):
     """IK the hand so its PALM (palm facing the surface) rests on the nearest surface to `query`: closest palm skin 0-3 mm off, 0 inside; then drape the fingers."""
-    meshes_eval(True); T=target_bvh(meshes,excl,near=query,rad=0.35); meshes_eval(False)
+    meshes_eval(True); T=target_bvh(meshes,excl,near=query,rad=0.35,incl=incl); meshes_eval(False)
     if T is None: return None
+    if settle and not unsigned: fingers_flat(sd)
     loc,nr,_,_=T.find_nearest(Vector(tuple(query)),maxd)
     if loc is None: return None
     wr=PB[sd+' wrist']; tgt=loc+nr*0.03-(wr.tail-wr.head)*0.3; n2=nr
@@ -185,8 +198,8 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,p
         if unsigned: return fingers_dir
         f_=Vector(fingers_dir).normalized(); t_=f_-n2*f_.dot(n2)
         if t_.length<1e-4: return f_
-        return (t_.normalized()-n2*0.12).normalized()
-    pv=PALMV[sd] if (palm_only and len(PALMV[sd])) else HANDV[sd]
+        return t_.normalized()
+    thv=set(FINGV[(sd,'Thumb')].tolist()); pv=np.array([i for i in HANDV[sd].tolist() if i not in thv],dtype=np.int64) if settle else HANDV[sd]
     for k in range(10):
         ik_hand_to(sd,tgt,elbow_pole,fdir(),want())
         meshes_eval(True); co=body_co(); d=[x for x in sdist(T,co[pv],0.12) if x is not None]
@@ -199,8 +212,8 @@ def place_hand(sd,query,meshes,excl,elbow_pole,fingers_dir,gap=0.002,maxd=0.30,p
         tgt=tgt+n2*step+tan*0.5
     rep={}
     meshes_eval(True); rep['palm']=hand_stats(sd,T,which=pv); meshes_eval(False)
-    finger_spread(sd,1.0)
-    if not unsigned: rep['fingers']=settle_fingers(sd,T)
+    if settle and not unsigned:
+        finger_spread(sd,0.8); rep['fingers']=settle_fingers(sd,T)
     meshes_eval(True); rep['hand']=hand_stats(sd,T); meshes_eval(False)
     # last guard: any hand skin still inside -> lift the whole hand off along the normal, 1 mm steps (finger poses kept)
     k=0
