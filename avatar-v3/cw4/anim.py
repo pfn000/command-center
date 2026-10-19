@@ -1134,27 +1134,24 @@ elif MODE=='dance2':
                     for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
                     upd(); meshes_eval(True); cf=clip_flags()
                 if k_: e.setdefault('extra_push_steps',{})[sd]=k_
-            # legs through each other: swing a knee out about its own hip->ankle line (the ankle, and so a planted foot, does not move)
+            # legs through each other: swing the knees apart, each about its own hip->ankle line (the ankle, and so a planted foot, does not move)
             nll=cf.get('leg_vs_leg_tris') or 0
             if nll>0:
                 meshes_eval(False)
                 names=[n_ for sd_ in ('Left','Right') for n_ in (sd_+' leg',sd_+' knee',sd_+' ankle',sd_+' toe') if n_ in PB]
                 best=(nll,{n_:PB[n_].matrix_basis.copy() for n_ in names}); tried=0
-                order=[s_ for s_ in ('Left','Right') if s_ not in e['locked']]+[s_ for s_ in ('Left','Right') if s_ in e['locked']]
-                for sdl in order:
-                    for sg_ in (1,-1):
-                        for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
-                        upd()
-                        for k in range(8):
-                            Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sdl+' ankle',sdl+' toe') if n_ in PB}
-                            hip=PB[sdl+' leg'].head.copy(); ank=PB[sdl+' ankle'].head.copy(); ax=(ank-hip).normalized()
-                            wrot_v(sdl+' leg',sg_*3.0,ax)
-                            for n_,R_ in Ra.items(): set_rot(n_,R_)
-                            meshes_eval(True); c_=clip_flags().get('leg_vs_leg_tris') or 0; meshes_eval(False); tried+=1
-                            if c_<best[0]: best=(c_,{n_:PB[n_].matrix_basis.copy() for n_ in names})
-                            if c_==0: break
-                        if best[0]==0: break
-                    if best[0]==0: break
+                def swing(sdl,deg):
+                    o_='Right' if sdl=='Left' else 'Left'
+                    hip=PB[sdl+' leg'].head.copy(); ank=PB[sdl+' ankle'].head.copy(); ax=(ank-hip).normalized(); K=PB[sdl+' knee'].head; O=PB[o_+' knee'].head
+                    sg_=1.0 if ax.cross(K-hip).dot(K-O)>=0 else -1.0
+                    Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sdl+' ankle',sdl+' toe') if n_ in PB}
+                    wrot_v(sdl+' leg',sg_*deg,ax)
+                    for n_,R_ in Ra.items(): set_rot(n_,R_)
+                for k in range(16):
+                    for sdl in ('Left','Right'): swing(sdl,2.5)
+                    meshes_eval(True); c_=clip_flags().get('leg_vs_leg_tris') or 0; meshes_eval(False); tried+=1
+                    if c_<best[0]: best=(c_,{n_:PB[n_].matrix_basis.copy() for n_ in names})
+                    if c_==0: break
                 for n_,m_ in best[1].items(): PB[n_].matrix_basis=m_
                 upd(); meshes_eval(True); cf=clip_flags(); e['leg_swing']={'tries':tried,'before':nll,'after':cf.get('leg_vs_leg_tris')}
             # hands: never inside her thighs/hips/chest (vertex test), pushed out along the surface normal by the depth + 1 mm, contact kept
@@ -1163,11 +1160,11 @@ elif MODE=='dance2':
                 T_=target_bvh(['Body','Shorts','Shirt','Bra'],frozenset({sd[0]+'ARM'}),near=hc,rad=0.25)
                 if T_ is None: continue
                 hs=hand_stats(sd,T_); hs0=dict(hs); k=0
-                while hs['pen_verts']>0 and k<40:
+                while hs['pen_verts']>0 and k<70:
                     hv=body_co()[HANDV[sd]]; d=sdist(T_,hv,0.08); j=int(np.argmin([x if x is not None else 9 for x in d])); p=Vector(tuple(hv[j]))
                     loc,nr,_,_=T_.find_nearest(p,0.08); meshes_eval(False)
                     if loc is None: break
-                    r=p-PB[sd+' arm'].head; disp=nr*((hs['pen_mm']*1.6+1.0)/1000.0); ax=r.cross(disp)
+                    r=p-PB[sd+' arm'].head; disp=nr*((hs['pen_mm']*2.0+1.0)/1000.0); ax=r.cross(disp)
                     if ax.length<1e-10: break
                     wrot_v(sd+' arm',math.degrees(disp.length/max(r.length,0.1)),ax.normalized())
                     k+=1; meshes_eval(True); hs=hand_stats(sd,T_)
@@ -1194,6 +1191,17 @@ elif MODE=='dance2':
             # feet: no skin through the floor; a free foot that dips is tilted (2 deg steps) until it clears
             for sd in ('Left','Right'):
                 meshes_eval(True); fs=foot_stats(sd,FLOOR); k=0
+                if fs['below_verts']>0 and sd not in e['locked']:
+                    # a free foot under the floor: lift the whole foot with the leg (ankle up by the depth), its orientation kept
+                    pole_=PB[sd+' knee'].head+(PB[sd+' knee'].head-(PB[sd+' leg'].head+PB[sd+' ankle'].head)/2).normalized()*0.5
+                    for _ in range(3):
+                        dz=(0.8-fs['min_mm'])/1000.0
+                        if fs['below_verts']==0: break
+                        meshes_eval(False); Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                        ik2(sd+' leg',sd+' knee',PB[sd+' ankle'].head+Vector((0,0,dz)),pole_)
+                        for n_,R_ in Ra.items(): set_rot(n_,R_)
+                        meshes_eval(True); fs=foot_stats(sd,FLOOR); k+=1
+                    e.setdefault('foot_lift_steps',{})[sd]=k
                 if fs['below_verts']>0 and sd not in e['locked']:
                     fw_=PB[sd+' toe'].tail-PB[sd+' ankle'].head; fw_.z=0; lat=fw_.normalized().cross(Vector((0,0,1)))
                     sgn=1.0
