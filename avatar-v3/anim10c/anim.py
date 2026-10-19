@@ -677,7 +677,7 @@ elif MODE=='poses3b':
             o='Right' if pop_side=='Left' else 'Left'
             sgn_roll('Hips',pop,'Y',lambda: PB[pop_side+' leg'].head.z>PB[o+' leg'].head.z)
             # shoulders tilt the other way (counter), half as much
-            sgn_roll('Chest',pop*0.9,'Y',lambda: PB[o+' arm'].head.z>=PB[pop_side+' arm'].head.z-0.002)
+            sgn_roll('Chest',pop*0.5,'Y',lambda: PB[o+' arm'].head.z>=PB[pop_side+' arm'].head.z-0.002)
     def leg_to(sd,ank,pole_dir,foot_dir):
         hj=PB[sd+' leg'].head.copy(); ik2(sd+' leg',sd+' knee',ank,hj+pole_dir)
         align(sd+' ankle',foot_dir.normalized(),cap=120)
@@ -688,7 +688,7 @@ elif MODE=='poses3b':
         wr=PB[sd+' wrist']; hand=(wr.tail-wr.head)
         tgt=loc+nr*off-hand*0.45
         for _ in range(3):
-            ik2(sd+' arm',sd+' elbow',tgt,PB[sd+' arm'].head+elbow_pole); align(sd+' wrist',fingers_dir,cap=90)
+            ik2(sd+' arm',sd+' elbow',tgt,PB[sd+' arm'].head+elbow_pole); align(sd+' wrist',fingers_dir,cap=180)
             pc=(PB[f'MiddleFinger1_{sd[0]}'].head+wr.head)*0.5; meshes_eval(True); T_=bvh(classes); l2,n2,_,d2=T_.find_nearest(pc,0.4); meshes_eval(False)
             if l2 is None: break
             tgt=tgt+(l2+n2*off-pc)*0.9
@@ -740,13 +740,13 @@ elif MODE=='poses3b':
             wa=REST[w_+' ankle']; leg_to(w_,Vector((wa.x,wa.y,wa.z)),Vector((0.0,-1,0)),Vector((0.0,-0.5,-0.12)))
             fa=REST[f_+' ankle']; leg_to(f_,Vector((fa.x-sgx*0.05,fa.y-0.10,fa.z+0.055)),Vector((-sgx*0.25,-1,0.1)),Vector((-sgx*0.15,-0.55,-0.8)))
             if name in ('hand_on_hip','hand_behind_head'):
-                hipq=PB['Left leg'].head+Vector((0.22,0.0,0.10))
-                hand_on('Left',hipq,['T','LL'],Vector((0.55,0.35,-0.15)),Vector((-0.35,-0.55,-0.6)))
+                hipq=PB['Left leg'].head+Vector((0.20,0.01,0.16))
+                hand_on('Left',hipq,['T','LL'],Vector((0.6,0.3,-0.1)),Vector((-0.15,-0.35,-0.92)))
             if name=='hand_behind_head':
                 hd=PB['Head'].head; q=hd+Vector((-0.04,0.10,0.10))
                 ik2('Right arm','Right elbow',q,PB['Right arm'].head+Vector((-0.7,0.1,0.6))); align('Right wrist',Vector((0.4,0.3,0.8)),cap=120); PLACED.add('Right')
             if name=='contrapposto':
-                hand_on('Left',PB['Left leg'].head+Vector((0.07,-0.08,-0.16)),['LL'],Vector((0.4,0.2,-0.4)),Vector((0.0,-0.3,-0.95)),off=0.02)
+                hand_on('Left',PB['Left leg'].head+Vector((0.06,-0.10,-0.14)),['LL'],Vector((0.45,0.25,-0.3)),Vector((0.0,-0.25,-0.97)),off=0.02)
             # head: level, a touch toward the camera
             wrot('Head',4 if w_=='Left' else -4,'Y')
             ch={sd:min(PB[sd+' ankle'].head.z,PB[sd+' toe'].tail.z if sd+' toe' in PB else 9) for sd in ('Left','Right')}
