@@ -432,24 +432,34 @@ elif MODE=='fist':
     FING=('IndexFinger','MiddleFinger','RingFinger','LittleFinger')
     def lx(n,c=0): return PB[n].matrix.to_3x3().col[c].normalized()
     def curl_signs():
-        relaxed(); S={}
-        for sd in 'LR':
-            w=PB[('Left' if sd=='L' else 'Right')+' wrist'].head.copy()
-            for f_ in FING:
-                n=f'{f_}1_{sd}'; tip=lambda: PB[f'{f_}3_{sd}'].tail.copy(); d0=(tip()-w).length; base={pb.name:pb.matrix_basis.copy() for pb in PB}
-                wrot_v(n,40,lx(n)); d1=(tip()-w).length
-                for pb in PB: pb.matrix_basis=base[pb.name]
-                upd(); S[(sd,f_)]=1 if d1<d0 else -1
-        return S
-    meshes_eval(False); SG=curl_signs(); log('curl signs',SG)
-    ANG=(80,100,72)
-    def fist(a):
-        relaxed()
+        # per-JOINT sign, tested in the rest T-pose (palms down): + is the way that moves the fingertip DOWN toward the palm side.
+        # (the old test used tip-to-wrist distance, which is nearly symmetric for a straight finger -> random signs -> knotted fingers)
+        rest(); S={}
         for sd in 'LR':
             for f_ in FING:
                 for j in (1,2,3):
-                    n=f'{f_}{j}_{sd}'; base_rel=(14,22,14)[j-1]   # undo part of the relaxed curl already applied
-                    wrot_v(n,SG[(sd,f_)]*max(0,ANG[j-1]-base_rel)*a,lx(n))
+                    n=f'{f_}{j}_{sd}'
+                    if n not in PB: continue
+                    base={pb.name:pb.matrix_basis.copy() for pb in PB}
+                    tip=lambda: PB[f'{f_}3_{sd}'].tail.copy(); z0=tip().z
+                    wrot_v(n,30,lx(n)); z1=tip().z
+                    for pb in PB: pb.matrix_basis=base[pb.name]
+                    upd(); S[(sd,f_,j)]=1 if z1<z0 else -1
+        return S
+    meshes_eval(False); SG=curl_signs(); log('curl signs',SG)
+    ANG=(85,100,70)
+    FINB=[f'{f_}{j}_{sd}' for sd in 'LR' for f_ in FING for j in (1,2,3)]
+    def fist(a):
+        relaxed()
+        for n in FINB:
+            if n in PB: PB[n].matrix_basis=Matrix.Identity(4)
+        upd()
+        for sd in 'LR':
+            for f_ in FING:
+                for j in (1,2,3):
+                    n=f'{f_}{j}_{sd}'
+                    rel=(14,22,14)[j-1]*(1-a)   # start from her relaxed curl, end at the full fist
+                    wrot_v(n,SG[(sd,f_,j)]*(rel+ANG[j-1]*a),lx(n))
         return a
     # thumb: search for the fold that lays the thumb tip over the middle phalanx of index/middle (outside the fingers)
     def thumb_fit(sd):
@@ -483,6 +493,7 @@ elif MODE=='fist':
         for sd in 'LR':
             w=PB[('Left' if sd=='L' else 'Right')+' wrist'].head
             tips[sd]={f_:round((PB[f'{f_}3_{sd}'].tail-w).length*1000,1) for f_ in FING}
+            pc=(w+PB[f'MiddleFinger1_{sd}'].head)*0.5; e.setdefault('tip_to_palm_mm',{})[sd]={f_:round((PB[f'{f_}3_{sd}'].tail-pc).length*1000,1) for f_ in FING}
         e['tip_to_wrist_mm']=tips
         for sd,az in (('Left',62),('Right',-62)):
             wv=PB[sd+' wrist'].head; t_=PB['MiddleFinger3_'+sd[0]].tail; c=B.matrix_world@((wv+t_)*0.5); setcam(c,az,8,dist,85); render(OUT+f'/f{f:03d}_{sd[0]}.jpg')
