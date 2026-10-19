@@ -268,7 +268,7 @@ def main():
     from faster_whisper import WhisperModel
     model = OPTS.get('model', 'small'); live(stage='transcribing', model=model)
     wm = WhisperModel(model, device='cpu', compute_type='int8', cpu_threads=os.cpu_count() or 2, download_root=os.path.join(MODELS, 'whisper'))
-    it, tinfo = wm.transcribe(wav, language=OPTS.get('lang'), word_timestamps=True, vad_filter=True, beam_size=int(OPTS.get('beam', 5)),
+    it, tinfo = wm.transcribe(wav, language=OPTS.get('lang'), language_detection_segments=4, word_timestamps=True, vad_filter=True, beam_size=int(OPTS.get('beam', 5)),
                               condition_on_previous_text=False, vad_parameters={'min_silence_duration_ms': 500})
     meta['whisper'] = {'model': model, 'language': tinfo.language, 'language_prob': round(tinfo.language_probability, 3), 'speech_s_after_vad': round(getattr(tinfo, 'duration_after_vad', 0) or 0, 1)}
     words, segs_out, last_push = [], [], time.time(); title = meta.get('title') or URL
