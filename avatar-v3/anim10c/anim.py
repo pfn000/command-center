@@ -713,9 +713,9 @@ elif MODE=='poses3b':
             wrot('Hips',-4,'X')   # sit tall: tiny forward tilt of the pelvis
             hl=PB['Left leg'].head; hr=PB['Right leg'].head; fwd=Lt*0.95
             if name=='knee_over_knee':
-                lift=0.025*it
+                lift=0.022*it; fw2=0.012*it
                 leg_to('Left',Vector((hl.x+0.01,hl.y-fwd-0.04,FLOOR+ANKH+0.035)),Vector((0.05,-1,0.3)),Vector((0,-0.45,-0.89)))
-                leg_to('Right',Vector((hl.x+0.13,hl.y-fwd-0.16,FLOOR+ANKH+0.19+lift)),Vector((0.35,-1,0.9+lift*4)),Vector((0.15,-0.55,-0.82)))
+                leg_to('Right',Vector((hl.x+0.13,hl.y-fwd-0.16-fw2,FLOOR+ANKH+0.19+lift)),Vector((0.35,-1,0.9+lift*4)),Vector((0.15,-0.55,-0.82)))
                 q=PB['Right knee'].head+Vector((0.0,-0.02,0.06))
                 hand_on('Left',q+Vector((0.04,0,0.05)),['RL'],Vector((0.5,0.1,-0.3)),Vector((-0.3,-0.6,-0.5)))
                 hand_on('Right',q+Vector((-0.02,0.02,0.07)),['RL'],Vector((-0.5,0.1,-0.3)),Vector((0.3,-0.6,-0.5)))
@@ -747,6 +747,10 @@ elif MODE=='poses3b':
                 ik2('Right arm','Right elbow',q,PB['Right arm'].head+Vector((-0.7,0.1,0.6))); align('Right wrist',Vector((0.4,0.3,0.8)),cap=120); PLACED.add('Right')
             if name=='contrapposto':
                 hand_on('Left',PB['Left leg'].head+Vector((0.06,-0.10,-0.14)),['LL'],Vector((0.45,0.25,-0.3)),Vector((0.0,-0.25,-0.97)),off=0.02)
+            for sd in ('Left','Right'):
+                if sd in PLACED: continue
+                sx=1 if sd=='Left' else -1
+                hand_on(sd,PB[sd+' leg'].head+Vector((sx*0.14,0.01,-0.10)),['LL' if sd=='Left' else 'RL'],Vector((sx*0.7,0.6,0.0)),Vector((sx*0.06,-0.08,-0.99)),off=0.022)
             # head: level, a touch toward the camera
             wrot('Head',4 if w_=='Left' else -4,'Y')
             ch={sd:min(PB[sd+' ankle'].head.z,PB[sd+' toe'].tail.z if sd+' toe' in PB else 9) for sd in ('Left','Right')}
@@ -755,7 +759,7 @@ elif MODE=='poses3b':
         return info_
     def gates(name):
         meshes_eval(True); fl=clip_flags(); meshes_eval(False); g={'flags':fl}
-        cls_={'knee_over_knee':['RL'],'ankles_crossed':['LL','RL'],'side_saddle':['LL','T','RL'],'hand_on_hip':['T','LL'],'contrapposto':['LL'],'hand_behind_head':['T','LL','X']}[name]
+        cls_={'knee_over_knee':['RL'],'ankles_crossed':['LL','RL'],'side_saddle':['LL','T','RL'],'hand_on_hip':['T','LL','RL'],'contrapposto':['LL','RL'],'hand_behind_head':['T','LL','X']}[name]
         g['hand_contact_mm']={sd:contact_mm(sd,cls_) for sd in ('Left','Right')}
         g['toe_point_deg']={sd:toe_point(sd) for sd in ('Left','Right')}
         g['pelvis_roll_deg']=round(math.degrees(math.atan2(PB['Left leg'].head.z-PB['Right leg'].head.z,PB['Left leg'].head.x-PB['Right leg'].head.x)),1)
@@ -766,12 +770,13 @@ elif MODE=='poses3b':
     meshes_eval(True); relaxed(); mn,mx=bbox(MESHES); Hh=mx.z-mn.z
     for nm in mine:
         best=None
-        for it in range(8):
+        NIT=13 if nm=='knee_over_knee' else (8 if nm in ('ankles_crossed','side_saddle') else 1)
+        for it in range(NIT):
             meshes_eval(False); inf=pose(nm,it); g=gates(nm)
-            bad=(g['flags'].get('leg_vs_leg_tris') or 0)+(g['flags'].get('Larm_vs_torso_tris') or 0)+(g['flags'].get('Rarm_vs_torso_tris') or 0)+(g['flags'].get('Larm_vs_legs_tris') or 0)+(g['flags'].get('Rarm_vs_legs_tris') or 0)
+            bad=5*(g['flags'].get('leg_vs_leg_tris') or 0)+(g['flags'].get('Larm_vs_torso_tris') or 0)+(g['flags'].get('Rarm_vs_torso_tris') or 0)+(g['flags'].get('Larm_vs_legs_tris') or 0)+(g['flags'].get('Rarm_vs_legs_tris') or 0)
             log('pose3b',nm,it,g,inf)
             if best is None or bad<best[0]: best=(bad,it)
-            if bad==0: break
+            if bad==0 or (nm=='knee_over_knee' and not g['flags'].get('leg_vs_leg_tris') and not g['flags'].get('Rarm_vs_torso_tris') and not g['flags'].get('Larm_vs_torso_tris')): break
         meshes_eval(False); inf=pose(nm,best[1]); g=gates(nm); g.update(inf); g['iter']=best[1]
         seated=nm in ('knee_over_knee','ankles_crossed','side_saddle')
         if seated: seat(True,top=inf['seat_top'],cx=REST['Hips'].x,cy=REST['Hips'].y+0.12)
