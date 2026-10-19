@@ -196,10 +196,36 @@ def diarize(wav):
     audio, sr = sf.read(wav, dtype='float32', always_2d=True); audio = audio[:, 0]
     res = sd.process(audio).sort_by_start_time()
     segs = [{'start': round(r.start, 2), 'end': round(r.end, 2), 'spk': int(r.speaker)} for r in res]
+    # second pass: one voice often gets split (voice changes, noisy rooms). Merge clusters whose average voiceprints are
+    # close (cosine >= merge, default 0.7; tuned on 4 clips: same speaker 0.82, different speakers 0.40).
+    merge = float(OPTS.get('merge', 0.7)); merged = []
+    if n <= 0 and len({s['spk'] for s in segs}) > 1 and merge < 1:
+        ext = sherpa_onnx.SpeakerEmbeddingExtractor(sherpa_onnx.SpeakerEmbeddingExtractorConfig(model=emb, num_threads=2))
+        def vec(a):
+            st = ext.create_stream(); st.accept_waveform(16000, a); st.input_finished(); v = np.array(ext.compute(st)); return v / (np.linalg.norm(v) + 1e-9)
+        vs = {}
+        for s in segs:
+            a, b = s['start'], s['end']
+            if b - a < 0.5: continue
+            t = a
+            while True:
+                e = min(b, t + 1.5); vs.setdefault(s['spk'], []).append(vec(audio[int(t * 16000):int(e * 16000)]))
+                t += 0.75
+                if t + 0.5 > b or e >= b: break
+        cen = {k: np.mean(v, axis=0) for k, v in vs.items()}
+        cen = {k: v / np.linalg.norm(v) for k, v in cen.items()}
+        meta['speaker_similarity_before_merge'] = {f'{a}-{b}': round(float(cen[a] @ cen[b]), 3) for a in cen for b in cen if a < b}
+        while len(cen) > 1:
+            ks = sorted(cen); best = max(((float(cen[a] @ cen[b]), a, b) for i, a in enumerate(ks) for b in ks[i + 1:]))
+            if best[0] < merge: break
+            _, a, b = best; merged.append([a, b, round(best[0], 3)])
+            for s in segs:
+                if s['spk'] == b: s['spk'] = a
+            cen[a] = (cen[a] * len(vs[a]) + cen[b] * len(vs[b])); cen[a] /= np.linalg.norm(cen[a]); vs[a] += vs.pop(b); del cen[b]
     order = {}                                               # renumber speakers by first appearance: SPEAKER 1, 2, ...
     for s in segs: order.setdefault(s['spk'], len(order) + 1)
     for s in segs: s['speaker'] = f"SPEAKER {order[s['spk']]}"; del s['spk']
-    meta['diarizer'] = {'engine': 'sherpa-onnx (pyannote segmentation-3.0 ONNX + WeSpeaker ResNet34 embeddings, not gated)', 'cluster_threshold': thr, 'num_speakers_forced': n if n > 0 else None, 'speakers_found': len(order), 'segments': len(segs)}
+    meta['diarizer'] = {'engine': 'sherpa-onnx (pyannote segmentation-3.0 ONNX + WeSpeaker ResNet34 embeddings, not gated)', 'cluster_threshold': thr, 'num_speakers_forced': n if n > 0 else None, 'speakers_found': len(order), 'segments': len(segs), 'voiceprint_merge': merge, 'merged_pairs': merged}
     return segs
 def who(a, b, segs):
     best, bo = None, 0.0
