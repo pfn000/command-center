@@ -853,12 +853,14 @@ elif MODE=='poses4':
             if abs(dz)<0.0004: break
             a_=a_+Vector((0,0,dz))
         return a_
+    rest(); meshes_eval(True); HHp={_sd:float(foot_stats(_sd,0.0)['heel_mm']-foot_stats(_sd,0.0)['ball_mm']) for _sd in ('Left','Right')}; meshes_eval(False)
+    log('high-heel foot: bind-pose heel lift above the ball (mm)',HHp)
     def leg_flat(sd,ank,knee_pt,yaw=0.0):
-        """planted foot: sole flat (heel and ball both on the floor), grounded"""
+        """planted foot, HIGH-HEEL shape (Saidie Oct 19): ball + toe pads on the floor, heel held at the bind-pose lift (HHp), never forced flat"""
         pt=0.0; a_=ank
-        for _ in range(3):
+        for _ in range(4):
             a_=ground(sd,a_,knee_pt,pt,yaw,'flat'); meshes_eval(True); fs=foot_stats(sd,FLOOR); meshes_eval(False)
-            dh=(fs['heel_mm']-fs['ball_mm'])/1000.0
+            dh=(fs['heel_mm']-fs['ball_mm']-HHp[sd])/1000.0
             if abs(dh)<0.0015: break
             pt-=math.degrees(math.atan2(dh,0.16))   # heel high -> toes up (negative pitch) until the sole is level
         return a_
