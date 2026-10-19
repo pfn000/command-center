@@ -921,8 +921,8 @@ elif MODE=='poses4':
             kn=PB['Right knee'].head.copy(); th=(PB['Right knee'].head-PB['Right leg'].head).normalized()
             fd=(th+Vector((0,0,-0.6))).normalized()
             rep['Left']=place_hand('Left',PB['Right leg'].head.lerp(kn,0.86)+Vector((0,0.0,0.10)),['Body','Shorts'],ex('Left'),Vector((SG*0.5,0.2,-0.3)),fd,incl=frozenset({'RLEG'}))
-            q=PB['Right leg'].head.lerp(PB['Right knee'].head,0.70)+Vector((0,-0.01,0.10))
-            rep['Right']=place_hand('Right',q,['Body','Shorts'],ex('Right'),Vector((-SG*0.8,0.1,-0.2)),fd,incl=frozenset({'RLEG'}))
+            q=PB['Right leg'].head.lerp(PB['Right knee'].head,0.62)+Vector((0,-0.01,0.10))
+            rep['Right']=place_hand('Right',q,['Body','Shorts'],ex('Right'),Vector((-SG*0.8,0.1,-0.2)),fd,incl=frozenset({'RLEG','LARM'}))   # top hand rests on the thigh or ON the left hand, never inside it
         elif name=='ankles_crossed':
             for sd,sx in (('Left',SG),('Right',-SG)):
                 q=PB[sd+' leg'].head.lerp(PB[sd+' knee'].head,0.70)+Vector((0,0,0.10))
@@ -947,7 +947,7 @@ elif MODE=='poses4':
             else:
                 rep['Left']=on_hip('Left')
                 hd=PB['Head'].head; q=hd+Vector((-SG*0.03,0.10,0.11))
-                r_=place_hand('Right',q,['HeadShell'],frozenset(),Vector((-SG*0.8,0.15,0.6)),Vector((SG*0.55,0.25,0.8)),gap=0.0015)   # head collider: hair+skull envelope fitted to her mesh
+                r_=place_hand('Right',q,['HeadShell'],frozenset(),Vector((-SG*0.8,0.15,0.6)),Vector((SG*1.0,0.35,0.05)),gap=0.0015)   # fingers across the back of her head toward her left ear, like the ref   # head collider: hair+skull envelope fitted to her mesh
                 if r_:
                     # never into her skull/face: signed test against the head meshes, lift off in 2 mm steps
                     meshes_eval(True); Th=target_bvh(['Female Head','Cranium','Body'],frozenset({'RARM'}),near=PB['Right wrist'].head,rad=0.3); hs=hand_stats('Right',Th); meshes_eval(False); k=0
@@ -996,6 +996,10 @@ elif MODE=='poses4':
             az=40 if c.x>bc.x else -40
             if nm=='hand_behind_head' and sd=='Right': az=150 if c.x>bc.x else -150
             setcam(c,az,10,max(ext*2.0,0.26)/(24/85),85); render(OUT+f'/{nm}_hand{sd[0]}.jpg')
+        if nm=='hand_behind_head':
+            hw=cw[HANDV['Right']]; hc=Vector(tuple(hw.mean(axis=0))); hd=PB['Head'].head+Vector((0,0,0.09)); cc=(hc+hd)/2
+            for vw,az,el in (('headF',0,8),('headB',180,8),('headTop',180,70)):
+                setcam(cc,az,el,0.42/(24/85),85); render(OUT+f'/{nm}_{vw}.jpg')
         fw=np.concatenate([cw[FOOTV['Left']],cw[FOOTV['Right']]]); c=Vector(tuple(fw.mean(axis=0))); ext=float((fw.max(axis=0)-fw.min(axis=0)).max())
         for vw,az in (('front',0),('q34',-35)):
             setcam(c+Vector((0,0,0.03)),az,7,max(ext*1.5,0.36)/(24/70),70); render(OUT+f'/{nm}_feet_{vw}.jpg')
