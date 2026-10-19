@@ -1,0 +1,9 @@
+{
+ "render": {
+  "shards": 20,
+  "samples": 8,
+  "res": "720x1280",
+  "nout": 1200
+ },
+ "note": "dance4 big-fix #1 (16:3xZ): rig27 33 body bones, One-Euro zero-phase, face track head/neck 30/30/40 + shape keys, leg capsules, bounce, spring cam, 120 fps slerp"
+}
