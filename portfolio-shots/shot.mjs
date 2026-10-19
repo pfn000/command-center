@@ -5,6 +5,9 @@ import { execSync } from 'node:child_process'
 // stills of /work /emmico /writing at 1600x900 + 390x844, dark + light; then the desktop home->Work scroll video,
 // recorded as a screenshot sequence (frame by frame, so a slow runner can't stretch it) and encoded at 24 fps, <=1.9 MB.
 const T0 = Date.now()
+// r14b: video only (r14 stills are in run 39194803603). The runner image has no ffmpeg on PATH: fetch a static build in the background while the frames are captured.
+import { exec } from 'node:child_process'
+const FF = new Promise((res) => exec('cd /tmp/pw && npm i --no-audit --no-fund ffmpeg-static@5.2.0 ffprobe-static@3.1.0 >/tmp/ff.log 2>&1; node -e "process.stdout.write(require(\'ffmpeg-static\')+\' \'+require(\'ffprobe-static\').path)"', { timeout: 300000 }, (e, so) => res(e ? null : so.trim().split(' '))))
 const [base, out] = process.argv.slice(2)
 const B = base.replace(/\/$/, '')
 const report = { shots: [], errors: [], checks: {}, videos: [] }
@@ -52,7 +55,7 @@ async function lazyAll(p) {
 const absTop = (p, sel) => p.evaluate((s) => { const e = document.querySelector(s); return e ? Math.round(e.getBoundingClientRect().top + window.scrollY) : null }, sel)
 const scrollTo = async (p, y, w = 900) => { await p.evaluate((v) => window.scrollTo(0, v), Math.max(0, Math.round(y))); await p.waitForTimeout(w) }
 
-for (const [kind, theme] of [['d', 'dark'], ['d', 'light'], ['p', 'dark'], ['p', 'light']]) {
+for (const [kind, theme] of []) {
   if (!browser.isConnected()) browser = await LAUNCH()
   const k = `${kind}-${theme}`
   const { c, p } = await ctx(kind, theme)
@@ -147,14 +150,19 @@ async function desktopVideo() {
   report.checks.videoCapture = { frames: n, seconds: Math.round((Date.now() - t0) / 1000), seg }
   console.log('video frames', n, Math.round((Date.now() - t0) / 1000))
   if (n < 48) return
+  let ffp = await FF
+  if (!ffp) { try { execSync('sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg', { timeout: 300000 }); ffp = ['ffmpeg', 'ffprobe'] } catch (e) { report.errors.push('no ffmpeg: ' + String(e).slice(0, 200)); return } }
+  const [FFM, FFP] = ffp
+  report.checks.ffmpeg = FFM + ' | ' + execSync(`${FFM} -version`).toString().split('\n')[0]
   const mp4 = `${out}/video-d-dark-home-work-scroll.mp4`
-  const enc = (crf) => { execSync(`ffmpeg -y -loglevel error -framerate 24 -i ${dir}/f%05d.jpg -vf "scale=1280:720:flags=lanczos,format=yuv420p" -c:v libx264 -preset slow -profile:v high -crf ${crf} -movflags +faststart -an ${mp4}`, { timeout: 300000 }); return fs.statSync(mp4).size }
+  const enc = (crf) => { execSync(`${FFM} -y -loglevel error -framerate 24 -i ${dir}/f%05d.jpg -vf "scale=1280:720:flags=lanczos,format=yuv420p" -c:v libx264 -preset slow -profile:v high -crf ${crf} -movflags +faststart -an ${mp4}`, { timeout: 300000 }); return fs.statSync(mp4).size }
   let crf = 26, bytes = enc(crf)
   while (bytes > 1.9e6 && crf < 44) { crf += 2; bytes = enc(crf) }
-  const dur = Number(execSync(`ffprobe -v error -show_entries format=duration -of csv=p=0 ${mp4}`).toString().trim())
+  const dur = Number(execSync(`${FFP} -v error -show_entries format=duration -of csv=p=0 ${mp4}`).toString().trim())
   report.videos.push({ file: 'video-d-dark-home-work-scroll.mp4', bytes, duration: dur, crf, frames: n })
   // contact sheet of the video for a quick look
-  execSync(`ffmpeg -y -loglevel error -i ${mp4} -vf "fps=12/${dur.toFixed(2)},scale=400:-2,tile=4x3" -frames:v 1 ${out}/video-d-dark-sheet.jpg`, { timeout: 120000 })
+  execSync(`${FFM} -y -loglevel error -i ${mp4} -vf "fps=12/${dur.toFixed(2)},scale=400:-2,tile=4x3" -frames:v 1 ${out}/video-d-dark-sheet.jpg`, { timeout: 120000 })
+  for (const f of [40, Math.round(n * 0.35), Math.round(n * 0.55), Math.round(n * 0.75), n - 30]) { try { fs.copyFileSync(`${dir}/f${String(f).padStart(5, '0')}.jpg`, `${out}/video-d-dark-frame${String(f).padStart(3, '0')}.jpg`) } catch {} }
   fs.rmSync(dir, { recursive: true, force: true })
 }
 await desktopVideo().catch((e) => report.errors.push('video: ' + String(e).slice(0, 300)))

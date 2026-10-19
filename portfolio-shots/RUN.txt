@@ -1,1 +1,1 @@
-v7 r14 proof run (PleX slate dim fix, Emmi_Official logo once, Medium links on /writing, desktop scroll video as a frame sequence) 2026-10-19T03:27Z 1792380440981194173
+v7 r14b: desktop home->work scroll video only (frame sequence + static ffmpeg) 2026-10-19T03:49Z 1792381796177954668
