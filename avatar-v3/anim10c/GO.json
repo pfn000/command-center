@@ -1,12 +1,1 @@
-{
- "render": [
-  {
-   "anim": "poses6",
-   "shards": 6,
-   "samples": 10,
-   "res": "900x1200",
-   "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
-  }
- ],
- "note": "anim10c poses6 #4 (18:24:56Z): thigh proxy radius sanity (7.2 cm; #3 measured 41 cm), standing hips 4.5 cm forward (balance) [182723]"
-}
+{"note": "anim10c poses6 #5 (worker 92b0eaba 19:1xZ): one relaxed default hand before contact (no draping, pinch reject), elbow/wrist twist clamp 160, standing knee valgus + half-hip knee gap, knee_over_knee authored (thigh 9 cm over the lower knee, shin hanging, <=8 mm flesh contact allowed)", "render": [{"res": "900x1200", "anim": "poses6", "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json", "shards": 6, "samples": 10}]}

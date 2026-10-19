@@ -1,4 +1,3 @@
-# rev 182723
 
 # Jena v3.7 run-10c ANIMATION clips (Saidie 9:47 PM Oct 18): talk/blink/expressions, dance retargeted from her TikTok ref, with bone-track export.
 # Renders from the SAVED run-10c .blend as built (no model edits). Face uses her existing shape keys only.
@@ -796,7 +795,64 @@ elif MODE in ('poses4','poses6'):
         # visible high-heel lift on standing feet, foot-vs-knee gap, hand-vs-body/shirt colliders, shirt pushed outside the body on seated poses.
         _ff0=fingers_flat; _sf0=settle_fingers
         def fingers_flat(sd,c1=16.0,c2=24.0,c3=12.0): return _ff0(sd,c1,c2,c3)
-        def settle_fingers(sd,T,lo=-12.0,hi=40.0,goal=0.0012,rest_hover=30.0): return _sf0(sd,T,lo,hi,goal,rest_hover)
+        # poses6 #5 (root 18:4xZ): ONE relaxed default hand (MCP 15-30, PIP 20-40, thumb slightly out, curl rising index->little), applied BEFORE the
+        # contact clamp; no draping (the draped fingers were the claws/pinches of #4); pinch (thumb tip - index tip < 15 mm) rejected
+        RELAXH={'IndexFinger':(17.0,24.0,12.0),'MiddleFinger':(20.0,28.0,14.0),'RingFinger':(23.0,32.0,16.0),'LittleFinger':(26.0,36.0,18.0)}
+        P5HAND={}
+        def relaxed_hand(sd):
+            s=sd[0]
+            for f,(c1,c2,c3) in RELAXH.items():
+                for j in (1,2,3):
+                    n=f'{f}{j}_{s}'
+                    if n in PB: PB[n].matrix_basis=BASE[n]
+                upd()
+                for j,a_ in ((1,c1),(2,c2),(3,c3)):
+                    n=f'{f}{j}_{s}'
+                    if n in PB: wrot_v(n,FSIGN[(s,f)]*a_,_lx(n))
+            for j,a_ in ((1,6.0),(2,10.0),(3,8.0)):
+                n=f'Thumb{j}_{s}'
+                if n in PB: PB[n].matrix_basis=BASE[n]; upd(); wrot_v(n,FSIGN[(s,'Thumb')]*a_,_lx(n))
+            tt=next((f'Thumb{j}_{s}' for j in (3,2) if f'Thumb{j}_{s}' in PB),None); it=f'IndexFinger3_{s}'; k=0
+            while tt and it in PB and (PB[tt].tail-PB[it].tail).length<0.015 and k<6:
+                for j in (1,2):
+                    n=f'Thumb{j}_{s}'
+                    if n in PB: wrot_v(n,-FSIGN[(s,'Thumb')]*4.0,_lx(n))
+                k+=1
+            P5HAND[sd]={'pinch_fix_steps':k,'thumb_index_mm':round((PB[tt].tail-PB[it].tail).length*1000,1) if tt and it in PB else None}
+            return {'relaxed_default':True,**P5HAND[sd]}
+        def settle_fingers(sd,T,lo=-12.0,hi=40.0,goal=0.0012,rest_hover=30.0): return relaxed_hand(sd)
+        def fingers_flat(sd,c1=16.0,c2=24.0,c3=12.0): return relaxed_hand(sd)
+        def twist_clamp(n,lim=160.0):
+            # swing-twist about the bone's own Y: |twist| capped (kills the 179.9 deg flips)
+            if n not in PB: return None
+            m=PB[n].matrix_basis; q=m.to_quaternion(); loc=m.to_translation()
+            tw=Quaternion((q.w,0.0,q.y,0.0)); 
+            if tw.magnitude<1e-9: return 0.0
+            tw.normalize(); ang=math.degrees(2*math.atan2(tw.y,tw.w)); ang=(ang+180)%360-180
+            if abs(ang)<=lim: return round(ang,1)
+            sw=q@tw.inverted(); tw2=Quaternion((0,1,0),math.radians(math.copysign(lim,ang)))
+            PB[n].matrix_basis=Matrix.Translation(loc)@(sw@tw2).to_matrix().to_4x4(); upd(); return (round(ang,1),lim)
+        def knee_valgus_fix(m=0.012):
+            out={}
+            for sd,o in (('Left','Right'),('Right','Left')):
+                hip=PB[sd+' leg'].head.copy(); ank=PB[sd+' ankle'].head.copy(); K=PB[sd+' knee'].head.copy(); ax=(ank-hip).normalized()
+                lat=PB[sd+' leg'].head-PB[o+' leg'].head; lat.z=0; lat.normalize(); lat=(lat-ax*lat.dot(ax)).normalized()
+                c=hip+ax*(K-hip).dot(ax); off=(K-c).dot(lat); out[sd]=round(off*1000,1)
+                if off<-m and (K-c).length>0.01:
+                    ang=min(20.0,math.degrees((-m-off)/max((K-c).length,0.05))); Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                    sg=1.0 if ax.cross((K-c).normalized()).dot(lat)>=0 else -1.0; wrot_v(sd+' leg',sg*ang,ax)
+                    if (PB[sd+' knee'].head-c).dot(lat)<off: wrot_v(sd+' leg',-2*sg*ang,ax)
+                    for n_,R_ in Ra.items(): set_rot(n_,R_)
+                    out[sd+'_fixed_deg']=round(ang,1)
+            kd=PB['Left knee'].head-PB['Right knee'].head; kd.z=0; hw=PB['Left leg'].head-PB['Right leg'].head; hw.z=0
+            if kd.length<0.5*hw.length:
+                for sd,o in (('Left','Right'),('Right','Left')):
+                    hip=PB[sd+' leg'].head.copy(); ank=PB[sd+' ankle'].head.copy(); ax=(ank-hip).normalized(); Ra={n_:PB[n_].matrix.to_3x3().copy() for n_ in (sd+' ankle',sd+' toe') if n_ in PB}
+                    d0=(PB['Left knee'].head-PB['Right knee'].head).length; wrot_v(sd+' leg',4.0,ax)
+                    if (PB['Left knee'].head-PB['Right knee'].head).length<d0: wrot_v(sd+' leg',-8.0,ax)
+                    for n_,R_ in Ra.items(): set_rot(n_,R_)
+            kd=PB['Left knee'].head-PB['Right knee'].head; kd.z=0; out['knee_gap_cm']=round(kd.length*100,1); out['half_hip_cm']=round(0.5*hw.length*100,1)
+            return out
         SHIRT=bpy.data.objects.get('Shirt') or next((o for o in bpy.data.objects if o.type=='MESH' and 'shirt' in o.name.lower()),None)
         SHWRAP=None
         if SHIRT is not None:
@@ -965,10 +1021,10 @@ elif MODE in ('poses4','poses6'):
                 la=PB['Left ankle'].head.copy(); lk=PB['Left knee'].head.copy()
                 # top leg (right): thigh LYING across the left thigh just behind the left knee (near horizontal, like the ref),
                 # shin hanging down in front of the left shin, foot softly pointed; only the thigh lift iterates until 0 leg-leg
-                K=lk+Vector((SG*0.035,0.035,0.105+0.008*it)); hp_=PB['Right leg'].head.copy()
+                K=lk+Vector((SG*0.030,0.030,(0.090 if P6 else 0.105+0.008*it))); hp_=PB['Right leg'].head.copy()   # #5: authored height, flesh contact allowed
                 align('Right leg',K-hp_)
                 kk=PB['Right knee'].head.copy()
-                sh_=Vector((SG*0.06,-0.30,-1.0)).normalized(); align('Right knee',sh_)
+                sh_=Vector((SG*0.05,(-0.18 if P6 else -0.30),-1.0)).normalized(); align('Right knee',sh_)   # top shin hangs beside the lower shin
                 foot_orient('Right',50.0,SG*10.0,'line')
                 inf['top_foot_kick_cm']=round((la.y-PB['Right ankle'].head.y)*100,1)
                 inf['top_thigh_pitch_deg']=round(math.degrees(math.asin(max(-1,min(1,(kk-hp_).normalized().z)))),1)
@@ -1088,7 +1144,7 @@ elif MODE in ('poses4','poses6'):
         sc.render.resolution_x,sc.render.resolution_y=RW,RH
     for nm in mine:
         t0=time.time(); seated=nm in ('knee_over_knee','ankles_crossed','side_saddle')
-        NIT=16 if nm=='knee_over_knee' else (12 if seated else 1); best=None
+        NIT=(1 if P6 else 16) if nm=='knee_over_knee' else (12 if seated else 1); best=None
         for it in range(NIT):
             meshes_eval(False); inf=legs(nm,it); ll=legleg()
             log('poses4 legs',nm,it,'leg_leg',ll,inf)
@@ -1100,7 +1156,7 @@ elif MODE in ('poses4','poses6'):
             lat_=(PB['Left leg'].head-PB['Right leg'].head).normalized(); hist_=[]
             for k_ in range(30):
                 meshes_eval(True); lv=leg_vs_leg('Right'); meshes_eval(False); hist_.append((lv['pen_verts'],lv['pen_mm']))
-                if lv['pen_verts']==0: break
+                if lv['pen_verts']==0 or (P6 and (lv['pen_mm'] or 0)<=8.0) or (P6 and k_>=6): break   # #5: <=8 mm is the thighs pressing together, not a clip
                 if k_<20:
                     z0=PB['Right knee'].head.z; wrot_v('Right leg',1.2,lat_)
                     if PB['Right knee'].head.z<z0: wrot_v('Right leg',-2.4,lat_)
@@ -1110,8 +1166,10 @@ elif MODE in ('poses4','poses6'):
             meshes_eval(True); inf['leg_vs_leg_vertex']={'steps':hist_,'final':leg_vs_leg('Right')}; meshes_eval(False)
             log('poses4 leg clearance',nm,inf['leg_vs_leg_vertex'])
         if seated: seat_on(inf['seat_top'])
+        if P6 and not seated: inf['p5_knee']=knee_valgus_fix()
         hrep=hands(nm,inf)
         p6={}
+        if P6: p6['twist_clamp']={n_:twist_clamp(n_) for n_ in ('Left elbow','Right elbow','Left wrist','Right wrist')}
         if P6:
             if SHWRAP is not None: SHWRAP.show_render=SHWRAP.show_viewport=bool(seated)
             for _o in [o_ for o_ in bpy.data.objects if o_.name.startswith('P6thigh')]: bpy.data.objects.remove(_o,do_unlink=True)
