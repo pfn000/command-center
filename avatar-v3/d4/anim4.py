@@ -125,6 +125,16 @@ sc.render.engine='CYCLES'; sc.cycles.device='CPU'; sc.cycles.samples=SAMP; sc.cy
 try: sc.cycles.denoiser='OPENIMAGEDENOISE'
 except Exception as e: log('denoiser',e)
 sc.render.use_persistent_data=True; sc.render.film_transparent=False
+if E.get('GPU')=='1':
+    try:
+        _pr=bpy.context.preferences.addons['cycles'].preferences
+        for _typ in ('OPTIX','CUDA'):
+            try: _pr.compute_device_type=_typ; _pr.get_devices(); _dv=[d for d in _pr.devices if d.type==_typ]
+            except Exception: _dv=[]
+            if _dv:
+                for d in _pr.devices: d.use=(d.type==_typ)
+                sc.cycles.device='GPU'; log('GPU',_typ,[d.name for d in _dv]); break
+    except Exception as ex: log('GPU setup failed',ex)
 sc.render.resolution_x,sc.render.resolution_y=RW,RH; sc.render.resolution_percentage=100
 sc.render.image_settings.file_format='JPEG'; sc.render.image_settings.quality=92
 _RF=[0]
