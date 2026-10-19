@@ -1,0 +1,39 @@
+name: tt8k probe
+# One-frame probes of the 8K turntable (same script/pose as tt8k.yml) uploaded to the private dataset for checking before the full render.
+on:
+  push:
+    branches: [avatar-v3]
+    paths: [avatar-v3/TT8KPROBE.txt]
+permissions:
+  contents: read
+env:
+  RUNID: "39182928356"
+  BLEND: "jena-v37r10-final.blend"
+  TT_POSE: '{"ARM_DOWN": 30, "SHOULDER_DOWN": 10, "ELBOW_BEND": -12, "WRIST_BEND": 8, "RELAX": true}'
+  NF: "300"
+  SAMPLES: "4"
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: { fr: ["0", "38", "262"] }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }
+        run: |
+          curl -sL -o /tmp/b.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+          mkdir -p /opt/blender && tar -xf /tmp/b.tar.xz -C /opt/blender --strip-components=1 && rm /tmp/b.tar.xz
+          sudo apt-get update -qq && sudo apt-get install -y -qq libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          pip install -q huggingface_hub > /dev/null
+          python3 -c "import os; from huggingface_hub import hf_hub_download as d; print(d('Saidie000/jena-avatar-assets','avatar-v3/runs/$RUNID/A0/$BLEND',repo_type='dataset',token=os.environ['HF'],local_dir='/tmp/in'))"
+      - name: Frame
+        env: { HF: "${{ secrets.AV2_HF_TOKEN }}", TT_ONLY: "${{ matrix.fr }}" }
+        run: |
+          TT_NF=$NF TT_SAMPLES=$SAMPLES timeout -k 10 3000 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/tt8k.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/frames 2>&1 | grep -E "^\[tt8k\]|Error|Traceback" | cut -c1-600
+          ls -la /tmp/frames
+          python3 -c "
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_folder(folder_path='/tmp/frames',path_in_repo='avatar-v3/runs/$RUNID/turntable-8k/probe-a30',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset'); print('uploaded')"
