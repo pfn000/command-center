@@ -328,6 +328,22 @@ def main():
             json.dump({'audio_done_s': round(s.end, 2), 'duration': pr['duration'], 'utterances': utts}, open(pjs, 'w'), indent=1)
             live(stage='transcribing', audio_done_s=round(s.end, 1), pct=round(100 * s.end / max(pr['duration'], 1)), utterances=len(utts),
                  tail=[f"[{u['tc']}] {u['speaker']}: {u['text'][:300]}" for u in utts[-12:]]); last_push = time.time()
+    # stray labels: a "speaker" holding under 1.5 s (and under 2% of the talk) is almost always a split-off syllable of a
+    # neighbour; give those words to the speaker talking around them, then number speakers by first appearance.
+    talk = {}
+    for w in words: talk[w['speaker']] = talk.get(w['speaker'], 0) + (w['end'] - w['start'])
+    tot = sum(talk.values()) or 1
+    stray = {k for k, v in talk.items() if k == 'SPEAKER ?' or (v < 1.5 and v / tot < 0.02)}
+    if stray and len(talk) - len(stray) >= 1:
+        for i, w in enumerate(words):
+            if w['speaker'] in stray:
+                prev = next((words[j]['speaker'] for j in range(i - 1, -1, -1) if words[j]['speaker'] not in stray), None)
+                nxt = next((words[j]['speaker'] for j in range(i + 1, len(words)) if words[j]['speaker'] not in stray), None)
+                w['speaker'] = prev or nxt
+        ren = {}
+        for w in words: ren.setdefault(w['speaker'], f'SPEAKER {len(ren) + 1}')
+        for w in words: w['speaker'] = ren[w['speaker']]
+        meta['stray_speakers_folded'] = sorted(stray)
     utts = utterances(words); meta['speakers_in_transcript'] = sorted({u['speaker'] for u in utts})
     write_md(utts, os.path.join(OUT, 'transcript.md'), title); write_srt(utts, os.path.join(OUT, 'transcript.srt'))
     json.dump({'title': title, 'url': URL, 'language': tinfo.language, 'model': model, 'utterances': utts, 'segments': segs_out, 'words': words, 'diarization': segs},
