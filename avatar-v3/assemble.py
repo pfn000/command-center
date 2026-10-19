@@ -3258,6 +3258,18 @@ def _flags2(vis,TB_polys):
             if loc is not None and (Vector(tuple(p))-loc).dot(nr)<-0.003: c3+=1
         f[o.name+('_verts_inside_body_gt3mm_x4' if o is HR else '_inside_body_gt3mm_x2')]=c3
     return f
+HT_SEGS=[(0,9,'neutral'),(9,33,'head tilt left'),(33,57,'head tilt right'),(57,81,'head forward'),(81,105,'head back'),(105,141,'cute side tilt (eyes follow)')]
+def headtilt_base(f,fps=30):
+    pose_relaxed(); s_=[x for x in HT_SEGS if x[0]<=f<x[1]] or [HT_SEGS[-1]]; s_=s_[0]; u=(f-s_[0])/(s_[1]-s_[0]); lab=s_[2]
+    a=_ss(min(u/0.35,1.0))*(1-_ss(max((u-0.7)/0.3,0.0)))
+    if lab=='head tilt left': wrot('Neck',7*a,'Y'); wrot('Head',17*a,'Y')
+    elif lab=='head tilt right': wrot('Neck',-7*a,'Y'); wrot('Head',-17*a,'Y')
+    elif lab=='head forward': wrot('Neck',8*a,'X'); wrot('Head',14*a,'X')
+    elif lab=='head back': wrot('Neck',-7*a,'X'); wrot('Head',-13*a,'X')
+    elif lab.startswith('cute'):
+        wrot('Neck',6*a,'Y'); wrot('Head',15*a,'Y'); wrot('Head',-10*a,'Z'); wrot('Head',4*a,'X')
+        for e_ in ('LeftEye','RightEye'): wrot(e_,-9*a,'Z')
+    bpy.context.view_layer.update(); return lab
 def qa_tests2(test):
     sh=int(os.environ.get('QA_SHARD','0')); n=int(os.environ.get('QA_SHARDS','1')); D_=OUT+f'/tests/{test}'; os.makedirs(D_,exist_ok=True)
     sc.render.resolution_x,sc.render.resolution_y=720,1280; sc.render.resolution_percentage=100; sc.cycles.samples=int(P.get('TEST_SAMPLES',8)); sc.render.use_persistent_data=True
@@ -3301,6 +3313,17 @@ def qa_tests2(test):
                 log('tpose',nm,a)
         if 'TestSeat' in bpy.data.objects: bpy.data.objects['TestSeat'].hide_render=True
         json.dump(trk,open(D_+'/track-pose0.json','w'))
+    elif test=='headtilt':
+        NF=HT_SEGS[-1][1]; bones=phys_bones(body=False); SIM=spring_sim(lambda f: headtilt_base(f,30),NF,30,bones)
+        views=(('front',0),('q34',-35)); vw,az=views[sh%2]; tgt=Vector((ctr.x,ctr.y,float(EYE_TOP_Z)-0.18))
+        info['springs']={'hair_bones':len(bones),'max_deg':'side/pigtail 30, back hair 15, bangs 14'}
+        for f in range(NF):
+            lab=headtilt_base(f,30); ang=apply_springs(SIM,f)
+            e={'label':lab,'max_back_hair_deg':round(max([v for k_,v in ang.items() if k_.startswith('Back hair')] or [0]),1)}
+            if f%3==0:
+                try: e['flags']=_flags2(vis,polys)
+                except Exception as ex: e['flags_error']=str(ex)
+            info['frames'][f]=e; _tv_shot(D_+f'/f{f:03d}_{vw}.jpg',tgt,az,3,0.62/(24/50),50); log('thead',vw,f)
     elif test=='catwalk':
         NF=120; WARM=60; bones=phys_bones(); SIM=spring_sim(lambda f: catwalk_base(f-WARM if f>=WARM else f,30),NF+WARM,30,bones)
         info['springs']=len(bones); views=(('front',0),('q34',-35)); vw,az=views[sh%2]; cams={vw:full(az)}; trk={}
