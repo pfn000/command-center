@@ -8,5 +8,5 @@
    "data": "avatar-v3/anim10c/39188988743/fist/fist-shard0.json"
   }
  ],
- "note": "anim10c fist2b: per-joint curl signs (old distance test was degenerate -> knotted fingers), curl from rest"
+ "note": "anim10c fist2c: planar curl targets in her palm frame (no axis guessing)"
 }

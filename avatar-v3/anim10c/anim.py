@@ -431,35 +431,37 @@ if MODE=='poses2':
 elif MODE=='fist':
     FING=('IndexFinger','MiddleFinger','RingFinger','LittleFinger')
     def lx(n,c=0): return PB[n].matrix.to_3x3().col[c].normalized()
-    def curl_signs():
-        # per-JOINT sign, tested in the rest T-pose (palms down): + is the way that moves the fingertip DOWN toward the palm side.
-        # (the old test used tip-to-wrist distance, which is nearly symmetric for a straight finger -> random signs -> knotted fingers)
-        rest(); S={}
-        for sd in 'LR':
-            for f_ in FING:
-                for j in (1,2,3):
-                    n=f'{f_}{j}_{sd}'
-                    if n not in PB: continue
-                    base={pb.name:pb.matrix_basis.copy() for pb in PB}
-                    tip=lambda: PB[f'{f_}3_{sd}'].tail.copy(); z0=tip().z
-                    wrot_v(n,30,lx(n)); z1=tip().z
-                    for pb in PB: pb.matrix_basis=base[pb.name]
-                    upd(); S[(sd,f_,j)]=1 if z1<z0 else -1
-        return S
-    meshes_eval(False); SG=curl_signs(); log('curl signs',SG)
-    ANG=(85,100,70)
-    FINB=[f'{f_}{j}_{sd}' for sd in 'LR' for f_ in FING for j in (1,2,3)]
+    # FIST by target directions in her own palm frame (planar curl per finger): no per-bone axis/sign guessing, fingers can't cross.
+    ANG=(88,100,72)
+    def palm_frame(sd):
+        w=PB[('Left' if sd=='L' else 'Right')+' wrist'].head.copy()
+        u=(PB[f'MiddleFinger1_{sd}'].head-w).normalized(); s=(PB[f'IndexFinger1_{sd}'].head-PB[f'LittleFinger1_{sd}'].head); s=(s-u*s.dot(u)).normalized(); n=u.cross(s)
+        # palm side = the side her relaxed fingers already curl toward
+        tip=PB[f'MiddleFinger3_{sd}'].tail; k=PB[f'MiddleFinger1_{sd}'].head
+        if (tip-k).dot(n)<0: n=-n
+        return u,n
+    relaxed(); REL={}
+    for sd in 'LR':
+        u,n=palm_frame(sd)
+        for f_ in FING:
+            for j in (1,2,3):
+                b=PB[f'{f_}{j}_{sd}']; d=(b.tail-b.head).normalized(); REL[(sd,f_,j)]=(d.dot(u),d.dot(n),d)
+    log('fist palm-frame ready')
     def fist(a):
         relaxed()
-        for n in FINB:
-            if n in PB: PB[n].matrix_basis=Matrix.Identity(4)
-        upd()
         for sd in 'LR':
+            u,n=palm_frame(sd)
             for f_ in FING:
+                acc=0.0
                 for j in (1,2,3):
-                    n=f'{f_}{j}_{sd}'
-                    rel=(14,22,14)[j-1]*(1-a)   # start from her relaxed curl, end at the full fist
-                    wrot_v(n,SG[(sd,f_,j)]*(rel+ANG[j-1]*a),lx(n))
+                    acc+=ANG[j-1]; th=math.radians(acc)
+                    df=(u*math.cos(th)+n*math.sin(th)).normalized()
+                    # keep the finger's own small sideways set (from relaxed) so fingers stay side by side
+                    du,dn,d0=REL[(sd,f_,j)]; side=d0-u*du-n*dn
+                    df=(df+side*0.6).normalized()
+                    b=PB[f'{f_}{j}_{sd}']; cur=(b.tail-b.head).normalized()
+                    tgt=cur.slerp(df,a) if a<1.0 else df
+                    align(f'{f_}{j}_{sd}',tgt)
         return a
     # thumb: search for the fold that lays the thumb tip over the middle phalanx of index/middle (outside the fingers)
     def thumb_fit(sd):
