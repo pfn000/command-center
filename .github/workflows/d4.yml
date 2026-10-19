@@ -1,4 +1,3 @@
-# rev 172210
 name: d4
 # Jena v3.7 DANCE4 big-fix: rig27 (33 body bones), One-Euro on every channel, face track (MediaPipe Face Landmarker) -> head/neck + her own shape keys,
 # leg capsule colliders, 120 fps by slerp between solved poses, spring camera, full-bone glow overlay. Inputs/outputs in the private HF dataset.
@@ -64,7 +63,7 @@ jobs:
         run: |
           mkdir -p /tmp/out/dance2
           timeout -k 10 9000 /opt/blender/blender -b --factory-startup --python-exit-code 3 --python avatar-v3/d4/anim4.py -- /tmp/in/avatar-v3/runs/$RUNID/A0/$BLEND /tmp/out/dance2 avatar-v3/cw4/dance2-src.json > /tmp/log.txt 2>&1 || echo "BLENDER EXIT $?"
-          grep -E "^\[anim\] (D4|RIG27|meshes|lr|abd|tracking|high-heel)|Error|Traceback|line [0-9]+" /tmp/log.txt | cut -c1-900 | tail -80; cp /tmp/log.txt /tmp/out/dance2/log-shard$SHARD.txt || true; ls /tmp/out/dance2 | wc -l
+          grep -E "^\[anim\] (D4|D6|RIG27|meshes|lr|abd|tracking|high-heel)|Error|Traceback|line [0-9]+" /tmp/log.txt | cut -c1-900 | tail -80; cp /tmp/log.txt /tmp/out/dance2/log-shard$SHARD.txt || true; ls /tmp/out/dance2 | wc -l
       - uses: actions/upload-artifact@v4
         with: { name: "frames-${{ matrix.shard }}", path: /tmp/out/dance2, retention-days: 3 }
       - name: Upload (private)
@@ -94,7 +93,7 @@ jobs:
           sudo apt-get install -y -qq ffmpeg > /dev/null 2>&1 || true
           pip install -q opencv-python-headless numpy huggingface_hub mediapipe > /dev/null
           ls /tmp/fr | wc -l
-          sudo apt-get install -y -qq libegl1 libgles2 libgl1 > /dev/null 2>&1; mkdir -p /tmp/split && FACEJ=/tmp/face/face.json SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/d4/compose120.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance4 2>&1 | tail -40; ls -la /tmp/split
+          sudo apt-get install -y -qq libegl1 libgles2 libgl1 > /dev/null 2>&1; mkdir -p /tmp/split && FACEJ=/tmp/face/face.json SRCVID=avatar-v3/cw4/tiktok-1035.mp4 python avatar-v3/d4/compose120.py /tmp/fr avatar-v3/cw4/dance2-src.json /tmp/split v37r10c-split-dance6 2>&1 | tail -40; python avatar-v3/d4/qc720.py /tmp/fr /tmp/split v37r10c-split-dance6 2>&1 | tail -20; ls -la /tmp/split
       - name: Upload (private)
         if: always()
         env: { HF: "${{ secrets.AV2_HF_TOKEN }}" }

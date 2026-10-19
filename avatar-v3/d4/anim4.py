@@ -1,4 +1,3 @@
-# rev 182938
 
 # Jena v3.7 dance4 big-fix (D4=1: rig27, One-Euro, face/head track, leg capsules, 120 fps) on top of run-10c ANIMATION clips (Saidie 9:47 PM Oct 18): talk/blink/expressions, dance retargeted from her TikTok ref, with bone-track export.
 # Renders from the SAVED run-10c .blend as built (no model edits). Face uses her existing shape keys only.
@@ -1144,6 +1143,11 @@ elif MODE=='dance2':
             meshes_eval(False); radial_push(sd,3,'arm'); n+=1; meshes_eval(True); c0=clip_flags().get(key) or 0
         meshes_eval(False); return n
     if D4: exec(open('avatar-v3/d4/d4core.py').read(),globals())
+    D6=D4 and E.get('D6','1')=='1'
+    if D6:
+        try: exec(open('avatar-v3/d4/d6.py').read(),globals())
+        except Exception as ex6:
+            import traceback; log('D6 LOAD FAILED',traceback.format_exc()[-1500:]); D6=False; info['d6_load_error']=traceback.format_exc()[-1500:]
     ABD=None; CROTCH=[0]
     def pose_dance(f,offs=None,locks=None):
         rest(); CUR_F[0]=f; finger_drive(f)
@@ -1343,7 +1347,7 @@ elif MODE=='dance2':
     if D4:
         per_=(NOUT+SHN-1)//SHN; G_SH=list(range(SH*per_,min(NOUT,(SH+1)*per_)))
         KEYS_SH=sorted({k for g in G_SH for k in (int(math.floor(TG[g])),min(int(math.floor(TG[g]))+1,NF-1))}); SNAP={}
-        if E.get('POSE_SMOOTH','1')=='1': _k0,_k1=KEYS_SH[0],KEYS_SH[-1]; KEYS_CORE=set(KEYS_SH); KEYS_SH=list(range(max(0,_k0-2),min(NF,_k1+3)))   # D6: 2 extra keyframes each side for the cross-keyframe smoothing
+        if E.get('POSE_SMOOTH','1')=='1': _k0,_k1=KEYS_SH[0],KEYS_SH[-1]; KEYS_CORE=set(KEYS_SH); _pd=int(E.get('D6_PAD','3')) if D6 else 2; KEYS_SH=list(range(max(0,_k0-_pd),min(NF,_k1+_pd+1)))   # D6: 2 extra keyframes each side for the cross-keyframe smoothing
         CLOSE_SH={c for c in CLOSE if int(round(c*(NOUT-1)/(NF-1))) in G_SH}; log('D4 shard',SH,'out',G_SH[:1],G_SH[-1:],'keys',len(KEYS_SH),'close',sorted(CLOSE_SH))
     for f in (KEYS_SH if D4 else frames_of(NF)):
         t0_=time.time(); meshes_eval(False); pose_dance(f,offs,locks); ang=apply_springs(SIM,f+WARM); setcam(Vector((float(CAMX[f])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
@@ -1550,7 +1554,11 @@ elif MODE=='dance2':
             e['qc_flags']=Fq; e['qc']={k:Mq.get(k) for k in ('balance_margin_cm','com','front_knee_minus_ankle_gap_cm','side_spine_bends','side_knee_bend_L','side_knee_bend_R','ankle_twist_L','ankle_inv_L','ankle_twist_R','ankle_inv_R')}
             if f in CLOSE: json.dump({'frame':f,'measures':Mq,'flags':Fq},open(OUT+f'/q{f:03d}_selfcheck.json','w'),default=str)
         except Exception as ex: e['qc_error']=repr(ex)[:200]
+        if D6:
+            try: meshes_eval(False); finger_curl_clamp(); e['d6_yaw_key']=round(head_world_yaw(float(f),cap=35.0),2); meshes_eval(True)
+            except Exception as ex6: e['d6_key_err']=repr(ex6)[:200]
         if D4: upper_twist(); SNAP[f]=snap()
+        if D6: d6_store_ank(f)
         else: render(OUT+f'/f{f:03d}.jpg')
         if f in CLOSE and (not D4 or f in CLOSE_SH):
             try:
@@ -1592,10 +1600,24 @@ elif MODE=='dance2':
                     if wt>0: acc/=np.linalg.norm(acc); nb[n]=(l0,Quaternion(acc.tolist()),s0)
                 NEW6[k]=(nb,kv_)
             SNAP.update(NEW6); info['d6_pose_smooth']={'bones':len(SM6),'kernel':W6,'keyframes':len(ks6)}
+        if D6:
+            D6INFO['hips_smoothed_keys']=d6_smooth_hips(SNAP)
+            try:
+                _t6=time.time(); D6INFO['qc720_passes']=d6_qc_shard(SNAP,G_SH,locks); D6INFO['qc720_params']=dict(P6)
+                S720,EV720=d6_qc_record(SNAP,G_SH,locks); json.dump({'shard':SH,'joints':QJ+['Left index tip','Right index tip'],'fps_src':30.0,'samples':S720},open(OUT+f'/q720-shard{SH}.json','w'))
+                with open(OUT+f'/collisions-shard{SH}.jsonl','w') as _fe:
+                    for _ev in EV720: _fe.write(json.dumps(_ev,default=str)+'\n')
+                D6INFO['qc720_sec']=round(time.time()-_t6,1); log('D6 qc720 done',len(S720),'samples',len(EV720),'events',D6INFO['qc720_sec'],'s')
+            except Exception as ex6:
+                import traceback; D6INFO['qc720_error']=traceback.format_exc()[-800:]; log('D6 qc720 ERROR',D6INFO['qc720_error'])
         for g in G_SH:
             t=float(TG[g]); k0=int(math.floor(t)); k1=min(k0+1,NF-1); a=t-k0
             if k0 not in SNAP or k1 not in SNAP: log('D4 missing snap',g,k0,k1); continue
-            meshes_eval(False); apply_interp(SNAP[k0],SNAP[k1],a)
+            meshes_eval(False); fx6=None
+            if D6:
+                try: fx6=d6_pose_at(SNAP,t,locks,P6)
+                except Exception as ex6: log('D6 pose_at ERROR',g,repr(ex6)[:300]); apply_interp(SNAP[k0],SNAP[k1],a)
+            else: apply_interp(SNAP[k0],SNAP[k1],a)
             setcam(Vector((float(CAMX120[g])+tgt.x,tgt.y,tgt.z)),CAM[1],CAM[2],CAM[3],CAM[4])
             t1_=time.time(); render(OUT+f'/g{g:04d}.jpg')
             P33,fw=mp33(); kk=k0 if a<0.5 else k1; lk=(info['frames'].get(kk) or {}).get('locked',[])
@@ -1605,8 +1627,15 @@ elif MODE=='dance2':
                     'src_head_rel':[round(float(x),2) for x in (SRC_HPYR[k0]*(1-a)+SRC_HPYR[k1]*a)],'keys':{k:round(KB[k].value,3) for k in FKEYS},
                     'cap_pen_mm':round(leg_pen()[0]*1000,1),'rs':round(time.time()-t1_,1),
                     'w':{n:[round(c,4) for c in (B.matrix_world@PB[n].head)] for n in ('Hips','Head','Left wrist','Right wrist','Left ankle','Right ankle')}}
+            if D6:
+                try:
+                    pv=pov_render(OUT+f'/p{g:04d}.jpg') if E.get('POV','1')=='1' else None
+                    trk[g]['d6']={'hyaw':round(jena_hyaw(),2),'hyaw_src':(round(src_hyaw(t),2) if src_hyaw(t) is not None else None),'hyaw_pre':(round(fx6['hyaw_pre'],2) if fx6 else None),
+                                  'fix':({k:v for k,v in fx6.items() if k!='hyaw_pre'} if fx6 else None),'pov':pv,'knee_dist_cm':(round(fx6['knee_dist']*100,1) if fx6 else None)}
+                except Exception as ex6: log('D6 out ERROR',g,repr(ex6)[:300])
             if g%10==0: log('D4 out',g,trk[g]['rs'])
     info['crotch_hand_fixes']=CROTCH[0]
+    if D4 and D6: D6INFO['finger_curl']=dict(CURLSTAT); D6INFO['leg_capsule_fix']=dict(LEGFIX)
     info['locked_foot_slide_mm']={k:round(v,2) for k,v in slide.items()}
     json.dump(trk,open(OUT+f'/track-shard{SH}.json','w'))
 json.dump(info,open(OUT+f'/{MODE}-shard{SH}.json','w'),indent=0,default=str)

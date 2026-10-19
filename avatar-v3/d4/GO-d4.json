@@ -5,5 +5,5 @@
   "res": "720x1280",
   "nout": 1200
  },
- "note": "dance6 #1 (18:29:38Z): cross-keyframe pose smoothing (arms/hands/spine/neck/head, 1-4-6-4-1, +2 keyframes per shard side) against solver wrist noise; relaxed finger floor MCP20/PIP28/DIP15"
+ "note": "dance6 #2 (worker 92b0eaba 18:5xZ): collider set fitted to mesh + stored, knee spacing, foot/leg/hand/hair projection after interp, finger curl ranges, world head yaw, hip smoothing + foot re-IK, Catmull-Rom 120 fps, 720 Hz QC + up to 6 auto-fix passes, POV cam, colour body map"
 }

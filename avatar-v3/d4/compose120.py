@@ -32,7 +32,32 @@ def draw_grid(img,segs,fx,fy,bh):
     return (img*(1-m*(lay.max(2,keepdims=True)>0))+lay*m).astype(np.uint8)
 def fit_affine(Wd,Px):
     X=np.c_[Wd,np.ones(len(Wd))]; A,*_=np.linalg.lstsq(X,Px,rcond=None); return A
+# D6 color-coded body map: every bone segment / limb its own colour (BGR), legend drawn on the overlay
+SEGC=[('pelvis',(0,140,255)),('spine',(0,230,255)),('chest',(60,200,200)),('neck',(150,255,150)),('head',(255,255,255)),
+      ('L clavicle',(203,130,255)),('R clavicle',(255,200,120)),('L upper arm',(255,0,255)),('R upper arm',(255,80,0)),('L forearm',(200,60,140)),('R forearm',(255,255,0)),
+      ('L hand',(160,120,255)),('R hand',(170,170,0)),('L thigh',(40,40,255)),('R thigh',(40,200,40)),('L shin',(0,90,200)),('R shin',(0,255,170)),('L foot',(80,80,160)),('R foot',(120,160,60))]
+SEGD=dict(SEGC)
+def seg_of(n):
+    s='L' if (n.startswith('Left') or n.endswith('_L') or n.endswith('.L')) else ('R' if (n.startswith('Right') or n.endswith('_R') or n.endswith('.R')) else None)
+    if n in ('Hips','Sacrum') or n.startswith('Hip_'): return 'pelvis'
+    if n in ('Spine','Spine2'): return 'spine'
+    if n in ('Chest','UpperChest','Sternum'): return 'chest'
+    if n in ('Neck','Neck2'): return 'neck'
+    if n=='Head': return 'head'
+    if s is None: return 'spine'
+    if 'shoulder' in n or 'Clav' in n: return s+' clavicle'
+    if n.endswith(' arm') or n.startswith('UpperArm'): return s+' upper arm'
+    if 'elbow' in n or n.startswith('Wrist_Twist'): return s+' forearm'
+    if 'wrist' in n or any(n.startswith(x) for x in ('Thumb','Index','Middle','Ring','Little')): return s+' hand'
+    if n.endswith(' leg'): return s+' thigh'
+    if 'knee' in n: return s+' shin'
+    return s+' foot'
+def draw_legend(img,x0,y0):
+    cv2.rectangle(img,(x0-6,y0-18),(x0+214,y0+10*15+4),(0,0,0),-1); cv2.putText(img,'BODY MAP',(x0,y0-5),cv2.FONT_HERSHEY_SIMPLEX,0.42,(255,255,255),1,cv2.LINE_AA)
+    for i,(lab,c) in enumerate(SEGC):
+        x=x0+(i//10)*108; y=y0+8+(i%10)*15; cv2.line(img,(x,y),(x+16,y),c,4,cv2.LINE_AA); cv2.putText(img,lab,(x+20,y+4),cv2.FONT_HERSHEY_SIMPLEX,0.36,(235,235,235),1,cv2.LINE_AA)
 def bcol(n):
+    if os.environ.get('BODYMAP','1')=='1': return SEGD.get(seg_of(n),(200,200,200))
     if n.startswith('Left') or n.endswith('_L') or n.endswith('.L'): return OV.COL['L']
     if n.startswith('Right') or n.endswith('_R') or n.endswith('.R'): return OV.COL['R']
     if n in ('Neck','Neck2','Head'): return (255,255,255)
@@ -66,6 +91,37 @@ def enc(br):
     return subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','bgr24','-s',f'{2*W}x{H+SH_}','-r',str(FPO),'-i','-','-ss',str(ST0),'-t',str(ST1-ST0),'-i',SRCV,'-map','0:v','-map','1:a',
         '-c:v','libx264','-preset','medium','-crf','21','-maxrate',f'{br}k','-bufsize',f'{2*br}k','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-shortest','-movflags','+faststart',tmp],stdin=subprocess.PIPE)
 BR=int(os.environ.get('VBR','10500')); pipe=enc(BR)
+# D6: first-person POV stream (her eyes, HUD) and a 3-panel stream (third-person | POV | body map)
+POVS=sorted(glob.glob(FR+'/p*.jpg')); HAVE_POV=len(POVS)>0.8*NOUT; PV=720
+def enc2(path,w,h,br):
+    return subprocess.Popen(['ffmpeg','-v','error','-y','-f','rawvideo','-pix_fmt','bgr24','-s',f'{w}x{h}','-r',str(FPO),'-i','-','-ss',str(ST0),'-t',str(ST1-ST0),'-i',SRCV,'-map','0:v','-map','1:a',
+        '-c:v','libx264','-preset','medium','-crf','22','-maxrate',f'{br}k','-bufsize',f'{2*br}k','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-shortest','-movflags','+faststart',path],stdin=subprocess.PIPE)
+def pov_hud(img,d):
+    h_,w_=img.shape[:2]; cx,cy=w_//2,h_//2; pv=(d or {}).get('pov') or {}
+    yaw=float(pv.get('yaw',0) or 0); pit=float(pv.get('pitch',0) or 0); rol=float(pv.get('roll',0) or 0); dp=pv.get('down_px')
+    ang=math.pi/2
+    if dp:
+        a_=np.array(dp[0])*[w_,h_]; b_=np.array(dp[1])*[w_,h_]; v=b_-a_
+        if np.linalg.norm(v)>1e-3: ang=math.atan2(v[1],v[0])
+    # horizon: perpendicular to gravity, shifted by pitch (90 deg FOV: f = half width)
+    f_=w_/2.0; off=math.tan(math.radians(max(-80,min(80,pit))))*f_; hx,hy=cx-math.cos(ang)*off,cy-math.sin(ang)*off
+    dx,dy=-math.sin(ang),math.cos(ang); L_=w_
+    cv2.line(img,(int(hx-dx*L_),int(hy-dy*L_)),(int(hx+dx*L_),int(hy+dy*L_)),(0,255,255),2,cv2.LINE_AA)
+    # gravity-down arrow
+    ax,ay=w_-70,h_-90; cv2.circle(img,(ax,ay),34,(0,0,0),-1); cv2.arrowedLine(img,(ax,ay),(int(ax+math.cos(ang)*28),int(ay+math.sin(ang)*28)),(80,255,80),3,cv2.LINE_AA,tipLength=0.35)
+    cv2.putText(img,'gravity',(ax-30,ay+50),cv2.FONT_HERSHEY_SIMPLEX,0.42,(230,230,230),1,cv2.LINE_AA)
+    # compass strip (heading = world yaw of her head)
+    cv2.rectangle(img,(40,8),(w_-40,44),(0,0,0),-1)
+    for dd in range(-90,91,5):
+        hd=yaw+dd; x=int(cx+dd*(w_-80)/180.0)
+        if int(round(hd))%15==0: cv2.line(img,(x,30),(x,44),(255,255,255),1); cv2.putText(img,f'{int(round(hd))%360}',(x-12,26),cv2.FONT_HERSHEY_SIMPLEX,0.36,(255,255,255),1,cv2.LINE_AA)
+    cv2.drawMarker(img,(cx,46),(0,200,255),cv2.MARKER_TRIANGLE_UP,12,2)
+    cv2.putText(img,f'HEADING {yaw:+.0f}   PITCH {pit:+.0f}   ROLL {rol:+.0f}',(40,h_-16),cv2.FONT_HERSHEY_SIMPLEX,0.55,(255,255,255),1,cv2.LINE_AA)
+    cv2.putText(img,'JENA  first-person (her eyes)',(40,66),cv2.FONT_HERSHEY_SIMPLEX,0.5,(0,230,255),1,cv2.LINE_AA)
+    return img
+if HAVE_POV:
+    pipe_pov=enc2(OUT+'/_pov.mp4',PV,PV,8500); pipe_p3=enc2(OUT+'/_p3.mp4',1440,856,9500)
+POVSHEET=[]; POVPICK=set(np.linspace(ks[0],ks[-1],8).astype(int).tolist())
 sheet=[]; picks=set(np.linspace(ks[0],ks[-1],8).astype(int).tolist()); STRIPK=set(np.linspace(ks[0],ks[-1],12).astype(int).tolist()); HS=[]; FS=[]
 os.makedirs('/tmp/jclean',exist_ok=True)
 for k in ks:
@@ -88,11 +144,12 @@ for k in ks:
        'hip_bounce_cm':(e['hips_w'][2]-hz0)*100,
        'hud':{'title':f'MOCAP v4 self-view   Jena dance4 ({NB} bones drawn, 120 fps)','lines':['driven by her V4 mocap + face track of the TikTok, One-Euro filtered, poses slerped to 120 fps',
               f'HEAD vs chest  pitch {hr[0]:+.0f} yaw {hr[1]:+.0f} roll {hr[2]:+.0f}   (source {sr[0]:+.0f} {sr[1]:+.0f} {sr[2]:+.0f})',
-              'her RIGHT side blue, LEFT side magenta | red grid = floor | green = planted foot']}}
+              'colour-coded body map (legend, bottom right) | red grid = floor | green = planted foot']}}
     try: OV.draw(ov,F); OV.hand_insets(ov,F['hands'])
     except Exception as ex: print('overlay err',k,repr(ex)[:200])
     if e.get('bones_px'): ov=glow_bones(ov,e['bones_px'])
     if e.get('head_axes_px'): head_gizmo(ov,e['head_axes_px'])
+    if os.environ.get('BODYMAP','1')=='1': draw_legend(ov,W-222,H-178)
     kv=e.get('keys') or {}
     for i,(kn,lab) in enumerate((('Blink L','blink L'),('Blink R','blink R'),('vrc.v_aa','jaw'),(':)','smile'),('brow ^','brow up'))):
         if kn in kv:
@@ -109,6 +166,13 @@ for k in ks:
         OV.text(clean,'source dance (ref, 30 fps) + face track',(x0-40,y0+ih+20),0.45,(255,255,255))
     OV.text(clean,'Jena v3.7  clean render  120 fps',(14,H-20),0.55,(255,255,255))
     fr=np.vstack([np.hstack([clean,ov]),strip(si)])
+    if HAVE_POV:
+        pim=cv2.imread(FR+f'/p{k:04d}.jpg')
+        pim=np.zeros((PV,PV,3),np.uint8) if pim is None else cv2.resize(pim,(PV,PV))
+        pim=pov_hud(pim,e.get('d6')); pipe_pov.stdin.write(pim.tobytes())
+        if k in POVPICK: POVSHEET.append(cv2.resize(pim,(480,480)))
+        mid=np.zeros((856,480,3),np.uint8); mid[188:668]=cv2.resize(pim,(480,480)); cv2.putText(mid,'her eyes (POV)',(150,170),cv2.FONT_HERSHEY_SIMPLEX,0.6,(255,255,255),1,cv2.LINE_AA)
+        p3=np.hstack([cv2.resize(clean,(480,856)),mid,cv2.resize(ov,(480,856))]); pipe_p3.stdin.write(p3.tobytes())
     pipe.stdin.write(fr.tobytes())
     if k in picks: sheet.append(cv2.resize(fr,(720,int(fr.shape[0]/2))))
     if k in STRIPK and SRCF:
@@ -121,6 +185,19 @@ for k in ks:
         else: sb=np.array(LMJ['body2d_px'][si]); scn=sb[0]; sw=abs(sb[7][0]-sb[8][0])+1
         HS.append(np.vstack([crop(clean,hp,ex_*2.2),crop(fr0,scn,sw*1.6)])); FS.append(np.vstack([crop(clean,hp,ex_*0.9),crop(fr0,scn,sw*0.7)]))
 pipe.stdin.close(); pipe.wait()
+def shrink(path,cap=15.0,br0=8500):
+    sz_=os.path.getsize(path)/1e6; br_=br0; n_=0
+    while sz_>cap and n_<3:
+        br_=int(br_*(cap-0.8)/sz_); n_+=1; t_=path+'.t.mp4'
+        subprocess.run(['ffmpeg','-v','error','-y','-i',path,'-c:v','libx264','-preset','medium','-crf','24','-maxrate',f'{br_}k','-bufsize',f'{2*br_}k','-pix_fmt','yuv420p','-c:a','copy','-movflags','+faststart',t_]); os.replace(t_,path); sz_=os.path.getsize(path)/1e6
+    return round(sz_,2)
+POVMB=None
+if HAVE_POV:
+    pipe_pov.stdin.close(); pipe_pov.wait(); pipe_p3.stdin.close(); pipe_p3.wait()
+    POVMB=[shrink(OUT+'/_pov.mp4',15.0,8500),shrink(OUT+'/_p3.mp4',15.0,9500)]
+    os.replace(OUT+'/_pov.mp4',OUT+f'/{NAME}-pov.mp4'); os.replace(OUT+'/_p3.mp4',OUT+f'/{NAME}-3panel.mp4')
+    if POVSHEET: cv2.imwrite(OUT+f'/{NAME}-pov-sheet.jpg',np.vstack([np.hstack(POVSHEET[i:i+4]) for i in range(0,len(POVSHEET),4)]),[cv2.IMWRITE_JPEG_QUALITY,85])
+print('POV',HAVE_POV,POVMB)
 sz=os.path.getsize(tmp)/1e6; print('video MB',round(sz,2),'at maxrate',BR)
 tries=0
 while sz>15.0 and tries<3:
