@@ -1,0 +1,60 @@
+# rev 1792500869.6329165
+name: jena-uneth
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go9.txt']
+env:
+  HF: ${{ secrets.AV2_HF_TOKEN }}
+jobs:
+  sep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        s: [uneth-pick, uneth-off150]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q demucs soundfile huggingface_hub "audio-separator[cpu]"
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os,glob; from huggingface_hub import hf_hub_download
+          for ext in ['m4a','flac']:
+              try: hf_hub_download('Saidie000/jena-avatar-assets',f'voice-lab/sep/in/${{ matrix.s }}.{ext}',repo_type='dataset',token=os.environ['HF'],local_dir='.')
+              except Exception as e: print('skip',ext)
+          EOF
+          f=$(ls voice-lab/sep/in/${{ matrix.s }}.* | head -1); ffmpeg -nostdin -v error -i "$f" -ar 44100 -ac 2 x.wav
+      - name: demucs
+        run: |
+          python -m demucs -n htdemucs_ft --two-stems vocals -o sepout x.wav 2>&1 | tail -3
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/vocals.wav -c:a flac ${{ matrix.s }}-vocals.flac
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/no_vocals.wav -c:a flac ${{ matrix.s }}-inst.flac
+      - name: karaoke
+        run: |
+          cp sepout/htdemucs_ft/x/vocals.wav v.wav
+          mkdir -p k1 k2
+          audio-separator v.wav --model_filename mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt --output_dir k1 --output_format FLAC 2>&1 | tail -4 || true
+          audio-separator v.wav --model_filename UVR_MDXNET_KARA_2.onnx --output_dir k2 --output_format FLAC 2>&1 | tail -4 || true
+          ls -la k1 k2
+      - name: upload
+        run: |
+          python - <<'EOF'
+          import os,glob; from huggingface_hub import HfApi
+          a=HfApi(token=os.environ['HF']); s='${{ matrix.s }}'
+          up=[(f'{s}-vocals.flac',f'{s}-vocals.flac'),(f'{s}-inst.flac',f'{s}-inst.flac')]
+          for d,tag in [('k1','rof'),('k2','kara2')]:
+              for f in glob.glob(d+'/*.flac'):
+                  kind='lead' if '(Vocals)' in f else ('back' if '(Instrumental)' in f else os.path.basename(f))
+                  up.append((f,f'{s}-{tag}-{kind}.flac'))
+          for f,n in up:
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/sep/out/'+n,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='sep '+n)
+              print('up',n)
+          EOF
