@@ -1,0 +1,94 @@
+# rev 1792501846.2659194
+name: jena-full02b
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go10.txt']
+env:
+  HF: ${{ secrets.AV2_HF_TOKEN }}
+jobs:
+  kara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q soundfile numpy huggingface_hub "audio-separator[cpu]"
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          for f in ['voice-lab/sep/out/song02full-vocals.flac','voice-lab/svc/in/f02-cuts.json']:
+              hf_hub_download('Saidie000/jena-avatar-assets',f,repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/sep/out/song02full-vocals.flac -ar 44100 -ac 2 v.wav
+      - name: karaoke
+        run: |
+          mkdir -p k2
+          audio-separator v.wav --model_filename UVR_MDXNET_KARA_2.onnx --output_dir k2 --output_format FLAC 2>&1 | tail -4
+          ls -la k2
+      - name: cut
+        run: |
+          python - <<'EOF'
+          import numpy as np, soundfile as sf, json, glob
+          meta=json.load(open('voice-lab/svc/in/f02-cuts.json'))
+          for f in glob.glob('k2/*.flac'):
+              kind='lead' if '(Vocals)' in f else 'back'
+              x,sr=sf.read(f); x=x.mean(1) if x.ndim==2 else x
+              sf.write(f'f02-{kind}.flac',x,sr)
+              for m in meta['chunks']:
+                  sf.write(f"f02{kind[0]}{m['i']}.flac",x[int(m['s']*sr):int(m['e']*sr)],sr)
+          EOF
+      - name: upload
+        run: |
+          python - <<'EOF'
+          import os,glob; from huggingface_hub import HfApi
+          a=HfApi(token=os.environ['HF'])
+          for f in ['f02-lead.flac','f02-back.flac']:
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/sep/out/song02full-'+f[4:],repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='kara '+f)
+          for f in sorted(glob.glob('f02[lb][0-9].flac')):
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/svc/in/'+f,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='cut '+f)
+          EOF
+  svc:
+    needs: kara
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        k: [l, b]
+        i: [0, 1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone --depth 1 https://github.com/Plachtaa/seed-vc.git sv
+          pip install -q torch==2.4.0 torchaudio==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cpu
+          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url|gradio|FreeSimpleGUI|sounddevice)' sv/requirements.txt > req.txt
+          pip install -q -r req.txt huggingface_hub
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          for f in ['voice-lab/svc/in/f02${{ matrix.k }}${{ matrix.i }}.flac','voice-lab/svc/in/ref-t50.mp3']:
+              hf_hub_download('Saidie000/jena-avatar-assets',f,repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/svc/in/f02${{ matrix.k }}${{ matrix.i }}.flac -ar 44100 -ac 1 src.wav
+      - name: convert
+        run: |
+          cd sv
+          python inference.py --source ../src.wav --target ../voice-lab/svc/in/ref-t50.mp3 --output ../out --diffusion-steps 30 --length-adjust 1.0 --inference-cfg-rate 1.0 --f0-condition True --auto-f0-adjust False --semi-tone-shift 0 --fp16 False 2>&1 | grep -v -i warn | tail -5
+      - name: upload
+        run: |
+          f=$(ls out/*.wav | head -1); ffmpeg -nostdin -v error -i "$f" -c:a flac T-F02${{ matrix.k }}${{ matrix.i }}.flac
+          python - <<'EOF'
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_file(path_or_fileobj='T-F02${{ matrix.k }}${{ matrix.i }}.flac',path_in_repo='voice-lab/svc/test/T-F02${{ matrix.k }}${{ matrix.i }}.flac',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='full02 layered conv')
+          EOF
