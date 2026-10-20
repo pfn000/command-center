@@ -1,0 +1,100 @@
+# rev 1792499700.4791474
+name: jena-full02
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go8.txt']
+env:
+  HF: ${{ secrets.AV2_HF_TOKEN }}
+jobs:
+  sep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q demucs soundfile huggingface_hub numpy
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          hf_hub_download('Saidie000/jena-avatar-assets','voice-lab/sep/in/song02full.m4a',repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/sep/in/song02full.m4a -ar 44100 -ac 2 x.wav
+      - name: separate
+        run: |
+          python -m demucs -n htdemucs_ft --two-stems vocals -o sepout x.wav 2>&1 | tail -3
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/vocals.wav -c:a flac song02full-vocals.flac
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/no_vocals.wav -c:a flac song02full-inst.flac
+      - name: cut
+        run: |
+          python - <<'EOF'
+          import numpy as np, soundfile as sf, json, subprocess
+          x,sr=sf.read('song02full-vocals.flac'); x=x.mean(1) if x.ndim==2 else x
+          if sr!=44100: raise SystemExit('sr')
+          dur=len(x)/sr; n=7; hop=441; fr=int(0.1*sr)
+          e=np.array([np.sqrt(np.mean(x[i:i+fr]**2)) for i in range(0,len(x)-fr,hop)])
+          cuts=[0.0]
+          for k in range(1,n):
+              t=k*dur/n; a=int((t-3)*sr/hop); b=int((t+3)*sr/hop)
+              j=a+int(np.argmin(e[a:b])); cuts.append(round((j*hop+fr/2)/sr,3))
+          cuts.append(round(dur,3)); pad=1.0; meta=[]
+          for i in range(n):
+              s=max(0.0,cuts[i]-pad); t1=min(dur,cuts[i+1]+pad)
+              y=x[int(s*sr):int(t1*sr)]; sf.write(f'f02c{i}.flac',y,sr)
+              meta.append(dict(i=i,cut0=cuts[i],cut1=cuts[i+1],s=s,e=t1,db=round(float(20*np.log10(e[int(cuts[i]*sr/hop)-1 if i else 0]+1e-9)),1)))
+          json.dump(dict(dur=dur,cuts=cuts,chunks=meta),open('f02-cuts.json','w'),indent=1); print(json.dumps(meta))
+          EOF
+      - name: upload
+        run: |
+          python - <<'EOF'
+          import os,glob; from huggingface_hub import HfApi
+          a=HfApi(token=os.environ['HF'])
+          for f in ['song02full-vocals.flac','song02full-inst.flac']:
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/sep/out/'+f,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='sep '+f)
+          for f in sorted(glob.glob('f02c*.flac'))+['f02-cuts.json']:
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/svc/in/'+f,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='cut '+f)
+          EOF
+  svc:
+    needs: sep
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        i: [0, 1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          git clone --depth 1 https://github.com/Plachtaa/seed-vc.git sv
+          pip install -q torch==2.4.0 torchaudio==2.4.0 torchvision==0.19.0 --index-url https://download.pytorch.org/whl/cpu
+          grep -v -i -E '^(torch|torchaudio|torchvision|--extra-index-url|gradio|FreeSimpleGUI|sounddevice)' sv/requirements.txt > req.txt
+          pip install -q -r req.txt huggingface_hub
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          for f in ['voice-lab/svc/in/f02c${{ matrix.i }}.flac','voice-lab/svc/in/ref-t50.mp3']:
+              hf_hub_download('Saidie000/jena-avatar-assets',f,repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/svc/in/f02c${{ matrix.i }}.flac -ar 44100 -ac 1 src.wav
+      - name: convert
+        run: |
+          cd sv
+          python inference.py --source ../src.wav --target ../voice-lab/svc/in/ref-t50.mp3 --output ../out --diffusion-steps 30 --length-adjust 1.0 --inference-cfg-rate 1.0 --f0-condition True --auto-f0-adjust False --semi-tone-shift 0 --fp16 False 2>&1 | grep -v -i warn | tail -5
+      - name: upload
+        run: |
+          f=$(ls out/*.wav | head -1); ffmpeg -nostdin -v error -i "$f" -c:a flac T-F02C${{ matrix.i }}.flac
+          python - <<'EOF'
+          import os; from huggingface_hub import HfApi
+          HfApi(token=os.environ['HF']).upload_file(path_or_fileobj='T-F02C${{ matrix.i }}.flac',path_in_repo='voice-lab/svc/test/T-F02C${{ matrix.i }}.flac',repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='full02 conv ${{ matrix.i }}')
+          EOF
