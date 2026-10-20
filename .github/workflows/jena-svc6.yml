@@ -11,14 +11,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { n: FJ0, src: m0u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ1, src: m1u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ2, src: m2u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ3, src: m3u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ4, src: m4u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ5, src: m5u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ6, src: m6u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: FJ7, src: m7u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG01, src: s01u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG02, src: s02u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG03, src: s03u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG04, src: s04u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG05, src: s05u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG06, src: s06u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG07, src: s07u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG08, src: s08u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG09, src: s09u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SG10, src: s10u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
     env:
       HF: ${{ secrets.AV2_HF_TOKEN }}
     steps:
