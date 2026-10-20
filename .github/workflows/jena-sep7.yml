@@ -7,6 +7,10 @@ jobs:
   sep:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        s: [song02, song05]
     env:
       HF: ${{ secrets.AV2_HF_TOKEN }}
     steps:
@@ -22,19 +26,19 @@ jobs:
         run: |
           python - <<'EOF'
           import os; from huggingface_hub import hf_hub_download
-          hf_hub_download('Saidie000/jena-avatar-assets','voice-lab/sep/in/target05.m4a',repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          hf_hub_download('Saidie000/jena-avatar-assets','voice-lab/sep/in/${{ matrix.s }}.m4a',repo_type='dataset',token=os.environ['HF'],local_dir='.')
           EOF
-          ffmpeg -nostdin -v error -i voice-lab/sep/in/target05.m4a -ar 44100 -ac 2 t05.wav
+          ffmpeg -nostdin -v error -i voice-lab/sep/in/${{ matrix.s }}.m4a -ar 44100 -ac 2 x.wav
       - name: separate
         run: |
-          python -m demucs -n htdemucs_ft --two-stems vocals -o sepout t05.wav 2>&1 | tail -3
-          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/t05/vocals.wav -c:a flac target05-vocals.flac
-          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/t05/no_vocals.wav -c:a libmp3lame -b:a 192k target05-inst.mp3
+          python -m demucs -n htdemucs_ft --two-stems vocals -o sepout x.wav 2>&1 | tail -3
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/vocals.wav -c:a flac ${{ matrix.s }}-vocals.flac
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/x/no_vocals.wav -c:a flac ${{ matrix.s }}-inst.flac
       - name: upload
         run: |
           python - <<'EOF'
           import os; from huggingface_hub import HfApi
           a=HfApi(token=os.environ['HF'])
-          for f in ['target05-vocals.flac','target05-inst.mp3']:
+          for f in ['${{ matrix.s }}-vocals.flac','${{ matrix.s }}-inst.flac']:
               a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/sep/out/'+f,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='sep '+f)
           EOF
