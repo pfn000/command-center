@@ -11,13 +11,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { n: R02A, src: s02u, ref: ref-t50.mp3, steps: 50, cfg: 0.7, shift: 0 }
-          - { n: R02B, src: s02u, ref: ref-t50.mp3, steps: 30, cfg: 1.0, shift: 0 }
-          - { n: R02C, src: s02u, ref: ref-t50.mp3, steps: 50, cfg: 1.0, shift: 0 }
-          - { n: R05A, src: s05u, ref: ref-t50.mp3, steps: 50, cfg: 0.7, shift: 0 }
-          - { n: R05B, src: s05u, ref: ref-t50.mp3, steps: 30, cfg: 1.0, shift: 0 }
-          - { n: R05C, src: s05u, ref: ref-t50.mp3, steps: 50, cfg: 1.0, shift: 0 }
-          - { n: R05D, src: s05u, ref: ref-t50.mp3, steps: 30, cfg: 0.7, shift: 0 }
+          - { n: R05S50, src: s05slo50, ref: ref-t50.mp3, steps: 30, cfg: 0.7, shift: 0 }
+          - { n: R05S70, src: s05slo70, ref: ref-t50.mp3, steps: 30, cfg: 0.7, shift: 0 }
+          - { n: R05S50B, src: s05slo50, ref: ref-t50.mp3, steps: 30, cfg: 1.0, shift: 0 }
     env:
       HF: ${{ secrets.AV2_HF_TOKEN }}
     steps:
