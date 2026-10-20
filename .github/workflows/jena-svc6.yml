@@ -11,16 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { n: SG01, src: s01u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG02, src: s02u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG03, src: s03u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG04, src: s04u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG05, src: s05u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG06, src: s06u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG07, src: s07u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG08, src: s08u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG09, src: s09u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
-          - { n: SG10, src: s10u, ref: ref-t50.mp3, steps: 30, cfg: 0.7 }
+          - { n: SH01, src: s01u, ref: ref-t50.mp3, steps: 30, cfg: 0.7, shift: 12 }
+          - { n: SH08, src: s08u, ref: ref-t50.mp3, steps: 30, cfg: 0.7, shift: 12 }
     env:
       HF: ${{ secrets.AV2_HF_TOKEN }}
     steps:
@@ -45,7 +37,7 @@ jobs:
       - name: convert
         run: |
           cd sv
-          python inference.py --source ../src.wav --target ../voice-lab/svc/in/${{ matrix.ref }} --output ../out --diffusion-steps ${{ matrix.steps }} --length-adjust 1.0 --inference-cfg-rate ${{ matrix.cfg }} --f0-condition True --auto-f0-adjust False --semi-tone-shift 0 --fp16 False 2>&1 | grep -v -i warn | tail -5
+          python inference.py --source ../src.wav --target ../voice-lab/svc/in/${{ matrix.ref }} --output ../out --diffusion-steps ${{ matrix.steps }} --length-adjust 1.0 --inference-cfg-rate ${{ matrix.cfg }} --f0-condition True --auto-f0-adjust False --semi-tone-shift ${{ matrix.shift }} --fp16 False 2>&1 | grep -v -i warn | tail -5
       - name: upload
         run: |
           f=$(ls out/*.wav | head -1); ffmpeg -nostdin -v error -i "$f" -c:a flac T-${{ matrix.n }}.flac
