@@ -1,0 +1,40 @@
+name: jena-sep7
+on:
+  push:
+    branches: [jena-voice-svc]
+    paths: ['jv/go7.txt']
+jobs:
+  sep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HF: ${{ secrets.AV2_HF_TOKEN }}
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg >/dev/null
+          pip install -q torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q demucs soundfile huggingface_hub
+      - name: fetch
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import hf_hub_download
+          hf_hub_download('Saidie000/jena-avatar-assets','voice-lab/sep/in/target05.m4a',repo_type='dataset',token=os.environ['HF'],local_dir='.')
+          EOF
+          ffmpeg -nostdin -v error -i voice-lab/sep/in/target05.m4a -ar 44100 -ac 2 t05.wav
+      - name: separate
+        run: |
+          python -m demucs -n htdemucs_ft --two-stems vocals -o sepout t05.wav 2>&1 | tail -3
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/t05/vocals.wav -c:a flac target05-vocals.flac
+          ffmpeg -nostdin -v error -i sepout/htdemucs_ft/t05/no_vocals.wav -c:a libmp3lame -b:a 192k target05-inst.mp3
+      - name: upload
+        run: |
+          python - <<'EOF'
+          import os; from huggingface_hub import HfApi
+          a=HfApi(token=os.environ['HF'])
+          for f in ['target05-vocals.flac','target05-inst.mp3']:
+              a.upload_file(path_or_fileobj=f,path_in_repo='voice-lab/sep/out/'+f,repo_id='Saidie000/jena-avatar-assets',repo_type='dataset',commit_message='sep '+f)
+          EOF
